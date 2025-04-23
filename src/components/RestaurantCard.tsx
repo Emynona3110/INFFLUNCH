@@ -13,6 +13,7 @@ import { Restaurant } from "../hooks/useRestaurants";
 import noImage from "../assets/no-image.png";
 import RestaurantRating from "./StarRating";
 import TagsList from "./TagsList";
+import LikeButton from "./LikeButton";
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
@@ -68,7 +69,10 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
             )}
           </HStack>
 
-          <TagsList tags={restaurant.tags} />
+          <HStack justifyContent="space-between" width="100%">
+            <TagsList tags={restaurant.tags} />
+            <LikeButton size={8} onClick={() => {}} />
+          </HStack>
         </VStack>
       </CardBody>
     </Card>
