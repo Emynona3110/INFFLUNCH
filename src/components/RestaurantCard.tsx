@@ -5,7 +5,9 @@ import {
   Heading,
   HStack,
   Image,
+  Text,
   VStack,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { Restaurant } from "../hooks/useRestaurants";
 import noImage from "../assets/no-image.png";
@@ -45,7 +47,22 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
           <HStack justifyContent="space-between">
             <Heading fontSize="2xl">{restaurant.name}</Heading>
           </HStack>
-          <RestaurantRating rating={restaurant.rating} />
+
+          <HStack verticalAlign="middle">
+            <RestaurantRating rating={restaurant.rating} />
+            {restaurant.reviews > 0 && (
+              <>
+                <Text fontSize="md">{restaurant.rating}</Text>
+                <Text
+                  fontSize="md"
+                  color={useColorModeValue("gray.300", "gray.600")}
+                >
+                  |
+                </Text>
+                <Text fontSize="md">{restaurant.reviews} avis</Text>
+              </>
+            )}
+          </HStack>
         </VStack>
       </CardBody>
     </Card>

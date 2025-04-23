@@ -7,6 +7,7 @@ export interface Restaurant {
   rating: number | null;
   tags: string[];
   veggie: boolean;
+  reviews: number;
 }
 
 const useRestaurants = () => ({

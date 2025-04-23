@@ -7,6 +7,7 @@ export default [
     rating: 3.9,
     tags: ["Indian"],
     veggie: false,
+    reviews: 10,
   },
   {
     id: 2,
@@ -16,15 +17,17 @@ export default [
     rating: 3.2,
     tags: ["Burger"],
     veggie: true,
+    reviews: 5,
   },
   {
     id: 3,
     name: "Authentic Bento",
     image:
       "https://tb-static.uber.com/prod/image-proc/processed_images/f5dee66c986bef84a8b1f740376c9f9d/db809eadd12d21eb61044e0f3bf7c9b7.jpeg",
-    rating: null,
+    rating: 5.0,
     tags: ["Japanese"],
     veggie: true,
+    reviews: 2,
   },
   {
     id: 4,
@@ -34,6 +37,7 @@ export default [
     rating: null,
     tags: ["Pizza"],
     veggie: true,
+    reviews: 0,
   },
   {
     id: 5,
@@ -43,5 +47,6 @@ export default [
     rating: null,
     tags: ["Salads"],
     veggie: true,
+    reviews: 0,
   },
 ];
