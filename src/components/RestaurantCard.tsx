@@ -8,12 +8,14 @@ import {
   Text,
   VStack,
   useColorModeValue,
+  Icon,
 } from "@chakra-ui/react";
 import { Restaurant } from "../hooks/useRestaurants";
 import noImage from "../assets/no-image.png";
 import RestaurantRating from "./StarRating";
 import TagsList from "./TagsList";
 import LikeButton from "./LikeButton";
+import { FaLeaf } from "react-icons/fa";
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
@@ -46,8 +48,11 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
 
       <CardBody>
         <VStack alignItems="left" spacing={2}>
-          <HStack justifyContent="space-between">
+          <HStack>
             <Heading fontSize="2xl">{restaurant.name}</Heading>
+            {restaurant.veggie && (
+              <Icon as={FaLeaf} boxSize={5} color="green.500" />
+            )}
           </HStack>
 
           <HStack

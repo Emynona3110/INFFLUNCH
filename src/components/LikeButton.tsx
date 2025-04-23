@@ -2,16 +2,16 @@ import { Icon, useColorModeValue } from "@chakra-ui/react";
 import { IoMdHeart, IoMdHeartEmpty } from "react-icons/io";
 import { useState } from "react";
 
-const redColor = "#ff6b81";
-const emptyColor = useColorModeValue("gray.300", "gray.600");
-const size = 8;
-
 interface LikeButtonProps {
   liked?: boolean;
   onClick: (liked: boolean) => void;
 }
 
 const LikeButton = ({ liked = false, onClick }: LikeButtonProps) => {
+  const redColor = "#ff6b81";
+  const emptyColor = useColorModeValue("gray.300", "gray.600");
+  const size = 8;
+
   const [isLiked, setIsLiked] = useState(liked);
 
   const toggle = () => {
