@@ -1,4 +1,4 @@
-import { useColorModeValue, Text, HStack, Icon } from "@chakra-ui/react";
+import { useColorModeValue, HStack, Icon } from "@chakra-ui/react";
 import { FaStar, FaStarHalfAlt } from "react-icons/fa";
 
 interface RestaurantRatingProps {

@@ -12,6 +12,7 @@ import {
 import { Restaurant } from "../hooks/useRestaurants";
 import noImage from "../assets/no-image.png";
 import RestaurantRating from "./StarRating";
+import TagsList from "./TagsList";
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
@@ -48,7 +49,10 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
             <Heading fontSize="2xl">{restaurant.name}</Heading>
           </HStack>
 
-          <HStack verticalAlign="middle">
+          <HStack
+            verticalAlign="middle"
+            color={useColorModeValue("gray.500", "gray.400")}
+          >
             <RestaurantRating rating={restaurant.rating} />
             {restaurant.reviews > 0 && (
               <>
@@ -63,6 +67,8 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
               </>
             )}
           </HStack>
+
+          <TagsList tags={restaurant.tags} />
         </VStack>
       </CardBody>
     </Card>
