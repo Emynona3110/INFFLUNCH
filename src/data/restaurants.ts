@@ -8,6 +8,7 @@ export default [
     tags: ["Indien"],
     veggie: false,
     reviews: 10,
+    address: "36 Rue de Lagny, 93100 Montreuil",
   },
   {
     id: 2,
@@ -18,6 +19,7 @@ export default [
     tags: ["Burger", "Fast Food"],
     veggie: true,
     reviews: 5,
+    address: "21 Rue de Lagny, 94300 Vincennes",
   },
   {
     id: 3,
@@ -28,16 +30,18 @@ export default [
     tags: ["Japonais", "Bento", "Donburi"],
     veggie: true,
     reviews: 2,
+    address: "18 Av. Georges Clemenceau, 94300 Vincennes",
   },
   {
     id: 4,
-    name: "Pizza O' Five",
+    name: "O' Five Pizza",
     image:
       "https://rs-menus-api.roocdn.com/images/111864dd-4251-4fd2-a654-df0c89424495/image.jpeg",
     rating: null,
     tags: ["Pizza", "Panini"],
     veggie: true,
     reviews: 0,
+    address: "21 Rue de Lagny, 94300 Vincennes",
   },
   {
     id: 5,
@@ -48,5 +52,6 @@ export default [
     tags: ["Salade", "Tartine"],
     veggie: true,
     reviews: 0,
+    address: "14 Rue de Lagny, 93100 Montreuil",
   },
 ];

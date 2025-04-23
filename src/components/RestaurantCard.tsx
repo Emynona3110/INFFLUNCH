@@ -16,6 +16,7 @@ import RestaurantRating from "./StarRating";
 import TagsList from "./TagsList";
 import LikeButton from "./LikeButton";
 import { FaLeaf } from "react-icons/fa";
+import DistanceToCompany from "./Distance";
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
@@ -32,7 +33,7 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
       transition="box-shadow 0.3s ease-in-out"
       _hover={{ boxShadow: "lg" }}
     >
-      <Box height="200px" overflow="hidden">
+      <Box height="200px" overflow="hidden" position="relative">
         <Image
           src={restaurant.image === "" ? noImage : restaurant.image}
           alt={restaurant.name}
@@ -44,6 +45,19 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
             transform: "scale(1.02)",
           }}
         />
+
+        <Box
+          position="absolute"
+          bottom="8px"
+          left="8px"
+          bg={useColorModeValue("whiteAlpha.500", "blackAlpha.500")}
+          color={useColorModeValue("black", "white")}
+          fontSize="sm"
+          borderRadius="md"
+          backdropFilter="blur(4px)"
+        >
+          <DistanceToCompany address={restaurant.address} />
+        </Box>
       </Box>
 
       <CardBody>

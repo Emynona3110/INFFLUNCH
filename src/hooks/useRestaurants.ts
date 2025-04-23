@@ -8,6 +8,7 @@ export interface Restaurant {
   tags: string[];
   veggie: boolean;
   reviews: number;
+  address: string;
 }
 
 const useRestaurants = () => ({
