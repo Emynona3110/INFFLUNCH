@@ -1,0 +1,55 @@
+import {
+  Box,
+  Card,
+  CardBody,
+  Heading,
+  HStack,
+  Image,
+  VStack,
+} from "@chakra-ui/react";
+import { Restaurant } from "../hooks/useRestaurants";
+import noImage from "../assets/no-image.png";
+import RestaurantRating from "./StarRating";
+
+interface RestaurantCardProps {
+  restaurant: Restaurant;
+}
+
+const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
+  return (
+    <Card
+      role="group"
+      cursor="pointer"
+      borderRadius="10"
+      overflow="hidden"
+      width="100%"
+      transition="box-shadow 0.3s ease-in-out"
+      _hover={{ boxShadow: "lg" }}
+    >
+      <Box height="200px" overflow="hidden">
+        <Image
+          src={restaurant.image === "" ? noImage : restaurant.image}
+          alt={restaurant.name}
+          w="100%"
+          h="100%"
+          objectFit="cover"
+          transition="transform 0.5s ease-in-out"
+          _groupHover={{
+            transform: "scale(1.02)",
+          }}
+        />
+      </Box>
+
+      <CardBody>
+        <VStack alignItems="left" spacing={2}>
+          <HStack justifyContent="space-between">
+            <Heading fontSize="2xl">{restaurant.name}</Heading>
+          </HStack>
+          <RestaurantRating rating={restaurant.rating} />
+        </VStack>
+      </CardBody>
+    </Card>
+  );
+};
+
+export default RestaurantCard;
