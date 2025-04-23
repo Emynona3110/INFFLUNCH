@@ -3,16 +3,16 @@ import { IoMdHeart, IoMdHeartEmpty } from "react-icons/io";
 import { useState } from "react";
 
 const redColor = "#ff6b81";
+const emptyColor = useColorModeValue("gray.300", "gray.600");
+const size = 8;
 
 interface LikeButtonProps {
   liked?: boolean;
-  size?: number;
   onClick: (liked: boolean) => void;
 }
 
-const LikeButton = ({ liked = false, size = 5, onClick }: LikeButtonProps) => {
+const LikeButton = ({ liked = false, onClick }: LikeButtonProps) => {
   const [isLiked, setIsLiked] = useState(liked);
-  const emptyColor = useColorModeValue("gray.500", "gray.400");
 
   const toggle = () => {
     setIsLiked(!isLiked);

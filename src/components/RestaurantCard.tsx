@@ -71,7 +71,7 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
 
           <HStack justifyContent="space-between" width="100%">
             <TagsList tags={restaurant.tags} />
-            <LikeButton size={8} onClick={() => {}} />
+            <LikeButton onClick={() => {}} />
           </HStack>
         </VStack>
       </CardBody>
