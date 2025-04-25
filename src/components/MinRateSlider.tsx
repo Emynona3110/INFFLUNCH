@@ -39,7 +39,7 @@ const MinRateInput = () => {
         clampValueOnBlur
         keepWithinRange
       >
-        <NumberInputField textAlign="center" />
+        <NumberInputField />
         <NumberInputStepper>
           <NumberIncrementStepper />
           <NumberDecrementStepper />
