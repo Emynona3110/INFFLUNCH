@@ -9,12 +9,14 @@ import {
   MenuItem,
   MenuList,
   useBreakpointValue,
-  Button,
+  IconButton,
+  Icon,
 } from "@chakra-ui/react";
-import { BsChevronDown } from "react-icons/bs";
+import { FiMoreVertical } from "react-icons/fi";
 import darkLogo from "../assets/infflux.svg";
 import lightLogo from "../assets/w-infflux.svg";
 import ColorModeSwitch from "./ColorModeSwitch";
+import SearchInput from "./SearchInput";
 
 interface NavbarProps {
   page: string;
@@ -23,41 +25,40 @@ interface NavbarProps {
 
 const Navbar = ({ page, setPage }: NavbarProps) => {
   const items = ["Restaurants", "Avis", "Favoris", "À propos"];
-  const isMobile = useBreakpointValue({ base: true, md: false });
+  const isMobile = useBreakpointValue({ base: true, lg: false });
 
   return (
-    <HStack justifyContent="space-between" h="100%">
+    <HStack justifyContent="space-between" h="100%" spacing={4} width="100%">
       <HStack spacing="5px" h="100%">
         <Box
           display="flex"
           alignItems="center"
           onClick={() => setPage("Restaurants")}
           _hover={{ cursor: "pointer" }}
-          mr="10px"
         >
           <Image src={useColorModeValue(darkLogo, lightLogo)} boxSize="32px" />
-          <Text fontSize="20px" fontWeight="bold">
-            INFFLUNCH
-          </Text>
+          {!isMobile && (
+            <Text fontSize="20px" fontWeight="bold" mr={4}>
+              INFFLUNCH
+            </Text>
+          )}
         </Box>
 
         {isMobile ? (
           <Menu>
             <MenuButton
-              as={Button}
-              rightIcon={<BsChevronDown />}
-              variant="ghost"
-              fontSize={"20px"}
-            >
-              {page}
-            </MenuButton>
+              as={IconButton}
+              icon={<Icon as={FiMoreVertical} boxSize="24px" />}
+              variant="transparent"
+              aria-label="Menu"
+            />
             <MenuList>
               {items.map((item) => (
                 <MenuItem
                   key={item}
                   onClick={() => setPage(item)}
                   fontWeight={page === item ? "bold" : "normal"}
-                  fontSize={"16px"}
+                  fontSize="16px"
                 >
                   {item}
                 </MenuItem>
@@ -70,21 +71,17 @@ const Navbar = ({ page, setPage }: NavbarProps) => {
               const isActive = item === page;
 
               return (
-                <Box key={item} paddingX="10px" h="100%">
+                <Box key={item} px="10px" h="100%">
                   <Box
                     role="group"
-                    height="100%"
+                    h="100%"
                     display="flex"
                     alignItems="center"
                     borderBottom={
                       isActive ? "2px solid" : "2px solid transparent"
                     }
-                    _hover={{
-                      cursor: "pointer",
-                    }}
-                    onClick={() => {
-                      setPage(item);
-                    }}
+                    _hover={{ cursor: "pointer" }}
+                    onClick={() => setPage(item)}
                   >
                     <Text
                       fontSize="20px"
@@ -106,6 +103,12 @@ const Navbar = ({ page, setPage }: NavbarProps) => {
         )}
       </HStack>
 
+      {/* Search input : flexible */}
+      <Box flex="1">
+        <SearchInput onSearch={() => {}} />
+      </Box>
+
+      {/* Color mode switch */}
       <ColorModeSwitch />
     </HStack>
   );
