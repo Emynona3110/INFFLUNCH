@@ -39,6 +39,7 @@ const Navbar = ({ page, setPage }: NavbarProps) => {
               as={Button}
               rightIcon={<BsChevronDown />}
               variant="ghost"
+              fontSize={"20px"}
             >
               {page}
             </MenuButton>
@@ -48,6 +49,7 @@ const Navbar = ({ page, setPage }: NavbarProps) => {
                   key={item}
                   onClick={() => setPage(item)}
                   fontWeight={page === item ? "bold" : "normal"}
+                  fontSize={"16px"}
                 >
                   {item}
                 </MenuItem>
