@@ -1,14 +1,16 @@
-import { useColorModeValue, Grid, GridItem } from "@chakra-ui/react";
+import { useColorModeValue, Grid, GridItem, Wrap } from "@chakra-ui/react";
 import "./App.css";
 import Navbar from "./components/Navbar";
 import RestaurantGrid from "./components/RestaurantGrid";
 import { useState } from "react";
-import SearchInput from "./components/SearchInput";
+import MinRateSlider from "./components/MinRateSlider";
+import SortSelector, { SortOrder } from "./components/SortSelector";
 
 export interface RestaurantQuery {}
 
 function App() {
   const [currentPage, setCurrentPage] = useState("Restaurants");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("");
 
   return (
     <Grid
@@ -18,7 +20,7 @@ function App() {
         xl: `"navigation navigation" "filters main" "footer footer"`,
       }}
       templateRows={{ base: "auto 1fr auto", xl: "auto 1fr auto" }}
-      templateColumns={{ base: "1fr", xl: "300px 1fr" }}
+      templateColumns={{ base: "1fr", xl: "400px 1fr" }}
     >
       <GridItem
         area="navigation"
@@ -37,7 +39,16 @@ function App() {
         <Navbar page={currentPage} setPage={setCurrentPage} />
       </GridItem>
       <GridItem area="filters" padding={4}>
-        <SearchInput onSearch={() => {}} />
+        <Wrap>
+          TODO utiliser une grid pour le responsive
+          <MinRateSlider />
+          <SortSelector
+            selectedSortOrder={sortOrder}
+            onSelectSortOrder={(order: SortOrder) => {
+              setSortOrder(order);
+            }}
+          />
+        </Wrap>
       </GridItem>
       <GridItem area="main" padding={4}>
         <RestaurantGrid />
