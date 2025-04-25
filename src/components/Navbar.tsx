@@ -28,10 +28,18 @@ const Navbar = ({ page, setPage }: NavbarProps) => {
   return (
     <HStack justifyContent="space-between" h="100%">
       <HStack spacing="5px" h="100%">
-        <Image src={useColorModeValue(darkLogo, lightLogo)} boxSize="32px" />
-        <Text fontSize="20px" fontWeight="bold" pr="10px">
-          INFFLUNCH
-        </Text>
+        <Box
+          display="flex"
+          alignItems="center"
+          onClick={() => setPage("Restaurants")}
+          _hover={{ cursor: "pointer" }}
+          mr="10px"
+        >
+          <Image src={useColorModeValue(darkLogo, lightLogo)} boxSize="32px" />
+          <Text fontSize="20px" fontWeight="bold">
+            INFFLUNCH
+          </Text>
+        </Box>
 
         {isMobile ? (
           <Menu>
