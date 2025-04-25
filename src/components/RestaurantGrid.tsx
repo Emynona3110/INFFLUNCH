@@ -12,7 +12,7 @@ const RestaurantGrid = () => {
 
   return (
     <SimpleGrid
-      columns={{ sm: 1, md: 1, lg: 2, xl: 2 }}
+      columns={{ sm: 1, md: 2, lg: 2, xl: 2 }}
       spacing="20px"
       justifyItems="center"
     >
