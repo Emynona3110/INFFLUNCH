@@ -3,6 +3,7 @@ import "./App.css";
 import Navbar from "./components/Navbar";
 import RestaurantGrid from "./components/RestaurantGrid";
 import { useState } from "react";
+import SearchInput from "./components/SearchInput";
 
 export interface RestaurantQuery {}
 
@@ -36,7 +37,7 @@ function App() {
         <Navbar page={currentPage} setPage={setCurrentPage} />
       </GridItem>
       <GridItem area="filters" padding={4}>
-        Filters
+        <SearchInput onSearch={() => {}} />
       </GridItem>
       <GridItem area="main" padding={4}>
         <RestaurantGrid />
