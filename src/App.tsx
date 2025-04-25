@@ -2,10 +2,13 @@ import { useColorModeValue, Grid, GridItem } from "@chakra-ui/react";
 import "./App.css";
 import Navbar from "./components/Navbar";
 import RestaurantGrid from "./components/RestaurantGrid";
+import { useState } from "react";
 
 export interface RestaurantQuery {}
 
 function App() {
+  const [currentPage, setCurrentPage] = useState("Restaurants");
+
   return (
     <Grid
       height={"100vh"}
@@ -18,7 +21,9 @@ function App() {
     >
       <GridItem
         area="navigation"
-        padding={4}
+        height={"60px"}
+        alignContent={"center"}
+        paddingX={4}
         shadow={"sm"}
         bg={useColorModeValue("white", "gray.900")}
         color={useColorModeValue("black", "white")}
@@ -28,7 +33,7 @@ function App() {
         top="0"
         zIndex="1000"
       >
-        <Navbar />
+        <Navbar page={currentPage} setPage={setCurrentPage} />
       </GridItem>
       <GridItem area="filters" padding={4}>
         Filters

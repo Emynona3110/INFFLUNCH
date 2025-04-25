@@ -3,6 +3,7 @@ import {
   HStack,
   useColorMode,
   Button,
+  Icon,
 } from "@chakra-ui/react";
 import { BsMoonFill, BsSunFill } from "react-icons/bs";
 
@@ -14,12 +15,16 @@ const ColorModeSwitch = () => {
       <Button
         w="30px"
         h="40px"
-        color="gray.500"
         padding="5px"
         variant="ghost"
         onClick={toggleColorMode}
       >
-        {useColorModeValue(<BsSunFill size="24px" />, <BsMoonFill />)}
+        <Icon
+          as={useColorModeValue(BsMoonFill, BsSunFill)}
+          boxSize={useColorModeValue("20px", "24px")}
+          color={useColorModeValue("gray.400", "gray.500")}
+        />
+        {/* {useColorModeValue(<BsSunFill size="24px" />, <BsMoonFill />)} */}
       </Button>
     </HStack>
   );
