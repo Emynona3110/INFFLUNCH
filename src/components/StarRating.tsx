@@ -14,7 +14,7 @@ const RestaurantRating = ({
   filledColor = "#f59e0b",
   emptyColor,
 }: RestaurantRatingProps) => {
-  const rounded = Math.ceil((rating ?? 0) * 2) / 2;
+  const rounded = Math.floor((rating ?? 0) * 2) / 2;
   const effectiveEmptyColor =
     emptyColor ?? useColorModeValue("gray.300", "gray.700");
 
