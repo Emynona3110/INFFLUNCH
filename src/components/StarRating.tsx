@@ -16,7 +16,7 @@ const RestaurantRating = ({
 }: RestaurantRatingProps) => {
   const rounded = Math.floor((rating ?? 0) * 2) / 2;
   const effectiveEmptyColor =
-    emptyColor ?? useColorModeValue("gray.300", "gray.700");
+    emptyColor ?? useColorModeValue("gray.300", "gray.800");
 
   const percentage = (rounded / 5) * 100;
 

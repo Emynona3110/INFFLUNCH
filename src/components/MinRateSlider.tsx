@@ -4,10 +4,10 @@ import {
   NumberInputStepper,
   NumberIncrementStepper,
   NumberDecrementStepper,
-  HStack,
-  Text,
   Box,
   useColorModeValue,
+  Flex,
+  Text,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import StarRating from "./StarRating";
@@ -16,17 +16,24 @@ const MinRateInput = () => {
   const [minRate, setMinRate] = useState(0);
 
   return (
-    <HStack
+    <Flex
+      bg={useColorModeValue("gray.100", "whiteAlpha.200")}
       px={4}
       py={2}
       borderRadius="md"
-      width="auto"
-      bg={useColorModeValue("gray.100", "whiteAlpha.200")}
+      align="center"
+      width="fit-content"
+      gap={3}
     >
-      <Box minW="60px" textAlign="center">
-        <Text fontSize="md">Note minimum</Text>
-        <StarRating rating={minRate} />
+      {/* Bloc étoile */}
+      <Box textAlign="center">
+        <Text fontSize="md" fontWeight="medium" mb="2px">
+          Note minimale
+        </Text>
+        <StarRating rating={minRate} size="16px" />
       </Box>
+
+      {/* Bloc saisie */}
       <NumberInput
         value={minRate}
         onChange={(_, valueNumber) => setMinRate(valueNumber)}
@@ -34,18 +41,19 @@ const MinRateInput = () => {
         max={5}
         step={0.5}
         precision={1}
-        width="80px"
+        width="auto"
+        size="md"
         focusBorderColor="inherit"
         clampValueOnBlur
         keepWithinRange
       >
-        <NumberInputField />
+        <NumberInputField textAlign="center" />
         <NumberInputStepper>
           <NumberIncrementStepper />
           <NumberDecrementStepper />
         </NumberInputStepper>
       </NumberInput>
-    </HStack>
+    </Flex>
   );
 };
 
