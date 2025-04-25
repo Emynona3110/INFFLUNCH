@@ -1,5 +1,5 @@
-import { useColorModeValue, HStack, Icon } from "@chakra-ui/react";
-import { FaStar, FaStarHalfAlt } from "react-icons/fa";
+import { Box, HStack, useColorModeValue } from "@chakra-ui/react";
+import { FaStar } from "react-icons/fa";
 
 interface RestaurantRatingProps {
   rating: number | null;
@@ -16,32 +16,45 @@ const RestaurantRating = ({
 }: RestaurantRatingProps) => {
   const rounded = Math.ceil((rating ?? 0) * 2) / 2;
   const effectiveEmptyColor =
-    emptyColor ?? useColorModeValue("gray.300", "gray.800");
+    emptyColor ?? useColorModeValue("gray.300", "gray.700");
 
-  const getStarIcon = (index: number) => {
-    const value = index + 1;
-    if (rounded >= value) return FaStar;
-    if (rounded === value - 0.5) return FaStarHalfAlt;
-    return FaStar;
-  };
-
-  const getStarColor = (index: number) => {
-    const value = index + 1;
-    if (rounded >= value || rounded === value - 0.5) return filledColor;
-    return effectiveEmptyColor;
-  };
+  const percentage = (rounded / 5) * 100;
 
   return (
-    <HStack spacing="1px" verticalAlign="middle">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <Icon
-          key={i}
-          as={getStarIcon(i)}
-          color={getStarColor(i)}
-          boxSize={size}
-        />
-      ))}
-    </HStack>
+    <Box position="relative" display="inline-block">
+      {/* Couche grise - fond */}
+      <HStack spacing="1px">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Box
+            key={`bg-${i}`}
+            as={FaStar}
+            boxSize={size}
+            color={effectiveEmptyColor}
+          />
+        ))}
+      </HStack>
+
+      {/* Couche jaune - dessus */}
+      <Box
+        position="absolute"
+        top="0"
+        left="0"
+        width="100%"
+        height="100%"
+        clipPath={`inset(0 ${100 - percentage}% 0 0)`} // Découpe propre
+      >
+        <HStack spacing="1px">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Box
+              key={`fg-${i}`}
+              as={FaStar}
+              boxSize={size}
+              color={filledColor}
+            />
+          ))}
+        </HStack>
+      </Box>
+    </Box>
   );
 };
 
