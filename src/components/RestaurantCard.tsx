@@ -8,21 +8,29 @@ import {
   Text,
   VStack,
   useColorModeValue,
-  Icon,
+  Wrap,
+  Tooltip,
 } from "@chakra-ui/react";
 import { Restaurant } from "../hooks/useRestaurants";
 import noImage from "../assets/no-image.png";
 import RestaurantRating from "./StarRating";
 import TagsList from "./TagsList";
 import LikeButton from "./LikeButton";
-import { FaLeaf } from "react-icons/fa";
 import DistanceToCompany from "./Distance";
+
+import badgeVegetarian from "../assets/Vegetarian.png";
+import badgeTooGoodToGo from "../assets/TooGoodToGo.png";
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
 }
 
 const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
+  const badgeMap: Record<string, string> = {
+    "Option Végétarienne": badgeVegetarian,
+    TooGoodToGo: badgeTooGoodToGo,
+  };
+
   return (
     <Card
       role="group"
@@ -37,8 +45,7 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
         <Image
           src={restaurant.image === "" ? noImage : restaurant.image}
           alt={restaurant.name}
-          w="100%"
-          h="100%"
+          boxSize="100%"
           objectFit="cover"
           transition="transform 0.5s ease-in-out"
           _groupHover={{
@@ -64,9 +71,31 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
         <VStack alignItems="left" spacing={2}>
           <HStack>
             <Heading fontSize="2xl">{restaurant.name}</Heading>
-            {restaurant.veggie && (
-              <Icon as={FaLeaf} boxSize={5} color="green.500" />
-            )}
+            <Wrap>
+              {restaurant.badges.map((badge) =>
+                badgeMap[badge] ? (
+                  <Tooltip
+                    key={badge}
+                    label={badge}
+                    hasArrow
+                    placement="top"
+                    bg={useColorModeValue("gray.700", "gray.300")}
+                    color={useColorModeValue("white", "black")}
+                    fontSize="sm"
+                    p={2}
+                    borderRadius="md"
+                  >
+                    <Image
+                      src={badgeMap[badge]}
+                      alt={badge}
+                      boxSize="24px"
+                      objectFit="contain"
+                      borderRadius="md"
+                    />
+                  </Tooltip>
+                ) : null
+              )}
+            </Wrap>
           </HStack>
 
           <HStack

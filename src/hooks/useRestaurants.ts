@@ -6,7 +6,7 @@ export interface Restaurant {
   image: string;
   rating: number | null;
   tags: string[];
-  veggie: boolean;
+  badges: string[];
   reviews: number;
   address: string;
 }
