@@ -12,14 +12,15 @@ import {
   Tooltip,
 } from "@chakra-ui/react";
 import { Restaurant } from "../hooks/useRestaurants";
-import noImage from "../assets/no-image.png";
 import RestaurantRating from "./StarRating";
 import TagsList from "./TagsList";
 import LikeButton from "./LikeButton";
 import DistanceToCompany from "./Distance";
-
+import noImage from "../assets/no-image.png";
 import badgeVegetarian from "../assets/Vegetarian.png";
 import badgeTooGoodToGo from "../assets/TooGoodToGo.png";
+import iconTopRated from "../assets/TopRated.png";
+import TopRated from "../data/top_rated";
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
@@ -30,6 +31,10 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
     "Option Végétarienne": badgeVegetarian,
     TooGoodToGo: badgeTooGoodToGo,
   };
+
+  const isTopRated = TopRated.some(
+    (item) => item.restaurant_id === restaurant.id
+  );
 
   return (
     <Card
@@ -69,20 +74,17 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
 
       <CardBody>
         <VStack alignItems="left" spacing={2}>
-          <HStack>
+          <HStack justifyContent="space-between" width="auto">
             <Heading fontSize="2xl">{restaurant.name}</Heading>
             <Wrap>
+              {/* Badges classiques */}
               {restaurant.badges.map((badge) =>
                 badgeMap[badge] ? (
                   <Tooltip
                     key={badge}
                     label={badge}
-                    hasArrow
                     placement="top"
-                    bg={useColorModeValue("gray.700", "gray.300")}
-                    color={useColorModeValue("white", "black")}
                     fontSize="sm"
-                    p={2}
                     borderRadius="md"
                   >
                     <Image
@@ -94,6 +96,25 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
                     />
                   </Tooltip>
                 ) : null
+              )}
+
+              {/* Badge TopRated */}
+              {isTopRated && (
+                <Tooltip
+                  key="top-rated"
+                  label="Top 3 des mieux notés"
+                  placement="top"
+                  fontSize="sm"
+                  borderRadius="md"
+                >
+                  <Image
+                    src={iconTopRated}
+                    alt="Top 3 des mieux notés"
+                    boxSize="24px"
+                    objectFit="contain"
+                    borderRadius="md"
+                  />
+                </Tooltip>
               )}
             </Wrap>
           </HStack>
