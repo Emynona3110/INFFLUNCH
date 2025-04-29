@@ -185,10 +185,10 @@ const FilterDialog = ({
                 }
               >
                 <option value="">Pertinence</option>
-                <option value="-rating">Note moyenne</option>
-                <option value="-added">Ajout récent</option>
-                <option value="name">Nom</option>
-                <option value="-released">Date de sortie</option>
+                <option value="highestRated">Meilleurs notes</option>
+                <option value="nearest">Proximité</option>
+                <option value="mostreviewed">Nombre d'avis</option>
+                <option value="newest">Ajout Récent</option>
               </Select>
             </VStack>
           </AlertDialogBody>
