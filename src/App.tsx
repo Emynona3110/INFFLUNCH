@@ -1,36 +1,34 @@
-import {
-  useColorModeValue,
-  Grid,
-  GridItem,
-  Stack,
-  Text,
-  Wrap,
-  HStack,
-} from "@chakra-ui/react";
+import { useColorModeValue, Grid, GridItem } from "@chakra-ui/react";
 import "./App.css";
 import Navbar from "./components/Navbar";
 import RestaurantGrid from "./components/RestaurantGrid";
 import { useState } from "react";
-import MinRateSlider from "./components/MinRateSlider";
-import SortSelector, { SortOrder } from "./components/SortSelector";
-import TagSelector from "./components/TagSelector";
+import { SortOrder } from "./components/SortSelector";
 
-export interface RestaurantQuery {}
+export interface RestaurantQuery {
+  minRate: number;
+  sortOrder: SortOrder;
+  tags: string[];
+  searchText: string;
+}
 
 function App() {
   const [currentPage, setCurrentPage] = useState("Restaurants");
-  const [sortOrder, setSortOrder] = useState<SortOrder>("");
-  const [tags, setTags] = useState<string[]>([]); // <-- en minuscule ✅
+  const [restaurantQuery, setRestaurantQuery] = useState<RestaurantQuery>({
+    minRate: 0,
+    sortOrder: "",
+    tags: [],
+    searchText: "",
+  });
 
   return (
     <Grid
       height="100vh"
       templateAreas={{
-        base: `"navigation" "filters" "main" "footer"`,
-        xl: `"navigation navigation" "filters main" "footer footer"`,
+        base: `"navigation" "main" "footer"`,
       }}
-      templateRows={{ base: "auto 1fr auto", xl: "auto 1fr auto" }}
-      templateColumns={{ base: "1fr", xl: "auto 1fr" }}
+      templateRows={{ base: "auto 1fr auto" }}
+      templateColumns={{ base: "1fr" }}
     >
       {/* NAVIGATION */}
       <GridItem
@@ -47,37 +45,14 @@ function App() {
         top="0"
         zIndex="1000"
       >
-        <Navbar page={currentPage} setPage={setCurrentPage} />
-      </GridItem>
-
-      {/* FILTERS */}
-      <GridItem area="filters" padding={4}>
-        <Stack spacing={4}>
-          <Text>TODO utiliser une grid pour le responsive</Text>
-          <MinRateSlider />
-          <SortSelector
-            selectedSortOrder={sortOrder}
-            onSelectSortOrder={(order: SortOrder) => setSortOrder(order)}
-          />
-
-          <HStack>
-            <TagSelector selectedTags={tags} setSelectedTags={setTags} />
-            <Wrap>
-              {tags.map((tag) => (
-                <Text
-                  key={tag}
-                  bg={useColorModeValue("gray.100", "whiteAlpha.200")}
-                  px={2}
-                  py={1}
-                  borderRadius="md"
-                  fontSize="sm"
-                >
-                  {tag}
-                </Text>
-              ))}
-            </Wrap>
-          </HStack>
-        </Stack>
+        <Navbar
+          page={currentPage}
+          setPage={setCurrentPage}
+          restaurantQuery={restaurantQuery}
+          onFilterChange={(query: RestaurantQuery) =>
+            setRestaurantQuery({ ...restaurantQuery, ...query })
+          }
+        />
       </GridItem>
 
       {/* MAIN */}

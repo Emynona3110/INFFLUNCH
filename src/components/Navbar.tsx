@@ -17,13 +17,22 @@ import darkLogo from "../assets/infflux.svg";
 import lightLogo from "../assets/w-infflux.svg";
 import ColorModeSwitch from "./ColorModeSwitch";
 import SearchInput from "./SearchInput";
+import FilterDialog from "./FilterDialog";
+import { RestaurantQuery } from "../App";
 
 interface NavbarProps {
   page: string;
   setPage: (page: string) => void;
+  restaurantQuery: RestaurantQuery;
+  onFilterChange: (query: RestaurantQuery) => void;
 }
 
-const Navbar = ({ page, setPage }: NavbarProps) => {
+const Navbar = ({
+  page,
+  setPage,
+  restaurantQuery,
+  onFilterChange,
+}: NavbarProps) => {
   const items = ["Restaurants", "Avis", "Favoris", "À propos"];
   const isMobile = useBreakpointValue({ base: true, lg: false });
 
@@ -105,9 +114,13 @@ const Navbar = ({ page, setPage }: NavbarProps) => {
 
       {/* Search input : flexible */}
       <Box flex="1">
-        <SearchInput onSearch={() => {}} />
+        <SearchInput onSearch={(searchText) => console.log(searchText)} />
       </Box>
 
+      <FilterDialog
+        restaurantQuery={restaurantQuery}
+        onFilterChange={onFilterChange}
+      />
       {/* Color mode switch */}
       <ColorModeSwitch />
     </HStack>
