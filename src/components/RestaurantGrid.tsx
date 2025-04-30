@@ -15,7 +15,6 @@ const RestaurantGrid = () => {
       columns={{ sm: 1, md: 2, lg: 3, xl: 3 }}
       spacing="20px"
       justifyItems="center"
-      overflowX={"clip"}
     >
       {data.map((restaurant) => (
         <RestaurantCard key={restaurant.id} restaurant={restaurant} />
