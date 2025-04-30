@@ -1,4 +1,4 @@
-import { useColorModeValue, Grid, GridItem } from "@chakra-ui/react";
+import { useColorModeValue, Grid, GridItem, Box } from "@chakra-ui/react";
 import "./App.css";
 import Navbar from "./components/Navbar";
 import RestaurantGrid from "./components/RestaurantGrid";
@@ -56,9 +56,9 @@ function App() {
       </GridItem>
 
       {/* MAIN */}
-      <GridItem area="main" padding={4}>
+      <Box maxWidth="1200px" width="100%" padding={4} marginX="auto">
         <RestaurantGrid />
-      </GridItem>
+      </Box>
 
       {/* FOOTER */}
       <GridItem area="footer" padding={4}>
