@@ -4,12 +4,13 @@ import {
   CardBody,
   Heading,
   HStack,
-  Image,
   Text,
   VStack,
   useColorModeValue,
   Wrap,
+  WrapItem,
   Tooltip,
+  Image,
 } from "@chakra-ui/react";
 import { Restaurant } from "../hooks/useRestaurants";
 import RestaurantRating from "./StarRating";
@@ -21,6 +22,7 @@ import badgeVegetarian from "../assets/Vegetarian.png";
 import badgeTooGoodToGo from "../assets/TooGoodToGo.png";
 import iconTopRated from "../assets/TopRated.png";
 import TopRated from "../data/top_rated";
+import BadgeImage from "./BadgeImage";
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
@@ -57,7 +59,6 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
             transform: "scale(1.02)",
           }}
         />
-
         <Box
           position="absolute"
           bottom="8px"
@@ -74,10 +75,10 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
 
       <CardBody>
         <VStack alignItems="left" spacing={2}>
-          <HStack justifyContent="space-between" width="auto">
+          <HStack justifyContent="space-between" width="100%">
             <Heading fontSize="2xl">{restaurant.name}</Heading>
             <Wrap>
-              {/* Badges classiques */}
+              {/* Badges dynamiques */}
               {restaurant.badges.map((badge) =>
                 badgeMap[badge] ? (
                   <Tooltip
@@ -85,15 +86,10 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
                     label={badge}
                     placement="top"
                     fontSize="sm"
-                    borderRadius="md"
                   >
-                    <Image
-                      src={badgeMap[badge]}
-                      alt={badge}
-                      boxSize="24px"
-                      objectFit="contain"
-                      borderRadius="md"
-                    />
+                    <WrapItem>
+                      <BadgeImage src={badgeMap[badge]} alt={badge} />
+                    </WrapItem>
                   </Tooltip>
                 ) : null
               )}
@@ -105,15 +101,13 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
                   label="Top 3 des mieux notés"
                   placement="top"
                   fontSize="sm"
-                  borderRadius="md"
                 >
-                  <Image
-                    src={iconTopRated}
-                    alt="Top 3 des mieux notés"
-                    boxSize="24px"
-                    objectFit="contain"
-                    borderRadius="md"
-                  />
+                  <WrapItem>
+                    <BadgeImage
+                      src={iconTopRated}
+                      alt="Top 3 des mieux notés"
+                    />
+                  </WrapItem>
                 </Tooltip>
               )}
             </Wrap>
