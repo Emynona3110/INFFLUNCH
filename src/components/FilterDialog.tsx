@@ -30,6 +30,7 @@ import { BsFilter } from "react-icons/bs";
 import { RestaurantQuery } from "../App";
 import { SortOrder } from "./SortSelector";
 import StarRating from "./StarRating";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface FilterDialogProps {
   restaurantQuery: RestaurantQuery;
@@ -51,24 +52,12 @@ const FilterDialog = ({
 }: FilterDialogProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = useRef<HTMLButtonElement>(null);
-
   const [localQuery, setLocalQuery] =
     useState<RestaurantQuery>(restaurantQuery);
-  const [newTag, setNewTag] = useState("");
 
   const handleOpen = () => {
-    setLocalQuery(restaurantQuery); // reset aux derniers filtres si on réouvre
+    setLocalQuery(restaurantQuery);
     onOpen();
-  };
-
-  const handleAddTag = () => {
-    if (newTag && !localQuery.tags.includes(newTag)) {
-      setLocalQuery({
-        ...localQuery,
-        tags: [...localQuery.tags, newTag].sort(),
-      });
-      setNewTag("");
-    }
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
@@ -78,14 +67,14 @@ const FilterDialog = ({
     });
   };
 
-  const selectableTags = availableTags
-    .filter((tag) => !localQuery.tags.includes(tag))
-    .sort();
-
   const handleValidate = () => {
     onFilterChange(localQuery);
     onClose();
   };
+
+  const selectableTags = availableTags
+    .filter((tag) => !localQuery.tags.includes(tag))
+    .sort();
 
   return (
     <>
@@ -111,43 +100,24 @@ const FilterDialog = ({
 
           <AlertDialogBody>
             <VStack spacing={4} align="stretch">
-              {/* Tags */}
-              <Wrap>
-                {localQuery.tags.length > 0 ? (
-                  localQuery.tags.map((tag) => (
-                    <WrapItem key={tag}>
-                      <Tag
-                        variant="solid"
-                        colorScheme="blue"
-                        borderRadius="full"
-                      >
-                        <TagLabel>{tag}</TagLabel>
-                        <TagCloseButton onClick={() => handleRemoveTag(tag)} />
-                      </Tag>
-                    </WrapItem>
-                  ))
-                ) : (
-                  <Text fontSize="sm" color="gray.500">
-                    Aucun tag sélectionné
-                  </Text>
-                )}
-              </Wrap>
-
+              {/* Tri */}
+              <Text fontWeight="bold">Trier par :</Text>
               <Select
-                placeholder="Choisir un tag"
-                value={newTag}
-                onChange={(e) => setNewTag(e.target.value)}
+                value={localQuery.sortOrder}
+                onChange={(e) =>
+                  setLocalQuery({
+                    ...localQuery,
+                    sortOrder: e.target.value as SortOrder,
+                  })
+                }
+                transition="all 0.2s ease-in-out"
               >
-                {selectableTags.map((tag) => (
-                  <option key={tag} value={tag}>
-                    {tag}
-                  </option>
-                ))}
+                <option value="">Pertinence</option>
+                <option value="highestRated">Meilleures notes</option>
+                <option value="nearest">Proximité</option>
+                <option value="mostreviewed">Nombre d'avis</option>
+                <option value="newest">Ajout récent</option>
               </Select>
-
-              <Button onClick={handleAddTag} size="sm" isDisabled={!newTag}>
-                Ajouter le tag
-              </Button>
 
               {/* Note minimum */}
               <Text fontWeight="bold">Note minimum :</Text>
@@ -161,7 +131,7 @@ const FilterDialog = ({
                   max={5}
                   step={1}
                   precision={1}
-                  w={"100%"}
+                  w="100%"
                 >
                   <NumberInputField />
                   <NumberInputStepper>
@@ -169,26 +139,68 @@ const FilterDialog = ({
                     <NumberDecrementStepper />
                   </NumberInputStepper>
                 </NumberInput>
-
                 <StarRating rating={localQuery.minRate} size="24px" />
               </HStack>
 
-              {/* Tri */}
-              <Text fontWeight="bold">Trier par :</Text>
+              {/* Tags */}
+              <Text fontWeight="bold">Tags :</Text>
+              <Wrap>
+                <AnimatePresence initial={false}>
+                  {localQuery.tags.length > 0 ? (
+                    localQuery.tags.map((tag) => (
+                      <motion.div
+                        key={tag}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <WrapItem>
+                          <Tag
+                            variant="solid"
+                            colorScheme="blue"
+                            borderRadius="full"
+                            cursor="default"
+                          >
+                            <TagLabel paddingY="5px">{tag}</TagLabel>
+                            <TagCloseButton
+                              onClick={() => handleRemoveTag(tag)}
+                            />
+                          </Tag>
+                        </WrapItem>
+                      </motion.div>
+                    ))
+                  ) : (
+                    <Text fontSize="sm" color="gray.500">
+                      Aucun tag sélectionné
+                    </Text>
+                  )}
+                </AnimatePresence>
+              </Wrap>
+
+              {/* Selecteur de tags */}
               <Select
-                value={localQuery.sortOrder}
-                onChange={(e) =>
-                  setLocalQuery({
-                    ...localQuery,
-                    sortOrder: e.target.value as SortOrder,
-                  })
-                }
+                key={localQuery.tags.join(",")}
+                value=""
+                onChange={(e) => {
+                  const selectedTag = e.target.value;
+                  if (selectedTag && !localQuery.tags.includes(selectedTag)) {
+                    setLocalQuery((prev) => ({
+                      ...prev,
+                      tags: [...prev.tags, selectedTag].sort(),
+                    }));
+                  }
+                }}
+                transition="all 0.2s ease-in-out"
               >
-                <option value="">Pertinence</option>
-                <option value="highestRated">Meilleurs notes</option>
-                <option value="nearest">Proximité</option>
-                <option value="mostreviewed">Nombre d'avis</option>
-                <option value="newest">Ajout Récent</option>
+                <option value="" disabled hidden>
+                  Choisir un tag
+                </option>
+                {selectableTags.map((tag) => (
+                  <option key={tag} value={tag}>
+                    {tag}
+                  </option>
+                ))}
               </Select>
             </VStack>
           </AlertDialogBody>
