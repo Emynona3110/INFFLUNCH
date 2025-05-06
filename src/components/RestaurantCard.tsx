@@ -23,6 +23,7 @@ import badgeTooGoodToGo from "../assets/TooGoodToGo.png";
 import iconTopRated from "../assets/TopRated.png";
 import TopRated from "../data/top_rated";
 import BadgeImage from "./BadgeImage";
+import { useMemo } from "react";
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
@@ -34,8 +35,9 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
     TooGoodToGo: badgeTooGoodToGo,
   };
 
-  const isTopRated = TopRated.some(
-    (item) => item.restaurant_id === restaurant.id
+  const isTopRated = useMemo(
+    () => TopRated.some((item) => item.restaurant_id === restaurant.id),
+    [restaurant.id]
   );
 
   return (
@@ -69,7 +71,7 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
           borderRadius="md"
           backdropFilter="blur(4px)"
         >
-          <DistanceToCompany address={restaurant.address} />
+          <DistanceToCompany distance={restaurant.distance} />
         </Box>
       </Box>
 

@@ -1,14 +1,11 @@
 import { Box, Text } from "@chakra-ui/react";
-import useLocations from "../hooks/useLocations";
 
-const DistanceToCompany = ({ address }: { address: string }) => {
-  const location = useLocations(address);
-
-  return location ? (
+const DistanceToCompany = ({ distance }: { distance: string }) => {
+  return (
     <Box paddingY={1} paddingX={2} borderRadius="md">
-      <Text fontSize="sm">{location.formattedDistance}</Text>
+      <Text fontSize="sm">{distance}</Text>
     </Box>
-  ) : null;
+  );
 };
 
 export default DistanceToCompany;

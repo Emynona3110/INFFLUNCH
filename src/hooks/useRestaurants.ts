@@ -4,6 +4,7 @@ export interface Restaurant {
   id: number;
   name: string;
   image: string;
+  distance: string;
   rating: number | null;
   tags: string[];
   badges: string[];
