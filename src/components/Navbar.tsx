@@ -19,6 +19,7 @@ import ColorModeSwitch from "./ColorModeSwitch";
 import SearchInput from "./SearchInput";
 import FilterDialog from "./FilterDialog";
 import { RestaurantQuery } from "../App";
+import { slugify } from "../utils/slugify";
 
 interface NavbarProps {
   page: string;
@@ -33,8 +34,15 @@ const Navbar = ({
   restaurantQuery,
   onFilterChange,
 }: NavbarProps) => {
-  const items = ["Restaurants", "Avis", "Favoris", "À propos"];
   const isMobile = useBreakpointValue({ base: true, lg: false });
+
+  // Prépare les onglets avec leurs slugs
+  const menuItems = ["Restaurants", "Avis", "Favoris", "À propos"].map(
+    (label) => ({
+      label,
+      slug: slugify(label),
+    })
+  );
 
   return (
     <HStack justifyContent="space-between" h="100%" spacing={4} width="100%">
@@ -42,7 +50,7 @@ const Navbar = ({
         <Box
           display="flex"
           alignItems="center"
-          onClick={() => setPage("Restaurants")}
+          onClick={() => setPage("restaurants")}
           _hover={{ cursor: "pointer" }}
         >
           <Image src={useColorModeValue(darkLogo, lightLogo)} boxSize="32px" />
@@ -62,25 +70,25 @@ const Navbar = ({
               aria-label="Menu"
             />
             <MenuList>
-              {items.map((item) => (
+              {menuItems.map((item) => (
                 <MenuItem
-                  key={item}
-                  onClick={() => setPage(item)}
-                  fontWeight={page === item ? "bold" : "normal"}
+                  key={item.slug}
+                  onClick={() => setPage(item.slug)}
+                  fontWeight={page === item.slug ? "bold" : "normal"}
                   fontSize="16px"
                 >
-                  {item}
+                  {item.label}
                 </MenuItem>
               ))}
             </MenuList>
           </Menu>
         ) : (
           <HStack h="100%">
-            {items.map((item) => {
-              const isActive = item === page;
+            {menuItems.map((item) => {
+              const isActive = item.slug === page;
 
               return (
-                <Box key={item} px="10px" h="100%">
+                <Box key={item.slug} px="10px" h="100%">
                   <Box
                     role="group"
                     h="100%"
@@ -90,7 +98,7 @@ const Navbar = ({
                       isActive ? "2px solid" : "2px solid transparent"
                     }
                     _hover={{ cursor: "pointer" }}
-                    onClick={() => setPage(item)}
+                    onClick={() => setPage(item.slug)}
                   >
                     <Text
                       fontSize="20px"
@@ -102,7 +110,7 @@ const Navbar = ({
                       _groupHover={{ color: "inherit" }}
                       transition="color 0.2s ease"
                     >
-                      {item}
+                      {item.label}
                     </Text>
                   </Box>
                 </Box>
@@ -112,16 +120,16 @@ const Navbar = ({
         )}
       </HStack>
 
-      {/* Search input : flexible */}
       <Box flex="1">
         <SearchInput onSearch={(searchText) => console.log(searchText)} />
       </Box>
 
-      <FilterDialog
-        restaurantQuery={restaurantQuery}
-        onFilterChange={onFilterChange}
-      />
-      {/* Color mode switch */}
+      {page === "restaurants" && (
+        <FilterDialog
+          restaurantQuery={restaurantQuery}
+          onFilterChange={onFilterChange}
+        />
+      )}
       <ColorModeSwitch />
     </HStack>
   );

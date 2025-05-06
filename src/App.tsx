@@ -4,6 +4,7 @@ import Navbar from "./components/Navbar";
 import RestaurantGrid from "./components/RestaurantGrid";
 import { useState } from "react";
 import { SortOrder } from "./components/SortSelector";
+import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 
 export interface RestaurantQuery {
   minRate: number;
@@ -13,13 +14,17 @@ export interface RestaurantQuery {
 }
 
 function App() {
-  const [currentPage, setCurrentPage] = useState("Restaurants");
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const [restaurantQuery, setRestaurantQuery] = useState<RestaurantQuery>({
     minRate: 0,
     sortOrder: "",
     tags: [],
     searchText: "",
   });
+
+  const currentPage = location.pathname.slice(1) || "restaurants";
 
   return (
     <Grid
@@ -47,7 +52,7 @@ function App() {
       >
         <Navbar
           page={currentPage}
-          setPage={setCurrentPage}
+          setPage={(page) => navigate("/" + page.toLowerCase())}
           restaurantQuery={restaurantQuery}
           onFilterChange={(query: RestaurantQuery) =>
             setRestaurantQuery({ ...restaurantQuery, ...query })
@@ -57,7 +62,13 @@ function App() {
 
       {/* MAIN */}
       <Box maxWidth="1200px" width="100%" padding={4} marginX="auto">
-        <RestaurantGrid />
+        <Routes>
+          <Route path="/" element={<RestaurantGrid />} />
+          <Route path="/restaurants" element={<RestaurantGrid />} />
+          <Route path="/avis" element={<Box p={4}>Avis à venir</Box>} />
+          <Route path="/favoris" element={<Box p={4}>Vos favoris</Box>} />
+          <Route path="/a-propos" element={<Box p={4}>À propos de nous</Box>} />
+        </Routes>
       </Box>
 
       {/* FOOTER */}
