@@ -7,9 +7,6 @@ import {
   Text,
   VStack,
   useColorModeValue,
-  Wrap,
-  WrapItem,
-  Tooltip,
   Image,
 } from "@chakra-ui/react";
 import { Restaurant } from "../hooks/useRestaurants";
@@ -18,28 +15,13 @@ import TagsList from "./TagsList";
 import LikeButton from "./LikeButton";
 import DistanceToCompany from "./Distance";
 import noImage from "../assets/no-image.png";
-import badgeVegetarian from "../assets/Vegetarian.png";
-import badgeTooGoodToGo from "../assets/TooGoodToGo.png";
-import iconTopRated from "../assets/TopRated.png";
-import TopRated from "../data/top_rated";
-import BadgeImage from "./BadgeImage";
-import { useMemo } from "react";
+import RestaurantBadges from "./RestaurantBadges";
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
 }
 
 const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
-  const badgeMap: Record<string, string> = {
-    "Option Végétarienne": badgeVegetarian,
-    TooGoodToGo: badgeTooGoodToGo,
-  };
-
-  const isTopRated = useMemo(
-    () => TopRated.some((item) => item.restaurant_id === restaurant.id),
-    [restaurant.id]
-  );
-
   return (
     <Card
       role="group"
@@ -79,40 +61,10 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
         <VStack alignItems="left" spacing={2}>
           <HStack justifyContent="space-between" width="100%">
             <Heading fontSize="2xl">{restaurant.name}</Heading>
-            <Wrap>
-              {/* Badges dynamiques */}
-              {restaurant.badges.map((badge) =>
-                badgeMap[badge] ? (
-                  <Tooltip
-                    key={badge}
-                    label={badge}
-                    placement="top"
-                    fontSize="sm"
-                  >
-                    <WrapItem>
-                      <BadgeImage src={badgeMap[badge]} alt={badge} />
-                    </WrapItem>
-                  </Tooltip>
-                ) : null
-              )}
-
-              {/* Badge TopRated */}
-              {isTopRated && (
-                <Tooltip
-                  key="top-rated"
-                  label="Top 3 des mieux notés"
-                  placement="top"
-                  fontSize="sm"
-                >
-                  <WrapItem>
-                    <BadgeImage
-                      src={iconTopRated}
-                      alt="Top 3 des mieux notés"
-                    />
-                  </WrapItem>
-                </Tooltip>
-              )}
-            </Wrap>
+            <RestaurantBadges
+              restaurantId={restaurant.id}
+              badges={restaurant.badges}
+            />
           </HStack>
 
           <HStack
