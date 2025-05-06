@@ -30,9 +30,9 @@ function App() {
     <Grid
       height="100vh"
       templateAreas={{
-        base: `"navigation" "main" "footer"`,
+        base: `"navigation" "main"`,
       }}
-      templateRows={{ base: "auto 1fr auto" }}
+      templateRows={{ base: "auto 1fr" }}
       templateColumns={{ base: "1fr" }}
     >
       {/* NAVIGATION */}
@@ -61,19 +61,23 @@ function App() {
       </GridItem>
 
       {/* MAIN */}
-      <Box maxWidth="1200px" width="100%" padding={4} marginX="auto">
-        <Routes>
-          <Route path="/" element={<RestaurantGrid />} />
-          <Route path="/restaurants" element={<RestaurantGrid />} />
-          <Route path="/avis" element={<Box p={4}>Avis à venir</Box>} />
-          <Route path="/favoris" element={<Box p={4}>Vos favoris</Box>} />
-          <Route path="/a-propos" element={<Box p={4}>À propos de nous</Box>} />
-        </Routes>
-      </Box>
+      <GridItem area="main" overflowY="auto" height="calc(100vh - 60px)">
+        <Box maxWidth="1200px" width="100%" padding={4} marginX="auto">
+          <Routes>
+            <Route path="/" element={<RestaurantGrid />} />
+            <Route path="/restaurants" element={<RestaurantGrid />} />
+            <Route path="/avis" element={<Box p={4}>Avis à venir</Box>} />
+            <Route path="/favoris" element={<Box p={4}>Vos favoris</Box>} />
+            <Route
+              path="/a-propos"
+              element={<Box p={4}>À propos de nous</Box>}
+            />
+          </Routes>
 
-      {/* FOOTER */}
-      <GridItem area="footer" padding={4}>
-        Footer
+          <Box as="footer" mt={10} textAlign="center" color="gray.500">
+            © 2025 Infflunch — Tous droits réservés.
+          </Box>
+        </Box>
       </GridItem>
     </Grid>
   );
