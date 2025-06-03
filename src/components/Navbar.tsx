@@ -122,15 +122,16 @@ const Navbar = ({
         )}
       </HStack>
 
-      <Box flex="1">
-        <SearchInput onSearch={onSearch} />
-      </Box>
-
       {page === "restaurants" && (
-        <FilterDialog
-          restaurantFilters={restaurantFilters}
-          onFilterChange={onFilterChange}
-        />
+        <>
+          <Box flex="1">
+            <SearchInput onSearch={onSearch} />
+          </Box>
+          <FilterDialog
+            restaurantFilters={restaurantFilters}
+            onFilterChange={onFilterChange}
+          />
+        </>
       )}
       <ColorModeSwitch />
     </HStack>
