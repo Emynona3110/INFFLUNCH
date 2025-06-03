@@ -1,7 +1,12 @@
 import { Menu, MenuButton, Button, MenuList, MenuItem } from "@chakra-ui/react";
 import { BsChevronDown } from "react-icons/bs";
 
-export type SortOrder = "" | "reviews" | "rating" | "date";
+export type SortOrder =
+  | "relevance"
+  | "reviews"
+  | "rating"
+  | "created_at"
+  | "distance";
 
 interface SortSelectorProps {
   onSelectSortOrder: (sortOrder: SortOrder) => void;

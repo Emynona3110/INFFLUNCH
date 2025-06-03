@@ -7,18 +7,19 @@ interface TagsListProps {
 const TagsList = ({ tags }: TagsListProps) => {
   return (
     <Wrap spacing={2} marginTop={2}>
-      {tags.map((tag) => (
-        <WrapItem key={tag}>
-          <Box
-            paddingX={3}
-            paddingY={1}
-            borderRadius="md"
-            backgroundColor={useColorModeValue("gray.100", "gray.600")}
-          >
-            <Text>{tag}</Text>
-          </Box>
-        </WrapItem>
-      ))}
+      {tags &&
+        tags.map((tag) => (
+          <WrapItem key={tag}>
+            <Box
+              paddingX={3}
+              paddingY={1}
+              borderRadius="md"
+              backgroundColor={useColorModeValue("gray.100", "gray.600")}
+            >
+              <Text>{tag}</Text>
+            </Box>
+          </WrapItem>
+        ))}
     </Wrap>
   );
 };

@@ -22,15 +22,16 @@ const RestaurantBadges = ({ restaurantId, badges }: RestaurantBadgesProps) => {
 
   return (
     <Wrap>
-      {badges.map((badge) =>
-        badgeMap[badge] ? (
-          <Tooltip key={badge} label={badge} placement="top" fontSize="sm">
-            <WrapItem>
-              <BadgeImage src={badgeMap[badge]} alt={badge} />
-            </WrapItem>
-          </Tooltip>
-        ) : null
-      )}
+      {badges &&
+        badges.map((badge) =>
+          badgeMap[badge] ? (
+            <Tooltip key={badge} label={badge} placement="top" fontSize="sm">
+              <WrapItem>
+                <BadgeImage src={badgeMap[badge]} alt={badge} />
+              </WrapItem>
+            </Tooltip>
+          ) : null
+        )}
 
       {isTopRated && (
         <Tooltip label="Top 3 des mieux notés" placement="top" fontSize="sm">

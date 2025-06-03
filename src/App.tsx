@@ -6,9 +6,11 @@ import { useState } from "react";
 import { SortOrder } from "./components/SortSelector";
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 
-export interface RestaurantQuery {
-  minRate: number;
+export interface RestaurantFilters {
+  id?: number;
+  slug?: string;
   sortOrder: SortOrder;
+  minRate: number;
   tags: string[];
   searchText: string;
 }
@@ -17,12 +19,14 @@ function App() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [restaurantQuery, setRestaurantQuery] = useState<RestaurantQuery>({
-    minRate: 0,
-    sortOrder: "",
-    tags: [],
-    searchText: "",
-  });
+  const [restaurantFilters, setRestaurantFilters] = useState<RestaurantFilters>(
+    {
+      sortOrder: "relevance",
+      minRate: 0,
+      tags: [],
+      searchText: "",
+    }
+  );
 
   const currentPage = location.pathname.slice(1) || "restaurants";
 
@@ -53,9 +57,15 @@ function App() {
         <Navbar
           page={currentPage}
           setPage={(page) => navigate("/" + page.toLowerCase())}
-          restaurantQuery={restaurantQuery}
-          onFilterChange={(query: RestaurantQuery) =>
-            setRestaurantQuery({ ...restaurantQuery, ...query })
+          restaurantFilters={restaurantFilters}
+          onFilterChange={(query: RestaurantFilters) =>
+            setRestaurantFilters({ ...restaurantFilters, ...query })
+          }
+          onSearch={(input: string) =>
+            setRestaurantFilters({
+              ...restaurantFilters,
+              searchText: input,
+            })
           }
         />
       </GridItem>
@@ -71,8 +81,18 @@ function App() {
             marginX="auto"
           >
             <Routes>
-              <Route path="/" element={<RestaurantGrid />} />
-              <Route path="/restaurants" element={<RestaurantGrid />} />
+              <Route
+                path="/"
+                element={
+                  <RestaurantGrid restaurantFilters={restaurantFilters} />
+                }
+              />
+              <Route
+                path="/restaurants"
+                element={
+                  <RestaurantGrid restaurantFilters={restaurantFilters} />
+                }
+              />
               <Route path="/avis" element={<Box p={4}>Avis à venir</Box>} />
               <Route path="/favoris" element={<Box p={4}>Vos favoris</Box>} />
               <Route

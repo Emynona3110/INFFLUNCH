@@ -53,7 +53,7 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
           borderRadius="md"
           backdropFilter="blur(4px)"
         >
-          <DistanceToCompany distance={restaurant.distance} />
+          <DistanceToCompany distanceLabel={restaurant.distanceLabel} />
         </Box>
       </Box>
 

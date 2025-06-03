@@ -27,36 +27,29 @@ import {
 } from "@chakra-ui/react";
 import { useRef, useState } from "react";
 import { BsFilter } from "react-icons/bs";
-import { RestaurantQuery } from "../App";
+import { RestaurantFilters } from "../App";
 import { SortOrder } from "./SortSelector";
 import StarRating from "./StarRating";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface FilterDialogProps {
-  restaurantQuery: RestaurantQuery;
-  onFilterChange: (query: RestaurantQuery) => void;
+  restaurantFilters: RestaurantFilters;
+  onFilterChange: (query: RestaurantFilters) => void;
 }
 
-const availableTags = [
-  "Italien",
-  "Végétarien",
-  "Asiatique",
-  "Burgers",
-  "Français",
-  "Pâtisserie",
-];
+const availableTags = ["Burger", "Bento"];
 
 const FilterDialog = ({
-  restaurantQuery,
+  restaurantFilters,
   onFilterChange,
 }: FilterDialogProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = useRef<HTMLButtonElement>(null);
   const [localQuery, setLocalQuery] =
-    useState<RestaurantQuery>(restaurantQuery);
+    useState<RestaurantFilters>(restaurantFilters);
 
   const handleOpen = () => {
-    setLocalQuery(restaurantQuery);
+    setLocalQuery(restaurantFilters);
     onOpen();
   };
 
@@ -112,11 +105,11 @@ const FilterDialog = ({
                 }
                 transition="all 0.2s ease-in-out"
               >
-                <option value="">Pertinence</option>
-                <option value="highestRated">Meilleures notes</option>
-                <option value="nearest">Proximité</option>
-                <option value="mostreviewed">Nombre d'avis</option>
-                <option value="newest">Ajout récent</option>
+                <option value="relevance">Pertinence</option>
+                <option value="rating">Meilleures notes</option>
+                <option value="distance">Proximité</option>
+                <option value="reviews">Nombre d'avis</option>
+                <option value="created_at">Ajout récent</option>
               </Select>
 
               {/* Note minimum */}

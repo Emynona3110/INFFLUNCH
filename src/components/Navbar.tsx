@@ -18,21 +18,23 @@ import lightLogo from "../assets/w-infflux.svg";
 import ColorModeSwitch from "./ColorModeSwitch";
 import SearchInput from "./SearchInput";
 import FilterDialog from "./FilterDialog";
-import { RestaurantQuery } from "../App";
+import { RestaurantFilters } from "../App";
 import { slugify } from "../utils/slugify";
 
 interface NavbarProps {
   page: string;
   setPage: (page: string) => void;
-  restaurantQuery: RestaurantQuery;
-  onFilterChange: (query: RestaurantQuery) => void;
+  restaurantFilters: RestaurantFilters;
+  onFilterChange: (query: RestaurantFilters) => void;
+  onSearch: (input: string) => void;
 }
 
 const Navbar = ({
   page,
   setPage,
-  restaurantQuery,
+  restaurantFilters,
   onFilterChange,
+  onSearch,
 }: NavbarProps) => {
   const isMobile = useBreakpointValue({ base: true, lg: false });
 
@@ -121,12 +123,12 @@ const Navbar = ({
       </HStack>
 
       <Box flex="1">
-        <SearchInput onSearch={(searchText) => console.log(searchText)} />
+        <SearchInput onSearch={onSearch} />
       </Box>
 
       {page === "restaurants" && (
         <FilterDialog
-          restaurantQuery={restaurantQuery}
+          restaurantFilters={restaurantFilters}
           onFilterChange={onFilterChange}
         />
       )}

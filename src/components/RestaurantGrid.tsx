@@ -1,14 +1,19 @@
 import { SimpleGrid, Text } from "@chakra-ui/react";
-import useRestaurants from "../hooks/useRestaurants";
 import RestaurantCard from "./RestaurantCard";
+import { RestaurantFilters } from "../App";
+import useRestaurants from "../hooks/useRestaurants";
 
-const RestaurantGrid = () => {
-  const { data, error, loading } = useRestaurants();
+interface RestaurantGridProps {
+  restaurantFilters: RestaurantFilters;
+}
+
+const RestaurantGrid = ({ restaurantFilters }: RestaurantGridProps) => {
+  const { data, error, loading } = useRestaurants(restaurantFilters);
 
   if (error) return <Text>{error}</Text>;
 
   if (!loading && data.length === 0)
-    return <Text>No restaurants found with this filters</Text>;
+    return <Text>Aucun restaurant ne correspond à votre recherche.</Text>;
 
   return (
     <SimpleGrid

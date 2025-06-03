@@ -1,46 +1,40 @@
 import { useEffect, useState } from "react";
-import apiClients from "../services/api-clients";
-import { AxiosRequestConfig, CanceledError } from "axios";
+import { PostgrestSingleResponse } from "@supabase/supabase-js";
+import { PostgrestFilterBuilder } from "@supabase/postgrest-js";
 
-interface FetchResponse<T> {
-  count: number;
-  results: T[];
-}
+export type Query = PostgrestFilterBuilder<any, any, any[], string, unknown>;
 
-const useData = <T>(
-  endpoint: string,
-  requestConfig?: AxiosRequestConfig,
-  depedences?: any[]
-) => {
+const useData = <T>(query: Query, deps: any[] = []) => {
   const [data, setData] = useState<T[]>([]);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(
-    () => {
-      const controller = new AbortController();
-      const signal = controller.signal;
-
+  useEffect(() => {
+    const fetchData = async () => {
       setLoading(true);
 
-      apiClients
-        .get<FetchResponse<T>>(endpoint, { signal, ...requestConfig })
-        .then((res) => {
-          setData(res.data.results);
-          setLoading(false);
-        })
-        .catch((err) => {
-          if (err instanceof CanceledError) return;
-          setError(err.message);
-          setLoading(false);
-        });
+      const { data, error }: PostgrestSingleResponse<T[]> = await query;
 
-      return () => controller.abort();
-    },
-    depedences ? [...depedences] : []
-  );
+      if (error) {
+        setError(error.message);
+        setData([]);
+      } else {
+        setData(data ?? []);
+        setError(null);
+      }
 
-  return { data, error, loading };
+      setLoading(false);
+    };
+
+    fetchData();
+  }, deps);
+
+  return {
+    data,
+    error,
+    loading,
+    empty: !loading && data.length === 0,
+  };
 };
 
 export default useData;
