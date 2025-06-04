@@ -16,9 +16,19 @@ const Beeeh = () => {
     audioRef.current.currentTime = 0;
     audioRef.current.play().catch(() => {});
 
+    // Lancer animation de wiggle
     await controls.start({
       rotate: [0, 5, -5, 5, -5, 0],
       transition: { duration: 1 },
+    });
+  };
+
+  const handleImageLoad = () => {
+    // Animation d’arrivée depuis le haut
+    controls.start({
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: "easeOut" },
     });
   };
 
@@ -39,8 +49,10 @@ const Beeeh = () => {
         borderRadius="lg"
         boxShadow="lg"
         cursor="pointer"
+        initial={{ opacity: 0, y: -100 }}
         animate={controls}
         onClick={handleClick}
+        onLoad={handleImageLoad}
       />
 
       <Box>
