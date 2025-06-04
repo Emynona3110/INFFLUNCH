@@ -5,6 +5,8 @@ import RestaurantGrid from "./components/RestaurantGrid";
 import { useState } from "react";
 import { SortOrder } from "./components/SortSelector";
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { AdminPage } from "./components/AdminPage";
+import Beeeh from "./components/Beeeh";
 
 export interface RestaurantFilters {
   id?: number;
@@ -99,6 +101,8 @@ function App() {
                 path="/a-propos"
                 element={<Box p={4}>À propos de nous</Box>}
               />
+              <Route path="/admin" element={<AdminPage />} />
+              <Route path="*" element={<Beeeh />} />
             </Routes>
           </Box>
 
