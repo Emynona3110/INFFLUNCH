@@ -31,6 +31,7 @@ import { RestaurantFilters } from "../App";
 import { SortOrder } from "./SortSelector";
 import StarRating from "./StarRating";
 import { motion, AnimatePresence } from "framer-motion";
+import useTags from "../hooks/useTags";
 
 interface FilterDialogProps {
   restaurantFilters: RestaurantFilters;
@@ -44,8 +45,6 @@ const defaultFilters: RestaurantFilters = {
   searchText: "",
 };
 
-const availableTags = ["Burger", "Bento"];
-
 const FilterDialog = ({
   restaurantFilters,
   onFilterChange,
@@ -54,6 +53,12 @@ const FilterDialog = ({
   const cancelRef = useRef<HTMLButtonElement>(null);
   const [localQuery, setLocalQuery] =
     useState<RestaurantFilters>(restaurantFilters);
+
+  const {
+    data: availableTags,
+    // loading: tagsLoading,
+    // error: tagsError,
+  } = useTags();
 
   const handleOpen = () => {
     setLocalQuery(restaurantFilters);
@@ -73,7 +78,7 @@ const FilterDialog = ({
   };
 
   const selectableTags = availableTags
-    .filter((tag) => !localQuery.tags.includes(tag))
+    .filter((tag) => !localQuery.tags.includes(tag.label))
     .sort();
 
   return (
@@ -197,8 +202,8 @@ const FilterDialog = ({
                   Choisir un tag
                 </option>
                 {selectableTags.map((tag) => (
-                  <option key={tag} value={tag}>
-                    {tag}
+                  <option key={tag.id} value={tag.label}>
+                    {tag.label}
                   </option>
                 ))}
               </Select>

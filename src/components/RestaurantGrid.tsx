@@ -5,7 +5,7 @@ import useRestaurants from "../hooks/useRestaurants";
 import { RestaurantFilters } from "../App";
 import { motion } from "framer-motion";
 
-const MotionBox = motion(Box);
+const MotionBox = motion.create(Box);
 
 interface RestaurantGridProps {
   restaurantFilters: RestaurantFilters;
