@@ -19,9 +19,10 @@ import RestaurantBadges from "./RestaurantBadges";
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
+  topRated: { id: number }[];
 }
 
-const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
+const RestaurantCard = ({ restaurant, topRated = [] }: RestaurantCardProps) => {
   return (
     <Card
       role="group"
@@ -64,6 +65,7 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
             <RestaurantBadges
               restaurantId={restaurant.id}
               badges={restaurant.badges}
+              topRated={topRated}
             />
           </HStack>
 

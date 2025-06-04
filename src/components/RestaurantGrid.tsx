@@ -4,6 +4,7 @@ import RestaurantCardSkeleton from "./RestaurantCardSkeleton";
 import useRestaurants from "../hooks/useRestaurants";
 import { RestaurantFilters } from "../App";
 import { motion } from "framer-motion";
+import useTopRated from "../hooks/useTopRated";
 
 const MotionBox = motion.create(Box);
 
@@ -14,6 +15,10 @@ interface RestaurantGridProps {
 const RestaurantGrid = ({ restaurantFilters }: RestaurantGridProps) => {
   const { data, error, loading } = useRestaurants(restaurantFilters);
   const skeletonCount = 6;
+  const topRatedResult = useTopRated();
+  const topRated = !topRatedResult.error
+    ? (topRatedResult.data as { id: number }[])
+    : [];
 
   if (error) {
     return (
@@ -64,7 +69,7 @@ const RestaurantGrid = ({ restaurantFilters }: RestaurantGridProps) => {
               transition={{ duration: 0.5, delay: i * 0.05 }}
               width="100%"
             >
-              <RestaurantCard restaurant={restaurant} />
+              <RestaurantCard restaurant={restaurant} topRated={topRated} />
             </MotionBox>
           ))}
     </SimpleGrid>

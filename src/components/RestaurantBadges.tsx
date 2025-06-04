@@ -3,11 +3,11 @@ import BadgeImage from "./BadgeImage";
 import badgeVegetarian from "../assets/Vegetarian.png";
 import badgeTooGoodToGo from "../assets/TooGoodToGo.png";
 import iconTopRated from "../assets/TopRated.png";
-import TopRated from "../data/top_rated";
 
 interface RestaurantBadgesProps {
   restaurantId: number;
   badges: string[];
+  topRated: { id: number }[];
 }
 
 const badgeMap: Record<string, string> = {
@@ -15,9 +15,13 @@ const badgeMap: Record<string, string> = {
   TooGoodToGo: badgeTooGoodToGo,
 };
 
-const RestaurantBadges = ({ restaurantId, badges }: RestaurantBadgesProps) => {
-  const isTopRated = TopRated.some(
-    (item) => item.restaurant_id === restaurantId
+const RestaurantBadges = ({
+  restaurantId,
+  badges,
+  topRated,
+}: RestaurantBadgesProps) => {
+  const isTopRated = topRated.some(
+    (restaurant) => restaurant.id === restaurantId
   );
 
   return (
