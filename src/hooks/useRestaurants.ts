@@ -47,7 +47,7 @@ const useRestaurants = (restaurantFilters: RestaurantFilters) => {
     }
   }
 
-  let asc = sortOrder === "created_at";
+  let asc = sortOrder === "distance" ? true : false;
 
   query = query.order(sortOrder, { ascending: asc });
 

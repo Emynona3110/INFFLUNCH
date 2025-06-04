@@ -37,6 +37,13 @@ interface FilterDialogProps {
   onFilterChange: (query: RestaurantFilters) => void;
 }
 
+const defaultFilters: RestaurantFilters = {
+  sortOrder: "relevance",
+  minRate: 0,
+  tags: [],
+  searchText: "",
+};
+
 const availableTags = ["Burger", "Bento"];
 
 const FilterDialog = ({
@@ -198,13 +205,22 @@ const FilterDialog = ({
             </VStack>
           </AlertDialogBody>
 
-          <AlertDialogFooter>
-            <Button ref={cancelRef} onClick={onClose}>
-              Annuler
+          <AlertDialogFooter justifyContent="space-between">
+            <Button
+              variant="ghost"
+              onClick={() => setLocalQuery(defaultFilters)}
+            >
+              Réinitialiser
             </Button>
-            <Button colorScheme="blue" ml={3} onClick={handleValidate}>
-              Valider
-            </Button>
+
+            <HStack>
+              <Button ref={cancelRef} onClick={onClose}>
+                Annuler
+              </Button>
+              <Button colorScheme="blue" onClick={handleValidate}>
+                Valider
+              </Button>
+            </HStack>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
