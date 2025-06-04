@@ -68,6 +68,7 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
           </HStack>
 
           <HStack
+            minHeight={"24px"}
             verticalAlign="middle"
             color={useColorModeValue("gray.500", "gray.400")}
           >
