@@ -1,5 +1,11 @@
 import { useColorModeValue, Grid, GridItem, Box, Flex } from "@chakra-ui/react";
-import { useNavigate, useLocation, Routes, Route } from "react-router-dom";
+import {
+  useNavigate,
+  useLocation,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import RestaurantGrid from "./RestaurantGrid";
@@ -75,9 +81,7 @@ const UserPage = () => {
             <Routes>
               <Route
                 path="/"
-                element={
-                  <RestaurantGrid restaurantFilters={restaurantFilters} />
-                }
+                element={<Navigate to="/restaurants" replace />}
               />
               <Route
                 path="/restaurants"
