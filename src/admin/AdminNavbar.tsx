@@ -15,27 +15,15 @@ import {
 import { FiMoreVertical } from "react-icons/fi";
 import darkLogo from "../assets/infflux.svg";
 import lightLogo from "../assets/w-infflux.svg";
-import ColorModeSwitch from "./ColorModeSwitch";
-import SearchInput from "./SearchInput";
-import FilterDialog from "./FilterDialog";
-import { RestaurantFilters } from "../App";
-import { userSections } from "./UserPage";
+import ColorModeSwitch from "../components/ColorModeSwitch";
+import { adminSections } from "./AdminPage";
 
-interface NavbarProps {
+interface AdminNavbarProps {
   page: string;
   setPage: (page: string) => void;
-  restaurantFilters: RestaurantFilters;
-  onFilterChange: (query: RestaurantFilters) => void;
-  onSearch: (input: string) => void;
 }
 
-const Navbar = ({
-  page,
-  setPage,
-  restaurantFilters,
-  onFilterChange,
-  onSearch,
-}: NavbarProps) => {
+const AdminNavbar = ({ page, setPage }: AdminNavbarProps) => {
   const isMobile = useBreakpointValue({ base: true, lg: false });
 
   return (
@@ -50,7 +38,7 @@ const Navbar = ({
           <Image src={useColorModeValue(darkLogo, lightLogo)} boxSize="32px" />
           {!isMobile && (
             <Text fontSize="20px" fontWeight="bold" mr={4}>
-              INFFLUNCH
+              ADMINFFLUNCH
             </Text>
           )}
         </Box>
@@ -64,7 +52,7 @@ const Navbar = ({
               aria-label="Menu"
             />
             <MenuList>
-              {userSections.map((item) => (
+              {adminSections.map((item) => (
                 <MenuItem
                   key={item.path}
                   onClick={() => setPage(item.path)}
@@ -78,7 +66,7 @@ const Navbar = ({
           </Menu>
         ) : (
           <HStack h="100%">
-            {userSections.map((item) => {
+            {adminSections.map((item) => {
               const isActive = item.path === page;
 
               return (
@@ -114,20 +102,9 @@ const Navbar = ({
         )}
       </HStack>
 
-      {page === "restaurants" && (
-        <>
-          <Box flex="1" paddingRight={2}>
-            <SearchInput onSearch={onSearch} />
-          </Box>
-          <FilterDialog
-            restaurantFilters={restaurantFilters}
-            onFilterChange={onFilterChange}
-          />
-        </>
-      )}
       <ColorModeSwitch />
     </HStack>
   );
 };
 
-export default Navbar;
+export default AdminNavbar;

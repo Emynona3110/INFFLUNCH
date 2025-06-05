@@ -12,6 +12,14 @@ import RestaurantGrid from "./RestaurantGrid";
 import Beeeh from "./Beeeh";
 import { useState } from "react";
 import { RestaurantFilters } from "../App";
+import { slugify } from "../utils/slugify";
+
+export const userSections = ["Restaurants", "Avis", "Favoris", "À propos"].map(
+  (label) => ({
+    label,
+    path: slugify(label),
+  })
+);
 
 const UserPage = () => {
   const navigate = useNavigate();
@@ -26,7 +34,9 @@ const UserPage = () => {
     }
   );
 
-  const currentPage = location.pathname.slice(1) || "restaurants";
+  const currentPage =
+    userSections.find((section) => location.pathname.includes(section.path))
+      ?.path ?? userSections[0].path;
 
   return (
     <Grid
