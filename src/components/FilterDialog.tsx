@@ -27,11 +27,11 @@ import {
 } from "@chakra-ui/react";
 import { useRef, useState } from "react";
 import { BsFilter } from "react-icons/bs";
-import { RestaurantFilters } from "../App";
 import { SortOrder } from "./SortSelector";
 import StarRating from "./StarRating";
 import { motion, AnimatePresence } from "framer-motion";
 import useTags from "../hooks/useTags";
+import { RestaurantFilters } from "../pages/UserPage";
 
 interface FilterDialogProps {
   restaurantFilters: RestaurantFilters;
