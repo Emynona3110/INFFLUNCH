@@ -38,7 +38,21 @@ const RestaurantBadges = ({
         )}
 
       {isTopRated && (
-        <Tooltip label="Top 3 des mieux notés" placement="top" fontSize="sm">
+        <Tooltip
+          label="Top 3 des mieux notés"
+          placement="top"
+          fontSize="sm"
+          overflow={"hidden"}
+          modifiers={[
+            {
+              name: "preventOverflow",
+              options: {
+                boundary: "clippingParents", // empêche le débordement
+                padding: 4,
+              },
+            },
+          ]}
+        >
           <WrapItem>
             <BadgeImage src={iconTopRated} alt="Top 3 des mieux notés" />
           </WrapItem>
