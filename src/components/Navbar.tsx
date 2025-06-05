@@ -40,7 +40,7 @@ const Navbar = ({
 
   return (
     <HStack justifyContent="space-between" h="100%" spacing={1} width="100%">
-      <HStack spacing="5px" h="100%">
+      <HStack spacing="5px" h="100%" userSelect={"none"}>
         <Box
           display="flex"
           alignItems="center"

@@ -9,10 +9,9 @@ import {
   MenuItem,
   MenuList,
   useBreakpointValue,
-  IconButton,
   Icon,
 } from "@chakra-ui/react";
-import { FiMoreVertical } from "react-icons/fi";
+import { BsChevronDown } from "react-icons/bs";
 import darkLogo from "../assets/infflux.svg";
 import lightLogo from "../assets/w-infflux.svg";
 import ColorModeSwitch from "../components/ColorModeSwitch";
@@ -26,9 +25,12 @@ interface AdminNavbarProps {
 const AdminNavbar = ({ page, setPage }: AdminNavbarProps) => {
   const isMobile = useBreakpointValue({ base: true, lg: false });
 
+  const currentLabel =
+    adminSections.find((item) => item.path === page)?.label ?? "Menu";
+
   return (
     <HStack justifyContent="space-between" h="100%" spacing={1} width="100%">
-      <HStack spacing="5px" h="100%">
+      <HStack spacing="15px" h="100%" userSelect={"none"}>
         <Box
           display="flex"
           alignItems="center"
@@ -46,11 +48,18 @@ const AdminNavbar = ({ page, setPage }: AdminNavbarProps) => {
         {isMobile ? (
           <Menu>
             <MenuButton
-              as={IconButton}
-              icon={<Icon as={FiMoreVertical} boxSize="24px" />}
-              variant="transparent"
-              aria-label="Menu"
-            />
+              px={3}
+              py={1}
+              rounded="md"
+              borderWidth="1px"
+              borderColor={useColorModeValue("gray.200", "gray.600")}
+              _hover={{ bg: useColorModeValue("gray.100", "gray.700") }}
+            >
+              <HStack>
+                <Text>{currentLabel}</Text>
+                <Icon as={BsChevronDown} />
+              </HStack>
+            </MenuButton>
             <MenuList>
               {adminSections.map((item) => (
                 <MenuItem

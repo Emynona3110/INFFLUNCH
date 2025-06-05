@@ -1,6 +1,6 @@
 import { Input, InputGroup, InputLeftElement } from "@chakra-ui/react";
 import { BsSearch } from "react-icons/bs";
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import debounce from "lodash.debounce";
 
 interface SearchInputProps {
@@ -10,11 +10,12 @@ interface SearchInputProps {
 
 const SearchInput = ({ onSearch, delay = 300 }: SearchInputProps) => {
   const ref = useRef<HTMLInputElement>(null);
+  const [value, setValue] = useState("");
 
   const debouncedSearch = useMemo(
     () =>
-      debounce((value: string) => {
-        onSearch(value);
+      debounce((val: string) => {
+        onSearch(val);
       }, delay),
     [onSearch, delay]
   );
@@ -27,7 +28,12 @@ const SearchInput = ({ onSearch, delay = 300 }: SearchInputProps) => {
         borderRadius={20}
         placeholder="Chercher un restaurant..."
         variant="filled"
-        onChange={(e) => debouncedSearch(e.target.value)}
+        value={value}
+        onChange={(e) => {
+          setValue(e.target.value);
+          debouncedSearch(e.target.value);
+        }}
+        style={{ userSelect: value ? "auto" : "none" }}
       />
     </InputGroup>
   );
