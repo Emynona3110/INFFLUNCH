@@ -5,8 +5,9 @@ import RestaurantGrid from "./components/RestaurantGrid";
 import { useState } from "react";
 import { SortOrder } from "./components/SortSelector";
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
-import { AdminPage } from "./components/AdminPage";
 import Beeeh from "./components/Beeeh";
+import AdminPage from "./admin/AdminPage";
+import Footer from "./components/Footer";
 
 export interface RestaurantFilters {
   id?: number;
@@ -30,7 +31,12 @@ function App() {
     }
   );
 
+  const isAdminPath = location.pathname.startsWith("/admin");
   const currentPage = location.pathname.slice(1) || "restaurants";
+
+  if (isAdminPath) {
+    return <AdminPage />;
+  }
 
   return (
     <Grid
@@ -101,23 +107,11 @@ function App() {
                 path="/a-propos"
                 element={<Box p={4}>À propos de nous</Box>}
               />
-              <Route path="/admin" element={<AdminPage />} />
               <Route path="*" element={<Beeeh />} />
             </Routes>
           </Box>
 
-          <Box
-            as="footer"
-            mt={10}
-            py={4}
-            textAlign="center"
-            fontSize="sm"
-            color={useColorModeValue("gray.600", "gray.400")}
-            borderTop="1px solid"
-            borderColor={useColorModeValue("gray.200", "gray.700")}
-          >
-            © 2025 Infflunch — Tous droits réservés.
-          </Box>
+          <Footer />
         </Flex>
       </GridItem>
     </Grid>
