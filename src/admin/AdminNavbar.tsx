@@ -15,8 +15,7 @@ import { BsChevronDown } from "react-icons/bs";
 import darkLogo from "../assets/infflux.svg";
 import lightLogo from "../assets/w-infflux.svg";
 import ColorModeSwitch from "../components/ColorModeSwitch";
-import { adminSections } from "../pages/AdminPage";
-import { useNavigate } from "react-router-dom";
+import { adminSections } from "../pages/adminSections";
 
 interface AdminNavbarProps {
   page: string;
@@ -25,7 +24,6 @@ interface AdminNavbarProps {
 
 const AdminNavbar = ({ page, setPage }: AdminNavbarProps) => {
   const isMobile = useBreakpointValue({ base: true, lg: false });
-  const navigate = useNavigate();
 
   const currentLabel =
     adminSections.find((item) => item.path === page)?.label ?? "Menu";
@@ -36,7 +34,7 @@ const AdminNavbar = ({ page, setPage }: AdminNavbarProps) => {
         <Box
           display="flex"
           alignItems="center"
-          onClick={() => navigate("/user")}
+          onClick={() => setPage("/user")}
           _hover={{ cursor: "pointer" }}
         >
           <Image src={useColorModeValue(darkLogo, lightLogo)} boxSize="32px" />
@@ -68,7 +66,6 @@ const AdminNavbar = ({ page, setPage }: AdminNavbarProps) => {
                   key={item.path}
                   onClick={() => setPage(item.path)}
                   fontWeight={page === item.path ? "bold" : "normal"}
-                  fontSize="16px"
                 >
                   {item.label}
                 </MenuItem>

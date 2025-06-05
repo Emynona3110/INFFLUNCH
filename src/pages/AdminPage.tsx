@@ -1,38 +1,9 @@
-import {
-  useColorModeValue,
-  Grid,
-  GridItem,
-  VStack,
-  Flex,
-  Heading,
-} from "@chakra-ui/react";
-import {
-  Navigate,
-  Route,
-  Routes,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
+import { useColorModeValue, Grid, GridItem } from "@chakra-ui/react";
+import { useLocation, useNavigate } from "react-router-dom";
 import AdminNavbar from "../admin/AdminNavbar";
-import { slugify } from "../utils/slugify";
-
-import BadgeManager from "../admin/Managers/BadgeManager";
-import RestaurantManager from "../admin/Managers/RestaurantManager";
-import ReviewManager from "../admin/Managers/ReviewManager";
-import TagManager from "../admin/Managers/TagManager";
-import UserManager from "../admin/Managers/UserManager";
+import DataManager from "../admin/DataManager";
 import Beeeh from "../components/Beeeh";
-
-export const adminSections = [
-  "Restaurants",
-  "Avis",
-  "Tags",
-  "Badges",
-  "Utilisateurs",
-].map((label) => ({
-  label,
-  path: `admin/${slugify(label)}`,
-}));
+import { adminSections } from "./adminSections";
 
 export const AdminPage = () => {
   const navigate = useNavigate();
@@ -42,9 +13,9 @@ export const AdminPage = () => {
     adminSections.find((section) => location.pathname.includes(section.path))
       ?.path ?? adminSections[0].path;
 
-  const currentLabel =
-    adminSections.find((section) => location.pathname.includes(section.path))
-      ?.label ?? "";
+  const currentSection = adminSections.find(
+    (section) => section.path === currentPage
+  );
 
   return (
     <Grid
@@ -78,27 +49,7 @@ export const AdminPage = () => {
 
       {/* MAIN */}
       <GridItem area="main" overflowY="auto" height="calc(100vh - 60px)">
-        <Flex flexDirection="column" height="100%">
-          <VStack
-            align="stretch"
-            spacing={4}
-            p={4}
-            height="100%"
-            maxHeight="calc(100vh - 60px)" // empêche de dépasser le viewport
-          >
-            <Heading size="md">{`Gestion des ${currentLabel.toLowerCase()}`}</Heading>
-
-            <Routes>
-              <Route index element={<Navigate to="restaurants" />} />
-              <Route path="restaurants" element={<RestaurantManager />} />
-              <Route path="avis" element={<ReviewManager />} />
-              <Route path="tags" element={<TagManager />} />
-              <Route path="badges" element={<BadgeManager />} />
-              <Route path="utilisateurs" element={<UserManager />} />
-              <Route path="*" element={<Beeeh />} />
-            </Routes>
-          </VStack>
-        </Flex>
+        {currentSection ? <DataManager section={currentSection} /> : <Beeeh />}
       </GridItem>
     </Grid>
   );
