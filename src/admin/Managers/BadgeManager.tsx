@@ -1,5 +1,5 @@
 import { VStack } from "@chakra-ui/react";
-import AdminTable from "./AdminTable";
+import AdminTable from "../AdminTable";
 
 export const BadgeManager = () => {
   return (

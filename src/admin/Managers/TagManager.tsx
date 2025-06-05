@@ -1,4 +1,4 @@
-import AdminTable from "./AdminTable";
+import AdminTable from "../AdminTable";
 
 const TagManager = () => {
   return <AdminTable tableName="tags" />;

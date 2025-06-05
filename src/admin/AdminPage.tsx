@@ -16,11 +16,11 @@ import {
 import AdminNavbar from "./AdminNavbar";
 import { slugify } from "../utils/slugify";
 
-import BadgeManager from "./BadgeManager";
-import RestaurantManager from "./RestaurantManager";
-import ReviewManager from "./ReviewManager";
-import TagManager from "./TagManager";
-import UserManager from "./UserManager";
+import BadgeManager from "./Managers/BadgeManager";
+import RestaurantManager from "./Managers/RestaurantManager";
+import ReviewManager from "./Managers/ReviewManager";
+import TagManager from "./Managers/TagManager";
+import UserManager from "./Managers/UserManager";
 
 export const adminSections = [
   "Restaurants",
