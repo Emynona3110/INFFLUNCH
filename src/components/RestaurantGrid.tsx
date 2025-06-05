@@ -2,9 +2,9 @@ import { SimpleGrid, Text, Box } from "@chakra-ui/react";
 import RestaurantCard from "./RestaurantCard";
 import RestaurantCardSkeleton from "./RestaurantCardSkeleton";
 import useRestaurants from "../hooks/useRestaurants";
-import { RestaurantFilters } from "../App";
 import { motion } from "framer-motion";
 import useTopRated from "../hooks/useTopRated";
+import { RestaurantFilters } from "../pages/UserPage";
 
 const MotionBox = motion.create(Box);
 
