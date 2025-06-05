@@ -12,9 +12,9 @@ export type Restaurant = {
 };
 
 import useData from "./useData";
-import { RestaurantFilters } from "../App";
 import { slugify } from "../utils/slugify";
 import supabaseClient from "../services/supabaseClient";
+import { RestaurantFilters } from "../pages/UserPage";
 
 const useRestaurants = (restaurantFilters: RestaurantFilters) => {
   const { id, slug, sortOrder, minRate, tags, searchText } = restaurantFilters;

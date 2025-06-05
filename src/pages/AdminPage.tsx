@@ -13,14 +13,15 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
-import AdminNavbar from "./AdminNavbar";
+import AdminNavbar from "../admin/AdminNavbar";
 import { slugify } from "../utils/slugify";
 
-import BadgeManager from "./Managers/BadgeManager";
-import RestaurantManager from "./Managers/RestaurantManager";
-import ReviewManager from "./Managers/ReviewManager";
-import TagManager from "./Managers/TagManager";
-import UserManager from "./Managers/UserManager";
+import BadgeManager from "../admin/Managers/BadgeManager";
+import RestaurantManager from "../admin/Managers/RestaurantManager";
+import ReviewManager from "../admin/Managers/ReviewManager";
+import TagManager from "../admin/Managers/TagManager";
+import UserManager from "../admin/Managers/UserManager";
+import Beeeh from "../components/Beeeh";
 
 export const adminSections = [
   "Restaurants",
@@ -88,22 +89,13 @@ export const AdminPage = () => {
             <Heading size="md">{`Gestion des ${currentLabel.toLowerCase()}`}</Heading>
 
             <Routes>
-              <Route
-                path="/admin"
-                element={<Navigate to="/admin/restaurants" replace />}
-              />
-              <Route
-                path="/admin/*"
-                element={<Navigate to="/admin/restaurants" replace />}
-              />
-              <Route
-                path="/admin/restaurants"
-                element={<RestaurantManager />}
-              />
-              <Route path="/admin/avis" element={<ReviewManager />} />
-              <Route path="/admin/tags" element={<TagManager />} />
-              <Route path="/admin/badges" element={<BadgeManager />} />
-              <Route path="/admin/utilisateurs" element={<UserManager />} />
+              <Route index element={<Navigate to="restaurants" />} />
+              <Route path="restaurants" element={<RestaurantManager />} />
+              <Route path="avis" element={<ReviewManager />} />
+              <Route path="tags" element={<TagManager />} />
+              <Route path="badges" element={<BadgeManager />} />
+              <Route path="utilisateurs" element={<UserManager />} />
+              <Route path="*" element={<Beeeh />} />
             </Routes>
           </VStack>
         </Flex>

@@ -1,22 +1,33 @@
-import { useLocation } from "react-router-dom";
-import AdminPage from "./admin/AdminPage";
-import UserPage from "./components/UserPage";
-import { SortOrder } from "./components/SortSelector";
-
-export interface RestaurantFilters {
-  id?: number;
-  slug?: string;
-  sortOrder: SortOrder;
-  minRate: number;
-  tags: string[];
-  searchText: string;
-}
+import { Routes, Route } from "react-router-dom";
+import AdminPage from "./pages/AdminPage";
+import UserPage from "./pages/UserPage";
+import LoginPage from "./pages/LoginPage";
+import PageNotFound from "./pages/PageNotFound";
+import Wrapper from "./pages/Wrapper";
 
 function App() {
-  const location = useLocation();
-  const isAdminPath = location.pathname.startsWith("/admin");
-
-  return isAdminPath ? <AdminPage /> : <UserPage />;
+  return (
+    <Routes>
+      <Route
+        path="/admin/*"
+        element={
+          <Wrapper>
+            <AdminPage />
+          </Wrapper>
+        }
+      />
+      <Route
+        path="/user/*"
+        element={
+          <Wrapper>
+            <UserPage />
+          </Wrapper>
+        }
+      />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="*" element={<PageNotFound />} />
+    </Routes>
+  );
 }
 
 export default App;

@@ -18,8 +18,11 @@ import lightLogo from "../assets/w-infflux.svg";
 import ColorModeSwitch from "./ColorModeSwitch";
 import SearchInput from "./SearchInput";
 import FilterDialog from "./FilterDialog";
-import { RestaurantFilters } from "../App";
-import { userSections } from "./UserPage";
+import {
+  defaultRestaurantFilters,
+  RestaurantFilters,
+  userSections,
+} from "../pages/UserPage";
 
 interface NavbarProps {
   page: string;
@@ -44,7 +47,11 @@ const Navbar = ({
         <Box
           display="flex"
           alignItems="center"
-          onClick={() => setPage("restaurants")}
+          onClick={() => {
+            //reset filters
+            onFilterChange(defaultRestaurantFilters);
+            setPage("restaurants");
+          }}
           _hover={{ cursor: "pointer" }}
         >
           <Image src={useColorModeValue(darkLogo, lightLogo)} boxSize="32px" />
@@ -116,7 +123,7 @@ const Navbar = ({
 
       {page === "restaurants" && (
         <>
-          <Box flex="1" paddingRight={2}>
+          <Box flex="1" paddingX={2}>
             <SearchInput onSearch={onSearch} />
           </Box>
           <FilterDialog

@@ -6,32 +6,47 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import Navbar from "./Navbar";
-import Footer from "./Footer";
-import RestaurantGrid from "./RestaurantGrid";
-import Beeeh from "./Beeeh";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+import RestaurantGrid from "../components/RestaurantGrid";
+import Beeeh from "../components/Beeeh";
 import { useState } from "react";
-import { RestaurantFilters } from "../App";
 import { slugify } from "../utils/slugify";
+import { SortOrder } from "../components/SortSelector";
+import MyAccount from "../sections/MyAccount";
 
-export const userSections = ["Restaurants", "Avis", "Favoris", "À propos"].map(
-  (label) => ({
-    label,
-    path: slugify(label),
-  })
-);
+export const userSections = [
+  "Restaurants",
+  "Mon compte",
+  "Favoris",
+  "À propos",
+].map((label) => ({
+  label,
+  path: slugify(label),
+}));
+
+export interface RestaurantFilters {
+  id?: number;
+  slug?: string;
+  sortOrder: SortOrder;
+  minRate: number;
+  tags: string[];
+  searchText: string;
+}
+
+export const defaultRestaurantFilters: RestaurantFilters = {
+  sortOrder: "relevance",
+  minRate: 0,
+  tags: [],
+  searchText: "",
+};
 
 const UserPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
   const [restaurantFilters, setRestaurantFilters] = useState<RestaurantFilters>(
-    {
-      sortOrder: "relevance",
-      minRate: 0,
-      tags: [],
-      searchText: "",
-    }
+    defaultRestaurantFilters
   );
 
   const currentPage =
@@ -64,7 +79,7 @@ const UserPage = () => {
       >
         <Navbar
           page={currentPage}
-          setPage={(page) => navigate("/" + page.toLowerCase())}
+          setPage={(page) => navigate("/user/" + page)}
           restaurantFilters={restaurantFilters}
           onFilterChange={(query: RestaurantFilters) =>
             setRestaurantFilters({ ...restaurantFilters, ...query })
@@ -89,20 +104,17 @@ const UserPage = () => {
             marginX="auto"
           >
             <Routes>
+              <Route index element={<Navigate to="restaurants" replace />} />
               <Route
-                path="/"
-                element={<Navigate to="/restaurants" replace />}
-              />
-              <Route
-                path="/restaurants"
+                path="restaurants"
                 element={
                   <RestaurantGrid restaurantFilters={restaurantFilters} />
                 }
               />
-              <Route path="/avis" element={<Box p={4}>Avis à venir</Box>} />
-              <Route path="/favoris" element={<Box p={4}>Vos favoris</Box>} />
+              <Route path="mon-compte" element={<MyAccount />} />
+              <Route path="favoris" element={<Box p={4}>Vos favoris</Box>} />
               <Route
-                path="/a-propos"
+                path="a-propos"
                 element={<Box p={4}>À propos de nous</Box>}
               />
               <Route path="*" element={<Beeeh />} />
