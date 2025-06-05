@@ -93,6 +93,10 @@ export const AdminPage = () => {
                 element={<Navigate to="/admin/restaurants" replace />}
               />
               <Route
+                path="/admin/*"
+                element={<Navigate to="/admin/restaurants" replace />}
+              />
+              <Route
                 path="/admin/restaurants"
                 element={<RestaurantManager />}
               />
