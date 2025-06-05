@@ -44,7 +44,7 @@ const useRestaurants = (restaurantFilters: RestaurantFilters) => {
   let asc = sortOrder === "distance" ? true : false;
   query = query.order(sortOrder, { ascending: asc });
   const result = useData<Restaurant>(query, [restaurantFilters]);
-  console.log("useRestaurants result:", result);
+  // console.log("useRestaurants result:", result);
   return result;
 };
 

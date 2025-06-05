@@ -10,7 +10,7 @@ const useTopRated = () => {
     .limit(3);
 
   const result = useData(query, []);
-  console.log("useTopRated result:", result);
+  // console.log("useTopRated result:", result);
   return result;
 };
 
