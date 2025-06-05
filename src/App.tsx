@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import AdminPage from "./pages/AdminPage";
 import UserPage from "./pages/UserPage";
 import LoginPage from "./pages/LoginPage";
@@ -8,6 +8,9 @@ import Wrapper from "./pages/Wrapper";
 function App() {
   return (
     <Routes>
+      {/* Redirection de la racine vers /user */}
+      <Route path="/" element={<Navigate to="/user" replace />} />
+
       <Route
         path="/admin/*"
         element={
