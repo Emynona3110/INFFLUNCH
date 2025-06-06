@@ -31,11 +31,18 @@ const ChangePasswordDialog = ({
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [localError, setLocalError] = useState("");
-  const { loading, message, changePassword, setMessage } = useChangePassword();
+
+  const handleClose = () => {
+    setNewPassword("");
+    setConfirmPassword("");
+    setLocalError("");
+    onClose();
+  };
+
+  const { isLoading, message, updatePassword } = useChangePassword(handleClose);
 
   const handleSubmit = () => {
     setLocalError("");
-    setMessage("");
 
     if (newPassword.length < 8) {
       setLocalError("Le mot de passe doit contenir au moins 8 caractères.");
@@ -47,17 +54,9 @@ const ChangePasswordDialog = ({
       return;
     }
 
-    changePassword(newPassword);
+    updatePassword(newPassword);
     setNewPassword("");
     setConfirmPassword("");
-  };
-
-  const handleClose = () => {
-    setNewPassword("");
-    setConfirmPassword("");
-    setLocalError("");
-    setMessage("");
-    onClose();
   };
 
   return (
@@ -119,7 +118,7 @@ const ChangePasswordDialog = ({
             colorScheme="blue"
             ml={3}
             onClick={handleSubmit}
-            isLoading={loading}
+            isLoading={isLoading}
           >
             Mettre à jour
           </Button>
