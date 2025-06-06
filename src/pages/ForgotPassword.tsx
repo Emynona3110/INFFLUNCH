@@ -73,8 +73,7 @@ const ForgotPassword = () => {
         <VStack spacing={2} textAlign="center">
           <Heading size="lg">Mot de passe oublié</Heading>
           <Text color="gray.500" fontSize="md">
-            Saisissez votre adresse e-mail pour recevoir un lien de
-            réinitialisation
+            Saisissez votre adresse e-mail
           </Text>
         </VStack>
 
