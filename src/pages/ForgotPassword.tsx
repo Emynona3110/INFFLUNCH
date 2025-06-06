@@ -19,8 +19,8 @@ import { useNavigate } from "react-router-dom";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
   const [success, setSuccess] = useState(false);
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -45,10 +45,10 @@ const ForgotPassword = () => {
     if (error) {
       setMessage("Une erreur est survenue. Veuillez réessayer plus tard.");
     } else {
-      setMessage(
-        "Si un compte existe avec cette adresse, un lien a été envoyé."
-      );
       setSuccess(true);
+      setMessage(
+        `Un email de réinitialisation a été envoyé à l'adresse ${email}.`
+      );
     }
   };
 
@@ -78,14 +78,7 @@ const ForgotPassword = () => {
         </VStack>
 
         {message && (
-          <Alert
-            status={
-              message.startsWith("Format") || message.startsWith("Une erreur")
-                ? "error"
-                : "success"
-            }
-            borderRadius="md"
-          >
+          <Alert status={success ? "success" : "error"} borderRadius="md">
             <AlertIcon />
             {message}
           </Alert>

@@ -15,19 +15,19 @@ import {
   Spinner,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import useSession from "../hooks/useSession";
 import useChangePassword from "../hooks/useChangePassword";
 
 const ResetPassword = () => {
   const { sessionData, loading } = useSession();
-  const navigate = useNavigate();
   const { updatePassword, isLoading, message } = useChangePassword(() => {
-    navigate("/login");
+    // Pas de navigation immédiate ici pour laisser le temps d'afficher le message
+    // Tu peux remettre navigate("/login") avec un timeout si souhaité
   });
 
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
   if (loading) {
     return (
@@ -63,9 +63,10 @@ const ResetPassword = () => {
     e.preventDefault();
     if (password !== confirm) return;
     await updatePassword(password);
+    setSubmitted(true);
   };
 
-  const isTooShort = password.length > 0 && password.length < 6;
+  const isTooShort = password.length > 0 && password.length < 8;
   const mismatch = password !== confirm;
 
   return (
@@ -93,11 +94,15 @@ const ResetPassword = () => {
           </Text>
         </VStack>
 
-        {message && (
-          <Alert
-            status={message.startsWith("Mot") ? "success" : "error"}
-            borderRadius="md"
-          >
+        {submitted && message?.startsWith("Mot") && (
+          <Alert status="success" borderRadius="md">
+            <AlertIcon />
+            {`Le mot de passe a été mis à jour avec succès. Un email a été envoyé à ${sessionData.user.email}`}
+          </Alert>
+        )}
+
+        {!message?.startsWith("Mot") && message && (
+          <Alert status="error" borderRadius="md">
             <AlertIcon />
             {message}
           </Alert>
@@ -127,10 +132,8 @@ const ResetPassword = () => {
           {(isTooShort || mismatch) && (
             <Text fontSize="sm" color="red.400">
               {isTooShort
-                ? "Le mot de passe doit contenir au moins 6 caractères."
-                : mismatch
-                ? "Les mots de passe ne correspondent pas."
-                : ""}
+                ? "Le mot de passe doit contenir au moins 8 caractères."
+                : "Les mots de passe ne correspondent pas."}
             </Text>
           )}
 
