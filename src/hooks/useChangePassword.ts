@@ -1,37 +1,29 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import supabaseClient from "../services/supabaseClient";
 
-export default function useChangePassword() {
-  const [loading, setLoading] = useState(false);
+const useChangePassword = (onSuccess: () => void) => {
+  const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const navigate = useNavigate();
 
-  const changePassword = async (newPassword: string) => {
-    setLoading(true);
+  const updatePassword = async (newPassword: string) => {
+    setIsLoading(true);
     setMessage("");
 
     const { error } = await supabaseClient.auth.updateUser({
       password: newPassword,
     });
 
-    setLoading(false);
+    setIsLoading(false);
 
     if (error) {
-      setMessage(`Erreur : ${error.message}`);
+      setMessage("Une erreur est survenue. Veuillez réessayer.");
     } else {
       setMessage("Mot de passe mis à jour avec succès.");
-      // Redirection après succès (avec petit délai pour UX)
-      setTimeout(() => {
-        navigate("/login");
-      }, 1500);
+      setTimeout(onSuccess, 1500);
     }
   };
 
-  return {
-    loading,
-    message,
-    changePassword,
-    setMessage,
-  };
-}
+  return { updatePassword, isLoading, message };
+};
+
+export default useChangePassword;

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ReactNode } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import supabaseClient from "../services/supabaseClient";
 import { Center, Spinner } from "@chakra-ui/react";
 
@@ -10,6 +10,7 @@ interface WrapperProps {
 
 const Wrapper = ({ children }: WrapperProps) => {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+  const location = useLocation();
 
   useEffect(() => {
     const getSession = async () => {
@@ -22,6 +23,11 @@ const Wrapper = ({ children }: WrapperProps) => {
 
     getSession();
   }, []);
+
+  // ✅ Cas spécial : ne pas bloquer certaines routes
+  if (location.pathname === "/reset-password") {
+    return <>{children}</>;
+  }
 
   if (authenticated === null) {
     return (

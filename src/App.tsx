@@ -5,6 +5,8 @@ import LoginPage from "./pages/LoginPage";
 import PageNotFound from "./pages/PageNotFound";
 import Wrapper from "./pages/Wrapper";
 import AdminWrapper from "./pages/AdminWrapper";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 function App() {
   return (
@@ -29,6 +31,8 @@ function App() {
         }
       />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

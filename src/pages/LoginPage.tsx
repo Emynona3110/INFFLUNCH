@@ -11,6 +11,8 @@ import {
   Stack,
   Alert,
   AlertIcon,
+  Link,
+  HStack,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -98,6 +100,17 @@ const LoginPage = () => {
               required
             />
           </FormControl>
+
+          <HStack justify="space-between" width="100%">
+            <Box />
+            <Link
+              color="blue.500"
+              fontSize="sm"
+              onClick={() => navigate("/forgot-password")}
+            >
+              Mot de passe oublié ?
+            </Link>
+          </HStack>
 
           <Button
             type="submit"
