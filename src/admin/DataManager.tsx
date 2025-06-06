@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button, Flex, Heading, HStack, VStack } from "@chakra-ui/react";
 import AdminTable from "./AdminTable";
-import { AdminSection } from "../pages/adminSections";
+import { AdminSection } from "../services/adminSections";
 import DataDialog from "./DataDialog";
 
 export interface DataManagerProps {

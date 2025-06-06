@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import AdminNavbar from "../admin/AdminNavbar";
 import DataManager from "../admin/DataManager";
 import Beeeh from "../components/Beeeh";
-import { adminSections } from "./adminSections";
+import { adminSections } from "../services/adminSections";
 
 export const AdminPage = () => {
   const navigate = useNavigate();

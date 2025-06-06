@@ -15,7 +15,7 @@ import { BsChevronDown } from "react-icons/bs";
 import darkLogo from "../assets/infflux.svg";
 import lightLogo from "../assets/w-infflux.svg";
 import ColorModeSwitch from "../components/ColorModeSwitch";
-import { adminSections } from "../pages/adminSections";
+import { adminSections } from "../services/adminSections";
 import { useNavigate } from "react-router-dom";
 
 interface AdminNavbarProps {
