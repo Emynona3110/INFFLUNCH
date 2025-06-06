@@ -14,20 +14,37 @@ import {
   Center,
   Spinner,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import useSession from "../hooks/useSession";
 import useChangePassword from "../hooks/useChangePassword";
 
 const ResetPassword = () => {
   const { sessionData, loading } = useSession();
-  const { updatePassword, isLoading, message } = useChangePassword(() => {
-    // Pas de navigation immédiate ici pour laisser le temps d'afficher le message
-    // Tu peux remettre navigate("/login") avec un timeout si souhaité
-  });
-
+  const navigate = useNavigate();
+  const { updatePassword, isLoading, message } = useChangePassword(() => {});
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [submitted, setSubmitted] = useState(false);
+
+  const isTooShort = password.length > 0 && password.length < 8;
+  const mismatch = password !== confirm;
+
+  const handleSubmit = async (e: React.FormEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (isTooShort || mismatch) return;
+    await updatePassword(password);
+    setSubmitted(true);
+  };
+
+  useEffect(() => {
+    if (submitted && message?.startsWith("Mot")) {
+      const timer = setTimeout(() => {
+        navigate("/user");
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [submitted, message, navigate]);
 
   if (loading) {
     return (
@@ -46,7 +63,7 @@ const ResetPassword = () => {
           borderRadius="md"
           boxShadow="lg"
           textAlign="center"
-          bg="white"
+          bg={useColorModeValue("white", "gray.900")}
         >
           <Text fontSize="lg" fontWeight="semibold">
             Session invalide ou expirée.
@@ -58,16 +75,6 @@ const ResetPassword = () => {
       </Center>
     );
   }
-
-  const handleSubmit = async (e: React.FormEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    if (password !== confirm) return;
-    await updatePassword(password);
-    setSubmitted(true);
-  };
-
-  const isTooShort = password.length > 0 && password.length < 8;
-  const mismatch = password !== confirm;
 
   return (
     <Box
@@ -97,7 +104,7 @@ const ResetPassword = () => {
         {submitted && message?.startsWith("Mot") && (
           <Alert status="success" borderRadius="md">
             <AlertIcon />
-            {`Le mot de passe a été mis à jour avec succès. Un email a été envoyé à ${sessionData.user.email}`}
+            {message} Vous allez être redirigé...
           </Alert>
         )}
 
@@ -108,45 +115,48 @@ const ResetPassword = () => {
           </Alert>
         )}
 
-        <VStack as="form" spacing={4} onSubmit={handleSubmit}>
-          <FormControl id="new-password">
-            <FormLabel>Nouveau mot de passe</FormLabel>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-            />
-          </FormControl>
+        {/* Ne pas afficher le formulaire si succès */}
+        {!submitted && (
+          <VStack as="form" spacing={4} onSubmit={handleSubmit}>
+            <FormControl id="new-password">
+              <FormLabel>Nouveau mot de passe</FormLabel>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+              />
+            </FormControl>
 
-          <FormControl id="confirm-password">
-            <FormLabel>Confirmer le mot de passe</FormLabel>
-            <Input
-              type="password"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              placeholder="••••••••"
-            />
-          </FormControl>
+            <FormControl id="confirm-password">
+              <FormLabel>Confirmer le mot de passe</FormLabel>
+              <Input
+                type="password"
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                placeholder="••••••••"
+              />
+            </FormControl>
 
-          {(isTooShort || mismatch) && (
-            <Text fontSize="sm" color="red.400">
-              {isTooShort
-                ? "Le mot de passe doit contenir au moins 8 caractères."
-                : "Les mots de passe ne correspondent pas."}
-            </Text>
-          )}
+            {(isTooShort || mismatch) && (
+              <Text fontSize="sm" color="red.400">
+                {isTooShort
+                  ? "Le mot de passe doit contenir au moins 8 caractères."
+                  : "Les mots de passe ne correspondent pas."}
+              </Text>
+            )}
 
-          <Button
-            type="submit"
-            colorScheme="blue"
-            width="full"
-            isLoading={isLoading}
-            isDisabled={mismatch}
-          >
-            Mettre à jour
-          </Button>
-        </VStack>
+            <Button
+              type="submit"
+              colorScheme="blue"
+              width="full"
+              isLoading={isLoading}
+              isDisabled={mismatch || isTooShort}
+            >
+              Mettre à jour
+            </Button>
+          </VStack>
+        )}
       </Stack>
     </Box>
   );

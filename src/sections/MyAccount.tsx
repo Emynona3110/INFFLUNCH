@@ -11,14 +11,13 @@ import {
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import useSession from "../hooks/useSession";
-import ChangePasswordDialog from "../components/ChangePasswordDialog";
-import { useState } from "react";
+import usePasswordReset from "../hooks/usePasswordReset";
 
 const MyAccount = () => {
   const navigate = useNavigate();
   const toast = useToast();
   const { sessionData, signOut, loading, error } = useSession();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { requestReset, isLoading } = usePasswordReset();
 
   const handleLogout = async () => {
     await signOut();
@@ -33,6 +32,23 @@ const MyAccount = () => {
     } else {
       navigate("/login");
     }
+  };
+
+  const handlePasswordReset = async () => {
+    if (!sessionData?.user?.email) return;
+
+    await requestReset(sessionData.user.email, async () => {
+      toast({
+        title: "Lien envoyé",
+        description: `Un email a été envoyé à ${sessionData.user.email}`,
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+
+      await signOut();
+      navigate("/login");
+    });
   };
 
   const role = sessionData?.user.user_metadata?.role;
@@ -64,9 +80,10 @@ const MyAccount = () => {
 
             <VStack spacing={3} align="stretch">
               <Button
-                onClick={() => setIsDialogOpen(true)}
+                onClick={handlePasswordReset}
                 colorScheme="blue"
                 variant="outline"
+                isLoading={isLoading}
               >
                 Changer le mot de passe
               </Button>
@@ -89,11 +106,6 @@ const MyAccount = () => {
         ) : (
           <Box>Aucune session utilisateur.</Box>
         )}
-
-        <ChangePasswordDialog
-          isOpen={isDialogOpen}
-          onClose={() => setIsDialogOpen(false)}
-        />
       </VStack>
     </Box>
   );

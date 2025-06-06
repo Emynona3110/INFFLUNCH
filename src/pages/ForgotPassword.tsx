@@ -14,42 +14,20 @@ import {
   Link,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import supabaseClient from "../services/supabaseClient";
 import { useNavigate } from "react-router-dom";
+import usePasswordReset from "../hooks/usePasswordReset";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
-  const [success, setSuccess] = useState(false);
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { requestReset, isLoading, message, success } = usePasswordReset();
 
-  const isValidEmail = (email: string) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
+  const isValidEmail = (email: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const handleReset = async () => {
-    setMessage("");
-
-    if (!isValidEmail(email)) {
-      setMessage("Format d'adresse e-mail invalide.");
-      return;
-    }
-
-    setLoading(true);
-    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-    setLoading(false);
-
-    if (error) {
-      setMessage("Une erreur est survenue. Veuillez réessayer plus tard.");
-    } else {
-      setSuccess(true);
-      setMessage(
-        `Un email de réinitialisation a été envoyé à l'adresse ${email}.`
-      );
-    }
+    if (!isValidEmail(email)) return;
+    await requestReset(email);
   };
 
   return (
@@ -85,7 +63,14 @@ const ForgotPassword = () => {
         )}
 
         {!success && (
-          <VStack spacing={4}>
+          <VStack
+            as="form"
+            spacing={4}
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleReset();
+            }}
+          >
             <FormControl id="email">
               <FormLabel>Adresse e-mail</FormLabel>
               <Input
@@ -97,10 +82,10 @@ const ForgotPassword = () => {
             </FormControl>
 
             <Button
+              type="submit"
               colorScheme="blue"
               width="full"
-              isLoading={loading}
-              onClick={handleReset}
+              isLoading={isLoading}
             >
               Envoyer le lien
             </Button>
