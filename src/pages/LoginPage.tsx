@@ -13,6 +13,7 @@ import {
   AlertIcon,
   Link,
   HStack,
+  Divider,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -120,6 +121,15 @@ const LoginPage = () => {
           >
             Se connecter
           </Button>
+
+          {/* Nouveau lien pour les nouveaux utilisateurs */}
+          <Divider />
+          <Text fontSize="sm" color="gray.600" textAlign="center">
+            Nouveau sur Infflunch ?{" "}
+            <Link color="blue.500" onClick={() => navigate("/forgot-password")}>
+              Active ton compte ici
+            </Link>
+          </Text>
         </VStack>
       </Stack>
     </Box>
