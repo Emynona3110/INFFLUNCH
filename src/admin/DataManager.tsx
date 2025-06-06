@@ -23,28 +23,30 @@ const DataManager = ({ section }: DataManagerProps) => {
       >
         <HStack justifyContent="space-between">
           <Heading size="md">{`Gestion des ${label.toLowerCase()}`}</Heading>
-          <Button
-            colorScheme="blue"
-            size="sm"
-            onClick={() => setIsDialogOpen(true)}
-            variant={"ghost"}
-          >
-            Ajouter +
-          </Button>
+
+          {tableName != "users" && (
+            <>
+              <Button
+                colorScheme="blue"
+                size="sm"
+                onClick={() => setIsDialogOpen(true)}
+                variant={"ghost"}
+              >
+                Ajouter +
+              </Button>
+              <DataDialog
+                isOpen={isDialogOpen}
+                onClose={() => setIsDialogOpen(false)}
+                tableName={tableName}
+                columns={columns}
+                onSuccess={() => setIsDialogOpen(false)}
+              />
+            </>
+          )}
         </HStack>
 
         <AdminTable tableName={tableName} columns={columns} />
       </VStack>
-
-      <DataDialog
-        isOpen={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
-        tableName={tableName}
-        columns={columns}
-        onSuccess={() => {
-          // Optionnel : tu peux rafraîchir les données ici si besoin
-        }}
-      />
     </Flex>
   );
 };

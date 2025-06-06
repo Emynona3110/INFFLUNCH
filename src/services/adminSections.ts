@@ -21,12 +21,6 @@ export const adminSections: AdminSection[] = [
       "image",
     ],
   },
-  // {
-  //   label: "Avis",
-  //   path: "admin/avis",
-  //   tableName: "rewiews",
-  //   columns: ["id", "restaurantId", "userId", "rating", "comment", "date"],
-  // },
   {
     label: "Tags",
     path: "admin/tags",
@@ -39,10 +33,4 @@ export const adminSections: AdminSection[] = [
     tableName: "badges",
     columns: ["id", "label"],
   },
-  // {
-  //   label: "Utilisateurs",
-  //   path: "admin/utilisateurs",
-  //   tableName: "users",
-  //   columns: ["id", "username", "email", "role"],
-  // },
 ];

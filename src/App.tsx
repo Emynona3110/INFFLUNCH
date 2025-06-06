@@ -4,6 +4,7 @@ import UserPage from "./pages/UserPage";
 import LoginPage from "./pages/LoginPage";
 import PageNotFound from "./pages/PageNotFound";
 import Wrapper from "./pages/Wrapper";
+import AdminWrapper from "./pages/AdminWrapper";
 
 function App() {
   return (
@@ -14,9 +15,9 @@ function App() {
       <Route
         path="/admin/*"
         element={
-          <Wrapper>
+          <AdminWrapper>
             <AdminPage />
-          </Wrapper>
+          </AdminWrapper>
         }
       />
       <Route
