@@ -13,7 +13,12 @@ import {
   AlertIcon,
   Center,
   Spinner,
+  InputGroup,
+  InputRightElement,
+  IconButton,
+  useToast,
 } from "@chakra-ui/react";
+import { VscEye, VscEyeClosed } from "react-icons/vsc";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useSession from "../hooks/useSession";
@@ -22,29 +27,70 @@ import useChangePassword from "../hooks/useChangePassword";
 const ResetPassword = () => {
   const { sessionData, loading } = useSession();
   const navigate = useNavigate();
+  const toast = useToast();
   const { updatePassword, isLoading, message } = useChangePassword(() => {});
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
-  const isTooShort = password.length > 0 && password.length < 8;
-  const mismatch = password !== confirm;
+  const isTooShort = password.length < 8;
+
+  const isComplexEnough = (pwd: string) =>
+    /[A-Z]/.test(pwd) &&
+    /[a-z]/.test(pwd) &&
+    /[0-9]/.test(pwd) &&
+    /[^A-Za-z0-9]/.test(pwd);
+
+  const notComplex = password.length >= 8 && !isComplexEnough(password);
+  const mismatch = confirm.length > 0 && password !== confirm;
+
+  const isSuccess = submitted && message?.startsWith("Mot");
+
+  const validationErrors: string[] = [];
+  if (isTooShort) {
+    validationErrors.push(
+      "Le mot de passe doit contenir au moins 8 caractères."
+    );
+  }
+  if (notComplex) {
+    validationErrors.push(
+      "Il doit contenir une majuscule, une minuscule, un chiffre et un caractère spécial."
+    );
+  }
+  if (mismatch) {
+    validationErrors.push("Les mots de passe ne correspondent pas.");
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLDivElement>) => {
     e.preventDefault();
-    if (isTooShort || mismatch) return;
+    if (isTooShort || notComplex || mismatch) return;
     await updatePassword(password);
     setSubmitted(true);
   };
 
   useEffect(() => {
-    if (submitted && message?.startsWith("Mot")) {
+    if (isSuccess) {
       const timer = setTimeout(() => {
         navigate("/user");
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [submitted, message, navigate]);
+  }, [isSuccess, navigate]);
+
+  useEffect(() => {
+    if (submitted && message && !message.startsWith("Mot")) {
+      toast({
+        title: "Erreur",
+        description: message,
+        status: "error",
+        duration: 4000,
+        isClosable: true,
+        position: "top",
+      });
+    }
+  }, [submitted, message, toast]);
 
   if (loading) {
     return (
@@ -95,63 +141,85 @@ const ResetPassword = () => {
         boxShadow="lg"
       >
         <VStack spacing={2} textAlign="center">
-          <Heading size="lg">Définir un nouveau mot de passe</Heading>
+          <Heading size="lg">Nouveau mot de passe</Heading>
           <Text color="gray.500" fontSize="md">
             Choisissez un mot de passe fort pour accéder à votre compte
           </Text>
         </VStack>
 
-        {submitted && message?.startsWith("Mot") && (
+        {isSuccess && (
           <Alert status="success" borderRadius="md">
             <AlertIcon />
             {message} Vous allez être redirigé...
           </Alert>
         )}
 
-        {!message?.startsWith("Mot") && message && (
-          <Alert status="error" borderRadius="md">
-            <AlertIcon />
-            {message}
-          </Alert>
-        )}
+        {!isSuccess &&
+          validationErrors.map((err, idx) => (
+            <Alert key={idx} status="error" borderRadius="md">
+              <AlertIcon />
+              {err}
+            </Alert>
+          ))}
 
-        {/* Ne pas afficher le formulaire si succès */}
-        {!submitted && (
+        {!isSuccess && (
           <VStack as="form" spacing={4} onSubmit={handleSubmit}>
             <FormControl id="new-password">
               <FormLabel>Nouveau mot de passe</FormLabel>
-              <Input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-              />
+              <InputGroup onMouseLeave={() => setShowPassword(false)}>
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                />
+                <InputRightElement>
+                  <IconButton
+                    variant="ghost"
+                    size="sm"
+                    aria-label={
+                      showPassword
+                        ? "Masquer le mot de passe"
+                        : "Afficher le mot de passe"
+                    }
+                    icon={showPassword ? <VscEyeClosed /> : <VscEye />}
+                    onClick={() => setShowPassword((prev) => !prev)}
+                  />
+                </InputRightElement>
+              </InputGroup>
             </FormControl>
 
             <FormControl id="confirm-password">
               <FormLabel>Confirmer le mot de passe</FormLabel>
-              <Input
-                type="password"
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                placeholder="••••••••"
-              />
+              <InputGroup onMouseLeave={() => setShowConfirm(false)}>
+                <Input
+                  type={showConfirm ? "text" : "password"}
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  placeholder="••••••••"
+                />
+                <InputRightElement>
+                  <IconButton
+                    variant="ghost"
+                    size="sm"
+                    aria-label={
+                      showConfirm
+                        ? "Masquer la confirmation"
+                        : "Afficher la confirmation"
+                    }
+                    icon={showConfirm ? <VscEyeClosed /> : <VscEye />}
+                    onClick={() => setShowConfirm((prev) => !prev)}
+                  />
+                </InputRightElement>
+              </InputGroup>
             </FormControl>
-
-            {(isTooShort || mismatch) && (
-              <Text fontSize="sm" color="red.400">
-                {isTooShort
-                  ? "Le mot de passe doit contenir au moins 8 caractères."
-                  : "Les mots de passe ne correspondent pas."}
-              </Text>
-            )}
 
             <Button
               type="submit"
               colorScheme="blue"
               width="full"
               isLoading={isLoading}
-              isDisabled={mismatch || isTooShort}
+              isDisabled={isTooShort || notComplex || mismatch}
             >
               Mettre à jour
             </Button>
