@@ -107,7 +107,7 @@ const LoginPage = () => {
             <Link
               color="blue.500"
               fontSize="sm"
-              onClick={() => navigate("/forgot-password")}
+              onClick={() => navigate("/password-oublie")}
             >
               Mot de passe oublié ?
             </Link>
@@ -126,7 +126,7 @@ const LoginPage = () => {
           <Divider />
           <Text fontSize="sm" color="gray.600" textAlign="center">
             Nouveau sur Infflunch ?{" "}
-            <Link color="blue.500" onClick={() => navigate("/forgot-password")}>
+            <Link color="blue.500" onClick={() => navigate("/password-oublie")}>
               Active ton compte ici
             </Link>
           </Text>

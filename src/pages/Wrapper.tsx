@@ -25,7 +25,7 @@ const Wrapper = ({ children }: WrapperProps) => {
   }, []);
 
   // ✅ Cas spécial : ne pas bloquer certaines routes
-  if (location.pathname === "/reset-password") {
+  if (location.pathname === "/reinitialiser-password") {
     return <>{children}</>;
   }
 

@@ -7,6 +7,7 @@ import Wrapper from "./pages/Wrapper";
 import AdminWrapper from "./pages/AdminWrapper";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -17,22 +18,26 @@ function App() {
       <Route
         path="/admin/*"
         element={
-          <AdminWrapper>
-            <AdminPage />
-          </AdminWrapper>
+          <ProtectedRoute>
+            <AdminWrapper>
+              <AdminPage />
+            </AdminWrapper>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/user/*"
         element={
-          <Wrapper>
-            <UserPage />
-          </Wrapper>
+          <ProtectedRoute>
+            <Wrapper>
+              <UserPage />
+            </Wrapper>
+          </ProtectedRoute>
         }
       />
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/password-oublie" element={<ForgotPassword />} />
+      <Route path="/reinitialiser-password" element={<ResetPassword />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

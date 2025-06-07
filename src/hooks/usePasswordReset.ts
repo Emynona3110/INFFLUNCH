@@ -14,7 +14,7 @@ const usePasswordReset = () => {
     console.log("Demande de réinitialisation pour :", email);
 
     const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: `${window.location.origin}/reinitialiser-password`,
     });
 
     setIsLoading(false);
