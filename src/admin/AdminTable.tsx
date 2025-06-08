@@ -30,9 +30,14 @@ const AdminTable = ({ tableName, columns }: AdminTableProps) => {
       setLoading(true);
       setError("");
 
+      let orderField = "label";
+      if (tableName === "restaurants") orderField = "name";
+      else if (tableName === "waiting_list") orderField = "email";
+
       const query = supabaseClient
         .from(tableName)
-        .select(columns?.join(",") || "*");
+        .select(columns?.join(",") || "*")
+        .order(orderField);
 
       const { data, error } = await query;
 
@@ -59,6 +64,8 @@ const AdminTable = ({ tableName, columns }: AdminTableProps) => {
       <Text color="gray.500">Aucune donnée dans la table "{tableName}"</Text>
     );
 
+  const visibleColumns = columnNames.filter((col) => col !== "id");
+
   return (
     <Box borderWidth="1px" borderRadius="md" overflow="auto">
       <Table variant="striped" size="sm">
@@ -69,7 +76,7 @@ const AdminTable = ({ tableName, columns }: AdminTableProps) => {
           bg={useColorModeValue("gray.100", "gray.800")}
         >
           <Tr>
-            {columnNames.map((col) => (
+            {visibleColumns.map((col) => (
               <Th key={col}>{col}</Th>
             ))}
           </Tr>
@@ -77,7 +84,7 @@ const AdminTable = ({ tableName, columns }: AdminTableProps) => {
         <Tbody>
           {data.map((row, idx) => (
             <Tr key={idx}>
-              {columnNames.map((col) => {
+              {visibleColumns.map((col) => {
                 const value = row[col];
                 const isImage =
                   typeof value === "string" &&
