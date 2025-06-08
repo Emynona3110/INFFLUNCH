@@ -14,7 +14,7 @@ import RestaurantRating from "./StarRating";
 import TagsList from "./TagsList";
 import LikeButton from "./LikeButton";
 import DistanceToCompany from "./Distance";
-import noImage from "../assets/no-image.png";
+import noImage from "../assets/no-image.jpg";
 import RestaurantBadges from "./RestaurantBadges";
 
 interface RestaurantCardProps {
@@ -35,7 +35,7 @@ const RestaurantCard = ({ restaurant, topRated = [] }: RestaurantCardProps) => {
     >
       <Box height="200px" overflow="hidden" position="relative">
         <Image
-          src={restaurant.image === "" ? noImage : restaurant.image}
+          src={restaurant.image === null ? noImage : restaurant.image}
           alt={restaurant.name}
           boxSize="100%"
           objectFit="cover"
