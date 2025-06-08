@@ -15,70 +15,135 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 import supabaseClient from "../../services/supabaseClient";
-import useBadges from "../../hooks/useBadges";
 
 interface BadgeDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  initialData?: { id: number; label: string };
 }
 
-const BadgeDialog = ({ isOpen, onClose, onSuccess }: BadgeDialogProps) => {
+const BadgeDialog = ({
+  isOpen,
+  onClose,
+  onSuccess,
+  initialData,
+}: BadgeDialogProps) => {
   const cancelRef = useRef<HTMLButtonElement>(null);
   const [label, setLabel] = useState("");
+  const [original, setOriginal] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const toast = useToast();
 
-  const { data: existingBadges = [] } = useBadges();
-
   useEffect(() => {
-    if (!isOpen) {
-      setLabel("");
-    }
-  }, [isOpen]);
-
-  const capitalizeWords = (input: string) => {
-    return input.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = capitalizeWords(e.target.value);
+    const formatted = initialData?.label ? formatLabel(initialData.label) : "";
     setLabel(formatted);
-  };
+    setOriginal(formatted);
+  }, [isOpen, initialData]);
+
+  const formatLabel = (value: string) =>
+    value
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ")
+      .trim();
 
   const handleSubmit = async () => {
-    const trimmed = label.trim();
-    if (!trimmed) return;
+    const formatted = formatLabel(label);
 
-    const formatted = capitalizeWords(trimmed);
+    if (!formatted) return;
 
-    const exists = existingBadges.some(
-      (badge) => badge.label.toLowerCase() === formatted.toLowerCase()
-    );
+    setIsSubmitting(true);
 
-    if (exists) {
+    if (initialData) {
+      if (formatted === original) {
+        toast({
+          title: "Aucune modification",
+          description: "Les données étaient identiques.",
+          status: "info",
+          duration: 4000,
+          isClosable: true,
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      const { error: updateError } = await supabaseClient
+        .from("badges")
+        .update({ label: formatted })
+        .eq("id", initialData.id);
+
+      if (updateError) {
+        toast({
+          title: "Erreur",
+          description: updateError.message,
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      const { data: updated, error: fetchError } = await supabaseClient
+        .from("badges")
+        .select("label")
+        .eq("id", initialData.id)
+        .maybeSingle();
+
+      setIsSubmitting(false);
+
+      if (fetchError || !updated || formatLabel(updated.label) === original) {
+        toast({
+          title: "Aucune modification détectée",
+          description: "L'enregistrement n'a pas changé dans la base.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+        return;
+      }
+
       toast({
-        title: "Badge déjà existant",
-        description: `Le badge "${formatted}" existe déjà.`,
+        title: "Badge modifié",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+
+      onSuccess?.();
+      onClose();
+      return;
+    }
+
+    // Création : vérifier s’il existe déjà
+    const { data: existing } = await supabaseClient
+      .from("badges")
+      .select("label")
+      .eq("label", formatted);
+
+    if (existing && existing.length > 0) {
+      toast({
+        title: "Badge existant",
+        description: "Un badge avec ce nom existe déjà.",
         status: "warning",
         duration: 4000,
         isClosable: true,
       });
+      setIsSubmitting(false);
       return;
     }
 
-    setIsSubmitting(true);
-
-    const { error } = await supabaseClient
+    const { error: insertError } = await supabaseClient
       .from("badges")
       .insert({ label: formatted });
 
     setIsSubmitting(false);
 
-    if (error) {
+    if (insertError) {
       toast({
-        title: "Erreur lors de l'ajout",
-        description: error.message,
+        title: "Erreur d'ajout",
+        description: insertError.message,
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -88,13 +153,12 @@ const BadgeDialog = ({ isOpen, onClose, onSuccess }: BadgeDialogProps) => {
 
     toast({
       title: "Badge ajouté",
-      description: `Le badge "${formatted}" a été ajouté avec succès.`,
       status: "success",
       duration: 3000,
       isClosable: true,
     });
 
-    if (onSuccess) onSuccess();
+    onSuccess?.();
     onClose();
   };
 
@@ -106,20 +170,18 @@ const BadgeDialog = ({ isOpen, onClose, onSuccess }: BadgeDialogProps) => {
       isCentered
     >
       <AlertDialogOverlay />
-      <AlertDialogContent
-        bg={useColorModeValue("white", "gray.900")}
-        mx={{ base: 4, md: "auto" }}
-        maxW={{ base: "100%", md: "lg" }}
-      >
-        <AlertDialogHeader>Ajouter un badge</AlertDialogHeader>
+      <AlertDialogContent bg={useColorModeValue("white", "gray.900")}>
+        <AlertDialogHeader>
+          {initialData ? "Modifier un badge" : "Ajouter un badge"}
+        </AlertDialogHeader>
         <AlertDialogCloseButton />
         <AlertDialogBody>
           <FormControl>
-            <FormLabel fontWeight="bold">Libellé</FormLabel>
+            <FormLabel>Label</FormLabel>
             <Input
               value={label}
-              onChange={handleChange}
-              placeholder="Nouveau badge"
+              onChange={(e) => setLabel(formatLabel(e.target.value))}
+              placeholder="ex: Local"
             />
           </FormControl>
         </AlertDialogBody>
@@ -132,9 +194,11 @@ const BadgeDialog = ({ isOpen, onClose, onSuccess }: BadgeDialogProps) => {
             ml={3}
             onClick={handleSubmit}
             isLoading={isSubmitting}
-            isDisabled={!label.trim()}
+            isDisabled={
+              !label.trim() || (initialData && formatLabel(label) === original)
+            }
           >
-            Ajouter
+            {initialData ? "Modifier" : "Ajouter"}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

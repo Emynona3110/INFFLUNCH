@@ -15,70 +15,120 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 import supabaseClient from "../../services/supabaseClient";
-import useTags from "../../hooks/useTags";
 
 interface TagDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  initialData?: { id: number; label: string };
 }
 
-const TagDialog = ({ isOpen, onClose, onSuccess }: TagDialogProps) => {
+const TagDialog = ({
+  isOpen,
+  onClose,
+  onSuccess,
+  initialData,
+}: TagDialogProps) => {
   const cancelRef = useRef<HTMLButtonElement>(null);
   const [label, setLabel] = useState("");
+  const [original, setOriginal] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const toast = useToast();
 
-  const { data: existingTags = [] } = useTags();
-
   useEffect(() => {
-    if (!isOpen) {
-      setLabel("");
-    }
-  }, [isOpen]);
-
-  const capitalizeWords = (input: string) => {
-    return input.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = capitalizeWords(e.target.value);
+    const formatted = initialData?.label ? formatLabel(initialData.label) : "";
     setLabel(formatted);
-  };
+    setOriginal(formatted);
+  }, [isOpen, initialData]);
+
+  const formatLabel = (input: string) =>
+    input
+      .split(" ")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(" ")
+      .trim();
 
   const handleSubmit = async () => {
-    const trimmed = label.trim();
-    if (!trimmed) return;
+    const formatted = formatLabel(label);
 
-    const formatted = capitalizeWords(trimmed);
+    if (!formatted) return;
 
-    const exists = existingTags.some(
-      (tag) => tag.label.toLowerCase() === formatted.toLowerCase()
-    );
+    if (initialData) {
+      if (formatted === original) {
+        toast({
+          title: "Aucune modification",
+          description: "Les données étaient identiques.",
+          status: "info",
+          duration: 4000,
+          isClosable: true,
+        });
+        return;
+      }
 
-    if (exists) {
+      setIsSubmitting(true);
+
+      const { error: updateError } = await supabaseClient
+        .from("tags")
+        .update({ label: formatted })
+        .eq("id", initialData.id);
+
+      if (updateError) {
+        setIsSubmitting(false);
+        toast({
+          title: "Erreur",
+          description: updateError.message,
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+        return;
+      }
+
+      // Relecture de l'élément pour vérifier la modification
+      const { data: updated, error: fetchError } = await supabaseClient
+        .from("tags")
+        .select("label")
+        .eq("id", initialData.id)
+        .maybeSingle();
+
+      setIsSubmitting(false);
+
+      if (fetchError || !updated || formatLabel(updated.label) === original) {
+        toast({
+          title: "Aucune modification détectée",
+          description: "L'enregistrement n'a pas changé dans la base.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+        return;
+      }
+
       toast({
-        title: "Tag déjà existant",
-        description: `Le tag "${formatted}" existe déjà.`,
-        status: "warning",
-        duration: 4000,
+        title: "Tag modifié",
+        status: "success",
+        duration: 3000,
         isClosable: true,
       });
+
+      onSuccess?.();
+      onClose();
       return;
     }
 
+    // Ajout d’un nouveau tag
     setIsSubmitting(true);
 
-    const { error } = await supabaseClient
+    const { error: insertError } = await supabaseClient
       .from("tags")
       .insert({ label: formatted });
 
     setIsSubmitting(false);
 
-    if (error) {
+    if (insertError) {
       toast({
-        title: "Erreur lors de l'ajout",
-        description: error.message,
+        title: "Erreur",
+        description: insertError.message,
         status: "error",
         duration: 5000,
         isClosable: true,
@@ -88,13 +138,12 @@ const TagDialog = ({ isOpen, onClose, onSuccess }: TagDialogProps) => {
 
     toast({
       title: "Tag ajouté",
-      description: `Le tag "${formatted}" a été ajouté avec succès.`,
       status: "success",
       duration: 3000,
       isClosable: true,
     });
 
-    if (onSuccess) onSuccess();
+    onSuccess?.();
     onClose();
   };
 
@@ -106,20 +155,18 @@ const TagDialog = ({ isOpen, onClose, onSuccess }: TagDialogProps) => {
       isCentered
     >
       <AlertDialogOverlay />
-      <AlertDialogContent
-        bg={useColorModeValue("white", "gray.900")}
-        mx={{ base: 4, md: "auto" }}
-        maxW={{ base: "100%", md: "lg" }}
-      >
-        <AlertDialogHeader>Ajouter un tag</AlertDialogHeader>
+      <AlertDialogContent bg={useColorModeValue("white", "gray.900")}>
+        <AlertDialogHeader>
+          {initialData ? "Modifier un tag" : "Ajouter un tag"}
+        </AlertDialogHeader>
         <AlertDialogCloseButton />
         <AlertDialogBody>
           <FormControl>
-            <FormLabel fontWeight="bold">Libellé</FormLabel>
+            <FormLabel>Label</FormLabel>
             <Input
               value={label}
-              onChange={handleChange}
-              placeholder="Nouveau tag"
+              onChange={(e) => setLabel(formatLabel(e.target.value))}
+              placeholder="ex: Végétarien"
             />
           </FormControl>
         </AlertDialogBody>
@@ -132,9 +179,11 @@ const TagDialog = ({ isOpen, onClose, onSuccess }: TagDialogProps) => {
             ml={3}
             onClick={handleSubmit}
             isLoading={isSubmitting}
-            isDisabled={!label.trim()}
+            isDisabled={
+              !label.trim() || (initialData && formatLabel(label) === original)
+            }
           >
-            Ajouter
+            {initialData ? "Modifier" : "Ajouter"}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -9,17 +9,27 @@ import {
   Spinner,
   Text,
   Image,
+  IconButton,
   useColorModeValue,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
+import { FaTrash, FaEdit } from "react-icons/fa";
 import supabaseClient from "../services/supabaseClient";
 
 interface AdminTableProps {
   tableName: string;
   columns?: string[];
+  onEdit?: (data: any) => void;
+  onDelete?: (id: number) => void;
 }
 
-const AdminTable = ({ tableName, columns }: AdminTableProps) => {
+const AdminTable = ({
+  tableName,
+  columns,
+  onEdit,
+  onDelete,
+}: AdminTableProps) => {
+  const bgHeader = useColorModeValue("gray.100", "gray.800"); // <-- Move hook here
   const [data, setData] = useState<any[]>([]);
   const [columnNames, setColumnNames] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -73,12 +83,13 @@ const AdminTable = ({ tableName, columns }: AdminTableProps) => {
           position="sticky"
           top={0}
           zIndex={1}
-          bg={useColorModeValue("gray.100", "gray.800")}
+          bg={bgHeader} // use the stored variable here
         >
           <Tr>
             {visibleColumns.map((col) => (
               <Th key={col}>{col}</Th>
             ))}
+            <Th>Actions</Th>
           </Tr>
         </Thead>
         <Tbody>
@@ -107,6 +118,22 @@ const AdminTable = ({ tableName, columns }: AdminTableProps) => {
                   </Td>
                 );
               })}
+              <Td>
+                <IconButton
+                  aria-label="Modifier"
+                  icon={<FaEdit />}
+                  size="sm"
+                  mr={2}
+                  onClick={() => onEdit?.(row)}
+                />
+                <IconButton
+                  aria-label="Supprimer"
+                  icon={<FaTrash />}
+                  size="sm"
+                  colorScheme="red"
+                  onClick={() => onDelete?.(row.id)}
+                />
+              </Td>
             </Tr>
           ))}
         </Tbody>

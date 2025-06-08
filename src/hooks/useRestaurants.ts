@@ -9,6 +9,8 @@ export type Restaurant = {
   badges: string[];
   reviews: number;
   address: string;
+  phone: string;
+  website: string;
 };
 
 import useData from "./useData";
@@ -44,7 +46,6 @@ const useRestaurants = (restaurantFilters: RestaurantFilters) => {
   let asc = sortOrder === "distance" ? true : false;
   query = query.order(sortOrder, { ascending: asc });
   const result = useData<Restaurant>(query, [restaurantFilters]);
-  // console.log("useRestaurants result:", result);
   return result;
 };
 

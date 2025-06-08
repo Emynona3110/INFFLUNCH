@@ -26,80 +26,165 @@ import { useEffect, useRef, useState } from "react";
 import supabaseClient from "../../services/supabaseClient";
 import useTags from "../../hooks/useTags";
 import useBadges from "../../hooks/useBadges";
-import useLocations from "../../hooks/useLocations";
 import { slugify } from "../../utils/slugify";
+import useLocations from "../../hooks/useLocations";
+import { Restaurant } from "../../hooks/useRestaurants";
 
 interface RestaurantDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  initialData?: Partial<Restaurant>;
 }
-
-const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 const RestaurantDialog = ({
   isOpen,
   onClose,
   onSuccess,
+  initialData,
 }: RestaurantDialogProps) => {
   const cancelRef = useRef<HTMLButtonElement>(null);
+  const toast = useToast();
+
   const [name, setName] = useState("");
   const [image, setImage] = useState("");
   const [address, setAddress] = useState("");
-  const [email, setEmail] = useState("");
+  const [website, setWebsite] = useState("");
   const [phone, setPhone] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [badges, setBadges] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const toast = useToast();
   const { data: availableTags } = useTags();
   const { data: availableBadges } = useBadges();
-  const {
-    data: locationData,
-    loading: locationLoading,
-    error: locationError,
-  } = useLocations(address);
+  const { fetchLocation, loading: locationLoading } = useLocations();
 
   useEffect(() => {
-    if (!isOpen) {
+    if (isOpen && initialData) {
+      setName(initialData.name || "");
+      setImage(initialData.image || "");
+      setAddress(initialData.address || "");
+      setWebsite(initialData.website || "");
+      setPhone(initialData.phone || "");
+      setTags(initialData.tags || []);
+      setBadges(initialData.badges || []);
+    } else if (!isOpen) {
       setName("");
       setImage("");
       setAddress("");
-      setEmail("");
+      setWebsite("");
       setPhone("");
       setTags([]);
       setBadges([]);
     }
-  }, [isOpen]);
+  }, [isOpen, initialData]);
+
+  const formatName = (value: string) =>
+    value
+      .split(" ")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
+
+  const isUnchanged = (existing: Partial<Restaurant>) => {
+    return (
+      existing.name === formatName(name) &&
+      existing.image === (image || null) &&
+      existing.address === address &&
+      existing.website === (website || null) &&
+      existing.phone === (phone || null) &&
+      JSON.stringify(existing.tags?.sort()) === JSON.stringify(tags.sort()) &&
+      JSON.stringify(existing.badges?.sort()) === JSON.stringify(badges.sort())
+    );
+  };
 
   const handleSubmit = async () => {
-    if (!locationData) {
+    const formattedName = formatName(name.trim());
+    const slug = slugify(formattedName);
+
+    setIsSubmitting(true);
+
+    let location;
+    try {
+      location = await fetchLocation(address);
+    } catch (err: any) {
       toast({
-        title: "Adresse invalide",
-        description: locationError || "Impossible de calculer la distance",
+        title: "Erreur d'adresse",
+        description: err.message || "Adresse invalide",
         status: "error",
         duration: 5000,
         isClosable: true,
       });
+      setIsSubmitting(false);
       return;
     }
 
-    setIsSubmitting(true);
+    if (initialData?.id) {
+      const { data: beforeUpdate } = await supabaseClient
+        .from("restaurants")
+        .select("*")
+        .eq("id", initialData.id)
+        .single();
 
-    const formattedName = capitalize(name.trim());
-    const slug = slugify(formattedName);
+      if (beforeUpdate && isUnchanged(beforeUpdate)) {
+        toast({
+          title: "Aucune modification",
+          description: "Les champs sont identiques.",
+          status: "info",
+          duration: 4000,
+          isClosable: true,
+        });
+        setIsSubmitting(false);
+        return;
+      }
 
-    // Vérifier si le restaurant existe déjà
+      const { error } = await supabaseClient
+        .from("restaurants")
+        .update({
+          name: formattedName,
+          slug,
+          image: image || null,
+          address,
+          website: website || null,
+          phone: phone || null,
+          distance: location.distanceKm,
+          distanceLabel: location.formattedDistance,
+          tags: tags.length ? tags : null,
+          badges: badges.length ? badges : null,
+        })
+        .eq("id", initialData.id);
+
+      setIsSubmitting(false);
+
+      if (error) {
+        toast({
+          title: "Erreur",
+          description: error.message,
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+        return;
+      }
+
+      toast({
+        title: "Restaurant modifié",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      onSuccess?.();
+      onClose();
+      return;
+    }
+
     const { data: existing } = await supabaseClient
       .from("restaurants")
-      .select("id")
-      .eq("slug", slug)
-      .single();
+      .select("slug")
+      .eq("slug", slug);
 
-    if (existing) {
+    if (existing && existing.length > 0) {
       toast({
-        title: "Restaurant existant",
+        title: "Nom déjà utilisé",
         description: "Un restaurant avec ce nom existe déjà.",
         status: "warning",
         duration: 4000,
@@ -114,19 +199,19 @@ const RestaurantDialog = ({
       slug,
       image: image || null,
       address,
-      email: email || null,
+      website: website || null,
       phone: phone || null,
-      distance: locationData.distanceKm,
-      distanceLabel: locationData.formattedDistance,
-      tags: tags.length === 0 ? null : tags,
-      badges: badges.length === 0 ? null : badges,
+      distance: location.distanceKm,
+      distanceLabel: location.formattedDistance,
+      tags: tags.length ? tags : null,
+      badges: badges.length ? badges : null,
     });
 
     setIsSubmitting(false);
 
     if (error) {
       toast({
-        title: "Erreur lors de l'ajout",
+        title: "Erreur",
         description: error.message,
         status: "error",
         duration: 5000,
@@ -137,44 +222,34 @@ const RestaurantDialog = ({
 
     toast({
       title: "Restaurant ajouté",
-      description: `"${formattedName}" a été ajouté avec succès.`,
       status: "success",
       duration: 3000,
       isClosable: true,
     });
-
-    if (onSuccess) onSuccess();
+    onSuccess?.();
     onClose();
   };
 
   const renderSelectable = (
     label: string,
     items: string[],
-    setItems: (val: string[]) => void,
+    setItems: (items: string[]) => void,
     available: string[],
     placeholder: string
   ) => (
     <FormControl>
       <FormLabel fontWeight="bold">{label}</FormLabel>
       <Wrap mb={2}>
-        {items.length > 0 ? (
-          items.map((val) => (
-            <WrapItem key={val}>
-              <Tag colorScheme="blue" borderRadius="full">
-                <TagLabel>{val}</TagLabel>
-                <TagCloseButton
-                  onClick={() => setItems(items.filter((t) => t !== val))}
-                />
-              </Tag>
-            </WrapItem>
-          ))
-        ) : (
-          <WrapItem>
-            <Tag colorScheme="gray" variant="subtle">
-              Aucun {label.toLowerCase()}
+        {items.map((item) => (
+          <WrapItem key={item}>
+            <Tag>
+              <TagLabel>{item}</TagLabel>
+              <TagCloseButton
+                onClick={() => setItems(items.filter((t) => t !== item))}
+              />
             </Tag>
           </WrapItem>
-        )}
+        ))}
       </Wrap>
       <Select
         placeholder={placeholder}
@@ -187,11 +262,11 @@ const RestaurantDialog = ({
         value=""
       >
         {available
-          .filter((t) => !items.includes(t))
+          .filter((opt) => !items.includes(opt))
           .sort()
-          .map((t) => (
-            <option key={t} value={t}>
-              {t}
+          .map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
             </option>
           ))}
       </Select>
@@ -211,7 +286,9 @@ const RestaurantDialog = ({
         maxW={{ base: "100%", md: "4xl" }}
         mx={{ base: 4, md: "auto" }}
       >
-        <AlertDialogHeader>Ajouter un restaurant</AlertDialogHeader>
+        <AlertDialogHeader>
+          {initialData ? "Modifier un restaurant" : "Ajouter un restaurant"}
+        </AlertDialogHeader>
         <AlertDialogCloseButton />
         <AlertDialogBody>
           <VStack spacing={6} align="stretch">
@@ -221,8 +298,8 @@ const RestaurantDialog = ({
                   <FormLabel>Nom</FormLabel>
                   <Input
                     value={name}
-                    onChange={(e) => setName(capitalize(e.target.value))}
-                    placeholder="Nouveau Restaurant"
+                    onChange={(e) => setName(formatName(e.target.value))}
+                    placeholder="Nom du restaurant"
                   />
                 </FormControl>
               </GridItem>
@@ -232,7 +309,7 @@ const RestaurantDialog = ({
                   <Input
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
-                    placeholder="Adresse du restaurant"
+                    placeholder="Adresse"
                   />
                 </FormControl>
               </GridItem>
@@ -242,27 +319,27 @@ const RestaurantDialog = ({
                   <Input
                     value={image}
                     onChange={(e) => setImage(e.target.value)}
-                    placeholder="Lien vers l'image"
+                    placeholder="URL de l'image"
                   />
                 </FormControl>
               </GridItem>
-              <GridItem>
+              <GridItem colSpan={2}>
                 <FormControl>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Site web</FormLabel>
                   <Input
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Adresse email"
+                    value={website}
+                    onChange={(e) => setWebsite(e.target.value)}
+                    placeholder="Site web"
                   />
                 </FormControl>
               </GridItem>
-              <GridItem>
+              <GridItem colSpan={2}>
                 <FormControl>
                   <FormLabel>Téléphone</FormLabel>
                   <Input
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="Numéro de téléphone"
+                    placeholder="Téléphone"
                   />
                 </FormControl>
               </GridItem>
@@ -297,7 +374,7 @@ const RestaurantDialog = ({
             isLoading={isSubmitting || locationLoading}
             isDisabled={!name.trim() || !address.trim()}
           >
-            Ajouter
+            {initialData ? "Modifier" : "Ajouter"}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

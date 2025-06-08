@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import L from "leaflet";
 
 interface Coordinates {
@@ -45,52 +45,35 @@ interface LocationResult {
   formattedDistance: string;
 }
 
-const useLocations = (address: string) => {
+const useLocations = () => {
   const [data, setData] = useState<LocationResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!address) {
-      setData(null);
-      setError(null);
-      return;
-    }
-
-    let cancelled = false;
+  const fetchLocation = async (address: string) => {
     setLoading(true);
     setError(null);
 
-    geocodeAddress(address)
-      .then((coords) => {
-        const distanceKm = getDistanceInKm(companyCoords, coords);
-        const formatted =
-          distanceKm >= 1
-            ? `${(Math.round(distanceKm * 10) / 10).toFixed(1)}km`
-            : `${Math.round((distanceKm * 1000) / 10) * 10}m`;
+    try {
+      const coords = await geocodeAddress(address);
+      const distanceKm = getDistanceInKm(companyCoords, coords);
+      const formatted =
+        distanceKm >= 1
+          ? `${(Math.round(distanceKm * 10) / 10).toFixed(1)}km`
+          : `${Math.round((distanceKm * 1000) / 10) * 10}m`;
 
-        if (!cancelled) {
-          setData({ coords, distanceKm, formattedDistance: formatted });
-        }
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          setData(null);
-          setError(err.message || "Erreur lors du géocodage");
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      });
+      setData({ coords, distanceKm, formattedDistance: formatted });
+      return { coords, distanceKm, formattedDistance: formatted };
+    } catch (err: any) {
+      setError(err.message || "Erreur lors du géocodage");
+      setData(null);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return () => {
-      cancelled = true;
-    };
-  }, [address]);
-
-  return { data, loading, error };
+  return { data, loading, error, fetchLocation };
 };
 
 export default useLocations;
