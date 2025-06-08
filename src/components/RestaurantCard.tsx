@@ -39,7 +39,7 @@ const RestaurantCard = ({ restaurant, topRated = [] }: RestaurantCardProps) => {
           alt={restaurant.name}
           boxSize="100%"
           objectFit="cover"
-          transition="transform 0.5s ease-in-out"
+          transition="transform 0.3s ease-in-out"
           _groupHover={{
             transform: "scale(1.02)",
           }}
