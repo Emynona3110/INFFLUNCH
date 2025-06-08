@@ -14,7 +14,11 @@ import {
   Link,
   HStack,
   Divider,
+  InputGroup,
+  InputRightElement,
+  IconButton,
 } from "@chakra-ui/react";
+import { VscEye, VscEyeClosed } from "react-icons/vsc";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import supabaseClient from "../services/supabaseClient";
@@ -24,6 +28,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (event: React.FormEvent<HTMLDivElement>) => {
@@ -93,13 +98,28 @@ const LoginPage = () => {
 
           <FormControl id="password">
             <FormLabel>Mot de passe</FormLabel>
-            <Input
-              type="password"
-              value={password}
-              placeholder="••••••••"
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <InputGroup onMouseLeave={() => setShowPassword(false)}>
+              <Input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                placeholder="••••••••"
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <InputRightElement>
+                <IconButton
+                  variant="ghost"
+                  size="sm"
+                  aria-label={
+                    showPassword
+                      ? "Masquer le mot de passe"
+                      : "Afficher le mot de passe"
+                  }
+                  icon={showPassword ? <VscEyeClosed /> : <VscEye />}
+                  onClick={() => setShowPassword((prev) => !prev)}
+                />
+              </InputRightElement>
+            </InputGroup>
           </FormControl>
 
           <HStack justify="space-between" width="100%">
@@ -122,7 +142,6 @@ const LoginPage = () => {
             Se connecter
           </Button>
 
-          {/* Nouveau lien pour les nouveaux utilisateurs */}
           <Divider />
           <Text fontSize="sm" color="gray.600" textAlign="center">
             Nouveau sur Infflunch ?{" "}
