@@ -47,11 +47,19 @@ interface LocationResult {
 
 const useLocations = (address: string) => {
   const [data, setData] = useState<LocationResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!address) return;
+    if (!address) {
+      setData(null);
+      setError(null);
+      return;
+    }
 
     let cancelled = false;
+    setLoading(true);
+    setError(null);
 
     geocodeAddress(address)
       .then((coords) => {
@@ -65,8 +73,16 @@ const useLocations = (address: string) => {
           setData({ coords, distanceKm, formattedDistance: formatted });
         }
       })
-      .catch(() => {
-        if (!cancelled) setData(null);
+      .catch((err) => {
+        if (!cancelled) {
+          setData(null);
+          setError(err.message || "Erreur lors du géocodage");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
       });
 
     return () => {
@@ -74,7 +90,7 @@ const useLocations = (address: string) => {
     };
   }, [address]);
 
-  return data;
+  return { data, loading, error };
 };
 
 export default useLocations;

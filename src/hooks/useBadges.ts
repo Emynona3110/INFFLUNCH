@@ -7,7 +7,7 @@ import useData from "./useData";
 import supabaseClient from "../services/supabaseClient";
 
 const useBadges = () => {
-  let query = supabaseClient.from("tags").select();
+  const query = supabaseClient.from("badges").select().order("label");
 
   return useData<Badge>(query, []);
 };
