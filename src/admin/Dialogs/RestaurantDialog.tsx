@@ -85,6 +85,11 @@ const RestaurantDialog = ({
       .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
       .join(" ");
 
+  const formatPhoneNumber = (value: string) => {
+    const digitsOnly = value.replace(/\D/g, "").slice(0, 10);
+    return digitsOnly.replace(/(\d{2})(?=\d)/g, "$1 ").trim();
+  };
+
   const isUnchanged = (existing: Partial<Restaurant>) => {
     return (
       existing.name === formatName(name) &&
@@ -338,7 +343,9 @@ const RestaurantDialog = ({
                   <FormLabel>Téléphone</FormLabel>
                   <Input
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    onChange={(e) =>
+                      setPhone(formatPhoneNumber(e.target.value))
+                    }
                     placeholder="Téléphone"
                   />
                 </FormControl>
