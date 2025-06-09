@@ -11,10 +11,17 @@ import {
   Image,
   IconButton,
   useColorModeValue,
+  Center,
+  HStack,
+  Link,
+  Tag,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { FaTrash, FaEdit } from "react-icons/fa";
+import { BsBan } from "react-icons/bs";
 import supabaseClient from "../services/supabaseClient";
+import badgeVegetarian from "../assets/Vegetarian.png";
+import badgeTooGoodToGo from "../assets/TooGoodToGo.png";
 
 interface AdminTableProps {
   tableName: string;
@@ -29,11 +36,30 @@ const AdminTable = ({
   onEdit,
   onDelete,
 }: AdminTableProps) => {
-  const bgHeader = useColorModeValue("gray.100", "gray.800"); // <-- Move hook here
+  const bgHeader = useColorModeValue("gray.100", "gray.800");
+  const rowBg = useColorModeValue("white", "gray.900");
+
   const [data, setData] = useState<any[]>([]);
   const [columnNames, setColumnNames] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
+
+  const badgeMap: Record<string, string> = {
+    "Option Végétarienne": badgeVegetarian,
+    TooGoodToGo: badgeTooGoodToGo,
+  };
+
+  const isBadgeColumn = (col: string) =>
+    col.toLowerCase() === "badges" || col.toLowerCase().includes("badge");
+
+  const cleanUrlText = (url: string) => {
+    try {
+      const { hostname } = new URL(url);
+      return hostname.replace(/^www\./, "");
+    } catch {
+      return url;
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -67,44 +93,78 @@ const AdminTable = ({
     fetchData();
   }, [tableName, columns]);
 
-  if (loading) return <Spinner />;
-  if (error) return <Text color="red.500">Erreur : {error}</Text>;
+  if (loading)
+    return (
+      <Center h="60vh">
+        <Spinner size="xl" />
+      </Center>
+    );
+
+  if (error)
+    return (
+      <Text color="red.500" textAlign="center">
+        Erreur : {error}
+      </Text>
+    );
+
   if (data.length === 0)
     return (
-      <Text color="gray.500">Aucune donnée dans la table "{tableName}"</Text>
+      <Text color="gray.500" textAlign="center">
+        Aucune donnée dans la table "{tableName}"
+      </Text>
     );
 
   const visibleColumns = columnNames.filter((col) => col !== "id");
 
   return (
-    <Box borderWidth="1px" borderRadius="md" overflow="auto">
+    <Box borderWidth="1px" borderRadius="md" overflowX="auto">
       <Table variant="striped" size="sm">
-        <Thead
-          position="sticky"
-          top={0}
-          zIndex={1}
-          bg={bgHeader} // use the stored variable here
-        >
+        <Thead>
           <Tr>
             {visibleColumns.map((col) => (
-              <Th key={col}>{col}</Th>
+              <Th
+                key={col}
+                textAlign="left"
+                px={2}
+                position="sticky"
+                top={0}
+                zIndex={4}
+                bg={bgHeader}
+              >
+                {col}
+              </Th>
             ))}
-            <Th>Actions</Th>
+            <Th
+              textAlign="right"
+              px={2}
+              position="sticky"
+              top={0}
+              right={0}
+              zIndex={5} // plus élevé que le zIndex des lignes
+              bg={bgHeader}
+            >
+              Actions
+            </Th>
           </Tr>
         </Thead>
         <Tbody>
           {data.map((row, idx) => (
-            <Tr key={idx}>
+            <Tr key={idx} bg={rowBg}>
               {visibleColumns.map((col) => {
                 const value = row[col];
                 const isImage =
                   typeof value === "string" &&
                   (value.startsWith("http") || value.startsWith("/")) &&
                   col.toLowerCase().includes("image");
+                const isWebsite =
+                  typeof value === "string" &&
+                  col.toLowerCase().includes("website");
 
                 return (
-                  <Td key={col}>
-                    {isImage ? (
+                  <Td key={col} textAlign="left" px={2} bg={rowBg}>
+                    {value === null || value === undefined || value === "" ? (
+                      <BsBan />
+                    ) : isImage ? (
                       <Image
                         src={value}
                         alt={col}
@@ -112,27 +172,69 @@ const AdminTable = ({
                         objectFit="cover"
                         borderRadius="md"
                       />
+                    ) : isWebsite ? (
+                      <Link
+                        href={value}
+                        isExternal
+                        color="blue.500"
+                        textDecoration="underline"
+                      >
+                        {cleanUrlText(value)}
+                      </Link>
+                    ) : Array.isArray(value) &&
+                      value.every((v) => typeof v === "string") ? (
+                      isBadgeColumn(col) ? (
+                        <HStack spacing={1}>
+                          {value.map(
+                            (badge: string) =>
+                              badgeMap[badge] && (
+                                <Image
+                                  key={badge}
+                                  src={badgeMap[badge]}
+                                  boxSize="16px"
+                                  objectFit="contain"
+                                />
+                              )
+                          )}
+                        </HStack>
+                      ) : (
+                        <HStack spacing={1}>
+                          {value.map((tag: string, i: number) => (
+                            <Tag key={i} size="sm" colorScheme="blue">
+                              {tag}
+                            </Tag>
+                          ))}
+                        </HStack>
+                      )
                     ) : (
                       String(value)
                     )}
                   </Td>
                 );
               })}
-              <Td>
-                <IconButton
-                  aria-label="Modifier"
-                  icon={<FaEdit />}
-                  size="sm"
-                  mr={2}
-                  onClick={() => onEdit?.(row)}
-                />
-                <IconButton
-                  aria-label="Supprimer"
-                  icon={<FaTrash />}
-                  size="sm"
-                  colorScheme="red"
-                  onClick={() => onDelete?.(row.id)}
-                />
+              <Td
+                textAlign="right"
+                px={2}
+                position="sticky"
+                right={0}
+                zIndex={3} // inférieur au header d'action
+                bg={rowBg}
+              >
+                <HStack justify="flex-end">
+                  <IconButton
+                    aria-label="Modifier"
+                    icon={<FaEdit />}
+                    size="sm"
+                    onClick={() => onEdit?.(row)}
+                  />
+                  <IconButton
+                    aria-label="Supprimer"
+                    icon={<FaTrash />}
+                    size="sm"
+                    colorScheme="red"
+                    onClick={() => onDelete?.(row.id)}
+                  />
+                </HStack>
               </Td>
             </Tr>
           ))}
