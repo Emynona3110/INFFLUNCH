@@ -6,9 +6,9 @@ import PageNotFound from "./pages/PageNotFound";
 import Wrapper from "./pages/Wrapper";
 import AdminWrapper from "./pages/AdminWrapper";
 import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
 import ProtectedRoute from "./components/ProtectedRoute";
 import JoinWaitingList from "./pages/JoinWaitingList";
+import ConfirmURLWrapper from "./pages/ConfirmURLWrapper";
 
 function App() {
   return (
@@ -38,7 +38,8 @@ function App() {
       />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/password-oublie" element={<ForgotPassword />} />
-      <Route path="/reinitialiser-password" element={<ResetPassword />} />
+      <Route path="/reinitialiser-password" element={<ConfirmURLWrapper />} />
+      <Route path="/activation" element={<ConfirmURLWrapper />} />
       <Route path="/activation" element={<JoinWaitingList />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>

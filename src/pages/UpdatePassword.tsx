@@ -24,7 +24,7 @@ import { useNavigate } from "react-router-dom";
 import useSession from "../hooks/useSession";
 import useChangePassword from "../hooks/useChangePassword";
 
-const ResetPassword = () => {
+const UpdatePassword = () => {
   const { sessionData, loading } = useSession();
   const navigate = useNavigate();
   const toast = useToast();
@@ -141,7 +141,11 @@ const ResetPassword = () => {
         boxShadow="lg"
       >
         <VStack spacing={2} textAlign="center">
-          <Heading size="lg">Nouveau mot de passe</Heading>
+          <Heading size="lg">
+            {window.location.pathname === "/reinitialiser-password"
+              ? "Réinitialiser le mot de passe"
+              : "Nouveau mot de passe"}
+          </Heading>
           <Text color="gray.500" fontSize="md">
             Choisissez un mot de passe fort pour accéder à votre compte
           </Text>
@@ -165,7 +169,7 @@ const ResetPassword = () => {
         {!isSuccess && (
           <VStack as="form" spacing={4} onSubmit={handleSubmit}>
             <FormControl id="new-password">
-              <FormLabel>Nouveau mot de passe</FormLabel>
+              <FormLabel> Mot de passe</FormLabel>
               <InputGroup onMouseLeave={() => setShowPassword(false)}>
                 <Input
                   type={showPassword ? "text" : "password"}
@@ -221,7 +225,9 @@ const ResetPassword = () => {
               isLoading={isLoading}
               isDisabled={isTooShort || notComplex || mismatch}
             >
-              Mettre à jour
+              {window.location.pathname === "/reinitialiser-password"
+                ? "Mettre à jour"
+                : "Activer mon compte"}
             </Button>
           </VStack>
         )}
@@ -230,4 +236,4 @@ const ResetPassword = () => {
   );
 };
 
-export default ResetPassword;
+export default UpdatePassword;
