@@ -67,7 +67,7 @@ const AdminTable = ({
       setError("");
 
       let orderField = "label";
-      if (tableName === "restaurants") orderField = "name";
+      if (tableName === "restaurants") orderField = "slug";
       else if (tableName === "waiting_list") orderField = "email";
 
       const query = supabaseClient

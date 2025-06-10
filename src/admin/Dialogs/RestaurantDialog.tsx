@@ -82,7 +82,17 @@ const RestaurantDialog = ({
   const formatName = (value: string) =>
     value
       .split(" ")
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .map((w) => {
+        if (/^\p{L}'/u.test(w) && w.length > 2) {
+          return (
+            w.charAt(0).toUpperCase() +
+            "'" +
+            w.charAt(2).toUpperCase() +
+            w.slice(3)
+          );
+        }
+        return w.charAt(0).toUpperCase() + w.slice(1);
+      })
       .join(" ");
 
   const formatPhoneNumber = (value: string) => {
