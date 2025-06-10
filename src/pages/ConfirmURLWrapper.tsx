@@ -69,7 +69,7 @@ const ConfirmURLWrapper = () => {
             fontSize="sm"
             textAlign="center"
           >
-            /inscription à la connexion
+            Retour à la connexion
           </Link>
         </Box>
       </Center>
