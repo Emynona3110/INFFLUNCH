@@ -14,6 +14,8 @@ import { useState } from "react";
 import { slugify } from "../utils/slugify";
 import { SortOrder } from "../components/SortSelector";
 import MyAccount from "../sections/MyAccount";
+import About from "./About";
+import Favorites from "./Favorites";
 
 export const userSections = [
   "Restaurants",
@@ -112,11 +114,8 @@ const UserPage = () => {
                 }
               />
               <Route path="mon-compte" element={<MyAccount />} />
-              <Route path="favoris" element={<Box p={4}>Vos favoris</Box>} />
-              <Route
-                path="a-propos"
-                element={<Box p={4}>À propos de nous</Box>}
-              />
+              <Route path="favoris" element={<Favorites />} />
+              <Route path="a-propos" element={<About />} />
               <Route path="*" element={<Beeeh />} />
             </Routes>
           </Box>
