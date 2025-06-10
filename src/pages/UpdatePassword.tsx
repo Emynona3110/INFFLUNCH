@@ -20,15 +20,17 @@ import {
 } from "@chakra-ui/react";
 import { VscEye, VscEyeClosed } from "react-icons/vsc";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import useSession from "../hooks/useSession";
 import useChangePassword from "../hooks/useChangePassword";
 
 const UpdatePassword = () => {
   const { sessionData, loading } = useSession();
   const navigate = useNavigate();
+  const location = useLocation();
   const toast = useToast();
   const { updatePassword, isLoading, message } = useChangePassword(() => {});
+
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -36,16 +38,15 @@ const UpdatePassword = () => {
   const [showConfirm, setShowConfirm] = useState(false);
 
   const isTooShort = password.length < 8;
-
   const isComplexEnough = (pwd: string) =>
     /[A-Z]/.test(pwd) &&
     /[a-z]/.test(pwd) &&
     /[0-9]/.test(pwd) &&
     /[^A-Za-z0-9]/.test(pwd);
-
   const notComplex = password.length >= 8 && !isComplexEnough(password);
   const mismatch = confirm.length > 0 && password !== confirm;
 
+  const isValid = !isTooShort && !notComplex && !mismatch;
   const isSuccess = submitted && message?.startsWith("Mot");
 
   const validationErrors: string[] = [];
@@ -65,7 +66,7 @@ const UpdatePassword = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLDivElement>) => {
     e.preventDefault();
-    if (isTooShort || notComplex || mismatch) return;
+    if (!isValid) return;
     await updatePassword(password);
     setSubmitted(true);
   };
@@ -115,12 +116,14 @@ const UpdatePassword = () => {
             Session invalide ou expirée.
           </Text>
           <Text color="gray.500" mt={2}>
-            Merci de redemander un nouveau lien de réinitialisation.
+            Merci de redemander un nouveau lien.
           </Text>
         </Box>
       </Center>
     );
   }
+
+  const isResetFlow = location.pathname === "/reinitialiser-password";
 
   return (
     <Box
@@ -142,9 +145,9 @@ const UpdatePassword = () => {
       >
         <VStack spacing={2} textAlign="center">
           <Heading size="lg">
-            {window.location.pathname === "/reinitialiser-password"
-              ? "Réinitialiser le mot de passe"
-              : "Nouveau mot de passe"}
+            {isResetFlow
+              ? "Nouveau mot de passe"
+              : "Définir votre mot de passe"}
           </Heading>
           <Text color="gray.500" fontSize="md">
             Choisissez un mot de passe fort pour accéder à votre compte
@@ -169,7 +172,7 @@ const UpdatePassword = () => {
         {!isSuccess && (
           <VStack as="form" spacing={4} onSubmit={handleSubmit}>
             <FormControl id="new-password">
-              <FormLabel> Mot de passe</FormLabel>
+              <FormLabel>Mot de passe</FormLabel>
               <InputGroup onMouseLeave={() => setShowPassword(false)}>
                 <Input
                   type={showPassword ? "text" : "password"}
@@ -223,11 +226,9 @@ const UpdatePassword = () => {
               colorScheme="blue"
               width="full"
               isLoading={isLoading}
-              isDisabled={isTooShort || notComplex || mismatch}
+              isDisabled={!isValid}
             >
-              {window.location.pathname === "/reinitialiser-password"
-                ? "Mettre à jour"
-                : "Activer mon compte"}
+              {isResetFlow ? "Mettre à jour" : "Activer mon compte"}
             </Button>
           </VStack>
         )}

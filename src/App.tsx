@@ -39,8 +39,8 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/password-oublie" element={<ForgotPassword />} />
       <Route path="/reinitialiser-password" element={<ConfirmURLWrapper />} />
-      <Route path="/activation" element={<ConfirmURLWrapper />} />
-      <Route path="/activation" element={<JoinWaitingList />} />
+      <Route path="/authentification" element={<ConfirmURLWrapper />} />
+      <Route path="/inscription" element={<JoinWaitingList />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

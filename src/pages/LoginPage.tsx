@@ -145,7 +145,7 @@ const LoginPage = () => {
           <Divider />
           <Text fontSize="sm" color="gray.600" textAlign="center">
             Nouveau sur Infflunch ?{" "}
-            <Link color="blue.500" onClick={() => navigate("/activation")}>
+            <Link color="blue.500" onClick={() => navigate("/inscription")}>
               Inscrivez-vous ici
             </Link>
           </Text>
