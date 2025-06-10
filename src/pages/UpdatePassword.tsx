@@ -17,6 +17,7 @@ import {
   InputRightElement,
   IconButton,
   useToast,
+  Link,
 } from "@chakra-ui/react";
 import { VscEye, VscEyeClosed } from "react-icons/vsc";
 import { useState, useEffect } from "react";
@@ -115,9 +116,14 @@ const UpdatePassword = () => {
           <Text fontSize="lg" fontWeight="semibold">
             Session invalide ou expirée.
           </Text>
-          <Text color="gray.500" mt={2}>
-            Merci de redemander un nouveau lien.
-          </Text>
+          <Link
+            onClick={() => navigate("/login")}
+            color="blue.500"
+            fontSize="sm"
+            textAlign="center"
+          >
+            Retour à la connexion
+          </Link>
         </Box>
       </Center>
     );

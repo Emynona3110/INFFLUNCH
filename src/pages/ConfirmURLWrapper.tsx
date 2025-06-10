@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
-import { Spinner, Center, Text, Box } from "@chakra-ui/react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Spinner, Center, Text, Box, Link } from "@chakra-ui/react";
 import UpdatePassword from "./UpdatePassword";
 import supabaseClient from "../services/supabaseClient";
 
@@ -8,6 +8,7 @@ const ConfirmURLWrapper = () => {
   const [isVerifying, setIsVerifying] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const hashParams = new URLSearchParams(
@@ -62,9 +63,14 @@ const ConfirmURLWrapper = () => {
           <Text fontSize="lg" fontWeight="semibold">
             {error}
           </Text>
-          <Text color="gray.500" mt={2}>
-            Merci de redemander une nouvelle confirmation.
-          </Text>
+          <Link
+            onClick={() => navigate("/login")}
+            color="blue.500"
+            fontSize="sm"
+            textAlign="center"
+          >
+            /inscription à la connexion
+          </Link>
         </Box>
       </Center>
     );
