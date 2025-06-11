@@ -308,7 +308,7 @@ const RestaurantDialog = ({
         <AlertDialogBody>
           <VStack spacing={6} align="stretch">
             <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
-              <GridItem>
+              <GridItem colSpan={{ base: 2, md: 1 }}>
                 <FormControl>
                   <FormLabel>Nom</FormLabel>
                   <Input
@@ -318,7 +318,7 @@ const RestaurantDialog = ({
                   />
                 </FormControl>
               </GridItem>
-              <GridItem>
+              <GridItem colSpan={{ base: 2, md: 1 }}>
                 <FormControl>
                   <FormLabel>Adresse</FormLabel>
                   <Input
