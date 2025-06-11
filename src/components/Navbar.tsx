@@ -48,7 +48,6 @@ const Navbar = ({
           display="flex"
           alignItems="center"
           onClick={() => {
-            //reset filters
             onFilterChange(defaultRestaurantFilters);
             setPage("restaurants");
           }}

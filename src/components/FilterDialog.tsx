@@ -24,6 +24,7 @@ import {
   NumberDecrementStepper,
   Text,
   HStack,
+  Box,
 } from "@chakra-ui/react";
 import { useRef, useState } from "react";
 import { BsFilter } from "react-icons/bs";
@@ -38,6 +39,15 @@ interface FilterDialogProps {
   restaurantFilters: RestaurantFilters;
   onFilterChange: (query: RestaurantFilters) => void;
 }
+
+const hasActiveFilters = (filters: RestaurantFilters) => {
+  return (
+    filters.minRate > 0 ||
+    filters.tags.length > 0 ||
+    filters.badges.length > 0 ||
+    filters.sortOrder !== defaultRestaurantFilters.sortOrder
+  );
+};
 
 const FilterDialog = ({
   restaurantFilters,
@@ -73,12 +83,33 @@ const FilterDialog = ({
 
   return (
     <>
-      <IconButton
-        aria-label="Filtres"
-        icon={<BsFilter size={24} />}
-        onClick={handleOpen}
-        variant="ghost"
-      />
+      <Box position="relative">
+        <IconButton
+          aria-label="Filtres"
+          icon={<BsFilter size={24} />}
+          onClick={handleOpen}
+          variant="ghost"
+        />
+        <AnimatePresence>
+          {hasActiveFilters(restaurantFilters) && (
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0 }}
+              transition={{ duration: 0.2 }}
+              style={{
+                position: "absolute",
+                top: "2px",
+                right: "2px",
+                width: "10px",
+                height: "10px",
+                borderRadius: "50%",
+                backgroundColor: "#4299e1", // Chakra's blue.400
+              }}
+            />
+          )}
+        </AnimatePresence>
+      </Box>
 
       <AlertDialog
         isOpen={isOpen}
@@ -88,14 +119,12 @@ const FilterDialog = ({
         isCentered
       >
         <AlertDialogOverlay />
-
         <AlertDialogContent bg={useColorModeValue("white", "gray.900")}>
           <AlertDialogHeader>Filtres</AlertDialogHeader>
           <AlertDialogCloseButton />
 
           <AlertDialogBody>
             <VStack spacing={4} align="stretch">
-              {/* Tri */}
               <Text fontWeight="bold">Trier par :</Text>
               <Select
                 value={localQuery.sortOrder}
@@ -113,7 +142,6 @@ const FilterDialog = ({
                 <option value="created_at">Ajout récent</option>
               </Select>
 
-              {/* Note minimum */}
               <Text fontWeight="bold">Note minimum :</Text>
               <HStack>
                 <NumberInput
@@ -136,7 +164,6 @@ const FilterDialog = ({
                 <StarRating rating={localQuery.minRate} size="24px" />
               </HStack>
 
-              {/* Tags */}
               <Text fontWeight="bold">Tags :</Text>
               <Wrap>
                 <AnimatePresence initial={false}>
@@ -172,7 +199,6 @@ const FilterDialog = ({
                 </AnimatePresence>
               </Wrap>
 
-              {/* Sélecteur de tags */}
               <Select
                 key={localQuery.tags.join(",")}
                 value=""
@@ -196,7 +222,6 @@ const FilterDialog = ({
                 ))}
               </Select>
 
-              {/* Badges */}
               <Text fontWeight="bold">Badges :</Text>
               <BadgesToggles
                 selected={localQuery.badges}
