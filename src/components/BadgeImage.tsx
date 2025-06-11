@@ -10,7 +10,6 @@ const BadgeImage = (props: ImageProps) => {
       willChange="transform"
       boxSize="24px"
       objectFit="contain"
-      borderRadius="md"
       {...props}
     />
   );

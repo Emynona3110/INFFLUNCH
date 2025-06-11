@@ -1,19 +1,12 @@
 import { Wrap, WrapItem, Tooltip } from "@chakra-ui/react";
 import BadgeImage from "./BadgeImage";
-import badgeVegetarian from "../assets/Vegetarian.png";
-import badgeTooGoodToGo from "../assets/TooGoodToGo.png";
-import iconTopRated from "../assets/TopRated.png";
+import badgeMap, { topRatedIcon } from "../services/badgeMap";
 
 interface RestaurantBadgesProps {
   restaurantId: number;
   badges: string[];
   topRated: { id: number }[];
 }
-
-const badgeMap: Record<string, string> = {
-  "Option Végétarienne": badgeVegetarian,
-  TooGoodToGo: badgeTooGoodToGo,
-};
 
 const RestaurantBadges = ({
   restaurantId,
@@ -54,7 +47,7 @@ const RestaurantBadges = ({
           ]}
         >
           <WrapItem>
-            <BadgeImage src={iconTopRated} alt="Top 3 des mieux notés" />
+            <BadgeImage src={topRatedIcon} alt="Top 3 des mieux notés" />
           </WrapItem>
         </Tooltip>
       )}

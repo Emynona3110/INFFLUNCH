@@ -21,8 +21,7 @@ import { useEffect, useState } from "react";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import { BsBan } from "react-icons/bs";
 import supabaseClient from "../services/supabaseClient";
-import badgeVegetarian from "../assets/Vegetarian.png";
-import badgeTooGoodToGo from "../assets/TooGoodToGo.png";
+import badgeMap from "../services/badgeMap";
 
 interface AdminTableProps {
   tableName: string;
@@ -45,11 +44,6 @@ const AdminTable = ({
   const [columnNames, setColumnNames] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
-
-  const badgeMap: Record<string, string> = {
-    "Option Végétarienne": badgeVegetarian,
-    TooGoodToGo: badgeTooGoodToGo,
-  };
 
   const isBadgeColumn = (col: string) =>
     col.toLowerCase() === "badges" || col.toLowerCase().includes("badge");

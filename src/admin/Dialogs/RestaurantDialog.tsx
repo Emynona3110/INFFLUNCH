@@ -25,10 +25,11 @@ import {
 import { useEffect, useRef, useState } from "react";
 import supabaseClient from "../../services/supabaseClient";
 import useTags from "../../hooks/useTags";
-import useBadges from "../../hooks/useBadges";
 import { slugify } from "../../utils/slugify";
 import useLocations from "../../hooks/useLocations";
 import { Restaurant } from "../../hooks/useRestaurants";
+import BadgesToggles from "../../components/BadgesToggles";
+import badgeMap from "../../services/badgeMap";
 
 interface RestaurantDialogProps {
   isOpen: boolean;
@@ -56,7 +57,6 @@ const RestaurantDialog = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: availableTags } = useTags();
-  const { data: availableBadges } = useBadges();
   const { fetchLocation, loading: locationLoading } = useLocations();
 
   useEffect(() => {
@@ -115,6 +115,10 @@ const RestaurantDialog = ({
   const handleSubmit = async () => {
     const formattedName = formatName(name.trim());
     const slug = slugify(formattedName);
+    const badgeOrder = Object.keys(badgeMap);
+    const orderedBadges = badges.length
+      ? badgeOrder.filter((label) => badges.includes(label))
+      : null;
 
     setIsSubmitting(true);
 
@@ -164,7 +168,7 @@ const RestaurantDialog = ({
           distance: location.distanceKm,
           distanceLabel: location.formattedDistance,
           tags: tags.length ? tags : null,
-          badges: badges.length ? badges : null,
+          badges: orderedBadges,
         })
         .eq("id", initialData.id);
 
@@ -219,7 +223,7 @@ const RestaurantDialog = ({
       distance: location.distanceKm,
       distanceLabel: location.formattedDistance,
       tags: tags.length ? tags : null,
-      badges: badges.length ? badges : null,
+      badges: orderedBadges,
     });
 
     setIsSubmitting(false);
@@ -370,13 +374,10 @@ const RestaurantDialog = ({
                 availableTags?.map((t) => t.label) ?? [],
                 "Choisir un tag"
               )}
-              {renderSelectable(
-                "Badges",
-                badges,
-                setBadges,
-                availableBadges?.map((b) => b.label) ?? [],
-                "Choisir un badge"
-              )}
+              <FormControl>
+                <FormLabel fontWeight="bold">Badges</FormLabel>
+                <BadgesToggles selected={badges} onChange={setBadges} />
+              </FormControl>
             </Grid>
           </VStack>
         </AlertDialogBody>
