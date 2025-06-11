@@ -15,6 +15,7 @@ import {
   HStack,
   Link,
   Tag,
+  useBreakpointValue,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { FaTrash, FaEdit } from "react-icons/fa";
@@ -38,6 +39,7 @@ const AdminTable = ({
 }: AdminTableProps) => {
   const bgHeader = useColorModeValue("gray.100", "gray.800");
   const rowBg = useColorModeValue("white", "gray.900");
+  const isMobile = useBreakpointValue({ base: true, md: false });
 
   const [data, setData] = useState<any[]>([]);
   const [columnNames, setColumnNames] = useState<string[]>([]);
@@ -114,7 +116,10 @@ const AdminTable = ({
       </Text>
     );
 
-  const visibleColumns = columnNames.filter((col) => col !== "id");
+  const visibleColumns =
+    tableName === "restaurants" && isMobile
+      ? ["name"]
+      : columnNames.filter((col) => col !== "id");
 
   return (
     <Box borderWidth="1px" borderRadius="md" overflowX="auto">
@@ -140,7 +145,7 @@ const AdminTable = ({
               position="sticky"
               top={0}
               right={0}
-              zIndex={5} // plus élevé que le zIndex des lignes
+              zIndex={5}
               bg={bgHeader}
             >
               Actions
@@ -217,7 +222,7 @@ const AdminTable = ({
                 px={2}
                 position="sticky"
                 right={0}
-                zIndex={3} // inférieur au header d'action
+                zIndex={3}
                 bg={rowBg}
               >
                 <HStack justify="flex-end">
