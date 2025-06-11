@@ -33,6 +33,7 @@ export interface RestaurantFilters {
   sortOrder: SortOrder;
   minRate: number;
   tags: string[];
+  badges: string[];
   searchText: string;
 }
 
@@ -40,6 +41,7 @@ export const defaultRestaurantFilters: RestaurantFilters = {
   sortOrder: "relevance",
   minRate: 0,
   tags: [],
+  badges: [],
   searchText: "",
 };
 

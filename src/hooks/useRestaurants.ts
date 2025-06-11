@@ -19,7 +19,9 @@ import supabaseClient from "../services/supabaseClient";
 import { RestaurantFilters } from "../pages/UserPage";
 
 const useRestaurants = (restaurantFilters: RestaurantFilters) => {
-  const { id, slug, sortOrder, minRate, tags, searchText } = restaurantFilters;
+  const { id, slug, sortOrder, minRate, tags, badges, searchText } =
+    restaurantFilters;
+
   let query = supabaseClient.from("restaurants").select();
 
   if (id) {
@@ -35,16 +37,21 @@ const useRestaurants = (restaurantFilters: RestaurantFilters) => {
       query = query.overlaps("tags", tags);
     }
 
+    if (badges.length > 0) {
+      query = query.contains("badges", badges);
+    }
+
     if (searchText !== "") {
-      let slugifiedSearchText = slugify(searchText);
+      const slugifiedSearchText = slugify(searchText);
       query = query.or(
-        `name.like.%${slugifiedSearchText}%,slug.like.%${slugifiedSearchText}%`
+        `name.ilike.%${slugifiedSearchText}%,slug.ilike.%${slugifiedSearchText}%`
       );
     }
   }
 
-  let asc = sortOrder === "distance" ? true : false;
+  const asc = sortOrder === "distance";
   query = query.order(sortOrder, { ascending: asc });
+
   const result = useData<Restaurant>(query, [restaurantFilters]);
   return result;
 };

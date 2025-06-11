@@ -31,19 +31,13 @@ import { SortOrder } from "./SortSelector";
 import StarRating from "./StarRating";
 import { motion, AnimatePresence } from "framer-motion";
 import useTags from "../hooks/useTags";
-import { RestaurantFilters } from "../pages/UserPage";
+import { defaultRestaurantFilters, RestaurantFilters } from "../pages/UserPage";
+import BadgesToggles from "./BadgesToggles";
 
 interface FilterDialogProps {
   restaurantFilters: RestaurantFilters;
   onFilterChange: (query: RestaurantFilters) => void;
 }
-
-const defaultFilters: RestaurantFilters = {
-  sortOrder: "relevance",
-  minRate: 0,
-  tags: [],
-  searchText: "",
-};
 
 const FilterDialog = ({
   restaurantFilters,
@@ -54,11 +48,7 @@ const FilterDialog = ({
   const [localQuery, setLocalQuery] =
     useState<RestaurantFilters>(restaurantFilters);
 
-  const {
-    data: availableTags,
-    // loading: tagsLoading,
-    // error: tagsError,
-  } = useTags();
+  const { data: availableTags } = useTags();
 
   const handleOpen = () => {
     setLocalQuery(restaurantFilters);
@@ -115,7 +105,6 @@ const FilterDialog = ({
                     sortOrder: e.target.value as SortOrder,
                   })
                 }
-                transition="all 0.2s ease-in-out"
               >
                 <option value="relevance">Pertinence</option>
                 <option value="rating">Meilleures notes</option>
@@ -183,7 +172,7 @@ const FilterDialog = ({
                 </AnimatePresence>
               </Wrap>
 
-              {/* Selecteur de tags */}
+              {/* Sélecteur de tags */}
               <Select
                 key={localQuery.tags.join(",")}
                 value=""
@@ -196,7 +185,6 @@ const FilterDialog = ({
                     }));
                   }
                 }}
-                transition="all 0.2s ease-in-out"
               >
                 <option value="" disabled hidden>
                   Choisir un tag
@@ -207,13 +195,22 @@ const FilterDialog = ({
                   </option>
                 ))}
               </Select>
+
+              {/* Badges */}
+              <Text fontWeight="bold">Badges :</Text>
+              <BadgesToggles
+                selected={localQuery.badges}
+                onChange={(updated) =>
+                  setLocalQuery({ ...localQuery, badges: updated })
+                }
+              />
             </VStack>
           </AlertDialogBody>
 
           <AlertDialogFooter justifyContent="space-between">
             <Button
               variant="ghost"
-              onClick={() => setLocalQuery(defaultFilters)}
+              onClick={() => setLocalQuery(defaultRestaurantFilters)}
             >
               Réinitialiser
             </Button>
