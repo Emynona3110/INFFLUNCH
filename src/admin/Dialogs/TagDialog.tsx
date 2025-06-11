@@ -30,6 +30,7 @@ const TagDialog = ({
   initialData,
 }: TagDialogProps) => {
   const cancelRef = useRef<HTMLButtonElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [label, setLabel] = useState("");
   const [original, setOriginal] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,6 +40,12 @@ const TagDialog = ({
     const formatted = initialData?.label ? formatLabel(initialData.label) : "";
     setLabel(formatted);
     setOriginal(formatted);
+
+    if (isOpen) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
+    }
   }, [isOpen, initialData]);
 
   const formatLabel = (input: string) =>
@@ -84,7 +91,6 @@ const TagDialog = ({
         return;
       }
 
-      // Relecture de l'élément pour vérifier la modification
       const { data: updated, error: fetchError } = await supabaseClient
         .from("tags")
         .select("label")
@@ -164,6 +170,7 @@ const TagDialog = ({
           <FormControl>
             <FormLabel>Label</FormLabel>
             <Input
+              ref={inputRef}
               value={label}
               onChange={(e) => setLabel(formatLabel(e.target.value))}
               placeholder="ex: Végétarien"

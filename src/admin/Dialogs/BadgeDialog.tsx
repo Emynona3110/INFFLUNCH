@@ -30,6 +30,7 @@ const BadgeDialog = ({
   initialData,
 }: BadgeDialogProps) => {
   const cancelRef = useRef<HTMLButtonElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [label, setLabel] = useState("");
   const [original, setOriginal] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,6 +40,12 @@ const BadgeDialog = ({
     const formatted = initialData?.label ? formatLabel(initialData.label) : "";
     setLabel(formatted);
     setOriginal(formatted);
+
+    if (isOpen) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
+    }
   }, [isOpen, initialData]);
 
   const formatLabel = (value: string) =>
@@ -179,6 +186,7 @@ const BadgeDialog = ({
           <FormControl>
             <FormLabel>Label</FormLabel>
             <Input
+              ref={inputRef}
               value={label}
               onChange={(e) => setLabel(formatLabel(e.target.value))}
               placeholder="ex: Local"
