@@ -9,6 +9,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ProtectedRoute from "./components/ProtectedRoute";
 import JoinWaitingList from "./pages/JoinWaitingList";
 import ConfirmURLWrapper from "./pages/ConfirmURLWrapper";
+import NewInvite from "./pages/NewInvite";
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
       <Route path="/reinitialiser-password" element={<ConfirmURLWrapper />} />
       <Route path="/authentification" element={<ConfirmURLWrapper />} />
       <Route path="/inscription" element={<JoinWaitingList />} />
+      <Route path="/invitation-expiree" element={<NewInvite />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

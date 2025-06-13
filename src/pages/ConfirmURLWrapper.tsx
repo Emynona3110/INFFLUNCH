@@ -15,6 +15,7 @@ const ConfirmURLWrapper = () => {
       window.location.hash.replace(/^#/, "")
     );
     const confirmationUrl = hashParams.get("confirmation_url");
+    const email = hashParams.get("email");
 
     if (!confirmationUrl) {
       setError("Lien de confirmation manquant.");
@@ -39,6 +40,10 @@ const ConfirmURLWrapper = () => {
       });
 
       if (error) {
+        if (type === "invite" && email) {
+          navigate(`/invitation-expiree?email=${encodeURIComponent(email)}`);
+          return;
+        }
         setError("Le lien est invalide ou expiré.");
       }
 
@@ -46,7 +51,7 @@ const ConfirmURLWrapper = () => {
     };
 
     verify();
-  }, [location]);
+  }, [location, navigate]);
 
   if (isVerifying) {
     return (
