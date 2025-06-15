@@ -44,7 +44,7 @@ const MyAccount = () => {
       mt={12}
       p={8}
       borderRadius="md"
-      boxShadow="lg"
+      boxShadow="md"
       bg={useColorModeValue("white", "gray.900")}
     >
       <VStack spacing={6} align="stretch">

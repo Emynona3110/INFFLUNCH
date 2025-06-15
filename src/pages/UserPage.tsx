@@ -65,6 +65,7 @@ const UserPage = () => {
       }}
       templateRows={{ base: "auto 1fr" }}
       templateColumns={{ base: "1fr" }}
+      bg={useColorModeValue("gray.100", "gray.800")}
     >
       {/* NAVIGATION */}
       <GridItem
