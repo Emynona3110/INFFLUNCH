@@ -12,7 +12,7 @@ export const Footer = () => {
       borderTop="1px solid"
       borderColor={useColorModeValue("gray.200", "gray.700")}
     >
-      © 2025 Infflunch — Tous droits réservés.
+      © 2025 Infflunch
     </Box>
   );
 };
