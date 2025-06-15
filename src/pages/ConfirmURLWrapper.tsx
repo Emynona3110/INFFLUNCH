@@ -55,8 +55,6 @@ const ConfirmURLWrapper = () => {
     verify();
   }, [location]);
 
-  window.history.replaceState(null, "", window.location.pathname);
-
   if (isVerifying) {
     return (
       <Center h="100vh">
@@ -68,6 +66,8 @@ const ConfirmURLWrapper = () => {
   if (expiredEmail !== null) {
     return <ExpiredLink email={expiredEmail} />;
   }
+
+  window.history.replaceState(null, "", window.location.pathname);
 
   return <UpdatePassword />;
 };

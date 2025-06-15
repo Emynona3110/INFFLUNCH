@@ -20,6 +20,8 @@ const ExpiredLink = ({ email }: { email: string }) => {
     await requestReset(email, () => setSent(true));
   };
 
+  window.history.replaceState(null, "", window.location.pathname);
+
   return (
     <Box
       minH="100vh"
