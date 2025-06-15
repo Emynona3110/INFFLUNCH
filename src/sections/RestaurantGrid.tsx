@@ -1,6 +1,6 @@
 import { SimpleGrid, Text, Box } from "@chakra-ui/react";
-import RestaurantCard from "./RestaurantCard";
-import RestaurantCardSkeleton from "./RestaurantCardSkeleton";
+import RestaurantCard from "../components/RestaurantCard";
+import RestaurantCardSkeleton from "../components/RestaurantCardSkeleton";
 import useRestaurants from "../hooks/useRestaurants";
 import { motion } from "framer-motion";
 import useTopRated from "../hooks/useTopRated";

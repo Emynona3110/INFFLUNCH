@@ -2,7 +2,6 @@ import { useColorModeValue, Grid, GridItem } from "@chakra-ui/react";
 import { useLocation, useNavigate } from "react-router-dom";
 import AdminNavbar from "../admin/AdminNavbar";
 import DataManager from "../admin/DataManager";
-import Beeeh from "../components/Beeeh";
 import { adminSections } from "../services/adminSections";
 
 export const AdminPage = () => {
@@ -49,7 +48,7 @@ export const AdminPage = () => {
 
       {/* MAIN */}
       <GridItem area="main" overflowY="auto" height="calc(100vh - 60px)">
-        {currentSection ? <DataManager section={currentSection} /> : <Beeeh />}
+        <DataManager section={currentSection ?? adminSections[0]} />
       </GridItem>
     </Grid>
   );

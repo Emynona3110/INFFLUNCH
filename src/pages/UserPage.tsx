@@ -8,14 +8,14 @@ import {
 } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import RestaurantGrid from "../components/RestaurantGrid";
-import Beeeh from "../components/Beeeh";
+import RestaurantGrid from "../sections/RestaurantGrid";
+import Beeeh from "../sections/Beeeh";
 import { useState } from "react";
 import { slugify } from "../utils/slugify";
 import { SortOrder } from "../components/SortSelector";
 import MyAccount from "../sections/MyAccount";
-import About from "./About";
-import Favorites from "./Favorites";
+import About from "../sections/About";
+import Favorites from "../sections/Favorites";
 
 export const userSections = [
   "Restaurants",
