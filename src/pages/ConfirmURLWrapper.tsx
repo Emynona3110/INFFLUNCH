@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { Spinner, Center, Text, Box, Link } from "@chakra-ui/react";
+import { useLocation } from "react-router-dom";
+import { Spinner, Center } from "@chakra-ui/react";
 import UpdatePassword from "./UpdatePassword";
 import supabaseClient from "../services/supabaseClient";
+import ExpiredLink from "./ExpiredLink";
 
 const ConfirmURLWrapper = () => {
   const [isVerifying, setIsVerifying] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [expiredEmail, setExpiredEmail] = useState<string | null>(null);
   const location = useLocation();
-  const navigate = useNavigate();
 
   useEffect(() => {
     const hashParams = new URLSearchParams(
@@ -18,7 +18,7 @@ const ConfirmURLWrapper = () => {
     const email = hashParams.get("email");
 
     if (!confirmationUrl) {
-      setError("Lien de confirmation manquant.");
+      setExpiredEmail(email || "");
       setIsVerifying(false);
       return;
     }
@@ -28,7 +28,7 @@ const ConfirmURLWrapper = () => {
     const type = url.searchParams.get("type");
 
     if (!token_hash || !type) {
-      setError("Le lien de confirmation est invalide.");
+      setExpiredEmail(email || "");
       setIsVerifying(false);
       return;
     }
@@ -40,18 +40,22 @@ const ConfirmURLWrapper = () => {
       });
 
       if (error) {
-        if (type === "invite" && email) {
-          navigate(`/invitation-expiree?email=${encodeURIComponent(email)}`);
+        if (type === "invite" || type === "recovery") {
+          setExpiredEmail(email || "");
+          setIsVerifying(false);
           return;
         }
-        setError("Le lien est invalide ou expiré.");
+        setIsVerifying(false);
+        return;
       }
 
       setIsVerifying(false);
     };
 
     verify();
-  }, [location, navigate]);
+  }, [location]);
+
+  window.history.replaceState(null, "", window.location.pathname);
 
   if (isVerifying) {
     return (
@@ -61,27 +65,9 @@ const ConfirmURLWrapper = () => {
     );
   }
 
-  if (error) {
-    return (
-      <Center h="100vh" px={4}>
-        <Box maxW="md" p={8} borderRadius="md" textAlign="center">
-          <Text fontSize="lg" fontWeight="semibold">
-            {error}
-          </Text>
-          <Link
-            onClick={() => navigate("/login")}
-            color="blue.500"
-            fontSize="sm"
-            textAlign="center"
-          >
-            Retour à la connexion
-          </Link>
-        </Box>
-      </Center>
-    );
+  if (expiredEmail !== null) {
+    return <ExpiredLink email={expiredEmail} />;
   }
-
-  window.history.replaceState(null, "", window.location.pathname);
 
   return <UpdatePassword />;
 };

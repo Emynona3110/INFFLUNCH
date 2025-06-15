@@ -14,14 +14,25 @@ const usePasswordReset = () => {
     console.log("Demande de réinitialisation pour :", email);
 
     const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reinitialiser-password`,
+      redirectTo: `${window.location.origin}/authentification`,
     });
 
     setIsLoading(false);
 
     if (error) {
       console.error("Erreur Supabase:", error.message);
-      setMessage("Une erreur est survenue. Veuillez réessayer.");
+
+      if (
+        error.message.includes(
+          "For security purposes, you can only request this after"
+        )
+      ) {
+        setMessage(
+          "Veuillez patienter quelques instants avant de redemander un nouveau lien."
+        );
+      } else {
+        setMessage("Une erreur est survenue. Veuillez réessayer.");
+      }
     } else {
       console.log("Lien de réinitialisation envoyé avec succès !");
       setSuccess(true);

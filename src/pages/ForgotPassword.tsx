@@ -13,14 +13,23 @@ import {
   AlertIcon,
   Link,
 } from "@chakra-ui/react";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import usePasswordReset from "../hooks/usePasswordReset";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const navigate = useNavigate();
   const { requestReset, isLoading, message, success } = usePasswordReset();
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const prefill = params.get("email");
+    if (prefill) {
+      setEmail(prefill);
+    }
+  }, [location.search]);
 
   const isValidEmail = (email: string) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
