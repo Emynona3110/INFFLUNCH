@@ -135,14 +135,14 @@ const FilterDialog = ({
                 </FormLabel>
                 <Switch
                   id="favorites-switch"
-                  isChecked={localQuery.favoritesOnly}
+                  isChecked={!!localQuery.favoritesOnly}
                   onChange={(e) =>
                     setLocalQuery((prev) => ({
                       ...prev,
                       favoritesOnly: e.target.checked,
                     }))
                   }
-                  colorScheme="pink"
+                  colorScheme="blue"
                 />
               </FormControl>
 
