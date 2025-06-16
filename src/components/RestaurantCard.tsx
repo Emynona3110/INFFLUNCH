@@ -18,33 +18,30 @@ import LikeButton from "./LikeButton";
 import DistanceToCompany from "./Distance";
 import noImage from "../assets/no-image.jpg";
 import RestaurantBadges from "./RestaurantBadges";
-import useFavorites from "../hooks/useFavorites";
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
   topRated: { id: number }[];
-  liked?: boolean;
+  liked: boolean;
+  onLikeToggle: (liked: boolean) => Promise<void>;
 }
 
 const RestaurantCard = ({
   restaurant,
   topRated = [],
-  liked = false,
+  liked,
+  onLikeToggle,
 }: RestaurantCardProps) => {
   const toast = useToast();
-  const { addFavorite, removeFavorite } = useFavorites();
   const [isLikedLocal, setIsLikedLocal] = useState(liked);
 
   const toggleLike = async () => {
     const previous = isLikedLocal;
-    setIsLikedLocal(!previous);
+    const next = !previous;
+    setIsLikedLocal(next);
 
     try {
-      if (!previous) {
-        await addFavorite(restaurant.id);
-      } else {
-        await removeFavorite(restaurant.id);
-      }
+      await onLikeToggle(next);
       window.dispatchEvent(new Event("favorites:updated"));
     } catch (err) {
       setIsLikedLocal(previous);

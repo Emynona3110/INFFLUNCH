@@ -15,7 +15,6 @@ import { slugify } from "../utils/slugify";
 import { SortOrder } from "../components/SortSelector";
 import MyAccount from "../sections/MyAccount";
 import About from "../sections/About";
-import useFavorites from "../hooks/useFavorites";
 
 export const userSections = ["Restaurants", "Mon compte", "À propos"].map(
   (label) => ({
@@ -51,12 +50,6 @@ const UserPage = () => {
   const [restaurantFilters, setRestaurantFilters] = useState<RestaurantFilters>(
     defaultRestaurantFilters
   );
-
-  const {
-    restaurantIds: favoriteRestaurantIds,
-    loading: favoritesLoading,
-    refreshFavorites,
-  } = useFavorites();
 
   const currentPage =
     userSections.find((section) => location.pathname.includes(section.path))
@@ -116,12 +109,7 @@ const UserPage = () => {
               <Route
                 path="restaurants"
                 element={
-                  <RestaurantGrid
-                    restaurantFilters={restaurantFilters}
-                    favoriteIds={favoriteRestaurantIds}
-                    favoritesLoading={favoritesLoading}
-                    refreshFavorites={refreshFavorites}
-                  />
+                  <RestaurantGrid restaurantFilters={restaurantFilters} />
                 }
               />
               <Route path="mon-compte" element={<MyAccount />} />

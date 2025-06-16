@@ -6,24 +6,25 @@ import useRestaurants from "../hooks/useRestaurants";
 import useTopRated from "../hooks/useTopRated";
 import { motion } from "framer-motion";
 import { RestaurantFilters } from "../pages/UserPage";
+import useFavorites from "../hooks/useFavorites";
 
 const MotionBox = motion.create(Box);
 
 interface RestaurantGridProps {
   restaurantFilters: RestaurantFilters;
-  favoriteIds: number[];
-  favoritesLoading?: boolean;
-  refreshFavorites?: () => void;
 }
 
-const RestaurantGrid = ({
-  restaurantFilters,
-  favoriteIds,
-  favoritesLoading = false,
-  refreshFavorites,
-}: RestaurantGridProps) => {
+const RestaurantGrid = ({ restaurantFilters }: RestaurantGridProps) => {
   const { data, error, loading } = useRestaurants(restaurantFilters);
   const topRatedResult = useTopRated();
+  const {
+    restaurantIds: favoriteIds,
+    loading: favoritesLoading,
+    addFavorite,
+    removeFavorite,
+    refreshFavorites,
+  } = useFavorites();
+
   const topRated = !topRatedResult.error
     ? (topRatedResult.data as { id: number }[])
     : [];
@@ -95,6 +96,10 @@ const RestaurantGrid = ({
                 restaurant={restaurant}
                 topRated={topRated}
                 liked={favoriteIds.includes(restaurant.id)}
+                onLikeToggle={async (liked) => {
+                  if (liked) await addFavorite(restaurant.id);
+                  else await removeFavorite(restaurant.id);
+                }}
               />
             </MotionBox>
           ))}
