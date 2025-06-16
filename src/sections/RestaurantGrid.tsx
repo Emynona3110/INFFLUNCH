@@ -1,24 +1,42 @@
-import { SimpleGrid, Text, Box } from "@chakra-ui/react";
+import { useEffect } from "react";
+import { Box, SimpleGrid, Text } from "@chakra-ui/react";
 import RestaurantCard from "../components/RestaurantCard";
 import RestaurantCardSkeleton from "../components/RestaurantCardSkeleton";
 import useRestaurants from "../hooks/useRestaurants";
-import { motion } from "framer-motion";
 import useTopRated from "../hooks/useTopRated";
+import { motion } from "framer-motion";
 import { RestaurantFilters } from "../pages/UserPage";
 
 const MotionBox = motion.create(Box);
 
 interface RestaurantGridProps {
   restaurantFilters: RestaurantFilters;
+  favoriteIds: number[];
+  favoritesLoading?: boolean;
+  refreshFavorites?: () => void;
 }
 
-const RestaurantGrid = ({ restaurantFilters }: RestaurantGridProps) => {
+const RestaurantGrid = ({
+  restaurantFilters,
+  favoriteIds,
+  favoritesLoading = false,
+  refreshFavorites,
+}: RestaurantGridProps) => {
   const { data, error, loading } = useRestaurants(restaurantFilters);
-  const skeletonCount = 6;
   const topRatedResult = useTopRated();
   const topRated = !topRatedResult.error
     ? (topRatedResult.data as { id: number }[])
     : [];
+
+  const skeletonCount = 6;
+
+  const filteredData = restaurantFilters.favoritesOnly
+    ? data.filter((r) => favoriteIds.includes(r.id))
+    : data;
+
+  useEffect(() => {
+    refreshFavorites?.();
+  }, []);
 
   if (error) {
     return (
@@ -28,10 +46,14 @@ const RestaurantGrid = ({ restaurantFilters }: RestaurantGridProps) => {
     );
   }
 
-  if (!loading && data.length === 0) {
+  if (!loading && !favoritesLoading && filteredData.length === 0) {
     return (
       <Box textAlign="center" mt={8}>
-        <Text>Aucun restaurant ne correspond à votre recherche.</Text>
+        <Text>
+          {restaurantFilters.favoritesOnly
+            ? "Aucun restaurant ne fait partie de vos favoris."
+            : "Aucun restaurant ne correspond à votre recherche."}
+        </Text>
       </Box>
     );
   }
@@ -47,7 +69,7 @@ const RestaurantGrid = ({ restaurantFilters }: RestaurantGridProps) => {
       spacing="20px"
       justifyItems="center"
     >
-      {loading
+      {loading || favoritesLoading
         ? Array.from({ length: skeletonCount }, (_, i) => (
             <MotionBox
               key={`skeleton-${i}`}
@@ -60,7 +82,7 @@ const RestaurantGrid = ({ restaurantFilters }: RestaurantGridProps) => {
               <RestaurantCardSkeleton />
             </MotionBox>
           ))
-        : data.map((restaurant, i) => (
+        : filteredData.map((restaurant, i) => (
             <MotionBox
               key={restaurant.id}
               variants={fadeOnly}
@@ -69,7 +91,11 @@ const RestaurantGrid = ({ restaurantFilters }: RestaurantGridProps) => {
               transition={{ duration: 0.5, delay: i * 0.05 }}
               width="100%"
             >
-              <RestaurantCard restaurant={restaurant} topRated={topRated} />
+              <RestaurantCard
+                restaurant={restaurant}
+                topRated={topRated}
+                liked={favoriteIds.includes(restaurant.id)}
+              />
             </MotionBox>
           ))}
     </SimpleGrid>

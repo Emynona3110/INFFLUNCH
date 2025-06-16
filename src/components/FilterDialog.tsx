@@ -25,6 +25,9 @@ import {
   Text,
   HStack,
   Box,
+  Switch,
+  FormControl,
+  FormLabel,
 } from "@chakra-ui/react";
 import { useRef, useState } from "react";
 import { BsFilter } from "react-icons/bs";
@@ -45,7 +48,8 @@ const hasActiveFilters = (filters: RestaurantFilters) => {
     filters.minRate > 0 ||
     filters.tags.length > 0 ||
     filters.badges.length > 0 ||
-    filters.sortOrder !== defaultRestaurantFilters.sortOrder
+    filters.sortOrder !== defaultRestaurantFilters.sortOrder ||
+    filters.favoritesOnly === true
   );
 };
 
@@ -79,7 +83,7 @@ const FilterDialog = ({
 
   const selectableTags = availableTags
     .filter((tag) => !localQuery.tags.includes(tag.label))
-    .sort();
+    .sort((a, b) => a.label.localeCompare(b.label));
 
   return (
     <>
@@ -104,7 +108,7 @@ const FilterDialog = ({
                 width: "10px",
                 height: "10px",
                 borderRadius: "50%",
-                backgroundColor: "#4299e1", // Chakra's blue.400
+                backgroundColor: "#4299e1",
               }}
             />
           )}
@@ -125,6 +129,23 @@ const FilterDialog = ({
 
           <AlertDialogBody>
             <VStack spacing={4} align="stretch">
+              <FormControl display="flex" alignItems="center">
+                <FormLabel htmlFor="favorites-switch" mb="0" fontWeight="bold">
+                  Mes favoris
+                </FormLabel>
+                <Switch
+                  id="favorites-switch"
+                  isChecked={localQuery.favoritesOnly}
+                  onChange={(e) =>
+                    setLocalQuery((prev) => ({
+                      ...prev,
+                      favoritesOnly: e.target.checked,
+                    }))
+                  }
+                  colorScheme="pink"
+                />
+              </FormControl>
+
               <Text fontWeight="bold">Trier par :</Text>
               <Select
                 value={localQuery.sortOrder}

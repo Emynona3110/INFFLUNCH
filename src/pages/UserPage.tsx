@@ -15,17 +15,14 @@ import { slugify } from "../utils/slugify";
 import { SortOrder } from "../components/SortSelector";
 import MyAccount from "../sections/MyAccount";
 import About from "../sections/About";
-import Favorites from "../sections/Favorites";
+import useFavorites from "../hooks/useFavorites";
 
-export const userSections = [
-  "Restaurants",
-  "Mon compte",
-  "Favoris",
-  "À propos",
-].map((label) => ({
-  label,
-  path: slugify(label),
-}));
+export const userSections = ["Restaurants", "Mon compte", "À propos"].map(
+  (label) => ({
+    label,
+    path: slugify(label),
+  })
+);
 
 export interface RestaurantFilters {
   id?: number;
@@ -35,6 +32,7 @@ export interface RestaurantFilters {
   tags: string[];
   badges: string[];
   searchText: string;
+  favoritesOnly?: boolean;
 }
 
 export const defaultRestaurantFilters: RestaurantFilters = {
@@ -43,6 +41,7 @@ export const defaultRestaurantFilters: RestaurantFilters = {
   tags: [],
   badges: [],
   searchText: "",
+  favoritesOnly: false,
 };
 
 const UserPage = () => {
@@ -52,6 +51,12 @@ const UserPage = () => {
   const [restaurantFilters, setRestaurantFilters] = useState<RestaurantFilters>(
     defaultRestaurantFilters
   );
+
+  const {
+    restaurantIds: favoriteRestaurantIds,
+    loading: favoritesLoading,
+    refreshFavorites,
+  } = useFavorites();
 
   const currentPage =
     userSections.find((section) => location.pathname.includes(section.path))
@@ -67,7 +72,6 @@ const UserPage = () => {
       templateColumns={{ base: "1fr" }}
       bg={useColorModeValue("gray.100", "gray.800")}
     >
-      {/* NAVIGATION */}
       <GridItem
         area="navigation"
         height="60px"
@@ -98,7 +102,6 @@ const UserPage = () => {
         />
       </GridItem>
 
-      {/* MAIN */}
       <GridItem area="main" overflowY="auto" height="calc(100vh - 60px)">
         <Flex flexDirection="column" minHeight="100%">
           <Box
@@ -113,11 +116,15 @@ const UserPage = () => {
               <Route
                 path="restaurants"
                 element={
-                  <RestaurantGrid restaurantFilters={restaurantFilters} />
+                  <RestaurantGrid
+                    restaurantFilters={restaurantFilters}
+                    favoriteIds={favoriteRestaurantIds}
+                    favoritesLoading={favoritesLoading}
+                    refreshFavorites={refreshFavorites}
+                  />
                 }
               />
               <Route path="mon-compte" element={<MyAccount />} />
-              <Route path="favoris" element={<Favorites />} />
               <Route path="a-propos" element={<About />} />
               <Route path="*" element={<Beeeh />} />
             </Routes>

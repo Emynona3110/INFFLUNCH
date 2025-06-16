@@ -8,7 +8,9 @@ import {
   VStack,
   useColorModeValue,
   Image,
+  useToast,
 } from "@chakra-ui/react";
+import { useState } from "react";
 import { Restaurant } from "../hooks/useRestaurants";
 import RestaurantRating from "./StarRating";
 import TagsList from "./TagsList";
@@ -16,13 +18,46 @@ import LikeButton from "./LikeButton";
 import DistanceToCompany from "./Distance";
 import noImage from "../assets/no-image.jpg";
 import RestaurantBadges from "./RestaurantBadges";
+import useFavorites from "../hooks/useFavorites";
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
   topRated: { id: number }[];
+  liked?: boolean;
 }
 
-const RestaurantCard = ({ restaurant, topRated = [] }: RestaurantCardProps) => {
+const RestaurantCard = ({
+  restaurant,
+  topRated = [],
+  liked = false,
+}: RestaurantCardProps) => {
+  const toast = useToast();
+  const { addFavorite, removeFavorite } = useFavorites();
+  const [isLikedLocal, setIsLikedLocal] = useState(liked);
+
+  const toggleLike = async () => {
+    const previous = isLikedLocal;
+    setIsLikedLocal(!previous);
+
+    try {
+      if (!previous) {
+        await addFavorite(restaurant.id);
+      } else {
+        await removeFavorite(restaurant.id);
+      }
+      window.dispatchEvent(new Event("favorites:updated"));
+    } catch (err) {
+      setIsLikedLocal(previous);
+      toast({
+        title: "Erreur",
+        description: "Impossible de mettre à jour les favoris.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
   return (
     <Card
       role="group"
@@ -71,7 +106,6 @@ const RestaurantCard = ({ restaurant, topRated = [] }: RestaurantCardProps) => {
 
           <HStack
             minHeight={"24px"}
-            verticalAlign="middle"
             color={useColorModeValue("gray.500", "gray.400")}
           >
             <RestaurantRating rating={restaurant.rating} />
@@ -91,7 +125,7 @@ const RestaurantCard = ({ restaurant, topRated = [] }: RestaurantCardProps) => {
 
           <HStack justifyContent="space-between" width="100%">
             <TagsList tags={restaurant.tags} />
-            <LikeButton onClick={() => {}} />
+            <LikeButton liked={isLikedLocal} onClick={toggleLike} />
           </HStack>
         </VStack>
       </CardBody>
