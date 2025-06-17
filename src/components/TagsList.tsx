@@ -1,32 +1,37 @@
-import { useColorModeValue, Box, Text, Wrap, WrapItem } from "@chakra-ui/react";
+import { Box, HStack, Text, useColorModeValue } from "@chakra-ui/react";
 
 interface TagsListProps {
   tags: string[];
 }
 
 const TagsList = ({ tags }: TagsListProps) => {
+  const tagBg = useColorModeValue("gray.100", "gray.600");
+
+  const visibleTags = tags.slice(0, 2);
+  const hiddenCount = tags.length - visibleTags.length;
+
   return (
-    <Wrap spacing={2} marginTop={2}>
-      {tags &&
-        tags.map((tag) => (
-          <WrapItem key={tag}>
-            <Box
-              paddingX={3}
-              paddingY={1}
-              borderRadius={50}
-              backgroundColor={useColorModeValue("gray.100", "gray.600")}
-            >
-              <Text>{tag}</Text>
-            </Box>
-          </WrapItem>
-        ))}
-    </Wrap>
+    <HStack spacing={2} mt={2} overflow="hidden" whiteSpace="nowrap">
+      {visibleTags.map((tag) => (
+        <Box
+          key={tag}
+          px={3}
+          py={1}
+          borderRadius="50px"
+          backgroundColor={tagBg}
+          flexShrink={0}
+        >
+          <Text>{tag}</Text>
+        </Box>
+      ))}
+
+      {hiddenCount > 0 && (
+        <Text fontSize="sm" color="gray.500" flexShrink={0}>
+          +{hiddenCount}
+        </Text>
+      )}
+    </HStack>
   );
 };
 
 export default TagsList;
-
-// backgroundColor: color || "#f0f0f0",
-//               padding: "5px 10px",
-//               borderRadius: "5px",
-//               fontSize: "14px",
