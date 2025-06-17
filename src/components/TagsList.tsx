@@ -13,7 +13,7 @@ const TagsList = ({ tags }: TagsListProps) => {
             <Box
               paddingX={3}
               paddingY={1}
-              borderRadius="md"
+              borderRadius={50}
               backgroundColor={useColorModeValue("gray.100", "gray.600")}
             >
               <Text>{tag}</Text>
