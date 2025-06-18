@@ -30,7 +30,7 @@ const Layout = ({
       templateAreas={{
         base: withNavbar ? `"navigation" "main"` : `"main"`,
       }}
-      templateRows={withNavbar ? "50px 1fr" : "1fr"}
+      templateRows={withNavbar ? "58px 1fr" : "1fr"}
       templateColumns="1fr"
       bg={bg}
     >
