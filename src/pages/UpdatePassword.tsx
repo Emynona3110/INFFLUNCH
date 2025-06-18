@@ -24,6 +24,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import useSession from "../hooks/useSession";
 import useChangePassword from "../hooks/useChangePassword";
+import Layout from "../components/Layout";
 
 const UpdatePassword = () => {
   const { sessionData, loading } = useSession();
@@ -132,14 +133,7 @@ const UpdatePassword = () => {
   const isResetFlow = location.pathname === "/reinitialiser-password";
 
   return (
-    <Box
-      minH="100vh"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      bg={useColorModeValue("gray.100", "gray.800")}
-      px={4}
-    >
+    <Layout centerContent>
       <Stack
         spacing={6}
         maxW="md"
@@ -239,7 +233,7 @@ const UpdatePassword = () => {
           </VStack>
         )}
       </Stack>
-    </Box>
+    </Layout>
   );
 };
 

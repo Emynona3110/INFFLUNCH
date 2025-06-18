@@ -1,5 +1,4 @@
 import {
-  Box,
   Button,
   Heading,
   Text,
@@ -13,6 +12,7 @@ import {
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import supabaseClient from "../services/supabaseClient";
+import Layout from "../components/Layout";
 
 const NewInvite = () => {
   const [email, setEmail] = useState("");
@@ -50,14 +50,7 @@ const NewInvite = () => {
   };
 
   return (
-    <Box
-      minH="100vh"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      bg={useColorModeValue("gray.100", "gray.800")}
-      px={4}
-    >
+    <Layout centerContent>
       <Stack
         spacing={6}
         maxW="md"
@@ -101,7 +94,7 @@ const NewInvite = () => {
           Retour à la connexion
         </Link>
       </Stack>
-    </Box>
+    </Layout>
   );
 };
 

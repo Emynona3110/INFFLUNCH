@@ -40,8 +40,7 @@ const MyAccount = () => {
   return (
     <Box
       maxW="md"
-      mx="auto"
-      mt={12}
+      width="100%"
       p={8}
       borderRadius="md"
       boxShadow="md"

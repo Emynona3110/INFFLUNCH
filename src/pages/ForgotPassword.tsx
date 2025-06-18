@@ -1,5 +1,4 @@
 import {
-  Box,
   Button,
   FormControl,
   FormLabel,
@@ -16,6 +15,7 @@ import {
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import usePasswordReset from "../hooks/usePasswordReset";
+import Layout from "../components/Layout";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -40,14 +40,7 @@ const ForgotPassword = () => {
   };
 
   return (
-    <Box
-      minH="100vh"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      bg={useColorModeValue("gray.100", "gray.800")}
-      px={4}
-    >
+    <Layout centerContent>
       <Stack
         spacing={6}
         maxW="md"
@@ -110,7 +103,7 @@ const ForgotPassword = () => {
           Retour à la connexion
         </Link>
       </Stack>
-    </Box>
+    </Layout>
   );
 };
 

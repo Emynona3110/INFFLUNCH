@@ -1,5 +1,4 @@
 import {
-  Box,
   Button,
   FormControl,
   FormLabel,
@@ -16,6 +15,7 @@ import {
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useJoinWaitingList from "../hooks/useJoinWaitingList";
+import Layout from "../components/Layout";
 
 const JoinWaitingList = () => {
   const [email, setEmail] = useState("");
@@ -31,14 +31,7 @@ const JoinWaitingList = () => {
   };
 
   return (
-    <Box
-      minH="100vh"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      bg={useColorModeValue("gray.100", "gray.800")}
-      px={4}
-    >
+    <Layout centerContent>
       <Stack
         spacing={6}
         maxW="md"
@@ -102,7 +95,7 @@ const JoinWaitingList = () => {
           Retour à la connexion
         </Link>
       </Stack>
-    </Box>
+    </Layout>
   );
 };
 

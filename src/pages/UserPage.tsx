@@ -1,4 +1,3 @@
-import { useColorModeValue, Grid, GridItem, Box, Flex } from "@chakra-ui/react";
 import {
   useNavigate,
   useLocation,
@@ -6,8 +5,6 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
 import RestaurantGrid from "../sections/RestaurantGrid";
 import Beeeh from "../sections/Beeeh";
 import { useState } from "react";
@@ -15,6 +12,7 @@ import { slugify } from "../utils/slugify";
 import { SortOrder } from "../components/SortSelector";
 import MyAccount from "../sections/MyAccount";
 import About from "../sections/About";
+import Layout from "../components/Layout";
 
 export const userSections = ["Restaurants", "Mon compte", "À propos"].map(
   (label) => ({
@@ -56,72 +54,30 @@ const UserPage = () => {
       ?.path ?? userSections[0].path;
 
   return (
-    <Grid
-      height="100vh"
-      templateAreas={{
-        base: `"navigation" "main"`,
+    <Layout
+      withNavbar
+      centerContent={currentPage !== "restaurants"}
+      navbarProps={{
+        page: currentPage,
+        setPage: (page) => navigate("/user/" + page),
+        restaurantFilters,
+        onFilterChange: (query) =>
+          setRestaurantFilters({ ...restaurantFilters, ...query }),
+        onSearch: (input) =>
+          setRestaurantFilters({ ...restaurantFilters, searchText: input }),
       }}
-      templateRows={{ base: "auto 1fr" }}
-      templateColumns={{ base: "1fr" }}
-      bg={useColorModeValue("gray.100", "gray.800")}
     >
-      <GridItem
-        area="navigation"
-        height="60px"
-        alignContent="center"
-        paddingX={4}
-        shadow="sm"
-        bg={useColorModeValue("white", "gray.900")}
-        color={useColorModeValue("black", "white")}
-        borderBottom="1px solid"
-        borderColor={useColorModeValue("gray.200", "gray.700")}
-        position="sticky"
-        top="0"
-        zIndex="1000"
-      >
-        <Navbar
-          page={currentPage}
-          setPage={(page) => navigate("/user/" + page)}
-          restaurantFilters={restaurantFilters}
-          onFilterChange={(query: RestaurantFilters) =>
-            setRestaurantFilters({ ...restaurantFilters, ...query })
-          }
-          onSearch={(input: string) =>
-            setRestaurantFilters({
-              ...restaurantFilters,
-              searchText: input,
-            })
-          }
+      <Routes>
+        <Route index element={<Navigate to="restaurants" replace />} />
+        <Route
+          path="restaurants"
+          element={<RestaurantGrid restaurantFilters={restaurantFilters} />}
         />
-      </GridItem>
-
-      <GridItem area="main" overflowY="auto" height="calc(100vh - 60px)">
-        <Flex flexDirection="column" minHeight="100%">
-          <Box
-            flex="1"
-            maxWidth="1200px"
-            width="100%"
-            padding={4}
-            marginX="auto"
-          >
-            <Routes>
-              <Route index element={<Navigate to="restaurants" replace />} />
-              <Route
-                path="restaurants"
-                element={
-                  <RestaurantGrid restaurantFilters={restaurantFilters} />
-                }
-              />
-              <Route path="mon-compte" element={<MyAccount />} />
-              <Route path="a-propos" element={<About />} />
-              <Route path="*" element={<Beeeh />} />
-            </Routes>
-          </Box>
-
-          <Footer />
-        </Flex>
-      </GridItem>
-    </Grid>
+        <Route path="mon-compte" element={<MyAccount />} />
+        <Route path="a-propos" element={<About />} />
+        <Route path="*" element={<Beeeh />} />
+      </Routes>
+    </Layout>
   );
 };
 

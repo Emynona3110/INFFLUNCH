@@ -22,6 +22,7 @@ import { VscEye, VscEyeClosed } from "react-icons/vsc";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import supabaseClient from "../services/supabaseClient";
+import Layout from "../components/Layout";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -53,14 +54,7 @@ const LoginPage = () => {
   };
 
   return (
-    <Box
-      minH="100vh"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      bg={useColorModeValue("gray.100", "gray.800")}
-      px={4}
-    >
+    <Layout centerContent>
       <Stack
         spacing={6}
         maxW="md"
@@ -151,7 +145,7 @@ const LoginPage = () => {
           </Text>
         </VStack>
       </Stack>
-    </Box>
+    </Layout>
   );
 };
 

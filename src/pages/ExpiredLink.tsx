@@ -1,5 +1,4 @@
 import {
-  Box,
   Button,
   Heading,
   Text,
@@ -11,6 +10,7 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import usePasswordReset from "../hooks/usePasswordReset";
+import Layout from "../components/Layout";
 
 const ExpiredLink = ({ email }: { email: string }) => {
   const [sent, setSent] = useState(false);
@@ -23,14 +23,7 @@ const ExpiredLink = ({ email }: { email: string }) => {
   window.history.replaceState(null, "", window.location.pathname);
 
   return (
-    <Box
-      minH="100vh"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      bg={useColorModeValue("gray.100", "gray.800")}
-      px={4}
-    >
+    <Layout centerContent>
       <Stack
         spacing={6}
         maxW="md"
@@ -67,7 +60,7 @@ const ExpiredLink = ({ email }: { email: string }) => {
           </Button>
         )}
       </Stack>
-    </Box>
+    </Layout>
   );
 };
 
