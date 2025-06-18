@@ -44,7 +44,14 @@ const About = () => {
 
           <Text fontSize="md">
             Si vous rencontrez un problème ou souhaitez faire une suggestion,
-            n’hésitez pas à contacter <strong>LLS</strong> 😉
+            n’hésitez pas à contacter <strong>LLS</strong> ou envoyer un mail à{" "}
+            <a
+              href="mailto:contact@infflunch.com"
+              style={{ color: "inherit", textDecoration: "underline" }}
+            >
+              contact@infflunch.com
+            </a>
+            😉
           </Text>
         </VStack>
       </Stack>

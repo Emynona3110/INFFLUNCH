@@ -12,7 +12,13 @@ export const Footer = () => {
       borderTop="1px solid"
       borderColor={useColorModeValue("gray.200", "gray.700")}
     >
-      © 2025 Infflunch
+      © 2025 Infflunch -{" "}
+      <a
+        href="mailto:contact@infflunch.com"
+        style={{ color: "inherit", textDecoration: "underline" }}
+      >
+        contact@infflunch.com
+      </a>
     </Box>
   );
 };
