@@ -1,7 +1,6 @@
-import { Box, Flex, Image, Text, useColorModeValue } from "@chakra-ui/react";
+import { Box, Image, Text, useColorModeValue, VStack } from "@chakra-ui/react";
 import { motion, useAnimation } from "framer-motion";
 import { useRef } from "react";
-import Layout from "../components/Layout";
 
 const MotionImage = motion(Image);
 
@@ -34,39 +33,36 @@ const Beeeh = () => {
   };
 
   return (
-    <Layout centerContent>
-      <Flex
-        direction="column"
-        align="center"
-        justify="center"
-        gap={6}
-        minHeight="500px"
-        textAlign="center"
-        p={8}
-      >
-        <MotionImage
-          src="/beeeh.jpg"
-          alt="BeeeH"
-          maxHeight="300px"
-          borderRadius="lg"
-          boxShadow="lg"
-          cursor="pointer"
-          initial={{ opacity: 0, y: -100 }}
-          animate={controls}
-          onClick={handleClick}
-          onLoad={handleImageLoad}
-        />
+    <VStack
+      direction="column"
+      align="center"
+      justify="center"
+      gap={6}
+      textAlign="center"
+      p={8}
+    >
+      <MotionImage
+        src="/beeeh.jpg"
+        alt="BeeeH"
+        maxHeight="300px"
+        borderRadius="lg"
+        boxShadow="lg"
+        cursor="pointer"
+        initial={{ opacity: 0, y: -100 }}
+        animate={controls}
+        onClick={handleClick}
+        onLoad={handleImageLoad}
+      />
 
-        <Box>
-          <Text fontSize="2xl" fontWeight="bold">
-            🐑 BEEEEH !
-          </Text>
-          <Text fontSize="md" color={useColorModeValue("gray.600", "gray.400")}>
-            Rien à voir par ici...
-          </Text>
-        </Box>
-      </Flex>
-    </Layout>
+      <Box>
+        <Text fontSize="2xl" fontWeight="bold">
+          🐑 BEEEEH !
+        </Text>
+        <Text fontSize="md" color={useColorModeValue("gray.600", "gray.400")}>
+          Rien à voir par ici...
+        </Text>
+      </Box>
+    </VStack>
   );
 };
 
