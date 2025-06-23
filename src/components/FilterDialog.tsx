@@ -25,9 +25,6 @@ import {
   Text,
   HStack,
   Box,
-  Switch,
-  FormControl,
-  FormLabel,
 } from "@chakra-ui/react";
 import { useRef, useState } from "react";
 import { BsFilter } from "react-icons/bs";
@@ -48,8 +45,7 @@ const hasActiveFilters = (filters: RestaurantFilters) => {
     filters.minRate > 0 ||
     filters.tags.length > 0 ||
     filters.badges.length > 0 ||
-    filters.sortOrder !== defaultRestaurantFilters.sortOrder ||
-    filters.favoritesOnly === true
+    filters.sortOrder !== defaultRestaurantFilters.sortOrder
   );
 };
 
@@ -93,7 +89,11 @@ const FilterDialog = ({
           icon={<BsFilter size={24} />}
           onClick={handleOpen}
           variant="ghost"
+          size="md"
+          isRound
+          _hover={{ bg: useColorModeValue("gray.100", "gray.700") }}
         />
+
         <AnimatePresence>
           {hasActiveFilters(restaurantFilters) && (
             <motion.div
@@ -129,23 +129,6 @@ const FilterDialog = ({
 
           <AlertDialogBody>
             <VStack spacing={4} align="stretch">
-              <FormControl display="flex" alignItems="center">
-                <FormLabel htmlFor="favorites-switch" mb="0" fontWeight="bold">
-                  Mes favoris
-                </FormLabel>
-                <Switch
-                  id="favorites-switch"
-                  isChecked={!!localQuery.favoritesOnly}
-                  onChange={(e) =>
-                    setLocalQuery((prev) => ({
-                      ...prev,
-                      favoritesOnly: e.target.checked,
-                    }))
-                  }
-                  colorScheme="blue"
-                />
-              </FormControl>
-
               <Text fontWeight="bold">Trier par :</Text>
               <Select
                 value={localQuery.sortOrder}

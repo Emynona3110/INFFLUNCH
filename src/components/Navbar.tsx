@@ -23,6 +23,7 @@ import {
   RestaurantFilters,
   userSections,
 } from "../pages/UserPage";
+import FavoritesToggle from "./FavoritesToggle";
 
 interface NavbarProps {
   page: string;
@@ -125,13 +126,24 @@ const Navbar = ({
           <Box flex="1" paddingX={2}>
             <SearchInput onSearch={onSearch} />
           </Box>
-          <FilterDialog
-            restaurantFilters={restaurantFilters}
-            onFilterChange={onFilterChange}
-          />
+
+          <HStack spacing={2}>
+            <FavoritesToggle
+              isChecked={!!restaurantFilters.favoritesOnly}
+              onChange={(checked) =>
+                onFilterChange({ ...restaurantFilters, favoritesOnly: checked })
+              }
+            />
+            <FilterDialog
+              restaurantFilters={restaurantFilters}
+              onFilterChange={onFilterChange}
+            />
+            <ColorModeSwitch />
+          </HStack>
         </>
       )}
-      <ColorModeSwitch />
+
+      {page !== "restaurants" && <ColorModeSwitch />}
     </HStack>
   );
 };
