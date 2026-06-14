@@ -1,43 +1,18 @@
 import {
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
   Heading,
   Text,
   VStack,
   useColorModeValue,
   Stack,
+  Link,
   Alert,
   AlertIcon,
-  Link,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import usePasswordReset from "../hooks/usePasswordReset";
+import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 
 const ForgotPassword = () => {
-  const [email, setEmail] = useState("");
   const navigate = useNavigate();
-  const { requestReset, isLoading, message, success } = usePasswordReset();
-  const location = useLocation();
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const prefill = params.get("email");
-    if (prefill) {
-      setEmail(prefill);
-    }
-  }, [location.search]);
-
-  const isValidEmail = (email: string) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-  const handleReset = async () => {
-    if (!isValidEmail(email)) return;
-    await requestReset(email);
-  };
 
   return (
     <Layout centerContent>
@@ -52,47 +27,19 @@ const ForgotPassword = () => {
       >
         <VStack spacing={2} textAlign="center">
           <Heading size="lg">Mot de passe oublié</Heading>
-          <Text color="gray.500" fontSize="md">
-            Saisissez votre adresse e-mail
-          </Text>
         </VStack>
 
-        {message && (
-          <Alert status={success ? "success" : "error"} borderRadius="md">
-            <AlertIcon />
-            {message}
-          </Alert>
-        )}
-
-        {!success && (
-          <VStack
-            as="form"
-            spacing={4}
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleReset();
-            }}
-          >
-            <FormControl id="email">
-              <FormLabel>Adresse e-mail</FormLabel>
-              <Input
-                type="email"
-                value={email}
-                placeholder="exemple@mail.com"
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </FormControl>
-
-            <Button
-              type="submit"
-              colorScheme="blue"
-              width="full"
-              isLoading={isLoading}
-            >
-              Envoyer le lien
-            </Button>
-          </VStack>
-        )}
+        <Alert status="info" borderRadius="md" alignItems="flex-start">
+          <AlertIcon />
+          <Text>
+            Pour réinitialiser ton mot de passe, contacte <strong>LLS</strong>{" "}
+            (par Teams ou à{" "}
+            <Link href="mailto:contact@infflunch.com" color="blue.500">
+              contact@infflunch.com
+            </Link>
+            ). Un nouveau mot de passe temporaire te sera communiqué.
+          </Text>
+        </Alert>
 
         <Link
           onClick={() => navigate("/login")}

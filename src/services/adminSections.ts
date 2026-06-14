@@ -33,4 +33,10 @@ export const adminSections: AdminSection[] = [
     tableName: "badges",
     columns: ["id", "label"],
   },
+  {
+    label: "Demandes",
+    path: "admin/demandes",
+    tableName: "waiting_list",
+    columns: ["email", "created_at"],
+  },
 ];

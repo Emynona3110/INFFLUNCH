@@ -2,6 +2,7 @@ import { useColorModeValue, Grid, GridItem } from "@chakra-ui/react";
 import { useLocation, useNavigate } from "react-router-dom";
 import AdminNavbar from "../admin/AdminNavbar";
 import DataManager from "../admin/DataManager";
+import AccessRequests from "../admin/AccessRequests";
 import { adminSections } from "../services/adminSections";
 
 export const AdminPage = () => {
@@ -48,7 +49,11 @@ export const AdminPage = () => {
 
       {/* MAIN */}
       <GridItem area="main" overflowY="auto" height="calc(100vh - 60px)">
-        <DataManager section={currentSection ?? adminSections[0]} />
+        {currentSection?.tableName === "waiting_list" ? (
+          <AccessRequests />
+        ) : (
+          <DataManager section={currentSection ?? adminSections[0]} />
+        )}
       </GridItem>
     </Grid>
   );

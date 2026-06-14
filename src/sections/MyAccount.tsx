@@ -12,7 +12,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import useSession from "../hooks/useSession";
-import ConfirmResetPassword from "../components/ConfirmResetPassword";
+import ChangePasswordDialog from "../components/ChangePasswordDialog";
 
 const MyAccount = () => {
   const navigate = useNavigate();
@@ -90,7 +90,7 @@ const MyAccount = () => {
         )}
       </VStack>
 
-      <ConfirmResetPassword
+      <ChangePasswordDialog
         isOpen={isDialogOpen}
         onClose={() => setDialogOpen(false)}
       />

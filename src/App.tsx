@@ -7,7 +7,8 @@ import Wrapper from "./pages/Wrapper";
 import AdminWrapper from "./pages/AdminWrapper";
 import ForgotPassword from "./pages/ForgotPassword";
 import ProtectedRoute from "./components/ProtectedRoute";
-import JoinWaitingList from "./pages/JoinWaitingList";
+import ForcePasswordChangeGate from "./components/ForcePasswordChangeGate";
+import RequestAccessPage from "./pages/RequestAccessPage";
 import ConfirmURLWrapper from "./pages/ConfirmURLWrapper";
 import NewInvite from "./pages/NewInvite";
 
@@ -21,9 +22,11 @@ function App() {
         path="/admin/*"
         element={
           <ProtectedRoute>
-            <AdminWrapper>
-              <AdminPage />
-            </AdminWrapper>
+            <ForcePasswordChangeGate>
+              <AdminWrapper>
+                <AdminPage />
+              </AdminWrapper>
+            </ForcePasswordChangeGate>
           </ProtectedRoute>
         }
       />
@@ -31,16 +34,18 @@ function App() {
         path="/user/*"
         element={
           <ProtectedRoute>
-            <Wrapper>
-              <UserPage />
-            </Wrapper>
+            <ForcePasswordChangeGate>
+              <Wrapper>
+                <UserPage />
+              </Wrapper>
+            </ForcePasswordChangeGate>
           </ProtectedRoute>
         }
       />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/password-oublie" element={<ForgotPassword />} />
       <Route path="/authentification" element={<ConfirmURLWrapper />} />
-      <Route path="/inscription" element={<JoinWaitingList />} />
+      <Route path="/inscription" element={<RequestAccessPage />} />
       <Route path="/invitation-expiree" element={<NewInvite />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>

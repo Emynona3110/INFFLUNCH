@@ -14,20 +14,29 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import useJoinWaitingList from "../hooks/useJoinWaitingList";
+import supabaseClient from "../services/supabaseClient";
 import Layout from "../components/Layout";
 
-const JoinWaitingList = () => {
+const RequestAccessPage = () => {
   const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [done, setDone] = useState(false);
   const navigate = useNavigate();
-  const { join, loading, success, error, message } = useJoinWaitingList();
 
-  const isValidEmail = (email: string) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isValidEmail = (value: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
   const handleSubmit = async () => {
     if (!isValidEmail(email)) return;
-    await join(email);
+    setIsLoading(true);
+
+    // On insère la demande. Les emails hors @infflux.com sont ignorés
+    // silencieusement par un trigger en base : on affiche un succès dans tous
+    // les cas (anti-énumération), et on ignore les erreurs (ex. doublon).
+    await supabaseClient.from("waiting_list").insert({ email });
+
+    setIsLoading(false);
+    setDone(true);
   };
 
   return (
@@ -42,20 +51,27 @@ const JoinWaitingList = () => {
         boxShadow="lg"
       >
         <VStack spacing={2} textAlign="center">
-          <Heading size="lg">Inscription</Heading>
+          <Heading size="lg">Demander un accès</Heading>
           <Text color="gray.500" fontSize="md">
-            Saisissez votre adresse e-mail pour rejoindre la liste d'attente.
+            Réservé aux collaborateurs d'INFFLUX.
           </Text>
         </VStack>
 
-        {(success || error) && (
-          <Alert status={success ? "success" : "error"} borderRadius="md">
-            <AlertIcon />
-            {message}
+        {done ? (
+          <Alert
+            status="success"
+            borderRadius="md"
+            flexDirection="column"
+            textAlign="center"
+            py={6}
+          >
+            <AlertIcon boxSize={6} mr={0} mb={2} />
+            <Text>
+              Demande envoyée ! Si ton adresse est éligible, un administrateur
+              créera ton compte et te transmettra tes identifiants.
+            </Text>
           </Alert>
-        )}
-
-        {!success && (
+        ) : (
           <VStack
             as="form"
             spacing={4}
@@ -65,11 +81,11 @@ const JoinWaitingList = () => {
             }}
           >
             <FormControl id="email">
-              <FormLabel>Adresse e-mail</FormLabel>
+              <FormLabel>Adresse e-mail professionnelle</FormLabel>
               <Input
                 type="email"
                 value={email}
-                placeholder="exemple@mail.com"
+                placeholder="prenom.nom@infflux.com"
                 onChange={(e) => setEmail(e.target.value)}
               />
             </FormControl>
@@ -78,10 +94,10 @@ const JoinWaitingList = () => {
               type="submit"
               colorScheme="blue"
               width="full"
-              isLoading={loading}
+              isLoading={isLoading}
               isDisabled={!isValidEmail(email)}
             >
-              M’inscrire
+              Envoyer ma demande
             </Button>
           </VStack>
         )}
@@ -99,4 +115,4 @@ const JoinWaitingList = () => {
   );
 };
 
-export default JoinWaitingList;
+export default RequestAccessPage;
