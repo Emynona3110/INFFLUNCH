@@ -17,7 +17,7 @@ import {
   Tag,
   useBreakpointValue,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import { BsBan } from "react-icons/bs";
 import supabaseClient from "../services/supabaseClient";
@@ -40,11 +40,6 @@ const AdminTable = ({
   const rowBg = useColorModeValue("white", "gray.900");
   const isMobile = useBreakpointValue({ base: true, md: false });
 
-  const [data, setData] = useState<any[]>([]);
-  const [columnNames, setColumnNames] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>("");
-
   const isBadgeColumn = (col: string) =>
     col.toLowerCase() === "badges" || col.toLowerCase().includes("badge");
 
@@ -57,37 +52,30 @@ const AdminTable = ({
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      setError("");
-
+  const {
+    data = [],
+    isPending: loading,
+    error: queryError,
+  } = useQuery<any[], Error>({
+    queryKey: ["table", tableName, columns],
+    queryFn: async () => {
       let orderField = "label";
       if (tableName === "restaurants") orderField = "slug";
       else if (tableName === "waiting_list") orderField = "email";
 
-      const query = supabaseClient
+      const { data, error } = await supabaseClient
         .from(tableName)
         .select(columns?.join(",") || "*")
         .order(orderField);
 
-      const { data, error } = await query;
+      if (error) throw new Error(error.message);
+      return data ?? [];
+    },
+  });
 
-      if (error) {
-        setError(error.message);
-        setData([]);
-      } else {
-        setData(data ?? []);
-        if (data && data.length > 0) {
-          setColumnNames(columns ?? Object.keys(data[0]));
-        }
-      }
-
-      setLoading(false);
-    };
-
-    fetchData();
-  }, [tableName, columns]);
+  const error = queryError ? queryError.message : "";
+  const columnNames =
+    data.length > 0 ? columns ?? Object.keys(data[0]) : [];
 
   if (loading)
     return (

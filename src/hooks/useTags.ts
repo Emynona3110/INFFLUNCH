@@ -3,14 +3,12 @@ export type Tag = {
   label: string;
 };
 
-import useData from "./useData";
+import useSupabaseQuery from "./useSupabaseQuery";
 import supabaseClient from "../services/supabaseClient";
 
-const useTags = () => {
-  const query = supabaseClient.from("tags").select().order("label");
-  const result = useData<Tag>(query, []);
-
-  return result;
-};
+const useTags = () =>
+  useSupabaseQuery<Tag>(["tags"], () =>
+    supabaseClient.from("tags").select().order("label")
+  );
 
 export default useTags;

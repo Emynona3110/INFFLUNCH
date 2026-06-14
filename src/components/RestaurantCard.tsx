@@ -42,7 +42,6 @@ const RestaurantCard = ({
 
     try {
       await onLikeToggle(next);
-      window.dispatchEvent(new Event("favorites:updated"));
     } catch (err) {
       setIsLikedLocal(previous);
       toast({

@@ -14,6 +14,7 @@ import {
   AlertDialogCloseButton,
 } from "@chakra-ui/react";
 import { useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import AdminTable from "./AdminTable";
 import { AdminSection } from "../services/adminSections";
 import supabaseClient from "../services/supabaseClient";
@@ -28,17 +29,19 @@ const DataManager = ({ section }: DataManagerProps) => {
   const { label, tableName, columns } = section;
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editData, setEditData] = useState<any | null>(null);
-  const [reloadKey, setReloadKey] = useState(0);
 
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
 
   const toast = useToast();
+  const queryClient = useQueryClient();
 
   const handleSuccess = () => {
     setIsDialogOpen(false);
     setEditData(null);
-    setReloadKey((k) => k + 1);
+    // Rafraîchit la table admin ainsi que les caches dérivés (tags, badges,
+    // restaurants) utilisés ailleurs dans l'app.
+    queryClient.invalidateQueries();
   };
 
   const confirmDelete = async () => {
@@ -122,7 +125,6 @@ const DataManager = ({ section }: DataManagerProps) => {
         </HStack>
 
         <AdminTable
-          key={reloadKey}
           tableName={tableName}
           columns={columns}
           onEdit={(data) => {

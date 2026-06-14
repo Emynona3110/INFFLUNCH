@@ -3,13 +3,12 @@ export type Badge = {
   label: string;
 };
 
-import useData from "./useData";
+import useSupabaseQuery from "./useSupabaseQuery";
 import supabaseClient from "../services/supabaseClient";
 
-const useBadges = () => {
-  const query = supabaseClient.from("badges").select().order("label");
-
-  return useData<Badge>(query, []);
-};
+const useBadges = () =>
+  useSupabaseQuery<Badge>(["badges"], () =>
+    supabaseClient.from("badges").select().order("label")
+  );
 
 export default useBadges;

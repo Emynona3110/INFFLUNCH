@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import useSession from "./useSession";
 import supabaseClient from "../services/supabaseClient";
 
@@ -10,68 +10,58 @@ interface Favorite {
 }
 
 const useFavorites = () => {
-  const { sessionData, loading: sessionLoading } = useSession();
-  const [favorites, setFavorites] = useState<Favorite[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [refreshIndex, setRefreshIndex] = useState(0);
+  const { sessionData } = useSession();
+  const userId = sessionData?.user?.id;
+  const queryClient = useQueryClient();
+  const queryKey = ["favorites", userId];
 
-  const fetchFavorites = async () => {
-    if (!sessionData?.user?.id) return;
+  const {
+    data: favorites = [],
+    isPending,
+    error,
+  } = useQuery<Favorite[], Error>({
+    queryKey,
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data, error } = await supabaseClient
+        .from("favorites")
+        .select("*")
+        .eq("user_id", userId);
+      if (error) throw new Error(error.message);
+      return data ?? [];
+    },
+  });
 
-    const { data, error } = await supabaseClient
-      .from("favorites")
-      .select("*")
-      .eq("user_id", sessionData.user.id);
+  const invalidate = () => queryClient.invalidateQueries({ queryKey });
 
-    if (error) {
-      setError(error.message);
-      setFavorites([]);
-    } else {
-      setFavorites(data);
-    }
+  const addMutation = useMutation({
+    mutationFn: async (restaurantId: number) => {
+      const { error } = await supabaseClient
+        .from("favorites")
+        .insert({ user_id: userId, restaurant_id: restaurantId });
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: invalidate,
+  });
 
-    setLoading(false);
-  };
-
-  const addFavorite = async (restaurantId: number) => {
-    const { error } = await supabaseClient.from("favorites").insert({
-      user_id: sessionData?.user?.id,
-      restaurant_id: restaurantId,
-    });
-    if (error) throw new Error(error.message);
-    setRefreshIndex((i) => i + 1);
-  };
-
-  const removeFavorite = async (restaurantId: number) => {
-    const { error } = await supabaseClient.from("favorites").delete().match({
-      user_id: sessionData?.user?.id,
-      restaurant_id: restaurantId,
-    });
-    if (error) throw new Error(error.message);
-    setRefreshIndex((i) => i + 1);
-  };
-
-  useEffect(() => {
-    if (!sessionLoading && sessionData?.user?.id) {
-      fetchFavorites();
-    }
-  }, [sessionLoading, sessionData?.user?.id, refreshIndex]);
-
-  useEffect(() => {
-    const handler = () => setRefreshIndex((i) => i + 1);
-    window.addEventListener("favorites:updated", handler);
-    return () => window.removeEventListener("favorites:updated", handler);
-  }, []);
+  const removeMutation = useMutation({
+    mutationFn: async (restaurantId: number) => {
+      const { error } = await supabaseClient
+        .from("favorites")
+        .delete()
+        .match({ user_id: userId, restaurant_id: restaurantId });
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: invalidate,
+  });
 
   return {
     favorites,
     restaurantIds: favorites.map((f) => f.restaurant_id),
-    loading,
-    error,
-    refreshFavorites: fetchFavorites,
-    addFavorite,
-    removeFavorite,
+    loading: !!userId && isPending,
+    error: error ? error.message : null,
+    addFavorite: addMutation.mutateAsync,
+    removeFavorite: removeMutation.mutateAsync,
   };
 };
 

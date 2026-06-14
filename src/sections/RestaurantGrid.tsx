@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Box, SimpleGrid, Text } from "@chakra-ui/react";
 import RestaurantCard from "../components/RestaurantCard";
 import RestaurantCardSkeleton from "../components/RestaurantCardSkeleton";
@@ -22,7 +21,6 @@ const RestaurantGrid = ({ restaurantFilters }: RestaurantGridProps) => {
     loading: favoritesLoading,
     addFavorite,
     removeFavorite,
-    refreshFavorites,
   } = useFavorites();
 
   const topRated = !topRatedResult.error
@@ -34,10 +32,6 @@ const RestaurantGrid = ({ restaurantFilters }: RestaurantGridProps) => {
   const filteredData = restaurantFilters.favoritesOnly
     ? data.filter((r) => favoriteIds.includes(r.id))
     : data;
-
-  useEffect(() => {
-    refreshFavorites?.();
-  }, []);
 
   if (error) {
     return (
