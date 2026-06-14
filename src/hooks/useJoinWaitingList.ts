@@ -13,31 +13,23 @@ const useJoinWaitingList = () => {
     setError(null);
     setMessage("");
 
-    // Vérifie si l'email est déjà présent
-    const { data, error: checkError } = await supabaseClient
+    // Le dédoublonnage est garanti par une contrainte UNIQUE en base : on insère
+    // directement (la lecture de waiting_list est désormais réservée aux admins).
+    const { error: insertError } = await supabaseClient
       .from("waiting_list")
-      .select("email")
-      .eq("email", email);
+      .insert({ email });
 
-    if (checkError) {
-      setError("Erreur lors de la vérification.");
-      setMessage(checkError.message);
-      setLoading(false);
-      return;
-    }
-
-    if (!data || data.length === 0) {
-      // Insertion si l'e-mail n'existe pas
-      const { error: insertError } = await supabaseClient
-        .from("waiting_list")
-        .insert({ email });
-
-      if (insertError) {
+    if (insertError) {
+      // 23505 = violation de contrainte unique => email déjà inscrit
+      if (insertError.code === "23505") {
+        setSuccess(true);
+        setMessage("Cette adresse est déjà enregistrée.");
+      } else {
         setError("Erreur lors de l'inscription.");
         setMessage(insertError.message);
-        setLoading(false);
-        return;
       }
+      setLoading(false);
+      return;
     }
 
     setSuccess(true);
