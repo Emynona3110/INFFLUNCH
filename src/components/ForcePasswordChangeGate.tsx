@@ -3,10 +3,7 @@ import {
   AlertIcon,
   Button,
   Center,
-  FormControl,
-  FormLabel,
   Heading,
-  Input,
   Spinner,
   Stack,
   Text,
@@ -17,6 +14,7 @@ import { ReactNode, useState } from "react";
 import supabaseClient from "../services/supabaseClient";
 import useSession from "../hooks/useSession";
 import Layout from "./Layout";
+import PasswordField from "./PasswordField";
 
 interface Props {
   children: ReactNode;
@@ -102,28 +100,18 @@ const ForcePasswordChangeGate = ({ children }: Props) => {
             handleSubmit();
           }}
         >
-          <FormControl id="new-password">
-            <FormLabel>Nouveau mot de passe</FormLabel>
-            <Input
-              type="password"
-              value={password}
-              placeholder="••••••••"
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </FormControl>
+          <PasswordField
+            label="Nouveau mot de passe"
+            value={password}
+            onChange={setPassword}
+          />
 
-          <FormControl
-            id="confirm-password"
+          <PasswordField
+            label="Confirme le mot de passe"
+            value={confirm}
+            onChange={setConfirm}
             isInvalid={confirm !== "" && confirm !== password}
-          >
-            <FormLabel>Confirme le mot de passe</FormLabel>
-            <Input
-              type="password"
-              value={confirm}
-              placeholder="••••••••"
-              onChange={(e) => setConfirm(e.target.value)}
-            />
-          </FormControl>
+          />
 
           <Button
             type="submit"

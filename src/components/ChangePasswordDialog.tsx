@@ -7,9 +7,6 @@ import {
   ModalFooter,
   ModalCloseButton,
   Button,
-  FormControl,
-  FormLabel,
-  Input,
   VStack,
   Alert,
   AlertIcon,
@@ -18,6 +15,7 @@ import {
 import { useState } from "react";
 import supabaseClient from "../services/supabaseClient";
 import useSession from "../hooks/useSession";
+import PasswordField from "./PasswordField";
 
 interface ChangePasswordDialogProps {
   isOpen: boolean;
@@ -109,35 +107,22 @@ const ChangePasswordDialog = ({ isOpen, onClose }: ChangePasswordDialogProps) =>
               </Alert>
             )}
 
-            <FormControl id="old-password">
-              <FormLabel>Ancien mot de passe</FormLabel>
-              <Input
-                type="password"
-                value={oldPassword}
-                onChange={(e) => setOldPassword(e.target.value)}
-              />
-            </FormControl>
-
-            <FormControl id="new-password">
-              <FormLabel>Nouveau mot de passe</FormLabel>
-              <Input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-              />
-            </FormControl>
-
-            <FormControl
-              id="confirm-password"
+            <PasswordField
+              label="Ancien mot de passe"
+              value={oldPassword}
+              onChange={setOldPassword}
+            />
+            <PasswordField
+              label="Nouveau mot de passe"
+              value={newPassword}
+              onChange={setNewPassword}
+            />
+            <PasswordField
+              label="Confirmer le nouveau mot de passe"
+              value={confirm}
+              onChange={setConfirm}
               isInvalid={confirm !== "" && confirm !== newPassword}
-            >
-              <FormLabel>Confirmer le nouveau mot de passe</FormLabel>
-              <Input
-                type="password"
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-              />
-            </FormControl>
+            />
           </VStack>
         </ModalBody>
         <ModalFooter>

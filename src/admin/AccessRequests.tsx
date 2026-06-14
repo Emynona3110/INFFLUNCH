@@ -1,4 +1,5 @@
 import {
+  Badge,
   Box,
   Button,
   Center,
@@ -31,18 +32,30 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FiCopy } from "react-icons/fi";
 import supabaseClient from "../services/supabaseClient";
 
+type RequestType = "creation" | "password_reset";
+type RequestState = "Waiting" | "Accepted" | "Rejected";
+
 interface AccessRequest {
+  id: number;
   email: string;
+  type: RequestType;
+  state: RequestState;
   created_at: string;
 }
+
+const typeLabel: Record<RequestType, string> = {
+  creation: "Création de compte",
+  password_reset: "Réinit. mot de passe",
+};
 
 const AccessRequests = () => {
   const queryClient = useQueryClient();
   const toast = useToast();
   const rowBg = useColorModeValue("white", "gray.900");
   const headerBg = useColorModeValue("gray.100", "gray.800");
+  const mutedColor = useColorModeValue("gray.400", "gray.600");
 
-  const [creatingEmail, setCreatingEmail] = useState<string | null>(null);
+  const [processingId, setProcessingId] = useState<number | null>(null);
   const [credentials, setCredentials] = useState<{
     email: string;
     tempPassword: string;
@@ -57,23 +70,31 @@ const AccessRequests = () => {
     queryFn: async () => {
       const { data, error } = await supabaseClient
         .from("waiting_list")
-        .select("email, created_at")
-        .order("created_at", { ascending: true });
+        .select("id, email, type, state, created_at")
+        .order("created_at", { ascending: false });
       if (error) throw new Error(error.message);
-      return data ?? [];
+      return (data ?? []) as AccessRequest[];
     },
   });
 
-  const handleCreate = async (email: string) => {
-    setCreatingEmail(email);
+  // Demandes en attente d'abord, puis l'historique
+  const sorted = [...requests].sort((a, b) => {
+    if (a.state === "Waiting" && b.state !== "Waiting") return -1;
+    if (a.state !== "Waiting" && b.state === "Waiting") return 1;
+    return 0;
+  });
+
+  const setState = (id: number, state: RequestState) =>
+    supabaseClient.from("waiting_list").update({ state }).eq("id", id);
+
+  const handleAccept = async (req: AccessRequest) => {
+    setProcessingId(req.id);
     const { data, error } = await supabaseClient.functions.invoke(
       "admin-create-user",
-      { body: { email } }
+      { body: { email: req.email, type: req.type } }
     );
-    setCreatingEmail(null);
 
     if (error || data?.error) {
-      // Le message d'erreur de la fonction est dans data.error (réponse non-2xx)
       let description = data?.error;
       if (!description && error?.context) {
         try {
@@ -82,8 +103,9 @@ const AccessRequests = () => {
           /* ignore */
         }
       }
+      setProcessingId(null);
       toast({
-        title: "Création impossible",
+        title: "Action impossible",
         description: description || "Une erreur est survenue.",
         status: "error",
         duration: 5000,
@@ -92,7 +114,26 @@ const AccessRequests = () => {
       return;
     }
 
+    await setState(req.id, "Accepted");
+    setProcessingId(null);
     setCredentials({ email: data.email, tempPassword: data.tempPassword });
+    queryClient.invalidateQueries({ queryKey: ["access-requests"] });
+  };
+
+  const handleReject = async (req: AccessRequest) => {
+    setProcessingId(req.id);
+    const { error } = await setState(req.id, "Rejected");
+    setProcessingId(null);
+    if (error) {
+      toast({
+        title: "Erreur",
+        description: error.message,
+        status: "error",
+        duration: 4000,
+        isClosable: true,
+      });
+      return;
+    }
     queryClient.invalidateQueries({ queryKey: ["access-requests"] });
   };
 
@@ -112,46 +153,76 @@ const AccessRequests = () => {
           </Center>
         ) : error ? (
           <Text color="red.500">Erreur : {error.message}</Text>
-        ) : requests.length === 0 ? (
-          <Text color="gray.500">Aucune demande en attente.</Text>
+        ) : sorted.length === 0 ? (
+          <Text color="gray.500">Aucune demande.</Text>
         ) : (
           <Box borderWidth="1px" borderRadius="md" overflowX="auto">
-            <Table variant="striped" size="sm">
+            <Table variant="simple" size="sm">
               <Thead>
                 <Tr>
                   <Th bg={headerBg}>Email</Th>
-                  <Th bg={headerBg}>Demandé le</Th>
+                  <Th bg={headerBg}>Type</Th>
+                  <Th bg={headerBg}>Date</Th>
                   <Th bg={headerBg} textAlign="right">
-                    Action
+                    Statut / Action
                   </Th>
                 </Tr>
               </Thead>
               <Tbody>
-                {requests.map((req) => (
-                  <Tr key={req.email} bg={rowBg}>
-                    <Td>{req.email}</Td>
-                    <Td>
-                      {new Date(req.created_at).toLocaleDateString("fr-FR")}
-                    </Td>
-                    <Td textAlign="right">
-                      <Button
-                        size="sm"
-                        colorScheme="blue"
-                        isLoading={creatingEmail === req.email}
-                        onClick={() => handleCreate(req.email)}
-                      >
-                        Créer le compte
-                      </Button>
-                    </Td>
-                  </Tr>
-                ))}
+                {sorted.map((req) => {
+                  const pending = req.state === "Waiting";
+                  return (
+                    <Tr
+                      key={req.id}
+                      bg={rowBg}
+                      color={pending ? undefined : mutedColor}
+                    >
+                      <Td>{req.email}</Td>
+                      <Td>{typeLabel[req.type]}</Td>
+                      <Td>
+                        {new Date(req.created_at).toLocaleDateString("fr-FR")}
+                      </Td>
+                      <Td textAlign="right">
+                        {pending ? (
+                          <HStack justify="flex-end" spacing={2}>
+                            <Button
+                              size="sm"
+                              colorScheme="green"
+                              isLoading={processingId === req.id}
+                              onClick={() => handleAccept(req)}
+                            >
+                              Accepter
+                            </Button>
+                            <Button
+                              size="sm"
+                              colorScheme="red"
+                              variant="outline"
+                              isDisabled={processingId === req.id}
+                              onClick={() => handleReject(req)}
+                            >
+                              Refuser
+                            </Button>
+                          </HStack>
+                        ) : (
+                          <Badge
+                            colorScheme={
+                              req.state === "Accepted" ? "green" : "red"
+                            }
+                          >
+                            {req.state === "Accepted" ? "Acceptée" : "Refusée"}
+                          </Badge>
+                        )}
+                      </Td>
+                    </Tr>
+                  );
+                })}
               </Tbody>
             </Table>
           </Box>
         )}
       </VStack>
 
-      {/* Affichage du mot de passe temporaire après création */}
+      {/* Mot de passe temporaire après acceptation */}
       <Modal
         isOpen={credentials !== null}
         onClose={() => setCredentials(null)}
@@ -159,13 +230,14 @@ const AccessRequests = () => {
       >
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Compte créé ✅</ModalHeader>
+          <ModalHeader>Demande acceptée ✅</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <VStack align="stretch" spacing={3}>
               <Text>
                 Transmets ces identifiants à <b>{credentials?.email}</b> via
-                Teams. Il devra changer son mot de passe à la première connexion.
+                Teams. Le mot de passe devra être changé à la prochaine
+                connexion.
               </Text>
               <Box>
                 <Text fontSize="sm" color="gray.500">

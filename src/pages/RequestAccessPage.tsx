@@ -53,7 +53,7 @@ const RequestAccessPage = () => {
         <VStack spacing={2} textAlign="center">
           <Heading size="lg">Demander un accès</Heading>
           <Text color="gray.500" fontSize="md">
-            Réservé aux collaborateurs d'INFFLUX.
+            Saisis ton adresse e-mail pour envoyer une demande.
           </Text>
         </VStack>
 
@@ -81,11 +81,10 @@ const RequestAccessPage = () => {
             }}
           >
             <FormControl id="email">
-              <FormLabel>Adresse e-mail professionnelle</FormLabel>
+              <FormLabel>Adresse e-mail</FormLabel>
               <Input
                 type="email"
                 value={email}
-                placeholder="prenom.nom@infflux.com"
                 onChange={(e) => setEmail(e.target.value)}
               />
             </FormControl>

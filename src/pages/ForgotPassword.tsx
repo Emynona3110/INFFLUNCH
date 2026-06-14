@@ -1,18 +1,44 @@
 import {
+  Button,
+  FormControl,
+  FormLabel,
+  Input,
   Heading,
   Text,
   VStack,
   useColorModeValue,
   Stack,
-  Link,
   Alert,
   AlertIcon,
+  Link,
 } from "@chakra-ui/react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import supabaseClient from "../services/supabaseClient";
 import Layout from "../components/Layout";
 
 const ForgotPassword = () => {
+  const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [done, setDone] = useState(false);
   const navigate = useNavigate();
+
+  const isValidEmail = (value: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+  const handleSubmit = async () => {
+    if (!isValidEmail(email)) return;
+    setIsLoading(true);
+
+    // Crée une demande de réinitialisation. Les emails hors domaine sont
+    // ignorés silencieusement en base ; succès affiché dans tous les cas.
+    await supabaseClient
+      .from("waiting_list")
+      .insert({ email, type: "password_reset" });
+
+    setIsLoading(false);
+    setDone(true);
+  };
 
   return (
     <Layout centerContent>
@@ -27,19 +53,54 @@ const ForgotPassword = () => {
       >
         <VStack spacing={2} textAlign="center">
           <Heading size="lg">Mot de passe oublié</Heading>
+          <Text color="gray.500" fontSize="md">
+            Saisis ton adresse e-mail pour demander une réinitialisation.
+          </Text>
         </VStack>
 
-        <Alert status="info" borderRadius="md" alignItems="flex-start">
-          <AlertIcon />
-          <Text>
-            Pour réinitialiser ton mot de passe, contacte <strong>LLS</strong>{" "}
-            (par Teams ou à{" "}
-            <Link href="mailto:contact@infflunch.com" color="blue.500">
-              contact@infflunch.com
-            </Link>
-            ). Un nouveau mot de passe temporaire te sera communiqué.
-          </Text>
-        </Alert>
+        {done ? (
+          <Alert
+            status="success"
+            borderRadius="md"
+            flexDirection="column"
+            textAlign="center"
+            py={6}
+          >
+            <AlertIcon boxSize={6} mr={0} mb={2} />
+            <Text>
+              Demande envoyée ! Si un compte correspond, un administrateur te
+              transmettra un nouveau mot de passe temporaire.
+            </Text>
+          </Alert>
+        ) : (
+          <VStack
+            as="form"
+            spacing={4}
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmit();
+            }}
+          >
+            <FormControl id="email">
+              <FormLabel>Adresse e-mail</FormLabel>
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </FormControl>
+
+            <Button
+              type="submit"
+              colorScheme="blue"
+              width="full"
+              isLoading={isLoading}
+              isDisabled={!isValidEmail(email)}
+            >
+              Envoyer ma demande
+            </Button>
+          </VStack>
+        )}
 
         <Link
           onClick={() => navigate("/login")}

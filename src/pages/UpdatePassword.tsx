@@ -178,7 +178,6 @@ const UpdatePassword = () => {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
                 />
                 <InputRightElement>
                   <IconButton
@@ -189,7 +188,7 @@ const UpdatePassword = () => {
                         ? "Masquer le mot de passe"
                         : "Afficher le mot de passe"
                     }
-                    icon={showPassword ? <VscEyeClosed /> : <VscEye />}
+                    icon={showPassword ? <VscEye /> : <VscEyeClosed />}
                     onClick={() => setShowPassword((prev) => !prev)}
                   />
                 </InputRightElement>
@@ -203,7 +202,6 @@ const UpdatePassword = () => {
                   type={showConfirm ? "text" : "password"}
                   value={confirm}
                   onChange={(e) => setConfirm(e.target.value)}
-                  placeholder="••••••••"
                 />
                 <InputRightElement>
                   <IconButton
@@ -214,7 +212,7 @@ const UpdatePassword = () => {
                         ? "Masquer la confirmation"
                         : "Afficher la confirmation"
                     }
-                    icon={showConfirm ? <VscEyeClosed /> : <VscEye />}
+                    icon={showConfirm ? <VscEye /> : <VscEyeClosed />}
                     onClick={() => setShowConfirm((prev) => !prev)}
                   />
                 </InputRightElement>

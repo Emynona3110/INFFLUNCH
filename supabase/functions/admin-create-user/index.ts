@@ -1,13 +1,13 @@
 // Edge Function : admin-create-user
-// Crée un compte utilisateur à partir d'une demande d'accès.
-// - Vérifie que l'appelant est un admin (via son JWT)
-// - Crée le compte avec un mot de passe temporaire (compte actif, sans email)
-// - Marque must_change_password=true (changement forcé à la 1ère connexion)
-// - Retire la demande de waiting_list
-// - Renvoie le mot de passe temporaire à l'admin (à transmettre via Teams)
+// Traite une demande d'accès depuis le panneau admin :
+//   - type "creation"       → crée le compte avec un mot de passe temporaire
+//   - type "password_reset" → réinitialise le mot de passe d'un compte existant
+// Dans les deux cas : must_change_password=true (changement forcé à la connexion)
+// et renvoie le mot de passe temporaire à l'admin (à transmettre via Teams).
+// Le statut de la demande (Accepted/Rejected) est mis à jour côté front.
 //
-// Déploiement : Dashboard Supabase → Edge Functions → New function → coller ce code.
-// Les variables SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY sont injectées automatiquement.
+// Déploiement : Dashboard Supabase → Edge Functions → coller ce code → Deploy.
+// SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY sont injectés automatiquement.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -28,7 +28,6 @@ function json(body: unknown, status: number) {
 }
 
 function genTempPassword(len = 12): string {
-  // Jeu de caractères sans ambiguïté (pas de 0/O, 1/l/I)
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
   const arr = new Uint32Array(len);
   crypto.getRandomValues(arr);
@@ -70,34 +69,62 @@ Deno.serve(async (req) => {
       return json({ error: "Action réservée aux administrateurs." }, 403);
     }
 
-    // 3) Valider l'email cible
-    const { email } = await req.json().catch(() => ({}));
+    // 3) Valider l'entrée
+    const { email, type = "creation" } = await req.json().catch(() => ({}));
     if (!email || !String(email).toLowerCase().endsWith(ALLOWED_DOMAIN)) {
       return json({ error: `Une adresse ${ALLOWED_DOMAIN} est requise.` }, 400);
     }
-
-    // 4) Créer le compte avec mot de passe temporaire
-    const tempPassword = genTempPassword();
-    const { error: createErr } = await admin.auth.admin.createUser({
-      email,
-      password: tempPassword,
-      email_confirm: true,
-      user_metadata: { must_change_password: true },
-    });
-    if (createErr) {
-      const already = /already.*(registered|exists)/i.test(createErr.message);
-      return json(
-        {
-          error: already
-            ? "Un compte existe déjà pour cette adresse."
-            : createErr.message,
-        },
-        already ? 409 : 400
-      );
+    if (type !== "creation" && type !== "password_reset") {
+      return json({ error: "Type de demande invalide." }, 400);
     }
 
-    // 5) Retirer la demande de la liste d'attente
-    await admin.from("waiting_list").delete().eq("email", email);
+    const tempPassword = genTempPassword();
+
+    if (type === "creation") {
+      // 4a) Créer le compte
+      const { error: createErr } = await admin.auth.admin.createUser({
+        email,
+        password: tempPassword,
+        email_confirm: true,
+        user_metadata: { must_change_password: true },
+      });
+      if (createErr) {
+        const already = /already.*(registered|exists)/i.test(createErr.message);
+        return json(
+          {
+            error: already
+              ? "Un compte existe déjà pour cette adresse."
+              : createErr.message,
+          },
+          already ? 409 : 400
+        );
+      }
+    } else {
+      // 4b) Réinitialiser le mot de passe d'un compte existant
+      const { data: target } = await admin
+        .from("users")
+        .select("id")
+        .eq("email", email)
+        .maybeSingle();
+      if (!target) {
+        return json({ error: "Aucun compte pour cette adresse." }, 404);
+      }
+
+      // Fusionner les métadonnées pour ne pas écraser le rôle
+      const { data: got } = await admin.auth.admin.getUserById(target.id);
+      const meta = {
+        ...(got.user?.user_metadata ?? {}),
+        must_change_password: true,
+      };
+
+      const { error: updErr } = await admin.auth.admin.updateUserById(
+        target.id,
+        { password: tempPassword, user_metadata: meta }
+      );
+      if (updErr) {
+        return json({ error: updErr.message }, 400);
+      }
+    }
 
     return json({ email, tempPassword }, 200);
   } catch (e) {

@@ -84,7 +84,6 @@ const LoginPage = () => {
             <Input
               type="email"
               value={email}
-              placeholder="exemple@mail.com"
               onChange={(e) => setEmail(e.target.value)}
               required
             />
@@ -96,7 +95,6 @@ const LoginPage = () => {
               <Input
                 type={showPassword ? "text" : "password"}
                 value={password}
-                placeholder="••••••••"
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
@@ -109,7 +107,7 @@ const LoginPage = () => {
                       ? "Masquer le mot de passe"
                       : "Afficher le mot de passe"
                   }
-                  icon={showPassword ? <VscEyeClosed /> : <VscEye />}
+                  icon={showPassword ? <VscEye /> : <VscEyeClosed />}
                   onClick={() => setShowPassword((prev) => !prev)}
                 />
               </InputRightElement>
