@@ -10,7 +10,7 @@ import {
   Image,
   useToast,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Restaurant } from "../hooks/useRestaurants";
 import RestaurantRating from "./StarRating";
 import TagsList from "./TagsList";
@@ -34,6 +34,13 @@ const RestaurantCard = ({
 }: RestaurantCardProps) => {
   const toast = useToast();
   const [isLikedLocal, setIsLikedLocal] = useState(liked);
+
+  // Resynchronise l'état local quand la prop change (ex. favoris chargés après
+  // le premier rendu, juste après le login) — sinon le cœur reste vide jusqu'au
+  // rechargement de la page.
+  useEffect(() => {
+    setIsLikedLocal(liked);
+  }, [liked]);
 
   const toggleLike = async () => {
     const previous = isLikedLocal;

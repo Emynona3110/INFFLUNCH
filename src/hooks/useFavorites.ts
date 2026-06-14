@@ -10,7 +10,7 @@ interface Favorite {
 }
 
 const useFavorites = () => {
-  const { sessionData } = useSession();
+  const { sessionData, loading: sessionLoading } = useSession();
   const userId = sessionData?.user?.id;
   const queryClient = useQueryClient();
   const queryKey = ["favorites", userId];
@@ -58,7 +58,10 @@ const useFavorites = () => {
   return {
     favorites,
     restaurantIds: favorites.map((f) => f.restaurant_id),
-    loading: !!userId && isPending,
+    // Reste "loading" tant que la session n'est pas résolue OU que la requête
+    // favoris est en cours : évite d'afficher les cartes (cœurs vides) avant que
+    // les favoris ne soient connus, juste après le login.
+    loading: sessionLoading || (!!userId && isPending),
     error: error ? error.message : null,
     addFavorite: addMutation.mutateAsync,
     removeFavorite: removeMutation.mutateAsync,
