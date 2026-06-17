@@ -1,20 +1,10 @@
-import {
-  Alert,
-  AlertIcon,
-  Button,
-  Center,
-  Heading,
-  Spinner,
-  Stack,
-  Text,
-  useColorModeValue,
-  VStack,
-} from "@chakra-ui/react";
 import { ReactNode, useState } from "react";
 import supabaseClient from "../services/supabaseClient";
 import useSession from "../hooks/useSession";
 import Layout from "./Layout";
 import PasswordField from "./PasswordField";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   children: ReactNode;
@@ -34,13 +24,11 @@ const ForcePasswordChangeGate = ({ children }: Props) => {
   const mustChange =
     sessionData?.user?.user_metadata?.must_change_password === true;
 
-  const cardBg = useColorModeValue("white", "gray.900");
-
   if (loading) {
     return (
-      <Center h="100vh">
-        <Spinner size="xl" />
-      </Center>
+      <div className="tw-scope flex h-screen items-center justify-center bg-background">
+        <div className="h-10 w-10 animate-spin rounded-full border-2 border-border border-t-primary" />
+      </div>
     );
   }
 
@@ -69,61 +57,51 @@ const ForcePasswordChangeGate = ({ children }: Props) => {
 
   return (
     <Layout centerContent>
-      <Stack
-        spacing={6}
-        maxW="md"
-        width="100%"
-        p={8}
-        borderRadius="md"
-        bg={cardBg}
-        boxShadow="lg"
-      >
-        <VStack spacing={2} textAlign="center">
-          <Heading size="lg">Choisis ton mot de passe</Heading>
-          <Text color="gray.500" fontSize="md">
-            Pour ta première connexion, remplace le mot de passe temporaire.
-          </Text>
-        </VStack>
+      <div className="tw-scope w-full max-w-md">
+        <Card className="p-8">
+          <div className="text-center">
+            <div
+              role="heading"
+              aria-level={1}
+              className="font-display text-2xl font-extrabold text-card-foreground"
+            >
+              Choisis ton mot de passe
+            </div>
+            <p className="mt-1 text-sm text-foreground/60">
+              Pour ta première connexion, remplace le mot de passe temporaire.
+            </p>
+          </div>
 
-        {error && (
-          <Alert status="error" borderRadius="md">
-            <AlertIcon />
-            {error}
-          </Alert>
-        )}
+          {error && (
+            <div className="mt-5 rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
+              {error}
+            </div>
+          )}
 
-        <VStack
-          as="form"
-          spacing={4}
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSubmit();
-          }}
-        >
-          <PasswordField
-            label="Nouveau mot de passe"
-            value={password}
-            onChange={setPassword}
-          />
-
-          <PasswordField
-            label="Confirme le mot de passe"
-            value={confirm}
-            onChange={setConfirm}
-            isInvalid={confirm !== "" && confirm !== password}
-          />
-
-          <Button
-            type="submit"
-            colorScheme="blue"
-            width="full"
-            isLoading={isLoading}
-            isDisabled={!canSubmit}
+          <form
+            className="mt-6 flex flex-col gap-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmit();
+            }}
           >
-            Valider
-          </Button>
-        </VStack>
-      </Stack>
+            <PasswordField
+              label="Nouveau mot de passe"
+              value={password}
+              onChange={setPassword}
+            />
+            <PasswordField
+              label="Confirme le mot de passe"
+              value={confirm}
+              onChange={setConfirm}
+              isInvalid={confirm !== "" && confirm !== password}
+            />
+            <Button type="submit" disabled={isLoading || !canSubmit} className="w-full">
+              {isLoading ? "…" : "Valider"}
+            </Button>
+          </form>
+        </Card>
+      </div>
     </Layout>
   );
 };

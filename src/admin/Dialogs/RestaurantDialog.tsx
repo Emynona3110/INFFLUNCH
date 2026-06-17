@@ -1,28 +1,5 @@
-import {
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogCloseButton,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogOverlay,
-  Button,
-  FormControl,
-  FormLabel,
-  Grid,
-  GridItem,
-  Input,
-  Select,
-  Tag,
-  TagCloseButton,
-  TagLabel,
-  useColorModeValue,
-  useToast,
-  VStack,
-  Wrap,
-  WrapItem,
-} from "@chakra-ui/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "@/lib/toast";
 import supabaseClient from "../../services/supabaseClient";
 import useTags from "../../hooks/useTags";
 import { slugify } from "../../utils/slugify";
@@ -30,6 +7,10 @@ import useLocations from "../../hooks/useLocations";
 import { Restaurant } from "../../hooks/useRestaurants";
 import BadgesToggles from "../../components/BadgesToggles";
 import badgeMap from "../../services/badgeMap";
+import { FiChevronDown } from "react-icons/fi";
+import { Dialog, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface RestaurantDialogProps {
   isOpen: boolean;
@@ -44,8 +25,6 @@ const RestaurantDialog = ({
   onSuccess,
   initialData,
 }: RestaurantDialogProps) => {
-  const cancelRef = useRef<HTMLButtonElement>(null);
-  const toast = useToast();
 
   const [name, setName] = useState("");
   const [image, setImage] = useState("");
@@ -249,154 +228,129 @@ const RestaurantDialog = ({
     onClose();
   };
 
-  const renderSelectable = (
-    label: string,
-    items: string[],
-    setItems: (items: string[]) => void,
-    available: string[],
-    placeholder: string
-  ) => (
-    <FormControl>
-      <FormLabel fontWeight="bold">{label}</FormLabel>
-      <Wrap mb={2}>
-        {items.map((item) => (
-          <WrapItem key={item}>
-            <Tag>
-              <TagLabel>{item}</TagLabel>
-              <TagCloseButton
-                onClick={() => setItems(items.filter((t) => t !== item))}
-              />
-            </Tag>
-          </WrapItem>
-        ))}
-      </Wrap>
-      <Select
-        placeholder={placeholder}
-        onChange={(e) => {
-          const value = e.target.value;
-          if (value && !items.includes(value)) {
-            setItems([...items, value].sort());
-          }
-        }}
-        value=""
-      >
-        {available
-          .filter((opt) => !items.includes(opt))
-          .sort()
-          .map((opt) => (
-            <option key={opt} value={opt}>
-              {opt}
-            </option>
-          ))}
-      </Select>
-    </FormControl>
-  );
+  const tagOptions = (availableTags ?? [])
+    .map((t) => t.label)
+    .filter((o) => !tags.includes(o))
+    .sort();
 
   return (
-    <AlertDialog
-      isOpen={isOpen}
-      leastDestructiveRef={cancelRef}
-      onClose={onClose}
-      isCentered
-    >
-      <AlertDialogOverlay />
-      <AlertDialogContent
-        bg={useColorModeValue("white", "gray.900")}
-        maxW={{ base: "100%", md: "4xl" }}
-        mx={{ base: 4, md: "auto" }}
-      >
-        <AlertDialogHeader>
-          {initialData ? "Modifier un restaurant" : "Ajouter un restaurant"}
-        </AlertDialogHeader>
-        <AlertDialogCloseButton />
-        <AlertDialogBody>
-          <VStack spacing={6} align="stretch">
-            <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={4}>
-              <GridItem colSpan={{ base: 2, md: 1 }}>
-                <FormControl>
-                  <FormLabel>Nom</FormLabel>
-                  <Input
-                    value={name}
-                    onChange={(e) => setName(formatName(e.target.value))}
-                    placeholder="Nom du restaurant"
-                  />
-                </FormControl>
-              </GridItem>
-              <GridItem colSpan={{ base: 2, md: 1 }}>
-                <FormControl>
-                  <FormLabel>Adresse</FormLabel>
-                  <Input
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    placeholder="Adresse"
-                  />
-                </FormControl>
-              </GridItem>
-              <GridItem colSpan={2}>
-                <FormControl>
-                  <FormLabel>Image (URL)</FormLabel>
-                  <Input
-                    value={image}
-                    onChange={(e) => setImage(e.target.value)}
-                    placeholder="URL de l'image"
-                  />
-                </FormControl>
-              </GridItem>
-              <GridItem colSpan={2}>
-                <FormControl>
-                  <FormLabel>Site web</FormLabel>
-                  <Input
-                    value={website}
-                    onChange={(e) => setWebsite(e.target.value)}
-                    placeholder="Site web"
-                  />
-                </FormControl>
-              </GridItem>
-              <GridItem colSpan={2}>
-                <FormControl>
-                  <FormLabel>Téléphone</FormLabel>
-                  <Input
-                    value={phone}
-                    onChange={(e) =>
-                      setPhone(formatPhoneNumber(e.target.value))
-                    }
-                    placeholder="Téléphone"
-                  />
-                </FormControl>
-              </GridItem>
-            </Grid>
+    <Dialog open={isOpen} onClose={onClose} className="max-w-3xl">
+      <DialogTitle>
+        {initialData ? "Modifier un restaurant" : "Ajouter un restaurant"}
+      </DialogTitle>
 
-            <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap={6}>
-              {renderSelectable(
-                "Tags",
-                tags,
-                setTags,
-                availableTags?.map((t) => t.label) ?? [],
-                "Choisir un tag"
-              )}
-              <FormControl>
-                <FormLabel fontWeight="bold">Badges</FormLabel>
-                <BadgesToggles selected={badges} onChange={setBadges} />
-              </FormControl>
-            </Grid>
-          </VStack>
-        </AlertDialogBody>
-        <AlertDialogFooter>
-          <Button ref={cancelRef} onClick={onClose}>
-            Annuler
-          </Button>
-          <Button
-            colorScheme="blue"
-            ml={3}
-            onClick={handleSubmit}
-            isLoading={isSubmitting || locationLoading}
-            isDisabled={!name.trim() || !address.trim()}
-          >
-            {initialData ? "Modifier" : "Ajouter"}
-          </Button>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+      <div className="mt-5 space-y-6">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <label className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium text-foreground">Nom</span>
+            <Input
+              value={name}
+              onChange={(e) => setName(formatName(e.target.value))}
+              placeholder="Nom du restaurant"
+            />
+          </label>
+          <label className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium text-foreground">Adresse</span>
+            <Input
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="Adresse"
+            />
+          </label>
+          <label className="flex flex-col gap-1.5 md:col-span-2">
+            <span className="text-sm font-medium text-foreground">Image (URL)</span>
+            <Input
+              value={image}
+              onChange={(e) => setImage(e.target.value)}
+              placeholder="URL de l'image"
+            />
+          </label>
+          <label className="flex flex-col gap-1.5 md:col-span-2">
+            <span className="text-sm font-medium text-foreground">Site web</span>
+            <Input
+              value={website}
+              onChange={(e) => setWebsite(e.target.value)}
+              placeholder="Site web"
+            />
+          </label>
+          <label className="flex flex-col gap-1.5 md:col-span-2">
+            <span className="text-sm font-medium text-foreground">Téléphone</span>
+            <Input
+              value={phone}
+              onChange={(e) => setPhone(formatPhoneNumber(e.target.value))}
+              placeholder="Téléphone"
+            />
+          </label>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          {/* Tags */}
+          <div>
+            <span className="text-sm font-bold text-foreground">Tags</span>
+            <div className="mb-2 mt-1.5 flex flex-wrap gap-1.5">
+              {tags.map((t) => (
+                <span
+                  key={t}
+                  className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary"
+                >
+                  {t}
+                  <button
+                    type="button"
+                    onClick={() => setTags(tags.filter((x) => x !== t))}
+                    aria-label={`Retirer ${t}`}
+                    className="cursor-pointer text-primary/60 transition hover:text-primary"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+            <div className="relative">
+              <select
+                value=""
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v && !tags.includes(v)) setTags([...tags, v].sort());
+                }}
+                className="h-10 w-full cursor-pointer appearance-none rounded-lg border border-border bg-background pl-3 pr-9 text-sm text-foreground outline-none transition focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/25"
+              >
+                <option value="">Choisir un tag</option>
+                {tagOptions.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+              <FiChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/50" />
+            </div>
+          </div>
+
+          {/* Badges */}
+          <div>
+            <span className="text-sm font-bold text-foreground">Badges</span>
+            <div className="mt-1.5">
+              <BadgesToggles selected={badges} onChange={setBadges} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-6 flex justify-end gap-2">
+        <Button variant="outline" onClick={onClose}>
+          Annuler
+        </Button>
+        <Button
+          onClick={handleSubmit}
+          disabled={isSubmitting || locationLoading || !name.trim() || !address.trim()}
+        >
+          {isSubmitting || locationLoading
+            ? "…"
+            : initialData
+            ? "Modifier"
+            : "Ajouter"}
+        </Button>
+      </div>
+    </Dialog>
   );
 };
 

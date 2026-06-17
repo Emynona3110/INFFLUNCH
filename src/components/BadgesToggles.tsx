@@ -1,4 +1,3 @@
-import { HStack } from "@chakra-ui/react";
 import BadgeButton from "./BadgeButton";
 import badgeMap from "../services/badgeMap";
 
@@ -14,13 +13,13 @@ const BadgesToggles = ({ selected, onChange }: BadgesTogglesProps) => {
       ? selected.filter((b) => b !== label)
       : [...selected, label];
 
-    // Respecter l’ordre de badgeMap
+    // Respecter l'ordre de badgeMap
     const ordered = Object.keys(badgeMap).filter((b) => updated.includes(b));
     onChange(ordered);
   };
 
   return (
-    <HStack wrap="wrap" spacing={3}>
+    <div className="tw-scope flex flex-wrap gap-3">
       {Object.entries(badgeMap).map(([label, src]) => (
         <BadgeButton
           key={label}
@@ -30,7 +29,7 @@ const BadgesToggles = ({ selected, onChange }: BadgesTogglesProps) => {
           onToggle={() => toggleBadge(label)}
         />
       ))}
-    </HStack>
+    </div>
   );
 };
 

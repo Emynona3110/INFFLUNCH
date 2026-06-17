@@ -1,22 +1,17 @@
-import { Box, Image, Text, useColorModeValue, VStack } from "@chakra-ui/react";
 import { motion, useAnimation } from "framer-motion";
 import { useRef } from "react";
-
-const MotionImage = motion(Image);
 
 const Beeeh = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const controls = useAnimation();
 
   const handleClick = async () => {
-    // Jouer le son
     if (!audioRef.current) {
       audioRef.current = new Audio("/beeeh.mp3");
     }
     audioRef.current.currentTime = 0;
     audioRef.current.play().catch(() => {});
 
-    // Lancer animation de wiggle
     await controls.start({
       rotate: [0, 5, -5, 5, -5, 0],
       transition: { duration: 1 },
@@ -24,7 +19,6 @@ const Beeeh = () => {
   };
 
   const handleImageLoad = () => {
-    // Animation d’arrivée depuis le haut
     controls.start({
       opacity: 1,
       y: 0,
@@ -33,36 +27,22 @@ const Beeeh = () => {
   };
 
   return (
-    <VStack
-      direction="column"
-      align="center"
-      justify="center"
-      gap={6}
-      textAlign="center"
-      p={8}
-    >
-      <MotionImage
+    <div className="tw-scope flex flex-col items-center justify-center gap-6 p-8 text-center">
+      <motion.img
         src="/beeeh.jpg"
         alt="BeeeH"
-        maxHeight="300px"
-        borderRadius="lg"
-        boxShadow="lg"
-        cursor="pointer"
+        className="max-h-[300px] cursor-pointer rounded-lg shadow-lg"
         initial={{ opacity: 0, y: -100 }}
         animate={controls}
         onClick={handleClick}
         onLoad={handleImageLoad}
       />
 
-      <Box>
-        <Text fontSize="2xl" fontWeight="bold">
-          🐑 BEEEEH !
-        </Text>
-        <Text fontSize="md" color={useColorModeValue("gray.600", "gray.400")}>
-          Rien à voir par ici...
-        </Text>
-      </Box>
-    </VStack>
+      <div>
+        <p className="text-2xl font-bold text-foreground">🐑 BEEEEH !</p>
+        <p className="text-foreground/60">Rien à voir par ici...</p>
+      </div>
+    </div>
   );
 };
 

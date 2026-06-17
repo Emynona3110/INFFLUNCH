@@ -1,20 +1,9 @@
-import {
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogCloseButton,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogOverlay,
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
-  useColorModeValue,
-  useToast,
-} from "@chakra-ui/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "@/lib/toast";
 import supabaseClient from "../../services/supabaseClient";
+import { Dialog, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface TagDialogProps {
   isOpen: boolean;
@@ -23,41 +12,26 @@ interface TagDialogProps {
   initialData?: { id: number; label: string };
 }
 
-const TagDialog = ({
-  isOpen,
-  onClose,
-  onSuccess,
-  initialData,
-}: TagDialogProps) => {
-  const cancelRef = useRef<HTMLButtonElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+const formatLabel = (input: string) =>
+  input
+    .split(" ")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ")
+    .trim();
+
+const TagDialog = ({ isOpen, onClose, onSuccess, initialData }: TagDialogProps) => {
   const [label, setLabel] = useState("");
   const [original, setOriginal] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const toast = useToast();
 
   useEffect(() => {
     const formatted = initialData?.label ? formatLabel(initialData.label) : "";
     setLabel(formatted);
     setOriginal(formatted);
-
-    if (isOpen) {
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 0);
-    }
   }, [isOpen, initialData]);
-
-  const formatLabel = (input: string) =>
-    input
-      .split(" ")
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-      .join(" ")
-      .trim();
 
   const handleSubmit = async () => {
     const formatted = formatLabel(label);
-
     if (!formatted) return;
 
     if (initialData) {
@@ -73,7 +47,6 @@ const TagDialog = ({
       }
 
       setIsSubmitting(true);
-
       const { error: updateError } = await supabaseClient
         .from("tags")
         .update({ label: formatted })
@@ -110,25 +83,17 @@ const TagDialog = ({
         return;
       }
 
-      toast({
-        title: "Tag modifié",
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      });
-
+      toast({ title: "Tag modifié", status: "success", duration: 3000, isClosable: true });
       onSuccess?.();
       onClose();
       return;
     }
 
-    // Ajout d’un nouveau tag
+    // Ajout d'un nouveau tag
     setIsSubmitting(true);
-
     const { error: insertError } = await supabaseClient
       .from("tags")
       .insert({ label: formatted });
-
     setIsSubmitting(false);
 
     if (insertError) {
@@ -142,59 +107,47 @@ const TagDialog = ({
       return;
     }
 
-    toast({
-      title: "Tag ajouté",
-      status: "success",
-      duration: 3000,
-      isClosable: true,
-    });
-
+    toast({ title: "Tag ajouté", status: "success", duration: 3000, isClosable: true });
     onSuccess?.();
     onClose();
   };
 
+  const disabled =
+    isSubmitting ||
+    !label.trim() ||
+    (!!initialData && formatLabel(label) === original);
+
   return (
-    <AlertDialog
-      isOpen={isOpen}
-      leastDestructiveRef={cancelRef}
-      onClose={onClose}
-      isCentered
-    >
-      <AlertDialogOverlay />
-      <AlertDialogContent bg={useColorModeValue("white", "gray.900")}>
-        <AlertDialogHeader>
-          {initialData ? "Modifier un tag" : "Ajouter un tag"}
-        </AlertDialogHeader>
-        <AlertDialogCloseButton />
-        <AlertDialogBody>
-          <FormControl>
-            <FormLabel>Label</FormLabel>
-            <Input
-              ref={inputRef}
-              value={label}
-              onChange={(e) => setLabel(formatLabel(e.target.value))}
-              placeholder="ex: Végétarien"
-            />
-          </FormControl>
-        </AlertDialogBody>
-        <AlertDialogFooter>
-          <Button ref={cancelRef} onClick={onClose}>
+    <Dialog open={isOpen} onClose={onClose}>
+      <DialogTitle>{initialData ? "Modifier un tag" : "Ajouter un tag"}</DialogTitle>
+
+      <form
+        className="mt-5 flex flex-col gap-4"
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit();
+        }}
+      >
+        <label className="flex flex-col gap-1.5">
+          <span className="text-sm font-medium text-foreground">Label</span>
+          <Input
+            autoFocus
+            value={label}
+            placeholder="ex : Végétarien"
+            onChange={(e) => setLabel(formatLabel(e.target.value))}
+          />
+        </label>
+
+        <div className="mt-2 flex justify-end gap-2">
+          <Button type="button" variant="outline" onClick={onClose}>
             Annuler
           </Button>
-          <Button
-            colorScheme="blue"
-            ml={3}
-            onClick={handleSubmit}
-            isLoading={isSubmitting}
-            isDisabled={
-              !label.trim() || (initialData && formatLabel(label) === original)
-            }
-          >
+          <Button type="submit" disabled={disabled}>
             {initialData ? "Modifier" : "Ajouter"}
           </Button>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+        </div>
+      </form>
+    </Dialog>
   );
 };
 

@@ -1,20 +1,9 @@
-import {
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogCloseButton,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogOverlay,
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
-  useColorModeValue,
-  useToast,
-} from "@chakra-ui/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "@/lib/toast";
 import supabaseClient from "../../services/supabaseClient";
+import { Dialog, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface BadgeDialogProps {
   isOpen: boolean;
@@ -23,43 +12,27 @@ interface BadgeDialogProps {
   initialData?: { id: number; label: string };
 }
 
-const BadgeDialog = ({
-  isOpen,
-  onClose,
-  onSuccess,
-  initialData,
-}: BadgeDialogProps) => {
-  const cancelRef = useRef<HTMLButtonElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+const formatLabel = (value: string) =>
+  value
+    .split(" ")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ")
+    .trim();
+
+const BadgeDialog = ({ isOpen, onClose, onSuccess, initialData }: BadgeDialogProps) => {
   const [label, setLabel] = useState("");
   const [original, setOriginal] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const toast = useToast();
 
   useEffect(() => {
     const formatted = initialData?.label ? formatLabel(initialData.label) : "";
     setLabel(formatted);
     setOriginal(formatted);
-
-    if (isOpen) {
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 0);
-    }
   }, [isOpen, initialData]);
-
-  const formatLabel = (value: string) =>
-    value
-      .split(" ")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(" ")
-      .trim();
 
   const handleSubmit = async () => {
     const formatted = formatLabel(label);
-
     if (!formatted) return;
-
     setIsSubmitting(true);
 
     if (initialData) {
@@ -111,19 +84,13 @@ const BadgeDialog = ({
         return;
       }
 
-      toast({
-        title: "Badge modifié",
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      });
-
+      toast({ title: "Badge modifié", status: "success", duration: 3000, isClosable: true });
       onSuccess?.();
       onClose();
       return;
     }
 
-    // Création : vérifier s’il existe déjà
+    // Création : vérifier s'il existe déjà
     const { data: existing } = await supabaseClient
       .from("badges")
       .select("label")
@@ -144,7 +111,6 @@ const BadgeDialog = ({
     const { error: insertError } = await supabaseClient
       .from("badges")
       .insert({ label: formatted });
-
     setIsSubmitting(false);
 
     if (insertError) {
@@ -158,59 +124,47 @@ const BadgeDialog = ({
       return;
     }
 
-    toast({
-      title: "Badge ajouté",
-      status: "success",
-      duration: 3000,
-      isClosable: true,
-    });
-
+    toast({ title: "Badge ajouté", status: "success", duration: 3000, isClosable: true });
     onSuccess?.();
     onClose();
   };
 
+  const disabled =
+    isSubmitting ||
+    !label.trim() ||
+    (!!initialData && formatLabel(label) === original);
+
   return (
-    <AlertDialog
-      isOpen={isOpen}
-      leastDestructiveRef={cancelRef}
-      onClose={onClose}
-      isCentered
-    >
-      <AlertDialogOverlay />
-      <AlertDialogContent bg={useColorModeValue("white", "gray.900")}>
-        <AlertDialogHeader>
-          {initialData ? "Modifier un badge" : "Ajouter un badge"}
-        </AlertDialogHeader>
-        <AlertDialogCloseButton />
-        <AlertDialogBody>
-          <FormControl>
-            <FormLabel>Label</FormLabel>
-            <Input
-              ref={inputRef}
-              value={label}
-              onChange={(e) => setLabel(formatLabel(e.target.value))}
-              placeholder="ex: Local"
-            />
-          </FormControl>
-        </AlertDialogBody>
-        <AlertDialogFooter>
-          <Button ref={cancelRef} onClick={onClose}>
+    <Dialog open={isOpen} onClose={onClose}>
+      <DialogTitle>{initialData ? "Modifier un badge" : "Ajouter un badge"}</DialogTitle>
+
+      <form
+        className="mt-5 flex flex-col gap-4"
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit();
+        }}
+      >
+        <label className="flex flex-col gap-1.5">
+          <span className="text-sm font-medium text-foreground">Label</span>
+          <Input
+            autoFocus
+            value={label}
+            placeholder="ex : Local"
+            onChange={(e) => setLabel(formatLabel(e.target.value))}
+          />
+        </label>
+
+        <div className="mt-2 flex justify-end gap-2">
+          <Button type="button" variant="outline" onClick={onClose}>
             Annuler
           </Button>
-          <Button
-            colorScheme="blue"
-            ml={3}
-            onClick={handleSubmit}
-            isLoading={isSubmitting}
-            isDisabled={
-              !label.trim() || (initialData && formatLabel(label) === original)
-            }
-          >
+          <Button type="submit" disabled={disabled}>
             {initialData ? "Modifier" : "Ajouter"}
           </Button>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+        </div>
+      </form>
+    </Dialog>
   );
 };
 

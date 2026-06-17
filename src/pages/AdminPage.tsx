@@ -1,4 +1,3 @@
-import { useColorModeValue, Grid, GridItem } from "@chakra-ui/react";
 import { useLocation, useNavigate } from "react-router-dom";
 import AdminNavbar from "../admin/AdminNavbar";
 import DataManager from "../admin/DataManager";
@@ -18,44 +17,22 @@ export const AdminPage = () => {
   );
 
   return (
-    <Grid
-      height="100vh"
-      templateAreas={{
-        base: `"navigation" "main"`,
-      }}
-      templateRows={{ base: "auto 1fr" }}
-      templateColumns={{ base: "1fr" }}
-    >
-      {/* NAVIGATION */}
-      <GridItem
-        area="navigation"
-        height="60px"
-        alignContent="center"
-        paddingX={4}
-        shadow="sm"
-        bg={useColorModeValue("white", "gray.900")}
-        color={useColorModeValue("black", "white")}
-        borderBottom="1px solid"
-        borderColor={useColorModeValue("gray.200", "gray.700")}
-        position="sticky"
-        top="0"
-        zIndex="1000"
-      >
+    <div className="tw-scope flex h-screen flex-col bg-background text-foreground">
+      <header className="sticky top-0 z-[1000] flex h-[60px] shrink-0 items-center border-b border-border bg-card px-4 shadow-sm">
         <AdminNavbar
           page={currentPage}
           setPage={(page) => navigate("/" + page.toLowerCase())}
         />
-      </GridItem>
+      </header>
 
-      {/* MAIN */}
-      <GridItem area="main" overflowY="auto" height="calc(100vh - 60px)">
+      <main className="min-h-0 flex-1 overflow-hidden">
         {currentSection?.tableName === "waiting_list" ? (
           <AccessRequests />
         ) : (
           <DataManager section={currentSection ?? adminSections[0]} />
         )}
-      </GridItem>
-    </Grid>
+      </main>
+    </div>
   );
 };
 

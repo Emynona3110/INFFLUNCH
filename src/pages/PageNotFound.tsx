@@ -1,21 +1,27 @@
-import { Button, Heading, Text, VStack } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
+import { Button } from "@/components/ui/button";
 
 const PageNotFound = () => {
   const navigate = useNavigate();
 
   return (
     <Layout centerContent>
-      <VStack spacing={6} textAlign="center">
-        <Heading size="2xl">404 - Page introuvable</Heading>
-        <Text fontSize="lg" color="gray.500">
+      <div className="tw-scope text-center">
+        <div
+          role="heading"
+          aria-level={1}
+          className="font-display text-4xl font-extrabold text-foreground"
+        >
+          404 — Page introuvable
+        </div>
+        <p className="mt-3 text-foreground/60">
           Oups ! La page que vous cherchez n'existe pas ou a été déplacée.
-        </Text>
-        <Button colorScheme="blue" onClick={() => navigate("/user")}>
+        </p>
+        <Button className="mt-6" onClick={() => navigate("/user")}>
           Retour à l'accueil
         </Button>
-      </VStack>
+      </div>
     </Layout>
   );
 };

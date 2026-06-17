@@ -1,19 +1,5 @@
-import {
-  Button,
-  Flex,
-  Heading,
-  HStack,
-  VStack,
-  useToast,
-  AlertDialog,
-  AlertDialogOverlay,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogBody,
-  AlertDialogFooter,
-  AlertDialogCloseButton,
-} from "@chakra-ui/react";
-import { useRef, useState } from "react";
+import { useState } from "react";
+import { toast } from "@/lib/toast";
 import { useQueryClient } from "@tanstack/react-query";
 import AdminTable from "./AdminTable";
 import { AdminSection } from "../services/adminSections";
@@ -21,6 +7,8 @@ import supabaseClient from "../services/supabaseClient";
 import BadgeDialog from "./Dialogs/BadgeDialog";
 import RestaurantDialog from "./Dialogs/RestaurantDialog";
 import TagDialog from "./Dialogs/TagDialog";
+import { Button } from "@/components/ui/button";
+
 export interface DataManagerProps {
   section: AdminSection;
 }
@@ -29,11 +17,8 @@ const DataManager = ({ section }: DataManagerProps) => {
   const { label, tableName, columns } = section;
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editData, setEditData] = useState<any | null>(null);
-
   const [deleteId, setDeleteId] = useState<number | null>(null);
-  const cancelRef = useRef<HTMLButtonElement>(null);
 
-  const toast = useToast();
   const queryClient = useQueryClient();
 
   const handleSuccess = () => {
@@ -92,38 +77,34 @@ const DataManager = ({ section }: DataManagerProps) => {
 
     if (tableName === "tags") return <TagDialog {...commonProps} />;
     if (tableName === "badges") return <BadgeDialog {...commonProps} />;
-    if (tableName === "restaurants")
-      return <RestaurantDialog {...commonProps} />;
-
+    if (tableName === "restaurants") return <RestaurantDialog {...commonProps} />;
     return null;
   };
 
   return (
-    <Flex flexDirection="column" height="100%">
-      <VStack
-        align="stretch"
-        spacing={4}
-        p={4}
-        height="100%"
-        maxHeight="calc(100vh - 60px)"
-      >
-        <HStack justifyContent="space-between">
-          <Heading size="md">{`Gestion des ${label.toLowerCase()}`}</Heading>
-          {tableName !== "users" && (
-            <Button
-              colorScheme="blue"
-              size="sm"
-              onClick={() => {
-                setEditData(null);
-                setIsDialogOpen(true);
-              }}
-              variant={"ghost"}
-            >
-              Ajouter +
-            </Button>
-          )}
-        </HStack>
+    <div className="tw-scope flex h-full flex-col p-4">
+      <div className="mb-4 flex h-10 items-center justify-between gap-3">
+        <div
+          role="heading"
+          aria-level={1}
+          className="font-display text-xl font-bold text-foreground"
+        >
+          {`${label}`}
+        </div>
+        {tableName !== "users" && (
+          <Button
+            variant="primarySoft"
+            onClick={() => {
+              setEditData(null);
+              setIsDialogOpen(true);
+            }}
+          >
+            Ajouter +
+          </Button>
+        )}
+      </div>
 
+      <div className="min-h-0 flex-1">
         <AdminTable
           tableName={tableName}
           columns={columns}
@@ -133,36 +114,44 @@ const DataManager = ({ section }: DataManagerProps) => {
           }}
           onDelete={(id) => setDeleteId(id)}
         />
-      </VStack>
+      </div>
 
+      {/* Dialogs d'édition (encore Chakra — migration étape 2) */}
       {renderDialog()}
 
-      {/* AlertDialog pour suppression */}
-      <AlertDialog
-        isOpen={deleteId !== null}
-        leastDestructiveRef={cancelRef}
-        onClose={() => setDeleteId(null)}
-        isCentered
-      >
-        <AlertDialogOverlay />
-        <AlertDialogContent>
-          <AlertDialogHeader>Confirmer la suppression</AlertDialogHeader>
-          <AlertDialogCloseButton />
-          <AlertDialogBody>
-            Êtes-vous sûr de vouloir supprimer cette entrée ? Cette action est
-            irréversible.
-          </AlertDialogBody>
-          <AlertDialogFooter>
-            <Button ref={cancelRef} onClick={() => setDeleteId(null)}>
-              Annuler
-            </Button>
-            <Button colorScheme="red" ml={3} onClick={confirmDelete}>
-              Supprimer
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </Flex>
+      {/* Confirmation de suppression */}
+      {deleteId !== null && (
+        <div
+          className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setDeleteId(null)}
+        >
+          <div
+            className="w-full max-w-sm rounded-card border border-border bg-card p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              role="heading"
+              aria-level={2}
+              className="font-display text-lg font-bold text-card-foreground"
+            >
+              Confirmer la suppression
+            </div>
+            <p className="mt-3 text-sm text-foreground/80">
+              Êtes-vous sûr de vouloir supprimer cette entrée ? Cette action est
+              irréversible.
+            </p>
+            <div className="mt-6 flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setDeleteId(null)}>
+                Annuler
+              </Button>
+              <Button variant="destructive" onClick={confirmDelete}>
+                Supprimer
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

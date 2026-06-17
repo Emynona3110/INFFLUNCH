@@ -1,7 +1,7 @@
-import { Box, Flex, useColorModeValue, Grid, GridItem } from "@chakra-ui/react";
 import Footer from "./Footer";
 import Navbar from "./Navbar";
 import { RestaurantFilters } from "../pages/UserPage";
+import { cn } from "@/lib/utils";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -22,56 +22,28 @@ const Layout = ({
   withNavbar = false,
   navbarProps,
 }: LayoutProps) => {
-  const bg = useColorModeValue("gray.100", "gray.800");
-
   return (
-    <Grid
-      height="100vh"
-      templateAreas={{
-        base: withNavbar ? `"navigation" "main"` : `"main"`,
-      }}
-      templateRows={withNavbar ? "58px 1fr" : "1fr"}
-      templateColumns="1fr"
-      bg={bg}
-    >
-      {withNavbar && (
-        <GridItem
-          area="navigation"
-          height="60px"
-          alignContent="center"
-          paddingX={4}
-          shadow="sm"
-          bg={useColorModeValue("white", "gray.900")}
-          color={useColorModeValue("black", "white")}
-          borderBottom="1px solid"
-          borderColor={useColorModeValue("gray.200", "gray.700")}
-          position="sticky"
-          top="0"
-          zIndex="1000"
-        >
-          {navbarProps && <Navbar {...navbarProps} />}
-        </GridItem>
+    <div className="tw-scope flex h-screen flex-col bg-background text-foreground">
+      {withNavbar && navbarProps && (
+        <header className="sticky top-0 z-[1000] flex h-[60px] shrink-0 items-center border-b border-border bg-card px-4 shadow-sm">
+          <Navbar {...navbarProps} />
+        </header>
       )}
 
-      <GridItem area="main" overflowY="auto">
-        <Flex direction="column" minHeight="100%" bg={bg}>
-          <Box
-            flex="1"
-            width="100%"
-            maxW="1200px"
-            mx="auto"
-            px={4}
-            py={6}
-            display={centerContent ? "flex" : undefined}
-            alignItems={centerContent ? "center" : undefined}
-            justifyContent={centerContent ? "center" : undefined}
+      <main className="flex-1 overflow-y-auto">
+        <div className="flex min-h-full flex-col">
+          <div
+            className={cn(
+              "mx-auto w-full max-w-[1200px] flex-1 px-4 py-6",
+              centerContent && "flex items-center justify-center"
+            )}
           >
             {children}
-          </Box>
+          </div>
           <Footer />
-        </Flex>
-      </GridItem>
-    </Grid>
+        </div>
+      </main>
+    </div>
   );
 };
 

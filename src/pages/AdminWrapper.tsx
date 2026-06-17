@@ -1,7 +1,5 @@
-import { useEffect, useState } from "react";
-import { ReactNode } from "react";
+import { useEffect, useState, ReactNode } from "react";
 import { Navigate } from "react-router-dom";
-import { Center, Spinner } from "@chakra-ui/react";
 import useSession from "../hooks/useSession";
 
 interface WrapperProps {
@@ -14,16 +12,14 @@ const AdminWrapper = ({ children }: WrapperProps) => {
 
   useEffect(() => {
     if (!sessionData) return;
-
-    const role = sessionData.user.user_metadata?.role;
-    setIsAdmin(role === "admin");
+    setIsAdmin(sessionData.user.user_metadata?.role === "admin");
   }, [sessionData]);
 
   if (loading || isAdmin === null) {
     return (
-      <Center h="100vh">
-        <Spinner size="xl" />
-      </Center>
+      <div className="tw-scope flex h-screen items-center justify-center bg-background">
+        <div className="h-10 w-10 animate-spin rounded-full border-2 border-border border-t-primary" />
+      </div>
     );
   }
 

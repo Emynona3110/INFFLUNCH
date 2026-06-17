@@ -1,21 +1,10 @@
-import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  ModalCloseButton,
-  Button,
-  VStack,
-  Alert,
-  AlertIcon,
-  useToast,
-} from "@chakra-ui/react";
 import { useState } from "react";
+import { toast } from "@/lib/toast";
 import supabaseClient from "../services/supabaseClient";
 import useSession from "../hooks/useSession";
 import PasswordField from "./PasswordField";
+import { Dialog, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface ChangePasswordDialogProps {
   isOpen: boolean;
@@ -24,7 +13,6 @@ interface ChangePasswordDialogProps {
 
 const ChangePasswordDialog = ({ isOpen, onClose }: ChangePasswordDialogProps) => {
   const { sessionData } = useSession();
-  const toast = useToast();
 
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -86,60 +74,49 @@ const ChangePasswordDialog = ({ isOpen, onClose }: ChangePasswordDialogProps) =>
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} isCentered>
-      <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>Changer le mot de passe</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody>
-          <VStack
-            as="form"
-            spacing={4}
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSubmit();
-            }}
-          >
-            {error && (
-              <Alert status="error" borderRadius="md">
-                <AlertIcon />
-                {error}
-              </Alert>
-            )}
+    <Dialog open={isOpen} onClose={handleClose}>
+      <DialogTitle>Changer le mot de passe</DialogTitle>
 
-            <PasswordField
-              label="Ancien mot de passe"
-              value={oldPassword}
-              onChange={setOldPassword}
-            />
-            <PasswordField
-              label="Nouveau mot de passe"
-              value={newPassword}
-              onChange={setNewPassword}
-            />
-            <PasswordField
-              label="Confirmer le nouveau mot de passe"
-              value={confirm}
-              onChange={setConfirm}
-              isInvalid={confirm !== "" && confirm !== newPassword}
-            />
-          </VStack>
-        </ModalBody>
-        <ModalFooter>
-          <Button onClick={handleClose} mr={3} variant="ghost">
+      <form
+        className="mt-5 flex flex-col gap-4"
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit();
+        }}
+      >
+        {error && (
+          <div className="rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            {error}
+          </div>
+        )}
+
+        <PasswordField
+          label="Ancien mot de passe"
+          value={oldPassword}
+          onChange={setOldPassword}
+        />
+        <PasswordField
+          label="Nouveau mot de passe"
+          value={newPassword}
+          onChange={setNewPassword}
+        />
+        <PasswordField
+          label="Confirmer le nouveau mot de passe"
+          value={confirm}
+          onChange={setConfirm}
+          isInvalid={confirm !== "" && confirm !== newPassword}
+        />
+
+        <div className="mt-2 flex justify-end gap-2">
+          <Button type="button" variant="outline" onClick={handleClose}>
             Annuler
           </Button>
-          <Button
-            colorScheme="blue"
-            onClick={handleSubmit}
-            isLoading={isLoading}
-            isDisabled={!canSubmit}
-          >
-            Valider
+          <Button type="submit" disabled={isLoading || !canSubmit}>
+            {isLoading ? "…" : "Valider"}
           </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+        </div>
+      </form>
+    </Dialog>
   );
 };
 

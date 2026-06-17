@@ -1,22 +1,13 @@
-import {
-  Box,
-  Heading,
-  Button,
-  VStack,
-  useColorModeValue,
-  useToast,
-  Spinner,
-  Text,
-  Divider,
-} from "@chakra-ui/react";
+import { toast } from "@/lib/toast";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import useSession from "../hooks/useSession";
 import ChangePasswordDialog from "../components/ChangePasswordDialog";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 const MyAccount = () => {
   const navigate = useNavigate();
-  const toast = useToast();
   const { sessionData, signOut, loading, error } = useSession();
   const [isDialogOpen, setDialogOpen] = useState(false);
 
@@ -38,63 +29,54 @@ const MyAccount = () => {
   const role = sessionData?.user.user_metadata?.role;
 
   return (
-    <Box
-      maxW="md"
-      width="100%"
-      p={8}
-      borderRadius="md"
-      boxShadow="md"
-      bg={useColorModeValue("white", "gray.900")}
-    >
-      <VStack spacing={6} align="stretch">
-        <Heading size="lg" textAlign="center">
+    <div className="tw-scope w-full max-w-md">
+      <Card className="p-8">
+        <div
+          role="heading"
+          aria-level={1}
+          className="text-center font-display text-2xl font-extrabold text-card-foreground"
+        >
           Mon compte
-        </Heading>
+        </div>
 
         {loading ? (
-          <Spinner alignSelf="center" />
+          <div className="mx-auto mt-6 h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
         ) : sessionData ? (
           <>
-            <Box>
-              <Text>{sessionData.user.email}</Text>
-            </Box>
+            <p className="mt-2 text-center text-foreground/70">
+              {sessionData.user.email}
+            </p>
 
-            <Divider />
+            <div className="my-6 h-px bg-border" />
 
-            <VStack spacing={3} align="stretch">
-              <Button
-                onClick={() => setDialogOpen(true)}
-                colorScheme="blue"
-                variant="outline"
-              >
+            <div className="flex flex-col gap-3">
+              <Button variant="outline" onClick={() => setDialogOpen(true)}>
                 Changer le mot de passe
               </Button>
 
               {role === "admin" && (
-                <Button
-                  colorScheme="teal"
-                  variant="solid"
-                  onClick={() => navigate("/admin")}
-                >
-                  Accéder à l’espace admin
+                <Button variant="primarySoft" onClick={() => navigate("/admin")}>
+                  Accéder à l'espace admin
                 </Button>
               )}
 
-              <Button colorScheme="red" onClick={handleLogout}>
+              <Button variant="destructiveSoft" onClick={handleLogout}>
                 Se déconnecter
               </Button>
-            </VStack>
+            </div>
           </>
         ) : (
-          <Box>Aucune session utilisateur.</Box>
+          <p className="mt-6 text-center text-foreground/70">
+            Aucune session utilisateur.
+          </p>
         )}
-      </VStack>
+      </Card>
 
       <ChangePasswordDialog
         isOpen={isDialogOpen}
         onClose={() => setDialogOpen(false)}
       />
-    </Box>
+    </div>
   );
 };
 

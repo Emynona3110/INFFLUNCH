@@ -1,5 +1,5 @@
-import { IconButton, useColorModeValue } from "@chakra-ui/react";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
+import { cn } from "@/lib/utils";
 
 interface FavoritesToggleProps {
   isChecked: boolean;
@@ -7,23 +7,23 @@ interface FavoritesToggleProps {
 }
 
 const FavoritesToggle = ({ isChecked, onChange }: FavoritesToggleProps) => {
-  const heartColor = "#ff6b81"; // couleur personnalisée
-  const hoverBg = useColorModeValue("gray.100", "gray.700");
-
   return (
-    <IconButton
+    <button
+      type="button"
       aria-label="Afficher uniquement les favoris"
-      icon={isChecked ? <FaHeart /> : <FaRegHeart />}
-      color={isChecked ? heartColor : undefined}
-      variant="ghost"
-      size="md"
+      aria-pressed={isChecked}
       onClick={() => onChange(!isChecked)}
-      _hover={{
-        bg: hoverBg,
-        color: heartColor,
-      }}
-      isRound
-    />
+      className={cn(
+        "grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-full transition hover:bg-muted",
+        isChecked ? "text-[#ff6b81]" : "text-foreground/60 hover:text-[#ff6b81]"
+      )}
+    >
+      {isChecked ? (
+        <FaHeart className="h-5 w-5" />
+      ) : (
+        <FaRegHeart className="h-5 w-5" />
+      )}
+    </button>
   );
 };
 

@@ -1,0 +1,192 @@
+/* Tailwind v4 SANS preflight global : on n'importe que theme + utilities pour
+   ne pas réinitialiser les styles de base des pages encore en Chakra UI.
+   Le reset nécessaire est scopé à la zone Tailwind (.tw-scope). */
+@layer theme, base, components;
+@import "tailwindcss/theme.css" layer(theme);
+/* Utilities NON-layered volontairement : le reset CSS de Chakra n'est pas dans
+   un layer, donc des utilitaires layered seraient perdants. En les laissant
+   non-layered, une classe (ex. .bg-primary) bat le sélecteur d'élément du reset
+   Chakra (ex. button {...}) par spécificité. */
+@import "tailwindcss/utilities.css";
+
+/* Dark mode : classe .dark posée sur <html> par le ThemeProvider maison */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Tokens exposés comme utilitaires Tailwind (bg-card, text-foreground, ...) */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --font-display: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --radius-card: 16px;
+}
+
+/* Aurora UI — LIGHT (brand royal blue #113894 + adventure orange) */
+:root {
+  --background: #f4f7fc;
+  --foreground: #0c1f4a;
+  --card: #ffffff;
+  --card-foreground: #0c1f4a;
+  --primary: #113894;
+  --primary-foreground: #ffffff;
+  --secondary: #3b5bb5;
+  --accent: #ea580c;
+  --muted: #eaf0fa;
+  --border: #d2def2;
+  --ring: #113894;
+  --destructive: #dc2626;
+}
+
+/* Aurora UI — DARK (deep navy + brightened royal/orange) */
+.dark {
+  --background: #0a1024;
+  --foreground: #e5ecfa;
+  --card: #111a35;
+  --card-foreground: #e5ecfa;
+  --primary: #5b82e6;
+  --primary-foreground: #07112b;
+  --secondary: #3b5bb5;
+  --accent: #fb923c;
+  --muted: #16223f;
+  --border: #26345c;
+  --ring: #5b82e6;
+  --destructive: #f87171;
+}
+
+/* Reset global html/body (Chakra le faisait avant son retrait) : supprime la
+   marge native de 8px et aligne le fond pour éviter tout liseré au toggle dark. */
+html,
+body {
+  margin: 0;
+  background-color: var(--background);
+}
+#root {
+  min-height: 100vh;
+}
+
+/* Fondu rapide des tooltips */
+@keyframes tooltip-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* OverlayScrollbars : barres flottantes (sans gouttière/fond), fines.
+   Couleur = --foreground (foncé en mode clair, clair en mode sombre). */
+.os-infflunch {
+  --os-size: 10px;
+  --os-padding-perpendicular: 3px;
+  --os-padding-axis: 3px;
+  --os-track-bg: transparent;
+  --os-track-bg-hover: transparent;
+  --os-track-border-radius: 9999px;
+  --os-handle-border-radius: 9999px;
+  --os-handle-bg: color-mix(in srgb, var(--foreground) 35%, transparent);
+  --os-handle-bg-hover: color-mix(in srgb, var(--foreground) 55%, transparent);
+  --os-handle-bg-active: color-mix(in srgb, var(--foreground) 70%, transparent);
+}
+
+/* Mode "grille figée" : la barre verticale démarre sous l'entête, l'horizontale
+   s'arrête avant la colonne Actions figée (valeurs via --grid-top / --grid-right). */
+.os-grid .os-scrollbar-vertical {
+  top: var(--grid-top, 44px) !important;
+}
+.os-grid .os-scrollbar-horizontal {
+  right: var(--grid-right, 120px) !important;
+}
+
+/* Fallback natif minimaliste (zones Tailwind sans OverlayScrollbars).
+   NB : pas de scrollbar-color/width — sinon Chrome ignore les ::-webkit-scrollbar. */
+.tw-scope::-webkit-scrollbar,
+.tw-scope *::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  background: transparent;
+}
+.tw-scope::-webkit-scrollbar-track,
+.tw-scope *::-webkit-scrollbar-track,
+.tw-scope::-webkit-scrollbar-track-piece,
+.tw-scope *::-webkit-scrollbar-track-piece,
+.tw-scope::-webkit-scrollbar-corner,
+.tw-scope *::-webkit-scrollbar-corner {
+  background: transparent;
+}
+.tw-scope::-webkit-scrollbar-button,
+.tw-scope *::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+.tw-scope::-webkit-scrollbar-thumb,
+.tw-scope *::-webkit-scrollbar-thumb {
+  background-color: var(--primary);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+/* Reset minimal SCOPÉ à la zone Tailwind (pas de fuite vers Chakra) */
+@layer base {
+  .tw-scope,
+  .tw-scope * {
+    box-sizing: border-box;
+    border-width: 0;
+    border-style: solid;
+    border-color: var(--border);
+  }
+  .tw-scope {
+    font-family: var(--font-sans);
+    color: var(--foreground);
+  }
+
+  /* Normalisation des médias (preflight Tailwind omis par le reset scopé) :
+     sans ça les SVG/icônes restent en display:inline → alignés baseline et
+     rognés d'~1px. */
+  .tw-scope img,
+  .tw-scope svg,
+  .tw-scope video,
+  .tw-scope canvas {
+    display: block;
+    vertical-align: middle;
+  }
+  /* overflow visible : certaines icônes (ex. lune BsMoonFill) ont un tracé au
+     ras du viewBox, rogné d'~1px par le overflow:hidden par défaut des <svg>. */
+  .tw-scope svg {
+    overflow: visible;
+  }
+
+  /* Neutralise le chrome natif des contrôles (Chakra le faisait globalement
+     avant son retrait → sinon contours/fonds gris natifs sur les boutons). */
+  .tw-scope button,
+  .tw-scope [type="button"],
+  .tw-scope [type="reset"],
+  .tw-scope [type="submit"] {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: transparent;
+    background-image: none;
+    cursor: pointer;
+  }
+  .tw-scope button,
+  .tw-scope input,
+  .tw-scope optgroup,
+  .tw-scope select,
+  .tw-scope textarea {
+    font: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+  }
+}

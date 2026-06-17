@@ -1,21 +1,10 @@
-import {
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
-  Heading,
-  Text,
-  VStack,
-  useColorModeValue,
-  Stack,
-  Alert,
-  AlertIcon,
-  Link,
-} from "@chakra-ui/react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import supabaseClient from "../services/supabaseClient";
 import Layout from "../components/Layout";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -26,7 +15,8 @@ const ForgotPassword = () => {
   const isValidEmail = (value: string) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!isValidEmail(email)) return;
     setIsLoading(true);
 
@@ -42,75 +32,62 @@ const ForgotPassword = () => {
 
   return (
     <Layout centerContent>
-      <Stack
-        spacing={6}
-        maxW="md"
-        width="100%"
-        p={8}
-        borderRadius="md"
-        bg={useColorModeValue("white", "gray.900")}
-        boxShadow="lg"
-      >
-        <VStack spacing={2} textAlign="center">
-          <Heading size="lg">Mot de passe oublié</Heading>
-          <Text color="gray.500" fontSize="md">
-            Saisis ton adresse e-mail pour demander une réinitialisation.
-          </Text>
-        </VStack>
+      <div className="tw-scope w-full max-w-md">
+        <Card className="p-8">
+          <div className="text-center">
+            <div
+              role="heading"
+              aria-level={1}
+              className="font-display text-2xl font-extrabold text-card-foreground"
+            >
+              Mot de passe oublié
+            </div>
+            <p className="mt-1 text-sm text-foreground/60">
+              Saisis ton adresse e-mail pour demander une réinitialisation.
+            </p>
+          </div>
 
-        {done ? (
-          <Alert
-            status="success"
-            borderRadius="md"
-            flexDirection="column"
-            textAlign="center"
-            py={6}
-          >
-            <AlertIcon boxSize={6} mr={0} mb={2} />
-            <Text>
+          {done ? (
+            <div className="mt-6 rounded-lg bg-primary/10 px-4 py-5 text-center text-sm text-foreground">
               Demande envoyée ! Si un compte correspond, un administrateur te
               transmettra un nouveau mot de passe temporaire.
-            </Text>
-          </Alert>
-        ) : (
-          <VStack
-            as="form"
-            spacing={4}
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSubmit();
-            }}
-          >
-            <FormControl id="email">
-              <FormLabel>Adresse e-mail</FormLabel>
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </FormControl>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
+              <label className="flex flex-col gap-1.5">
+                <span className="text-sm font-medium text-foreground">
+                  Adresse e-mail
+                </span>
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </label>
 
-            <Button
-              type="submit"
-              colorScheme="blue"
-              width="full"
-              isLoading={isLoading}
-              isDisabled={!isValidEmail(email)}
+              <Button
+                type="submit"
+                disabled={isLoading || !isValidEmail(email)}
+                className="w-full"
+              >
+                {isLoading ? "Envoi…" : "Envoyer ma demande"}
+              </Button>
+            </form>
+          )}
+
+          <div className="my-6 h-px bg-border" />
+
+          <p className="text-center">
+            <button
+              type="button"
+              onClick={() => navigate("/login")}
+              className="cursor-pointer text-sm text-primary hover:underline"
             >
-              Envoyer ma demande
-            </Button>
-          </VStack>
-        )}
-
-        <Link
-          onClick={() => navigate("/login")}
-          color="blue.500"
-          fontSize="sm"
-          textAlign="center"
-        >
-          Retour à la connexion
-        </Link>
-      </Stack>
+              Retour à la connexion
+            </button>
+          </p>
+        </Card>
+      </div>
     </Layout>
   );
 };

@@ -1,28 +1,11 @@
-import {
-  Box,
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
-  Heading,
-  Text,
-  VStack,
-  useColorModeValue,
-  Stack,
-  Alert,
-  AlertIcon,
-  Link,
-  HStack,
-  Divider,
-  InputGroup,
-  InputRightElement,
-  IconButton,
-} from "@chakra-ui/react";
-import { VscEye, VscEyeClosed } from "react-icons/vsc";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { VscEye, VscEyeClosed } from "react-icons/vsc";
 import supabaseClient from "../services/supabaseClient";
 import Layout from "../components/Layout";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -32,7 +15,7 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (event: React.FormEvent<HTMLDivElement>) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsLoading(true);
     setMessage("");
@@ -55,94 +38,96 @@ const LoginPage = () => {
 
   return (
     <Layout centerContent>
-      <Stack
-        spacing={6}
-        maxW="md"
-        width="100%"
-        p={8}
-        borderRadius="md"
-        bg={useColorModeValue("white", "gray.900")}
-        boxShadow="lg"
-      >
-        <VStack spacing={2} textAlign="center">
-          <Heading size="lg">Connexion à votre compte</Heading>
-          <Text color="gray.500" fontSize="md">
-            Entrez vos identifiants pour continuer
-          </Text>
-        </VStack>
+      <div className="tw-scope w-full max-w-md">
+        <Card className="p-8">
+          <div className="text-center">
+            <div
+              role="heading"
+              aria-level={1}
+              className="font-display text-2xl font-extrabold text-card-foreground"
+            >
+              Connexion à votre compte
+            </div>
+          </div>
 
-        {message && (
-          <Alert status="error" borderRadius="md">
-            <AlertIcon />
-            {message}
-          </Alert>
-        )}
+          {message && (
+            <div className="mt-5 rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
+              {message}
+            </div>
+          )}
 
-        <VStack as="form" spacing={4} onSubmit={handleSubmit}>
-          <FormControl id="email">
-            <FormLabel>Adresse e-mail</FormLabel>
-            <Input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </FormControl>
-
-          <FormControl id="password">
-            <FormLabel>Mot de passe</FormLabel>
-            <InputGroup onMouseLeave={() => setShowPassword(false)}>
+          <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
+            <label className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium text-foreground">
+                Adresse e-mail
+              </span>
               <Input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
-              <InputRightElement>
-                <IconButton
-                  variant="ghost"
-                  size="sm"
+            </label>
+
+            <label className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium text-foreground">
+                Mot de passe
+              </span>
+              <div
+                className="relative"
+                onMouseLeave={() => setShowPassword(false)}
+              >
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((p) => !p)}
                   aria-label={
                     showPassword
                       ? "Masquer le mot de passe"
                       : "Afficher le mot de passe"
                   }
-                  icon={showPassword ? <VscEye /> : <VscEyeClosed />}
-                  onClick={() => setShowPassword((prev) => !prev)}
-                />
-              </InputRightElement>
-            </InputGroup>
-          </FormControl>
+                  className="absolute inset-y-0 right-0 grid w-10 cursor-pointer place-items-center text-foreground/50 transition hover:text-foreground"
+                >
+                  {showPassword ? <VscEye /> : <VscEyeClosed />}
+                </button>
+              </div>
+            </label>
 
-          <HStack justify="space-between" width="100%">
-            <Box />
-            <Link
-              color="blue.500"
-              fontSize="sm"
-              onClick={() => navigate("/password-oublie")}
-            >
-              Mot de passe oublié ?
-            </Link>
-          </HStack>
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => navigate("/password-oublie")}
+                className="cursor-pointer text-sm text-primary hover:underline"
+              >
+                Mot de passe oublié ?
+              </button>
+            </div>
 
-          <Button
-            type="submit"
-            colorScheme="blue"
-            width="full"
-            isLoading={isLoading}
-          >
-            Se connecter
-          </Button>
+            <Button type="submit" disabled={isLoading} className="w-full">
+              {isLoading ? "Connexion…" : "Se connecter"}
+            </Button>
+          </form>
 
-          <Divider />
-          <Text fontSize="sm" color="gray.600" textAlign="center">
+          <div className="my-6 h-px bg-border" />
+
+          <p className="text-center text-sm text-foreground/60">
             Nouveau sur Infflunch ?{" "}
-            <Link color="blue.500" onClick={() => navigate("/inscription")}>
+            <button
+              type="button"
+              onClick={() => navigate("/inscription")}
+              className="cursor-pointer text-primary hover:underline"
+            >
               Inscrivez-vous ici
-            </Link>
-          </Text>
-        </VStack>
-      </Stack>
+            </button>
+          </p>
+        </Card>
+      </div>
     </Layout>
   );
 };

@@ -1,6 +1,5 @@
 import { Navigate } from "react-router-dom";
 import { ReactNode } from "react";
-import { Spinner, Center, Text, VStack } from "@chakra-ui/react";
 import useAuth from "../hooks/useAuth";
 
 interface ProtectedRouteProps {
@@ -12,24 +11,24 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   if (loading) {
     return (
-      <Center h="100vh">
-        <Spinner size="xl" />
-      </Center>
+      <div className="tw-scope flex h-screen items-center justify-center bg-background">
+        <div className="h-10 w-10 animate-spin rounded-full border-2 border-border border-t-primary" />
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Center h="100vh" px={4}>
-        <VStack spacing={2} textAlign="center">
-          <Text color="red.500" fontWeight="bold">
+      <div className="tw-scope flex h-screen items-center justify-center bg-background px-4">
+        <div className="text-center">
+          <p className="font-bold text-destructive">
             Impossible de contacter le serveur.
-          </Text>
-          <Text color="gray.500">
+          </p>
+          <p className="mt-1 text-foreground/60">
             Réessaie dans un instant ou recharge la page.
-          </Text>
-        </VStack>
-      </Center>
+          </p>
+        </div>
+      </div>
     );
   }
 

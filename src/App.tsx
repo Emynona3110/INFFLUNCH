@@ -9,8 +9,6 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ForcePasswordChangeGate from "./components/ForcePasswordChangeGate";
 import RequestAccessPage from "./pages/RequestAccessPage";
-import ConfirmURLWrapper from "./pages/ConfirmURLWrapper";
-import NewInvite from "./pages/NewInvite";
 
 function App() {
   return (
@@ -44,9 +42,7 @@ function App() {
       />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/password-oublie" element={<ForgotPassword />} />
-      <Route path="/authentification" element={<ConfirmURLWrapper />} />
       <Route path="/inscription" element={<RequestAccessPage />} />
-      <Route path="/invitation-expiree" element={<NewInvite />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

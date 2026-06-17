@@ -1,29 +1,22 @@
-import {
-  useColorModeValue,
-  IconButton,
-  useColorMode,
-  Icon,
-} from "@chakra-ui/react";
 import { BsMoonFill, BsSunFill } from "react-icons/bs";
+import { useTheme } from "@/lib/theme";
 
 const ColorModeSwitch = () => {
-  const { toggleColorMode } = useColorMode();
-
-  const icon = useColorModeValue(
-    <Icon as={BsMoonFill} boxSize="18px" color="gray.400" />, // lune plus petite
-    <Icon as={BsSunFill} boxSize="22px" color="gray.500" />
-  );
+  const { theme, toggleTheme } = useTheme();
 
   return (
-    <IconButton
+    <button
+      type="button"
+      onClick={toggleTheme}
       aria-label="Changer le thème"
-      onClick={toggleColorMode}
-      icon={icon}
-      variant="ghost"
-      size="md"
-      isRound
-      _hover={{ bg: useColorModeValue("gray.100", "gray.700") }}
-    />
+      className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-full text-foreground/60 transition hover:bg-muted"
+    >
+      {theme === "light" ? (
+        <BsMoonFill className="h-[18px] w-[18px]" />
+      ) : (
+        <BsSunFill className="h-[22px] w-[22px]" />
+      )}
+    </button>
   );
 };
 
