@@ -1,9 +1,13 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
+import { useQueryClient } from "@tanstack/react-query";
 import { RestaurantFilters } from "../pages/UserPage";
-import useRestaurants from "../hooks/useRestaurants";
+import useRestaurants, { Restaurant } from "../hooks/useRestaurants";
 import useTopRated from "../hooks/useTopRated";
 import useFavorites from "../hooks/useFavorites";
+import useIsAdmin from "../hooks/useIsAdmin";
 import RestaurantCardTW from "@/components/RestaurantCardTW";
+import RestaurantDialog from "@/admin/Dialogs/RestaurantDialog";
 
 interface RestaurantGridProps {
   restaurantFilters: RestaurantFilters;
@@ -26,6 +30,9 @@ const CardSkeleton = () => (
 const RestaurantGrid = ({ restaurantFilters }: RestaurantGridProps) => {
   const { data, error, loading } = useRestaurants(restaurantFilters);
   const topRatedResult = useTopRated();
+  const isAdmin = useIsAdmin();
+  const queryClient = useQueryClient();
+  const [editTarget, setEditTarget] = useState<Restaurant | null>(null);
   const {
     restaurantIds: favoriteIds,
     loading: favoritesLoading,
@@ -93,6 +100,9 @@ const RestaurantGrid = ({ restaurantFilters }: RestaurantGridProps) => {
                           if (liked) await addFavorite(restaurant.id);
                           else await removeFavorite(restaurant.id);
                         }}
+                        onEdit={
+                          isAdmin ? () => setEditTarget(restaurant) : undefined
+                        }
                       />
                     </motion.div>
                   );
@@ -100,6 +110,18 @@ const RestaurantGrid = ({ restaurantFilters }: RestaurantGridProps) => {
           </div>
         )}
       </div>
+
+      {isAdmin && (
+        <RestaurantDialog
+          isOpen={!!editTarget}
+          onClose={() => setEditTarget(null)}
+          onSuccess={() => {
+            setEditTarget(null);
+            queryClient.invalidateQueries();
+          }}
+          initialData={editTarget ?? undefined}
+        />
+      )}
     </div>
   );
 };

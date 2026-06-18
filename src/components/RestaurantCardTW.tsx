@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaStar, FaHeart, FaRegHeart } from "react-icons/fa";
+import { FaStar, FaHeart, FaRegHeart, FaEdit } from "react-icons/fa";
 import { HiOutlineLocationMarker } from "react-icons/hi";
 import { Restaurant } from "@/hooks/useRestaurants";
 import noImage from "@/assets/no-image.jpg";
@@ -16,6 +16,8 @@ interface Props {
   featured?: boolean;
   liked: boolean;
   onLikeToggle: (liked: boolean) => Promise<void>;
+  /** Fourni uniquement pour les admins : ouvre le dialog d'édition. */
+  onEdit?: () => void;
 }
 
 function Stars({ rating }: { rating: number }) {
@@ -47,6 +49,7 @@ const RestaurantCardTW = ({
   featured = false,
   liked,
   onLikeToggle,
+  onEdit,
 }: Props) => {
   const [isLiked, setIsLiked] = useState(liked);
 
@@ -118,12 +121,26 @@ const RestaurantCardTW = ({
 
       {/* Corps */}
       <div className="flex grow flex-col gap-2 px-5 py-4">
-        <div
-          role="heading"
-          aria-level={3}
-          className="truncate font-display text-[1.4rem] font-bold text-card-foreground"
-        >
-          {restaurant.name}
+        <div className="flex items-center gap-2">
+          <div
+            role="heading"
+            aria-level={3}
+            className="min-w-0 flex-1 truncate font-display text-[1.4rem] font-bold text-card-foreground"
+          >
+            {restaurant.name}
+          </div>
+          {onEdit && (
+            <Tooltip label="Modifier">
+              <button
+                type="button"
+                onClick={onEdit}
+                aria-label="Modifier le restaurant"
+                className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-foreground/50 transition hover:bg-muted hover:text-primary"
+              >
+                <FaEdit className="h-4 w-4" />
+              </button>
+            </Tooltip>
+          )}
         </div>
 
         <div className="flex min-h-6 items-center gap-2 text-sm text-foreground/60">

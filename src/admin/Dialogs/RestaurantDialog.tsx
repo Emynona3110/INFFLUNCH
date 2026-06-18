@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "@/lib/toast";
+import { useQueryClient } from "@tanstack/react-query";
 import supabaseClient from "../../services/supabaseClient";
 import useTags from "../../hooks/useTags";
 import { slugify } from "../../utils/slugify";
@@ -7,10 +8,18 @@ import useLocations from "../../hooks/useLocations";
 import { Restaurant } from "../../hooks/useRestaurants";
 import BadgesToggles from "../../components/BadgesToggles";
 import badgeMap from "../../services/badgeMap";
-import { FiChevronDown } from "react-icons/fi";
+import { FiChevronDown, FiPlus, FiCheck, FiX } from "react-icons/fi";
 import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+
+/** Met en forme un label de tag (1re lettre de chaque mot en majuscule). */
+const formatTagLabel = (input: string) =>
+  input
+    .split(" ")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ")
+    .trim();
 
 interface RestaurantDialogProps {
   isOpen: boolean;
@@ -34,9 +43,13 @@ const RestaurantDialog = ({
   const [tags, setTags] = useState<string[]>([]);
   const [badges, setBadges] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [creatingTag, setCreatingTag] = useState(false);
+  const [newTag, setNewTag] = useState("");
+  const [tagSubmitting, setTagSubmitting] = useState(false);
 
   const { data: availableTags } = useTags();
   const { fetchLocation, loading: locationLoading } = useLocations();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (isOpen && initialData) {
@@ -55,8 +68,51 @@ const RestaurantDialog = ({
       setPhone("");
       setTags([]);
       setBadges([]);
+      setCreatingTag(false);
+      setNewTag("");
     }
   }, [isOpen, initialData]);
+
+  const handleCreateTag = async () => {
+    const formatted = formatTagLabel(newTag);
+    if (!formatted) return;
+
+    // Évite un doublon (insensible à la casse) déjà présent en base.
+    const existing = (availableTags ?? []).find(
+      (t) => t.label.toLowerCase() === formatted.toLowerCase()
+    );
+    if (existing) {
+      if (!tags.includes(existing.label))
+        setTags([...tags, existing.label].sort());
+      setCreatingTag(false);
+      setNewTag("");
+      return;
+    }
+
+    setTagSubmitting(true);
+    const { error } = await supabaseClient
+      .from("tags")
+      .insert({ label: formatted });
+    setTagSubmitting(false);
+
+    if (error) {
+      toast({
+        title: "Erreur",
+        description: error.message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    // Rafraîchit la liste des tags partout + sélectionne le nouveau.
+    queryClient.invalidateQueries({ queryKey: ["tags"] });
+    setTags([...tags, formatted].sort());
+    setCreatingTag(false);
+    setNewTag("");
+    toast({ title: "Tag créé", status: "success", duration: 2500, isClosable: true });
+  };
 
   const formatName = (value: string) =>
     value
@@ -305,24 +361,76 @@ const RestaurantDialog = ({
                 </span>
               ))}
             </div>
-            <div className="relative">
-              <select
-                value=""
-                onChange={(e) => {
-                  const v = e.target.value;
-                  if (v && !tags.includes(v)) setTags([...tags, v].sort());
-                }}
-                className="h-10 w-full cursor-pointer appearance-none rounded-lg border border-border bg-background pl-3 pr-9 text-sm text-foreground outline-none transition focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/25"
-              >
-                <option value="">Choisir un tag</option>
-                {tagOptions.map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
-                  </option>
-                ))}
-              </select>
-              <FiChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/50" />
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <select
+                  value=""
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    if (v && !tags.includes(v)) setTags([...tags, v].sort());
+                  }}
+                  className="h-10 w-full cursor-pointer appearance-none rounded-lg border border-border bg-background pl-3 pr-9 text-sm text-foreground outline-none transition focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/25"
+                >
+                  <option value="">Choisir un tag</option>
+                  {tagOptions.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                </select>
+                <FiChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/50" />
+              </div>
+              {!creatingTag && (
+                <button
+                  type="button"
+                  aria-label="Créer un tag"
+                  onClick={() => setCreatingTag(true)}
+                  className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-lg border border-border text-foreground/70 transition hover:bg-muted hover:text-primary"
+                >
+                  <FiPlus className="h-5 w-5" />
+                </button>
+              )}
             </div>
+
+            {creatingTag && (
+              <div className="mt-2 flex items-center gap-2">
+                <Input
+                  autoFocus
+                  value={newTag}
+                  placeholder="Nouveau tag"
+                  onChange={(e) => setNewTag(formatTagLabel(e.target.value))}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleCreateTag();
+                    } else if (e.key === "Escape") {
+                      setCreatingTag(false);
+                      setNewTag("");
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  aria-label="Valider le tag"
+                  onClick={handleCreateTag}
+                  disabled={tagSubmitting || !newTag.trim()}
+                  className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-lg bg-primary/10 text-primary transition hover:bg-primary/20 disabled:pointer-events-none disabled:opacity-50"
+                >
+                  <FiCheck className="h-5 w-5" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Annuler"
+                  onClick={() => {
+                    setCreatingTag(false);
+                    setNewTag("");
+                  }}
+                  className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-lg border border-border text-foreground/70 transition hover:bg-muted"
+                >
+                  <FiX className="h-5 w-5" />
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Badges */}

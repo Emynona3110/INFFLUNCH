@@ -1,11 +1,15 @@
 import { useState } from "react";
-import { FiMoreVertical } from "react-icons/fi";
+import { FiMoreVertical, FiPlus } from "react-icons/fi";
+import { useQueryClient } from "@tanstack/react-query";
 import darkLogo from "../assets/infflux.svg";
 import lightLogo from "../assets/w-infflux.svg";
 import ColorModeSwitch from "./ColorModeSwitch";
 import SearchInput from "./SearchInput";
 import FilterDialog from "./FilterDialog";
 import FavoritesToggle from "./FavoritesToggle";
+import useIsAdmin from "../hooks/useIsAdmin";
+import RestaurantDialog from "@/admin/Dialogs/RestaurantDialog";
+import { Tooltip } from "@/components/ui/tooltip";
 import {
   defaultRestaurantFilters,
   RestaurantFilters,
@@ -29,6 +33,9 @@ const Navbar = ({
   onSearch,
 }: NavbarProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  const isAdmin = useIsAdmin();
+  const queryClient = useQueryClient();
 
   return (
     <div className="flex h-full w-full select-none items-center justify-between gap-1">
@@ -133,6 +140,18 @@ const Navbar = ({
             <SearchInput onSearch={onSearch} />
           </div>
           <div className="flex items-center gap-2">
+            {isAdmin && (
+              <Tooltip label="Ajouter un restaurant">
+                <button
+                  type="button"
+                  aria-label="Ajouter un restaurant"
+                  onClick={() => setAddOpen(true)}
+                  className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-full text-foreground/60 transition hover:bg-muted hover:text-primary"
+                >
+                  <FiPlus className="h-6 w-6" />
+                </button>
+              </Tooltip>
+            )}
             <FavoritesToggle
               isChecked={!!restaurantFilters.favoritesOnly}
               onChange={(checked) =>
@@ -148,6 +167,17 @@ const Navbar = ({
         </>
       ) : (
         <ColorModeSwitch />
+      )}
+
+      {isAdmin && (
+        <RestaurantDialog
+          isOpen={addOpen}
+          onClose={() => setAddOpen(false)}
+          onSuccess={() => {
+            setAddOpen(false);
+            queryClient.invalidateQueries();
+          }}
+        />
       )}
     </div>
   );
