@@ -152,7 +152,7 @@ const RestaurantMiniMap = ({ address, lat, lng, distanceLabel }: Props) => {
       </MapContainer>
 
       {/* Zoom +/- */}
-      <div className="absolute right-3 top-3 z-[500] flex flex-col overflow-hidden rounded-lg bg-card shadow">
+      <div className="absolute right-3 top-3 z-[500] flex flex-col overflow-hidden rounded-full bg-card shadow">
         <button
           type="button"
           onClick={() => map?.zoomIn()}

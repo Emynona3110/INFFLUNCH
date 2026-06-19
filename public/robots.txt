@@ -1,0 +1,4 @@
+# Site interne INFFLUNCH : on demande aux moteurs de ne rien explorer/indexer.
+# (Ne restreint pas l'accès : la protection réelle = authentification + RLS.)
+User-agent: *
+Disallow: /
