@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaStar, FaHeart, FaRegHeart, FaEdit } from "react-icons/fa";
+import { FaStar, FaHeart, FaRegHeart } from "react-icons/fa";
 import { HiOutlineLocationMarker } from "react-icons/hi";
 import { Restaurant } from "@/hooks/useRestaurants";
 import noImage from "@/assets/no-image.jpg";
@@ -135,9 +135,9 @@ const RestaurantCardTW = ({
                 type="button"
                 onClick={onEdit}
                 aria-label="Modifier le restaurant"
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-foreground/50 transition hover:bg-muted hover:text-primary"
+                className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-base leading-none text-foreground/50 transition hover:bg-muted hover:text-primary"
               >
-                <FaEdit className="h-4 w-4" />
+                ✎
               </button>
             </Tooltip>
           )}

@@ -6,21 +6,9 @@ export type AdminSection = {
 };
 
 export const adminSections: AdminSection[] = [
-  {
-    label: "Restaurants",
-    path: "admin/restaurants",
-    tableName: "restaurants",
-    columns: [
-      "id",
-      "name",
-      "address",
-      "phone",
-      "website",
-      "badges",
-      "tags",
-      "image",
-    ],
-  },
+  // Les restaurants se gèrent désormais directement dans le site (crayon sur
+  // chaque card + bouton "+" navbar + suppression dans le dialog d'édition),
+  // donc plus d'onglet "Restaurants" dans l'admin.
   {
     label: "Tags",
     path: "admin/tags",

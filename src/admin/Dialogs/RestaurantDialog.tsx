@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "@/lib/toast";
 import { useQueryClient } from "@tanstack/react-query";
 import supabaseClient from "../../services/supabaseClient";
@@ -46,6 +46,11 @@ const RestaurantDialog = ({
   const [creatingTag, setCreatingTag] = useState(false);
   const [newTag, setNewTag] = useState("");
   const [tagSubmitting, setTagSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  // Suppression par appui long (2s) avec barre de progression dans le bouton.
+  const HOLD_MS = 1000;
+  const [holding, setHolding] = useState(false);
+  const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { data: availableTags } = useTags();
   const { fetchLocation, loading: locationLoading } = useLocations();
@@ -70,8 +75,60 @@ const RestaurantDialog = ({
       setBadges([]);
       setCreatingTag(false);
       setNewTag("");
+      cancelHold();
     }
   }, [isOpen, initialData]);
+
+  // Nettoyage du timer si le composant est démonté pendant un appui.
+  useEffect(() => () => cancelHold(), []);
+
+  const cancelHold = () => {
+    if (holdTimer.current) {
+      clearTimeout(holdTimer.current);
+      holdTimer.current = null;
+    }
+    setHolding(false);
+  };
+
+  const startHold = () => {
+    if (isDeleting || holdTimer.current) return;
+    setHolding(true);
+    holdTimer.current = setTimeout(() => {
+      holdTimer.current = null;
+      setHolding(false);
+      handleDelete();
+    }, HOLD_MS);
+  };
+
+  const handleDelete = async () => {
+    if (!initialData?.id) return;
+    setIsDeleting(true);
+    const { error } = await supabaseClient
+      .from("restaurants")
+      .delete()
+      .eq("id", initialData.id);
+    setIsDeleting(false);
+
+    if (error) {
+      toast({
+        title: "Erreur",
+        description: error.message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    toast({
+      title: "Restaurant supprimé",
+      status: "success",
+      duration: 3000,
+      isClosable: true,
+    });
+    onSuccess?.();
+    onClose();
+  };
 
   const handleCreateTag = async () => {
     const formatted = formatTagLabel(newTag);
@@ -443,20 +500,52 @@ const RestaurantDialog = ({
         </div>
       </div>
 
-      <div className="mt-6 flex justify-end gap-2">
-        <Button variant="outline" onClick={onClose}>
-          Annuler
-        </Button>
-        <Button
-          onClick={handleSubmit}
-          disabled={isSubmitting || locationLoading || !name.trim() || !address.trim()}
-        >
-          {isSubmitting || locationLoading
-            ? "…"
-            : initialData
-            ? "Modifier"
-            : "Ajouter"}
-        </Button>
+      <div className="mt-6 flex items-center justify-between gap-2">
+        <div>
+          {initialData?.id && (
+            <button
+              type="button"
+              disabled={isDeleting}
+              onPointerDown={startHold}
+              onPointerUp={cancelHold}
+              onPointerLeave={cancelHold}
+              onPointerCancel={cancelHold}
+              onContextMenu={(e) => e.preventDefault()}
+              aria-label="Maintenir pour supprimer"
+              title="Maintenir pour supprimer"
+              className="relative inline-flex h-10 cursor-pointer touch-none select-none items-center justify-center overflow-hidden rounded-lg bg-destructive px-4 text-sm font-medium text-white transition hover:bg-destructive/90 disabled:pointer-events-none disabled:opacity-50"
+            >
+              {/* Barre de progression de l'appui long */}
+              <span
+                aria-hidden
+                className="absolute inset-y-0 left-0 bg-white/30 ease-linear"
+                style={{
+                  width: holding ? "100%" : "0%",
+                  transitionProperty: "width",
+                  transitionDuration: holding ? `${HOLD_MS}ms` : "150ms",
+                }}
+              />
+              <span className="relative">
+                {isDeleting ? "Suppression…" : "Supprimer"}
+              </span>
+            </button>
+          )}
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={onClose}>
+            Annuler
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={isSubmitting || locationLoading || !name.trim() || !address.trim()}
+          >
+            {isSubmitting || locationLoading
+              ? "…"
+              : initialData
+              ? "Modifier"
+              : "Ajouter"}
+          </Button>
+        </div>
       </div>
     </Dialog>
   );

@@ -26,8 +26,6 @@ const MyAccount = () => {
     }
   };
 
-  const role = sessionData?.user.user_metadata?.role;
-
   return (
     <div className="tw-scope w-full max-w-md">
       <Card className="p-8">
@@ -53,12 +51,6 @@ const MyAccount = () => {
               <Button variant="outline" onClick={() => setDialogOpen(true)}>
                 Changer le mot de passe
               </Button>
-
-              {role === "admin" && (
-                <Button variant="primarySoft" onClick={() => navigate("/admin")}>
-                  Accéder à l'espace admin
-                </Button>
-              )}
 
               <Button variant="destructiveSoft" onClick={handleLogout}>
                 Se déconnecter

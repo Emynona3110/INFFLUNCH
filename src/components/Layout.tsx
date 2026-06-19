@@ -6,6 +6,11 @@ import { cn } from "@/lib/utils";
 interface LayoutProps {
   children: React.ReactNode;
   centerContent?: boolean;
+  /**
+   * Contenu pleine hauteur sans scroll de page ni footer : le scroll se fait
+   * À L'INTÉRIEUR du contenu (tables admin). Sinon la page scrolle (grille, etc.).
+   */
+  fillContent?: boolean;
   withNavbar?: boolean;
   navbarProps?: {
     page: string;
@@ -19,6 +24,7 @@ interface LayoutProps {
 const Layout = ({
   children,
   centerContent = false,
+  fillContent = false,
   withNavbar = false,
   navbarProps,
 }: LayoutProps) => {
@@ -30,19 +36,28 @@ const Layout = ({
         </header>
       )}
 
-      <main className="flex-1 overflow-y-auto">
-        <div className="flex min-h-full flex-col">
-          <div
-            className={cn(
-              "mx-auto w-full max-w-[1200px] flex-1 px-4 py-6",
-              centerContent && "flex items-center justify-center"
-            )}
-          >
+      {fillContent ? (
+        // Pleine hauteur, pas de scroll de page : seul le contenu scrolle.
+        <main className="min-h-0 flex-1 overflow-hidden">
+          <div className="mx-auto h-full w-full max-w-[1200px] px-4 py-6">
             {children}
           </div>
-          <Footer />
-        </div>
-      </main>
+        </main>
+      ) : (
+        <main className="flex-1 overflow-y-auto">
+          <div className="flex min-h-full flex-col">
+            <div
+              className={cn(
+                "mx-auto w-full max-w-[1200px] flex-1 px-4 py-6",
+                centerContent && "flex items-center justify-center"
+              )}
+            >
+              {children}
+            </div>
+            <Footer />
+          </div>
+        </main>
+      )}
     </div>
   );
 };

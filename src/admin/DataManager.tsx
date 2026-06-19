@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "@/lib/toast";
 import { useQueryClient } from "@tanstack/react-query";
 import AdminTable from "./AdminTable";
@@ -11,15 +11,26 @@ import { Button } from "@/components/ui/button";
 
 export interface DataManagerProps {
   section: AdminSection;
+  /** Incrémenter cette valeur (depuis le parent) ouvre le dialog d'ajout. */
+  addSignal?: number;
 }
 
-const DataManager = ({ section }: DataManagerProps) => {
-  const { label, tableName, columns } = section;
+const DataManager = ({ section, addSignal }: DataManagerProps) => {
+  const { tableName, columns } = section;
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editData, setEditData] = useState<any | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
 
   const queryClient = useQueryClient();
+
+  // Ouverture du dialog d'ajout pilotée par le parent (bouton remonté dans la
+  // barre d'onglets). On ignore la valeur initiale (0/undefined).
+  useEffect(() => {
+    if (addSignal) {
+      setEditData(null);
+      setIsDialogOpen(true);
+    }
+  }, [addSignal]);
 
   const handleSuccess = () => {
     setIsDialogOpen(false);
@@ -82,28 +93,7 @@ const DataManager = ({ section }: DataManagerProps) => {
   };
 
   return (
-    <div className="tw-scope flex h-full flex-col p-4">
-      <div className="mb-4 flex h-10 items-center justify-between gap-3">
-        <div
-          role="heading"
-          aria-level={1}
-          className="font-display text-xl font-bold text-foreground"
-        >
-          {`${label}`}
-        </div>
-        {tableName !== "users" && (
-          <Button
-            variant="primarySoft"
-            onClick={() => {
-              setEditData(null);
-              setIsDialogOpen(true);
-            }}
-          >
-            Ajouter +
-          </Button>
-        )}
-      </div>
-
+    <div className="tw-scope flex h-full flex-col p-4 pt-0">
       <div className="min-h-0 flex-1">
         <AdminTable
           tableName={tableName}

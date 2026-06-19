@@ -8,12 +8,13 @@ import SearchInput from "./SearchInput";
 import FilterDialog from "./FilterDialog";
 import FavoritesToggle from "./FavoritesToggle";
 import useIsAdmin from "../hooks/useIsAdmin";
+import useAccessRequests from "../hooks/useAccessRequests";
 import RestaurantDialog from "@/admin/Dialogs/RestaurantDialog";
 import { Tooltip } from "@/components/ui/tooltip";
 import {
+  buildUserSections,
   defaultRestaurantFilters,
   RestaurantFilters,
-  userSections,
 } from "../pages/UserPage";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +37,11 @@ const Navbar = ({
   const [addOpen, setAddOpen] = useState(false);
   const isAdmin = useIsAdmin();
   const queryClient = useQueryClient();
+  const sections = buildUserSections(isAdmin);
+
+  // Puce "demandes en attente" (admins uniquement, la requête est gated par rôle).
+  const { data: requests = [] } = useAccessRequests();
+  const pendingCount = requests.filter((r) => r.state === "Waiting").length;
 
   return (
     <div className="flex h-full w-full select-none items-center justify-between gap-1">
@@ -47,24 +53,24 @@ const Navbar = ({
             setPage("restaurants");
           }}
         >
-          <img src={darkLogo} alt="" className="block h-8 w-8 dark:hidden" />
-          <img src={lightLogo} alt="" className="hidden h-8 w-8 dark:block" />
-          <span className="ml-1 mr-4 hidden font-display text-xl font-extrabold text-[#113894] dark:text-white lg:block">
-            INFFLUNCH
+          <img src={darkLogo} alt="" className="block h-7 w-7 dark:hidden" />
+          <img src={lightLogo} alt="" className="hidden h-7 w-7 dark:block" />
+          <span className="ml-1 mr-4 hidden font-display text-lg font-extrabold text-[#113894] dark:text-white lg:block">
+            {isAdmin ? "ADMINFFLUNCH" : "INFFLUNCH"}
           </span>
         </div>
 
         {/* Onglets desktop */}
         <nav className="hidden h-full items-center lg:flex">
-          {userSections.map((item) => {
+          {sections.map((item) => {
             const isActive = item.path === page;
             return (
-              <div key={item.path} className="h-full px-2.5">
+              <div key={item.path} className="h-full px-1.5">
                 <button
                   type="button"
                   onClick={() => setPage(item.path)}
                   className={cn(
-                    "flex h-full cursor-pointer items-center border-b-2 text-xl transition",
+                    "relative flex h-full cursor-pointer items-center border-b-2 text-lg transition",
                     isActive
                       ? "border-primary text-primary"
                       : "border-transparent text-foreground/50 hover:text-foreground"
@@ -87,6 +93,9 @@ const Navbar = ({
                       {item.label}
                     </span>
                   </span>
+                  {item.path === "demandes" && pendingCount > 0 && (
+                    <span className="absolute right-0 top-2.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-card" />
+                  )}
                 </button>
               </div>
             );
@@ -110,7 +119,7 @@ const Navbar = ({
                 onClick={() => setMenuOpen(false)}
               />
               <div className="absolute left-0 top-full z-20 mt-1 min-w-40 rounded-lg border border-border bg-card py-1 shadow-lg">
-                {userSections.map((item) => (
+                {sections.map((item) => (
                   <button
                     key={item.path}
                     type="button"
@@ -119,13 +128,16 @@ const Navbar = ({
                       setMenuOpen(false);
                     }}
                     className={cn(
-                      "block w-full cursor-pointer px-4 py-2 text-left text-base transition hover:bg-muted",
+                      "relative block w-full cursor-pointer px-4 py-2 text-left text-base transition hover:bg-muted",
                       page === item.path
                         ? "font-semibold text-primary"
                         : "text-foreground"
                     )}
                   >
                     {item.label}
+                    {item.path === "demandes" && pendingCount > 0 && (
+                      <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-card" />
+                    )}
                   </button>
                 ))}
               </div>
