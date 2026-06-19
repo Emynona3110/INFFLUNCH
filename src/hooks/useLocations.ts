@@ -1,37 +1,8 @@
 import { useState } from "react";
 import L from "leaflet";
+import { geocodeAddress, INFFLUX_COORDS, Coords as Coordinates } from "../services/geocode";
 
-interface Coordinates {
-  lat: number;
-  lng: number;
-}
-
-const companyCoords: Coordinates = {
-  lat: 48.8487433,
-  lng: 2.4280408,
-};
-
-const geocodeAddress = async (address: string): Promise<Coordinates> => {
-  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-    address
-  )}`;
-
-  const response = await fetch(url, {
-    headers: {
-      "User-Agent": "leaflet-distance-app",
-    },
-  });
-
-  if (!response.ok) throw new Error("Erreur lors du géocodage");
-
-  const data = await response.json();
-  if (!data || data.length === 0) throw new Error("Adresse non trouvée");
-
-  return {
-    lat: parseFloat(data[0].lat),
-    lng: parseFloat(data[0].lon),
-  };
-};
+const companyCoords = INFFLUX_COORDS;
 
 const getDistanceInKm = (a: Coordinates, b: Coordinates): number => {
   const pointA = L.latLng(a.lat, a.lng);

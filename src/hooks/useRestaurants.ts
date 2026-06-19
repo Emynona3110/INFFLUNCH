@@ -12,6 +12,8 @@ export type Restaurant = {
   address: string;
   phone: string;
   website: string;
+  lat: number | null;
+  lng: number | null;
 };
 
 import useSupabaseQuery from "./useSupabaseQuery";

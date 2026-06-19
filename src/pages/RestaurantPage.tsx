@@ -292,13 +292,13 @@ const RestaurantPage = () => {
                 aria-level={2}
                 className="font-display text-lg font-bold text-card-foreground"
               >
-                Situation
+                Carte
               </div>
-              <p className="text-xs text-foreground/55">Distance depuis INFFLUX</p>
             </div>
             <RestaurantMiniMap
               address={restaurant.address}
-              name={restaurant.name}
+              lat={restaurant.lat}
+              lng={restaurant.lng}
               distanceLabel={restaurant.distanceLabel}
             />
           </section>

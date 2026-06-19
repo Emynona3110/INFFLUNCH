@@ -259,6 +259,8 @@ const RestaurantDialog = ({
           phone: phone || null,
           distance: location.distanceKm,
           distanceLabel: location.formattedDistance,
+          lat: location.coords.lat,
+          lng: location.coords.lng,
           tags: tags.length ? tags : null,
           badges: orderedBadges,
         })
@@ -314,6 +316,8 @@ const RestaurantDialog = ({
       phone: phone || null,
       distance: location.distanceKm,
       distanceLabel: location.formattedDistance,
+      lat: location.coords.lat,
+      lng: location.coords.lng,
       tags: tags.length ? tags : null,
       badges: orderedBadges,
     });
