@@ -1,6 +1,7 @@
 export type Restaurant = {
   id: number;
   name: string;
+  slug: string;
   image: string;
   distance: string;
   distanceLabel: string;

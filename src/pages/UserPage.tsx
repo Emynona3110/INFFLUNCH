@@ -6,6 +6,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import RestaurantGrid from "../sections/RestaurantGrid";
+import RestaurantPage from "./RestaurantPage";
 import Beeeh from "../sections/Beeeh";
 import { useState } from "react";
 import { slugify } from "../utils/slugify";
@@ -57,12 +58,16 @@ const UserPage = () => {
     defaultRestaurantFilters
   );
 
-  const currentPage =
-    sections.find((section) => location.pathname.includes(section.path))
-      ?.path ?? sections[0].path;
+  // Fiche d'un restaurant : pas d'onglet actif, la navbar se réduit (pas de
+  // recherche/filtres). Sinon, l'onglet correspondant à l'URL.
+  const isRestaurantDetail = location.pathname.includes("/restaurant/");
+  const currentPage = isRestaurantDetail
+    ? ""
+    : sections.find((section) => location.pathname.includes(section.path))
+        ?.path ?? sections[0].path;
 
   // mon-compte / à propos = contenu centré ; demandes / tables = pleine hauteur
-  // avec scroll interne (pas de scroll de page) ; restaurants = scroll de page.
+  // avec scroll interne (pas de scroll de page) ; restaurants/fiche = scroll de page.
   const centerContent =
     currentPage === "mon-compte" || currentPage === "a-propos";
   const fillContent = currentPage === "demandes" || currentPage === "tables";
@@ -88,6 +93,7 @@ const UserPage = () => {
           path="restaurants"
           element={<RestaurantGrid restaurantFilters={restaurantFilters} />}
         />
+        <Route path="restaurant/:slug" element={<RestaurantPage />} />
         <Route path="mon-compte" element={<MyAccount />} />
         <Route path="a-propos" element={<About />} />
         {isAdmin && <Route path="demandes" element={<AccessRequests />} />}
