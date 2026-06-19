@@ -2,12 +2,18 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import supabaseClient from "../services/supabaseClient";
 import Layout from "../components/Layout";
+import Turnstile from "../components/Turnstile";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY as
+  | string
+  | undefined;
+
 const RequestAccessPage = () => {
   const [email, setEmail] = useState("");
+  const [token, setToken] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [done, setDone] = useState(false);
   const navigate = useNavigate();
@@ -17,13 +23,16 @@ const RequestAccessPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isValidEmail(email)) return;
+    if (!isValidEmail(email) || !token) return;
     setIsLoading(true);
 
-    // On insère la demande. Les emails hors @infflux.com sont ignorés
-    // silencieusement par un trigger en base : on affiche un succès dans tous
-    // les cas (anti-énumération), et on ignore les erreurs (ex. doublon).
-    await supabaseClient.from("waiting_list").insert({ email });
+    // L'écriture passe par l'Edge Function request-access (valide le token
+    // Turnstile, insère en service_role). Les emails hors @infflux.com et les
+    // erreurs (doublon, throttle) sont gérés côté serveur : on affiche un succès
+    // dans tous les cas (anti-énumération).
+    await supabaseClient.functions.invoke("request-access", {
+      body: { email, token },
+    });
 
     setIsLoading(false);
     setDone(true);
@@ -64,9 +73,22 @@ const RequestAccessPage = () => {
                 />
               </label>
 
+              {TURNSTILE_SITE_KEY ? (
+                <Turnstile
+                  siteKey={TURNSTILE_SITE_KEY}
+                  onToken={setToken}
+                  onExpire={() => setToken("")}
+                />
+              ) : (
+                <p className="text-xs text-destructive">
+                  Vérification anti-robot non configurée
+                  (VITE_TURNSTILE_SITE_KEY manquante).
+                </p>
+              )}
+
               <Button
                 type="submit"
-                disabled={isLoading || !isValidEmail(email)}
+                disabled={isLoading || !isValidEmail(email) || !token}
                 className="w-full"
               >
                 {isLoading ? "Envoi…" : "Envoyer ma demande"}
