@@ -188,6 +188,7 @@ const FilterDialog = ({ restaurantFilters, onFilterChange }: FilterDialogProps) 
                 onChange={(updated) =>
                   setLocalQuery({ ...localQuery, badges: updated })
                 }
+                className="justify-center"
               />
             </div>
           </div>

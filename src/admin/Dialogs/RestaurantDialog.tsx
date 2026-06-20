@@ -595,8 +595,8 @@ const RestaurantDialog = ({
             )}
           </div>
 
-          {/* Badges */}
-          <div>
+          {/* Badges — pleine largeur pour éviter le retour à la ligne. */}
+          <div className="md:col-span-2">
             <span className="text-sm font-bold text-foreground">Badges</span>
             <div className="mt-1.5">
               <BadgesToggles selected={badges} onChange={setBadges} />
