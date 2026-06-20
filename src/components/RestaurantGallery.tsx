@@ -44,7 +44,6 @@ const RestaurantGallery = ({ restaurantId, userId, isAdmin }: Props) => {
   useEffect(() => {
     if (start !== safeStart) setStart(safeStart);
   }, [start, safeStart]);
-  const visible = photos.slice(safeStart, safeStart + PAGE);
   const showLeft = safeStart > 0;
   const showRight = safeStart < maxStart;
 
@@ -157,13 +156,24 @@ const RestaurantGallery = ({ restaurantId, userId, isAdmin }: Props) => {
               <FiChevronRight className="h-5 w-5" />
             </button>
           )}
-          <div className="grid grid-cols-3 gap-2">
-          {visible.map((photo) => {
+          {/* Piste glissante : toutes les photos sont rendues côte à côte ;
+              on translate la bande (transition CSS) d'une fenêtre de 3. Chaque
+              item fait 1/3 de la largeur visible (2 gaps de 8px). */}
+          <div className="overflow-hidden">
+          <div
+            className="flex gap-2 will-change-transform"
+            style={{
+              transform: `translateX(calc(${safeStart} * ((16px - 100%) / 3 - 8px)))`,
+              transition: "transform 450ms cubic-bezier(0.22, 1, 0.36, 1)",
+            }}
+          >
+          {photos.map((photo) => {
             const canDelete = isAdmin || photo.user_id === userId;
             return (
               <div
                 key={photo.id}
-                className="group relative aspect-square overflow-hidden rounded-xl border border-border bg-muted"
+                style={{ flexBasis: "calc((100% - 16px) / 3)" }}
+                className="group relative aspect-square shrink-0 overflow-hidden rounded-xl border border-border bg-muted"
               >
                 <button
                   type="button"
@@ -197,6 +207,7 @@ const RestaurantGallery = ({ restaurantId, userId, isAdmin }: Props) => {
               </div>
             );
           })}
+          </div>
           </div>
         </div>
       )}

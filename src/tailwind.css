@@ -179,6 +179,16 @@ body {
     background-color: transparent;
     background-image: none;
     cursor: pointer;
+    /* Pas de sélection du texte des boutons (clics répétés, appuis longs…). */
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Images non sélectionnables et non « draggables » (galerie, vignettes…). */
+  .tw-scope img {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
   }
   .tw-scope button,
   .tw-scope input,
