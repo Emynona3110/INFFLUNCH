@@ -25,6 +25,8 @@ import RestaurantMiniMap from "@/components/RestaurantMiniMap";
 import LikeButton from "@/components/LikeButton";
 import ReviewForm from "@/components/ReviewForm";
 import HoldToDeleteButton from "@/components/HoldToDeleteButton";
+import RestaurantDialog from "@/admin/Dialogs/RestaurantDialog";
+import { Tooltip } from "@/components/ui/tooltip";
 import { formatAuthorName, authorInitials } from "@/utils/authorName";
 import { toast } from "@/lib/toast";
 import noImage from "@/assets/no-image.jpg";
@@ -103,6 +105,7 @@ const RestaurantPage = () => {
     restaurant?.id
   );
   const [showForm, setShowForm] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
 
   // Remonte en haut quand on ouvre une nouvelle fiche.
   useEffect(() => window.scrollTo({ top: 0 }), [slug]);
@@ -142,6 +145,11 @@ const RestaurantPage = () => {
 
   const totalReviews = reviews.length;
   const myReview = reviews.find((r) => r.user_id === userId) ?? null;
+  // On affiche toujours son propre avis (même sans texte), mais ceux des autres
+  // uniquement s'ils ont un commentaire (une note seule n'apporte rien à lire).
+  const visibleReviews = reviews.filter(
+    (r) => r.user_id === userId || r.comment?.trim()
+  );
   // Répartition par note (5→1) pour les barres type Amazon.
   const ratingCounts = (star: number) =>
     reviews.filter((r) => r.rating === star).length;
@@ -214,12 +222,26 @@ const RestaurantPage = () => {
               ))}
             </div>
           )}
-          <div
-            role="heading"
-            aria-level={1}
-            className="font-display text-3xl font-extrabold leading-tight text-white drop-shadow md:text-4xl"
-          >
-            {restaurant.name}
+          <div className="flex items-center gap-2">
+            <div
+              role="heading"
+              aria-level={1}
+              className="font-display text-3xl font-extrabold leading-tight text-white drop-shadow md:text-4xl"
+            >
+              {restaurant.name}
+            </div>
+            {isAdmin && (
+              <Tooltip label="Modifier">
+                <button
+                  type="button"
+                  onClick={() => setEditOpen(true)}
+                  aria-label="Modifier le restaurant"
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white/15 text-white backdrop-blur-sm transition hover:bg-white/30"
+                >
+                  <FiEdit2 className="h-4 w-4" />
+                </button>
+              </Tooltip>
+            )}
           </div>
           {hasRating && (
             <div className="mt-2 flex items-center gap-2 text-white/90">
@@ -393,13 +415,13 @@ const RestaurantPage = () => {
               <div className="flex justify-center py-8">
                 <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
               </div>
-            ) : reviews.length === 0 ? (
+            ) : visibleReviews.length === 0 ? (
               <p className="py-6 text-center text-sm text-foreground/55">
                 Aucun avis pour le moment. Sois le premier à en laisser un !
               </p>
             ) : (
               <ul className="m-0 list-none space-y-4 p-0">
-                {reviews.map((r) => {
+                {visibleReviews.map((r) => {
                   const mine = r.user_id === userId;
                   return (
                     <li
@@ -469,6 +491,18 @@ const RestaurantPage = () => {
             )}
           </section>
       </div>
+
+      {isAdmin && (
+        <RestaurantDialog
+          isOpen={editOpen}
+          onClose={() => setEditOpen(false)}
+          onSuccess={() => {
+            setEditOpen(false);
+            queryClient.invalidateQueries();
+          }}
+          initialData={restaurant}
+        />
+      )}
     </motion.div>
   );
 };

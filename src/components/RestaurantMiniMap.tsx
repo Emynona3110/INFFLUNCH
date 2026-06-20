@@ -127,7 +127,7 @@ const RestaurantMiniMap = ({ address, lat, lng, distanceLabel }: Props) => {
     <div className={`osm-map relative h-60${isDark ? " is-dark" : ""}`}>
       <MapContainer
         className="h-full w-full"
-        scrollWheelZoom={false}
+        scrollWheelZoom={true}
         zoomControl={false}
         attributionControl={false}
         style={{ background: "var(--muted)" }}

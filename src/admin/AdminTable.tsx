@@ -74,9 +74,9 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
   }
 
   return (
-    <div className="tw-scope h-full overflow-hidden rounded-card border border-border bg-card">
+    <div className="tw-scope flex max-h-full flex-col overflow-hidden rounded-card border border-border bg-card">
       <ScrollArea
-        className="h-full os-grid"
+        className="min-h-0 os-grid"
         style={{ ["--grid-right" as string]: "117px" }}
       >
         <table
