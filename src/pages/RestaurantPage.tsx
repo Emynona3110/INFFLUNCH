@@ -264,9 +264,14 @@ const RestaurantPage = () => {
           (infos pratiques avant les avis) ; à partir de lg, colonne gauche
           (atouts + avis) et sidebar à droite (order + placement explicite). */}
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
-        {/* Atouts */}
-        {visibleBadges.length > 0 && (
-          <section className="order-1 self-start rounded-card border border-border bg-card p-5 lg:col-span-2">
+        {/* Colonne gauche (atouts + avis). Desktop : flex col occupant 2/3 →
+            les avis sont collés sous les atouts, indépendamment de la hauteur
+            de la sidebar. Mobile : display:contents pour laisser la sidebar
+            s'intercaler entre les deux (ordre : atouts → infos → avis). */}
+        <div className="contents lg:col-span-2 lg:flex lg:flex-col lg:gap-6">
+          {/* Atouts */}
+          {visibleBadges.length > 0 && (
+            <section className="order-1 rounded-card border border-border bg-card p-5">
             <div
               role="heading"
               aria-level={2}
@@ -288,73 +293,8 @@ const RestaurantPage = () => {
           </section>
         )}
 
-        {/* Colonne latérale : coordonnées + situation. */}
-        <aside className="order-2 space-y-6 self-start lg:col-start-3 lg:row-start-1 lg:row-span-2">
-          {/* Coordonnées */}
-          <section className="rounded-card border border-border bg-card p-5">
-            <div
-              role="heading"
-              aria-level={2}
-              className="mb-3 font-display text-lg font-bold text-card-foreground"
-            >
-              Coordonnées
-            </div>
-            <ul className="m-0 list-none space-y-3 p-0 text-sm">
-              {restaurant.address && (
-                <li className="flex items-start gap-3">
-                  <FiMapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  <span className="text-foreground/80">{restaurant.address}</span>
-                </li>
-              )}
-              {restaurant.phone && (
-                <li className="flex items-center gap-3">
-                  <FiPhone className="h-4 w-4 shrink-0 text-primary" />
-                  <a
-                    href={`tel:${restaurant.phone}`}
-                    className="text-foreground/80 transition hover:text-primary"
-                  >
-                    {restaurant.phone}
-                  </a>
-                </li>
-              )}
-              {restaurant.website && (
-                <li className="flex items-center gap-3">
-                  <FiGlobe className="h-4 w-4 shrink-0 text-primary" />
-                  <a
-                    href={restaurant.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 truncate text-foreground/80 transition hover:text-primary"
-                  >
-                    Site web <FiExternalLink className="h-3.5 w-3.5" />
-                  </a>
-                </li>
-              )}
-            </ul>
-          </section>
-
-          {/* Carte */}
-          <section className="overflow-hidden rounded-card border border-border bg-card">
-            <div className="border-b border-border px-5 py-3">
-              <div
-                role="heading"
-                aria-level={2}
-                className="font-display text-lg font-bold text-card-foreground"
-              >
-                Carte
-              </div>
-            </div>
-            <RestaurantMiniMap
-              address={restaurant.address}
-              lat={restaurant.lat}
-              lng={restaurant.lng}
-              distanceLabel={restaurant.distanceLabel}
-            />
-          </section>
-        </aside>
-
-        {/* Avis */}
-        <section className="order-3 self-start rounded-card border border-border bg-card p-5 lg:col-span-2">
+          {/* Avis */}
+          <section className="order-3 rounded-card border border-border bg-card p-5">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div
                 role="heading"
@@ -490,6 +430,72 @@ const RestaurantPage = () => {
               </ul>
             )}
           </section>
+        </div>
+
+        {/* Sidebar : coordonnées + carte. Indépendante (pas de row-span). */}
+        <aside className="order-2 space-y-6 self-start lg:col-start-3 lg:row-start-1">
+          {/* Coordonnées */}
+          <section className="rounded-card border border-border bg-card p-5">
+            <div
+              role="heading"
+              aria-level={2}
+              className="mb-3 font-display text-lg font-bold text-card-foreground"
+            >
+              Coordonnées
+            </div>
+            <ul className="m-0 list-none space-y-3 p-0 text-sm">
+              {restaurant.address && (
+                <li className="flex items-start gap-3">
+                  <FiMapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                  <span className="text-foreground/80">{restaurant.address}</span>
+                </li>
+              )}
+              {restaurant.phone && (
+                <li className="flex items-center gap-3">
+                  <FiPhone className="h-4 w-4 shrink-0 text-primary" />
+                  <a
+                    href={`tel:${restaurant.phone}`}
+                    className="text-foreground/80 transition hover:text-primary"
+                  >
+                    {restaurant.phone}
+                  </a>
+                </li>
+              )}
+              {restaurant.website && (
+                <li className="flex items-center gap-3">
+                  <FiGlobe className="h-4 w-4 shrink-0 text-primary" />
+                  <a
+                    href={restaurant.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 truncate text-foreground/80 transition hover:text-primary"
+                  >
+                    Site web <FiExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                </li>
+              )}
+            </ul>
+          </section>
+
+          {/* Carte */}
+          <section className="overflow-hidden rounded-card border border-border bg-card">
+            <div className="border-b border-border px-5 py-3">
+              <div
+                role="heading"
+                aria-level={2}
+                className="font-display text-lg font-bold text-card-foreground"
+              >
+                Carte
+              </div>
+            </div>
+            <RestaurantMiniMap
+              address={restaurant.address}
+              lat={restaurant.lat}
+              lng={restaurant.lng}
+              distanceLabel={restaurant.distanceLabel}
+            />
+          </section>
+        </aside>
       </div>
 
       {isAdmin && (
