@@ -107,12 +107,12 @@ using (
 
 -- 4) RLS storage.objects (backstop côté fichiers) ------------------------------
 -- Le bucket étant public, la LECTURE des fichiers se fait via l'URL publique sans
--- policy. Ces policies encadrent l'écriture/suppression depuis le client.
-
+-- policy. On NE met PAS de policy SELECT : une policy SELECT large permettrait à
+-- un client de lister tout le contenu du bucket (storage.list()) — l'app n'en a
+-- pas besoin (on lit via getPublicUrl + la table restaurant_photos). On supprime
+-- donc une éventuelle policy SELECT déjà créée. Ces policies n'encadrent que
+-- l'écriture/suppression depuis le client.
 drop policy if exists "restaurant-photos read" on storage.objects;
-create policy "restaurant-photos read"
-on storage.objects for select to authenticated
-using (bucket_id = 'restaurant-photos');
 
 drop policy if exists "restaurant-photos insert own" on storage.objects;
 create policy "restaurant-photos insert own"
