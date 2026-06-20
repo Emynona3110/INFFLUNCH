@@ -44,7 +44,7 @@ export const MIN_IMAGE_LONG_EDGE = 800;
 export const WARN_IMAGE_LONG_EDGE = 1280;
 
 // Seuils couverture (hero affiché en grand sur la fiche → plus exigeant).
-export const COVER_MIN_LONG_EDGE = 1280;
+export const COVER_MIN_LONG_EDGE = 750;
 export const COVER_WARN_LONG_EDGE = 1600;
 
 export type ResolutionLevel = "ok" | "warn" | "block";
