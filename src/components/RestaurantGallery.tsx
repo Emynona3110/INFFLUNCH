@@ -126,13 +126,13 @@ const RestaurantGallery = ({ restaurantId, userId, isAdmin }: Props) => {
                 <button
                   type="button"
                   onClick={() => setLightbox(photo)}
-                  className="h-full w-full"
+                  className="absolute inset-0 h-full w-full"
                 >
                   <img
                     src={photo.url}
                     alt=""
                     loading="lazy"
-                    className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                    className="absolute inset-0 h-full w-full object-cover transition duration-300 group-hover:scale-105"
                   />
                 </button>
                 {/* Auteur au survol */}
