@@ -1,5 +1,12 @@
-import { useState } from "react";
-import { FiPlus, FiTrash2, FiX, FiImage } from "react-icons/fi";
+import { useEffect, useState } from "react";
+import {
+  FiPlus,
+  FiTrash2,
+  FiX,
+  FiImage,
+  FiChevronLeft,
+  FiChevronRight,
+} from "react-icons/fi";
 import useRestaurantPhotos, {
   RestaurantPhoto,
 } from "@/hooks/useRestaurantPhotos";
@@ -26,6 +33,20 @@ const RestaurantGallery = ({ restaurantId, userId, isAdmin }: Props) => {
     useRestaurantPhotos(restaurantId);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [lightbox, setLightbox] = useState<RestaurantPhoto | null>(null);
+
+  // Carrousel : fenêtre de 3 photos, sauts de 3 (clampés pour rester pleine et
+  // atteindre le bord). Flèches masquées aux extrémités.
+  const PAGE = 3;
+  const [start, setStart] = useState(0);
+  const maxStart = Math.max(0, photos.length - PAGE);
+  const safeStart = Math.min(start, maxStart);
+  // Recale si la liste a rétréci (suppression) ou changé de resto.
+  useEffect(() => {
+    if (start !== safeStart) setStart(safeStart);
+  }, [start, safeStart]);
+  const visible = photos.slice(safeStart, safeStart + PAGE);
+  const showLeft = safeStart > 0;
+  const showRight = safeStart < maxStart;
 
   // 1 photo par personne et par restaurant, sauf les admins (aligné sur le
   // trigger en base). On masque alors le bouton et on guide l'utilisateur.
@@ -115,8 +136,29 @@ const RestaurantGallery = ({ restaurantId, userId, isAdmin }: Props) => {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {photos.map((photo) => {
+        <div className="relative">
+          {showLeft && (
+            <button
+              type="button"
+              aria-label="Photos précédentes"
+              onClick={() => setStart(Math.max(0, safeStart - PAGE))}
+              className="absolute left-0 top-1/2 z-10 grid h-9 w-9 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-border bg-card text-foreground/70 shadow-md transition hover:text-primary"
+            >
+              <FiChevronLeft className="h-5 w-5" />
+            </button>
+          )}
+          {showRight && (
+            <button
+              type="button"
+              aria-label="Photos suivantes"
+              onClick={() => setStart(Math.min(maxStart, safeStart + PAGE))}
+              className="absolute right-0 top-1/2 z-10 grid h-9 w-9 -translate-y-1/2 translate-x-1/2 place-items-center rounded-full border border-border bg-card text-foreground/70 shadow-md transition hover:text-primary"
+            >
+              <FiChevronRight className="h-5 w-5" />
+            </button>
+          )}
+          <div className="grid grid-cols-3 gap-2">
+          {visible.map((photo) => {
             const canDelete = isAdmin || photo.user_id === userId;
             return (
               <div
@@ -155,6 +197,7 @@ const RestaurantGallery = ({ restaurantId, userId, isAdmin }: Props) => {
               </div>
             );
           })}
+          </div>
         </div>
       )}
 
