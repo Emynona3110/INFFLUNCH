@@ -5,6 +5,7 @@ import useRestaurantPhotos, {
 } from "@/hooks/useRestaurantPhotos";
 import HoldToDeleteButton from "@/components/HoldToDeleteButton";
 import { toast } from "@/lib/toast";
+import { formatAuthorName } from "@/utils/authorName";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -24,6 +25,11 @@ const RestaurantGallery = ({ restaurantId, userId, isAdmin }: Props) => {
     useRestaurantPhotos(restaurantId);
   const inputRef = useRef<HTMLInputElement>(null);
   const [lightbox, setLightbox] = useState<RestaurantPhoto | null>(null);
+
+  // 1 photo par personne et par restaurant, sauf les admins (aligné sur le
+  // trigger en base). On masque alors le bouton et on guide l'utilisateur.
+  const hasOwnPhoto = photos.some((p) => p.user_id === userId);
+  const canUpload = isAdmin || !hasOwnPhoto;
 
   const handleFiles = async (files: FileList | null) => {
     if (!files?.length) return;
@@ -82,20 +88,26 @@ const RestaurantGallery = ({ restaurantId, userId, isAdmin }: Props) => {
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          disabled={upload.isPending}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-1.5 text-sm font-medium text-primary-foreground transition hover:bg-primary/90 disabled:opacity-60"
-        >
-          <FiPlus className="h-4 w-4" />
-          {upload.isPending ? "Envoi…" : "Ajouter une photo"}
-        </button>
+        {canUpload ? (
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            disabled={upload.isPending}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-1.5 text-sm font-medium text-primary-foreground transition hover:bg-primary/90 disabled:opacity-60"
+          >
+            <FiPlus className="h-4 w-4" />
+            {upload.isPending ? "Envoi…" : "Ajouter une photo"}
+          </button>
+        ) : (
+          <span className="text-xs text-foreground/45">
+            Tu as déjà partagé une photo ici.
+          </span>
+        )}
         <input
           ref={inputRef}
           type="file"
           accept="image/*"
-          multiple
+          multiple={isAdmin}
           className="hidden"
           onChange={(e) => handleFiles(e.target.files)}
         />
@@ -133,6 +145,14 @@ const RestaurantGallery = ({ restaurantId, userId, isAdmin }: Props) => {
                     className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                   />
                 </button>
+                {/* Auteur au survol */}
+                {photo.email && (
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-2.5 pb-1.5 pt-6 opacity-0 transition group-hover:opacity-100">
+                    <span className="text-xs font-medium text-white drop-shadow">
+                      {formatAuthorName(photo.email)}
+                    </span>
+                  </div>
+                )}
                 {canDelete && (
                   <HoldToDeleteButton
                     onConfirm={() => deletePhoto(photo)}

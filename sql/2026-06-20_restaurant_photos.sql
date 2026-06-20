@@ -32,6 +32,42 @@ create table if not exists public.restaurant_photos (
 create index if not exists idx_restaurant_photos_restaurant
   on public.restaurant_photos (restaurant_id, created_at desc);
 
+-- 2bis) Limite : 1 photo par personne et par restaurant, SAUF les admins -------
+-- Un index unique (restaurant_id, user_id) ne convient pas : il bloquerait aussi
+-- les admins. On passe donc par un trigger qui exempte les admins.
+create or replace function public.enforce_one_photo_per_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  is_admin boolean;
+begin
+  select (role = 'admin') into is_admin
+  from public.users where id = new.user_id;
+
+  if coalesce(is_admin, false) then
+    return new; -- admins : pas de limite
+  end if;
+
+  if exists (
+    select 1 from public.restaurant_photos
+    where restaurant_id = new.restaurant_id and user_id = new.user_id
+  ) then
+    raise exception 'Une seule photo par personne et par restaurant'
+      using errcode = 'check_violation';
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_one_photo_per_user on public.restaurant_photos;
+create trigger trg_one_photo_per_user
+before insert on public.restaurant_photos
+for each row execute function public.enforce_one_photo_per_user();
+
 -- 3) RLS table -----------------------------------------------------------------
 alter table public.restaurant_photos enable row level security;
 
