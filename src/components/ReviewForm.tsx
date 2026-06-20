@@ -94,8 +94,8 @@ const ReviewForm = ({ restaurantId, existing, onDone }: Props) => {
         <Button variant="outline" onClick={onDone}>
           Annuler
         </Button>
-        <Button onClick={submit} disabled={submitting}>
-          {submitting ? "…" : existing ? "Modifier" : "Publier"}
+        <Button onClick={submit} loading={submitting}>
+          {existing ? "Modifier" : "Publier"}
         </Button>
       </div>
     </Dialog>

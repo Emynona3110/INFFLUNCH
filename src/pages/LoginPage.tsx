@@ -109,7 +109,7 @@ const LoginPage = () => {
               </button>
             </div>
 
-            <Button type="submit" disabled={isLoading} className="w-full">
+            <Button type="submit" loading={isLoading} className="w-full">
               {isLoading ? "Connexion…" : "Se connecter"}
             </Button>
           </form>

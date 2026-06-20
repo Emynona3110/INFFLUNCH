@@ -67,7 +67,8 @@ const ForgotPassword = () => {
 
               <Button
                 type="submit"
-                disabled={isLoading || !isValidEmail(email)}
+                loading={isLoading}
+                disabled={!isValidEmail(email)}
                 className="w-full"
               >
                 {isLoading ? "Envoi…" : "Envoyer ma demande"}

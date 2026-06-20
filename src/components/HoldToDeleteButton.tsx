@@ -1,5 +1,6 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { Spinner } from "@/components/ui/spinner";
 
 interface Props {
   /** Action déclenchée après l'appui maintenu. */
@@ -81,7 +82,9 @@ const HoldToDeleteButton = ({
           transitionDuration: holding ? `${holdMs}ms` : "150ms",
         }}
       />
-      <span className="relative inline-flex items-center gap-1">{children}</span>
+      <span className="relative inline-flex items-center gap-1">
+        {busy ? <Spinner /> : children}
+      </span>
     </button>
   );
 };

@@ -164,9 +164,13 @@ const PhotoUploadDialog = ({ isOpen, onClose, isAdmin, onSubmit }: Props) => {
             {picked.map((p, i) => (
               <div
                 key={p.url}
-                className="group relative aspect-square overflow-hidden rounded-lg border border-border"
+                className="group relative aspect-square overflow-hidden rounded-lg bg-muted ring-1 ring-border"
               >
-                <img src={p.url} alt="" className="h-full w-full object-cover" />
+                <img
+                  src={p.url}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
                 <button
                   type="button"
                   onClick={() => removeAt(i)}
@@ -207,7 +211,11 @@ const PhotoUploadDialog = ({ isOpen, onClose, isAdmin, onSubmit }: Props) => {
         <Button variant="outline" onClick={onClose} disabled={busy}>
           Annuler
         </Button>
-        <Button onClick={handleConfirm} disabled={busy || picked.length === 0}>
+        <Button
+          onClick={handleConfirm}
+          loading={busy}
+          disabled={picked.length === 0}
+        >
           {busy
             ? "Envoi…"
             : picked.length > 1

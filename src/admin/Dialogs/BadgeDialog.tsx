@@ -159,7 +159,7 @@ const BadgeDialog = ({ isOpen, onClose, onSuccess, initialData }: BadgeDialogPro
           <Button type="button" variant="outline" onClick={onClose}>
             Annuler
           </Button>
-          <Button type="submit" disabled={disabled}>
+          <Button type="submit" loading={isSubmitting} disabled={disabled}>
             {initialData ? "Modifier" : "Ajouter"}
           </Button>
         </div>

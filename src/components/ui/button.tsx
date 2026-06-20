@@ -1,5 +1,6 @@
 import { ButtonHTMLAttributes, forwardRef } from "react";
 import { cn } from "@/lib/utils";
+import { Spinner } from "@/components/ui/spinner";
 
 const variants = {
   primary: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm",
@@ -19,12 +20,18 @@ const sizes = {
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: keyof typeof variants;
   size?: keyof typeof sizes;
+  /** Affiche un spinner et désactive le bouton (attente réseau). */
+  loading?: boolean;
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = "primary", size = "default", ...props }, ref) => (
+  (
+    { className, variant = "primary", size = "default", loading, disabled, children, ...props },
+    ref
+  ) => (
     <button
       ref={ref}
+      disabled={disabled || loading}
       className={cn(
         "inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg font-medium transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50",
         variants[variant],
@@ -32,7 +39,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         className
       )}
       {...props}
-    />
+    >
+      {loading && <Spinner />}
+      {children}
+    </button>
   )
 );
 

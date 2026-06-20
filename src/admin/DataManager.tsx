@@ -20,6 +20,7 @@ const DataManager = ({ section, addSignal }: DataManagerProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editData, setEditData] = useState<any | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -42,6 +43,7 @@ const DataManager = ({ section, addSignal }: DataManagerProps) => {
 
   const confirmDelete = async () => {
     if (deleteId === null) return;
+    setDeleting(true);
 
     const { error: deleteError } = await supabaseClient
       .from(tableName)
@@ -72,6 +74,7 @@ const DataManager = ({ section, addSignal }: DataManagerProps) => {
       handleSuccess();
     }
 
+    setDeleting(false);
     setDeleteId(null);
   };
 
@@ -134,7 +137,7 @@ const DataManager = ({ section, addSignal }: DataManagerProps) => {
               <Button variant="outline" onClick={() => setDeleteId(null)}>
                 Annuler
               </Button>
-              <Button variant="destructive" onClick={confirmDelete}>
+              <Button variant="destructive" onClick={confirmDelete} loading={deleting}>
                 Supprimer
               </Button>
             </div>
