@@ -4,6 +4,11 @@ import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import useUsers from "@/hooks/useUsers";
 import { formatAuthorName } from "@/utils/authorName";
+import {
+  checkImageResolution,
+  MIN_IMAGE_LONG_EDGE,
+} from "@/utils/imageCompress";
+import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -60,14 +65,40 @@ const PhotoUploadDialog = ({ isOpen, onClose, isAdmin, onSubmit }: Props) => {
     []
   );
 
-  const addFiles = (files: File[]) => {
+  const addFiles = async (files: File[]) => {
     const images = files.filter((f) => f.type.startsWith("image/"));
     if (!images.length) return;
-    const mapped = images.map((file) => ({
-      file,
-      url: URL.createObjectURL(file),
-    }));
-    setPicked((prev) => (multiple ? [...prev, ...mapped] : mapped.slice(0, 1)));
+
+    // Contrôle de résolution : on refuse les images trop petites, on avertit
+    // pour celles à la limite (qu'aucun traitement ne rendrait vraiment nettes).
+    const accepted: Picked[] = [];
+    for (const file of images) {
+      const { level, longEdge } = await checkImageResolution(file).catch(() => ({
+        level: "ok" as const,
+        longEdge: 0,
+      }));
+      if (level === "block") {
+        toast({
+          title: "Image trop petite",
+          description: `Minimum ${MIN_IMAGE_LONG_EDGE}px sur le grand côté (ici ${longEdge}px).`,
+          status: "error",
+          duration: 5000,
+        });
+        continue;
+      }
+      if (level === "warn") {
+        toast({
+          title: "Qualité limitée",
+          description: `Image un peu petite (${longEdge}px), elle peut manquer de netteté.`,
+          status: "warning",
+          duration: 4000,
+        });
+      }
+      accepted.push({ file, url: URL.createObjectURL(file) });
+    }
+
+    if (!accepted.length) return;
+    setPicked((prev) => (multiple ? [...prev, ...accepted] : accepted.slice(0, 1)));
   };
 
   const removeAt = (i: number) =>

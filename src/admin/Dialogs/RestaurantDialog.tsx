@@ -8,6 +8,11 @@ import useLocations from "../../hooks/useLocations";
 import { Restaurant } from "../../hooks/useRestaurants";
 import BadgesToggles from "../../components/BadgesToggles";
 import ImageUploadField from "../../components/ImageUploadField";
+import {
+  checkImageResolution,
+  COVER_MIN_LONG_EDGE,
+  COVER_WARN_LONG_EDGE,
+} from "../../utils/imageCompress";
 import badgeMap from "../../services/badgeMap";
 import {
   uploadImageToBucket,
@@ -73,9 +78,35 @@ const RestaurantDialog = ({
       return null;
     });
 
-  // Sélection d'un nouveau fichier : on prévisualise localement et on oublie
-  // l'URL existante (la source d'affichage devient le fichier).
-  const pickImage = (file: File) => {
+  // Sélection d'un nouveau fichier : contrôle de résolution (le hero s'affiche
+  // en grand → seuils stricts), puis prévisualisation locale et on oublie l'URL
+  // existante (la source d'affichage devient le fichier).
+  const pickImage = async (file: File) => {
+    const { level, longEdge } = await checkImageResolution(file, {
+      min: COVER_MIN_LONG_EDGE,
+      warn: COVER_WARN_LONG_EDGE,
+    }).catch(() => ({ level: "ok" as const, longEdge: 0 }));
+
+    if (level === "block") {
+      toast({
+        title: "Image trop petite pour une couverture",
+        description: `Minimum ${COVER_MIN_LONG_EDGE}px sur le grand côté (ici ${longEdge}px). Elle serait floue en grand.`,
+        status: "error",
+        duration: 6000,
+        isClosable: true,
+      });
+      return;
+    }
+    if (level === "warn") {
+      toast({
+        title: "Qualité limite",
+        description: `Image un peu juste (${longEdge}px) pour un affichage en grand.`,
+        status: "warning",
+        duration: 4000,
+        isClosable: true,
+      });
+    }
+
     setImageFile(file);
     setImagePreview((prev) => {
       if (prev) URL.revokeObjectURL(prev);

@@ -35,6 +35,46 @@ const loadImage = (file: File) =>
     img.src = url;
   });
 
+/* ----------------------- Contrôle de résolution -------------------------- */
+
+// Seuils galerie (vignettes, vues petites — tolérants).
+/** En dessous (grand côté, px) on refuse l'image : trop petite pour être nette. */
+export const MIN_IMAGE_LONG_EDGE = 800;
+/** En dessous on accepte mais on avertit (qualité possiblement limitée). */
+export const WARN_IMAGE_LONG_EDGE = 1280;
+
+// Seuils couverture (hero affiché en grand sur la fiche → plus exigeant).
+export const COVER_MIN_LONG_EDGE = 1280;
+export const COVER_WARN_LONG_EDGE = 1600;
+
+export type ResolutionLevel = "ok" | "warn" | "block";
+
+/** Dimensions natives d'un fichier image. */
+export const getImageDimensions = async (
+  file: File
+): Promise<{ width: number; height: number }> => {
+  const img = await loadImage(file);
+  return { width: img.width, height: img.height };
+};
+
+/**
+ * Classe une image selon son grand côté : "block" (trop petite), "warn"
+ * (acceptable mais limite) ou "ok". Permet d'empêcher l'upload d'images de
+ * trop faible qualité (qu'aucun traitement ne peut vraiment rattraper).
+ */
+export const checkImageResolution = async (
+  file: File,
+  opts?: { min?: number; warn?: number }
+): Promise<{ level: ResolutionLevel; width: number; height: number; longEdge: number }> => {
+  const min = opts?.min ?? MIN_IMAGE_LONG_EDGE;
+  const warn = opts?.warn ?? WARN_IMAGE_LONG_EDGE;
+  const { width, height } = await getImageDimensions(file);
+  const longEdge = Math.max(width, height);
+  const level: ResolutionLevel =
+    longEdge < min ? "block" : longEdge < warn ? "warn" : "ok";
+  return { level, width, height, longEdge };
+};
+
 export const compressImage = async (
   file: File,
   { maxSize = 1600, quality = 0.82 }: CompressOptions = {}
