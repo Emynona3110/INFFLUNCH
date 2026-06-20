@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Anses (derrière le panier) -->
+  <g fill="none" stroke="#E4E7E7" stroke-width="46" stroke-linecap="round">
+    <path d="M152 248 L300 52" />
+    <path d="M360 248 L212 52" />
+  </g>
+  <!-- Corps du panier (trapèze) -->
+  <path d="M46 262 L466 262 L402 456 Q398 470 384 470 L128 470 Q114 470 110 456 Z"
+        fill="#E15B4F" />
+  <!-- Fentes verticales -->
+  <g fill="#CB5247">
+    <rect x="175" y="312" width="26" height="104" rx="13" />
+    <rect x="243" y="312" width="26" height="104" rx="13" />
+    <rect x="311" y="312" width="26" height="104" rx="13" />
+  </g>
+  <!-- Rebord supérieur -->
+  <rect x="18" y="196" width="476" height="68" rx="18" fill="#ED6A5C" />
+</svg>

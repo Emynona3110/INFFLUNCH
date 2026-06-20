@@ -3,6 +3,7 @@ import badgeTooGoodToGo from "../assets/TooGoodToGo.png";
 import badgeBar from "../assets/Bar.png";
 import badgeTable from "../assets/Table.png";
 import badgeTakeaway from "../assets/Takeaway.png";
+import badgeMagasin from "../assets/Magasin.svg";
 import iconTopRated from "../assets/TopRated.png";
 
 const badgeMap: Record<string, string> = {
@@ -11,6 +12,7 @@ const badgeMap: Record<string, string> = {
   "À Emporter": badgeTakeaway,
   Bar: badgeBar,
   TooGoodToGo: badgeTooGoodToGo,
+  Magasin: badgeMagasin,
 };
 
 export const getBadgeIcon = (label: string): string | undefined =>
