@@ -18,7 +18,7 @@ const PageNotFound = () => {
         <p className="mt-3 text-foreground/60">
           Oups ! La page que vous cherchez n'existe pas ou a été déplacée.
         </p>
-        <Button className="mt-6" onClick={() => navigate("/user")}>
+        <Button className="mt-6" onClick={() => navigate("/")}>
           Retour à l'accueil
         </Button>
       </div>

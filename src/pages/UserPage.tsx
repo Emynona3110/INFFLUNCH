@@ -9,23 +9,30 @@ import RestaurantGrid from "../sections/RestaurantGrid";
 import RestaurantPage from "./RestaurantPage";
 import Beeeh from "../sections/Beeeh";
 import { useState } from "react";
-import { slugify } from "../utils/slugify";
 import { SortOrder } from "../components/SortSelector";
 import MyAccount from "../sections/MyAccount";
 import About from "../sections/About";
 import AccessRequests from "../admin/AccessRequests";
 import AdminTablesSection from "../sections/AdminTablesSection";
+import AdminGuard from "../components/AdminGuard";
 import Layout from "../components/Layout";
 import useIsAdmin from "../hooks/useIsAdmin";
 
-// Sections de la navbar selon le rôle. Les admins gèrent tout depuis l'espace
-// user (plus d'espace admin séparé) : Restaurants, Demandes, Tables, Mon compte.
-// Les autres : Restaurants, Mon compte, À propos.
+// Sections de la navbar selon le rôle. Les pages réservées aux admins vivent
+// sous /admin/* (garde unique AdminGuard) ; les autres sont à la racine.
 export const buildUserSections = (isAdmin: boolean) =>
-  (isAdmin
-    ? ["Restaurants", "Demandes", "Tables", "Mon compte"]
-    : ["Restaurants", "Mon compte", "À propos"]
-  ).map((label) => ({ label, path: slugify(label) }));
+  isAdmin
+    ? [
+        { label: "Restaurants", path: "restaurants" },
+        { label: "Demandes", path: "admin/demandes" },
+        { label: "Tables", path: "admin/tables" },
+        { label: "Mon compte", path: "mon-compte" },
+      ]
+    : [
+        { label: "Restaurants", path: "restaurants" },
+        { label: "Mon compte", path: "mon-compte" },
+        { label: "À propos", path: "a-propos" },
+      ];
 
 export interface RestaurantFilters {
   id?: number;
@@ -70,7 +77,8 @@ const UserPage = () => {
   // avec scroll interne (pas de scroll de page) ; restaurants/fiche = scroll de page.
   const centerContent =
     currentPage === "mon-compte" || currentPage === "a-propos";
-  const fillContent = currentPage === "demandes" || currentPage === "tables";
+  const fillContent =
+    currentPage === "admin/demandes" || currentPage === "admin/tables";
 
   return (
     <Layout
@@ -79,7 +87,7 @@ const UserPage = () => {
       fillContent={fillContent}
       navbarProps={{
         page: currentPage,
-        setPage: (page) => navigate("/user/" + page),
+        setPage: (page) => navigate("/" + page),
         restaurantFilters,
         onFilterChange: (query) =>
           setRestaurantFilters({ ...restaurantFilters, ...query }),
@@ -96,8 +104,12 @@ const UserPage = () => {
         <Route path="restaurant/:slug" element={<RestaurantPage />} />
         <Route path="mon-compte" element={<MyAccount />} />
         <Route path="a-propos" element={<About />} />
-        {isAdmin && <Route path="demandes" element={<AccessRequests />} />}
-        {isAdmin && <Route path="tables" element={<AdminTablesSection />} />}
+        {/* Pages admin sous /admin/* derrière un garde unique. */}
+        <Route path="admin" element={<AdminGuard />}>
+          <Route index element={<Navigate to="demandes" replace />} />
+          <Route path="demandes" element={<AccessRequests />} />
+          <Route path="tables" element={<AdminTablesSection />} />
+        </Route>
         <Route path="*" element={<Beeeh />} />
       </Routes>
     </Layout>

@@ -58,7 +58,7 @@ const RestaurantCardTW = ({
 
   return (
     <article
-      onClick={() => navigate(`/user/restaurant/${restaurant.slug}`)}
+      onClick={() => navigate(`/restaurant/${restaurant.slug}`)}
       className={cn(
         "group flex h-full cursor-pointer select-none flex-col overflow-hidden rounded-card bg-card shadow-[0_10px_30px_-12px_rgba(2,8,40,0.22)] transition duration-200 transform-gpu [backface-visibility:hidden] hover:-translate-y-1 hover:shadow-[0_18px_44px_-14px_rgba(2,8,40,0.30)]",
         featured ? "ring-2 ring-primary" : "border border-border"

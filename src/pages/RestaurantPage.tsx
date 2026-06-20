@@ -125,7 +125,7 @@ const RestaurantPage = () => {
         </p>
         <button
           type="button"
-          onClick={() => navigate("/user/restaurants")}
+          onClick={() => navigate("/restaurants")}
           className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
         >
           <FiArrowLeft /> Retour aux restaurants
@@ -167,7 +167,7 @@ const RestaurantPage = () => {
       {/* Retour */}
       <button
         type="button"
-        onClick={() => navigate("/user/restaurants")}
+        onClick={() => navigate("/restaurants")}
         className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-foreground/60 transition hover:text-primary"
       >
         <FiArrowLeft className="h-4 w-4" /> Tous les restaurants

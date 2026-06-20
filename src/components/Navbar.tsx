@@ -93,7 +93,7 @@ const Navbar = ({
                       {item.label}
                     </span>
                   </span>
-                  {item.path === "demandes" && pendingCount > 0 && (
+                  {item.path === "admin/demandes" && pendingCount > 0 && (
                     <span className="absolute right-0 top-2.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-card" />
                   )}
                 </button>
@@ -135,7 +135,7 @@ const Navbar = ({
                     )}
                   >
                     {item.label}
-                    {item.path === "demandes" && pendingCount > 0 && (
+                    {item.path === "admin/demandes" && pendingCount > 0 && (
                       <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-card" />
                     )}
                   </button>

@@ -32,7 +32,7 @@ const LoginPage = () => {
       setEmail("");
       setPassword("");
     } else {
-      navigate("/user/restaurants");
+      navigate("/restaurants");
     }
   };
 
