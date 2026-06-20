@@ -26,6 +26,7 @@ import LikeButton from "@/components/LikeButton";
 import ReviewForm from "@/components/ReviewForm";
 import HoldToDeleteButton from "@/components/HoldToDeleteButton";
 import RestaurantDialog from "@/admin/Dialogs/RestaurantDialog";
+import RestaurantGallery from "@/components/RestaurantGallery";
 import { Tooltip } from "@/components/ui/tooltip";
 import { formatAuthorName, authorInitials } from "@/utils/authorName";
 import { toast } from "@/lib/toast";
@@ -293,8 +294,17 @@ const RestaurantPage = () => {
           </section>
         )}
 
+          {/* Photos (galerie collaborateurs) */}
+          <div className="order-2">
+            <RestaurantGallery
+              restaurantId={restaurant.id}
+              userId={userId}
+              isAdmin={isAdmin}
+            />
+          </div>
+
           {/* Avis */}
-          <section className="order-3 rounded-card border border-border bg-card p-5">
+          <section className="order-4 rounded-card border border-border bg-card p-5">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div
                 role="heading"
@@ -433,7 +443,7 @@ const RestaurantPage = () => {
         </div>
 
         {/* Sidebar : coordonnées + carte. Indépendante (pas de row-span). */}
-        <aside className="order-2 space-y-6 self-start lg:col-start-3 lg:row-start-1">
+        <aside className="order-3 space-y-6 self-start lg:col-start-3 lg:row-start-1">
           {/* Coordonnées */}
           <section className="rounded-card border border-border bg-card p-5">
             <div
