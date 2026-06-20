@@ -41,14 +41,14 @@ language plpgsql
 security definer
 set search_path = public
 as $$
-declare
-  is_admin boolean;
 begin
-  select (role = 'admin') into is_admin
-  from public.users where id = new.user_id;
-
-  if coalesce(is_admin, false) then
-    return new; -- admins : pas de limite
+  -- La limite porte sur ce qu'un UTILISATEUR peut saisir lui-même. Un admin
+  -- n'est pas limité (et peut poster au nom d'un autre via user_id), donc on
+  -- exempte selon l'UPLOADEUR réel (auth.uid()), pas l'auteur attribué.
+  if exists (
+    select 1 from public.users where id = auth.uid() and role = 'admin'
+  ) then
+    return new;
   end if;
 
   if exists (
@@ -76,10 +76,18 @@ create policy "restaurant_photos select authenticated"
 on public.restaurant_photos for select to authenticated
 using (true);
 
+-- Un utilisateur n'écrit que sa propre photo ; un admin peut attribuer la photo
+-- à n'importe quel user_id (poster au nom d'un autre).
 drop policy if exists "restaurant_photos insert own" on public.restaurant_photos;
 create policy "restaurant_photos insert own"
 on public.restaurant_photos for insert to authenticated
-with check (user_id = auth.uid());
+with check (
+  user_id = auth.uid()
+  or exists (
+    select 1 from public.users u
+    where u.id = auth.uid() and u.role = 'admin'
+  )
+);
 
 drop policy if exists "restaurant_photos delete own" on public.restaurant_photos;
 create policy "restaurant_photos delete own"

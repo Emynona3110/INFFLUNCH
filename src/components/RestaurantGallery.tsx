@@ -1,9 +1,10 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { FiPlus, FiTrash2, FiX, FiImage } from "react-icons/fi";
 import useRestaurantPhotos, {
   RestaurantPhoto,
 } from "@/hooks/useRestaurantPhotos";
 import HoldToDeleteButton from "@/components/HoldToDeleteButton";
+import PhotoUploadDialog from "@/components/PhotoUploadDialog";
 import { toast } from "@/lib/toast";
 import { formatAuthorName } from "@/utils/authorName";
 import { cn } from "@/lib/utils";
@@ -23,7 +24,7 @@ interface Props {
 const RestaurantGallery = ({ restaurantId, userId, isAdmin }: Props) => {
   const { data: photos = [], isPending, upload, remove } =
     useRestaurantPhotos(restaurantId);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploadOpen, setUploadOpen] = useState(false);
   const [lightbox, setLightbox] = useState<RestaurantPhoto | null>(null);
 
   // 1 photo par personne et par restaurant, sauf les admins (aligné sur le
@@ -31,12 +32,11 @@ const RestaurantGallery = ({ restaurantId, userId, isAdmin }: Props) => {
   const hasOwnPhoto = photos.some((p) => p.user_id === userId);
   const canUpload = isAdmin || !hasOwnPhoto;
 
-  const handleFiles = async (files: FileList | null) => {
-    if (!files?.length) return;
+  const handleUpload = async (files: File[], authorId?: string) => {
     let ok = 0;
-    for (const file of Array.from(files)) {
+    for (const file of files) {
       try {
-        await upload.mutateAsync(file);
+        await upload.mutateAsync({ file, authorId });
         ok++;
       } catch (e: any) {
         toast({
@@ -54,7 +54,6 @@ const RestaurantGallery = ({ restaurantId, userId, isAdmin }: Props) => {
         duration: 2500,
       });
     }
-    if (inputRef.current) inputRef.current.value = "";
   };
 
   const deletePhoto = async (photo: RestaurantPhoto) => {
@@ -91,26 +90,17 @@ const RestaurantGallery = ({ restaurantId, userId, isAdmin }: Props) => {
         {canUpload ? (
           <button
             type="button"
-            onClick={() => inputRef.current?.click()}
-            disabled={upload.isPending}
+            onClick={() => setUploadOpen(true)}
             className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-1.5 text-sm font-medium text-primary-foreground transition hover:bg-primary/90 disabled:opacity-60"
           >
             <FiPlus className="h-4 w-4" />
-            {upload.isPending ? "Envoi…" : "Ajouter une photo"}
+            Ajouter une photo
           </button>
         ) : (
           <span className="text-xs text-foreground/45">
             Tu as déjà partagé une photo ici.
           </span>
         )}
-        <input
-          ref={inputRef}
-          type="file"
-          accept="image/*"
-          multiple={isAdmin}
-          className="hidden"
-          onChange={(e) => handleFiles(e.target.files)}
-        />
       </div>
 
       {isPending ? (
@@ -192,6 +182,13 @@ const RestaurantGallery = ({ restaurantId, userId, isAdmin }: Props) => {
           />
         </div>
       )}
+
+      <PhotoUploadDialog
+        isOpen={uploadOpen}
+        onClose={() => setUploadOpen(false)}
+        isAdmin={isAdmin}
+        onSubmit={handleUpload}
+      />
     </section>
   );
 };

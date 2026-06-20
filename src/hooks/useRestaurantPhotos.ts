@@ -65,7 +65,14 @@ const useRestaurantPhotos = (restaurantId: number | undefined) => {
   });
 
   const upload = useMutation({
-    mutationFn: async (file: File) => {
+    mutationFn: async ({
+      file,
+      authorId,
+    }: {
+      file: File;
+      /** Admin : attribuer la photo à un autre user_id. Défaut = auteur courant. */
+      authorId?: string;
+    }) => {
       if (!restaurantId) throw new Error("Restaurant inconnu");
       if (!file.type.startsWith("image/")) {
         throw new Error("Le fichier doit être une image");
@@ -81,7 +88,14 @@ const useRestaurantPhotos = (restaurantId: number | undefined) => {
 
       const { error: insErr } = await supabaseClient
         .from("restaurant_photos")
-        .insert({ restaurant_id: restaurantId, storage_path: path, width, height });
+        .insert({
+          restaurant_id: restaurantId,
+          storage_path: path,
+          width,
+          height,
+          // Si non fourni : la colonne prend son défaut auth.uid() (auteur courant).
+          ...(authorId ? { user_id: authorId } : {}),
+        });
       if (insErr) {
         // L'insert métadonnée a échoué → on nettoie le fichier orphelin.
         await supabaseClient.storage.from(PHOTOS_BUCKET).remove([path]);
