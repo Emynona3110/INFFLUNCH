@@ -483,7 +483,7 @@ const RestaurantDialog = ({
               disabled={isSubmitting}
             />
           </div>
-          <label className="flex flex-col gap-1.5 md:col-span-2">
+          <label className="flex flex-col gap-1.5">
             <span className="text-sm font-medium text-foreground">Site web</span>
             <Input
               value={website}
@@ -491,7 +491,7 @@ const RestaurantDialog = ({
               placeholder="Site web"
             />
           </label>
-          <label className="flex flex-col gap-1.5 md:col-span-2">
+          <label className="flex flex-col gap-1.5">
             <span className="text-sm font-medium text-foreground">Téléphone</span>
             <Input
               value={phone}
@@ -595,8 +595,8 @@ const RestaurantDialog = ({
             )}
           </div>
 
-          {/* Badges — pleine largeur pour éviter le retour à la ligne. */}
-          <div className="md:col-span-2">
+          {/* Badges */}
+          <div>
             <span className="text-sm font-bold text-foreground">Badges</span>
             <div className="mt-1.5">
               <BadgesToggles selected={badges} onChange={setBadges} />
