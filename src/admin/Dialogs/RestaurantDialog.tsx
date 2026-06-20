@@ -7,7 +7,13 @@ import { slugify } from "../../utils/slugify";
 import useLocations from "../../hooks/useLocations";
 import { Restaurant } from "../../hooks/useRestaurants";
 import BadgesToggles from "../../components/BadgesToggles";
+import ImageUploadField from "../../components/ImageUploadField";
 import badgeMap from "../../services/badgeMap";
+import {
+  uploadImageToBucket,
+  bucketPathFromPublicUrl,
+  removeFromBucket,
+} from "../../services/uploadImage";
 import { FiChevronDown, FiPlus, FiCheck, FiX } from "react-icons/fi";
 import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -37,7 +43,11 @@ const RestaurantDialog = ({
 }: RestaurantDialogProps) => {
 
   const [name, setName] = useState("");
+  // image = URL existante (en base) ; imageFile = nouveau fichier choisi (pas
+  // encore uploadé) ; imagePreview = object URL local pour la prévisualisation.
   const [image, setImage] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [address, setAddress] = useState("");
   const [website, setWebsite] = useState("");
   const [phone, setPhone] = useState("");
@@ -57,10 +67,35 @@ const RestaurantDialog = ({
   const { fetchLocation, loading: locationLoading } = useLocations();
   const queryClient = useQueryClient();
 
+  const clearPreview = () =>
+    setImagePreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
+
+  // Sélection d'un nouveau fichier : on prévisualise localement et on oublie
+  // l'URL existante (la source d'affichage devient le fichier).
+  const pickImage = (file: File) => {
+    setImageFile(file);
+    setImagePreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return URL.createObjectURL(file);
+    });
+    setImage("");
+  };
+
+  const clearImage = () => {
+    setImageFile(null);
+    clearPreview();
+    setImage("");
+  };
+
   useEffect(() => {
     if (isOpen && initialData) {
       setName(initialData.name || "");
       setImage(initialData.image || "");
+      setImageFile(null);
+      clearPreview();
       setAddress(initialData.address || "");
       setWebsite(initialData.website || "");
       setPhone(initialData.phone || "");
@@ -69,6 +104,8 @@ const RestaurantDialog = ({
     } else if (!isOpen) {
       setName("");
       setImage("");
+      setImageFile(null);
+      clearPreview();
       setAddress("");
       setWebsite("");
       setPhone("");
@@ -230,6 +267,28 @@ const RestaurantDialog = ({
       return;
     }
 
+    // Upload de la nouvelle image (si un fichier a été choisi) → URL publique.
+    let finalImage: string | null = image || null;
+    if (imageFile) {
+      try {
+        const res = await uploadImageToBucket(imageFile, "covers", {
+          maxSize: 2000,
+          quality: 0.9,
+        });
+        finalImage = res.url;
+      } catch (err: any) {
+        toast({
+          title: "Échec de l'envoi de l'image",
+          description: err.message || "Réessaie.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+        setIsSubmitting(false);
+        return;
+      }
+    }
+
     if (initialData?.id) {
       const { data: beforeUpdate } = await supabaseClient
         .from("restaurants")
@@ -237,7 +296,7 @@ const RestaurantDialog = ({
         .eq("id", initialData.id)
         .single();
 
-      if (beforeUpdate && isUnchanged(beforeUpdate)) {
+      if (beforeUpdate && !imageFile && isUnchanged(beforeUpdate)) {
         toast({
           title: "Aucune modification",
           description: "Les champs sont identiques.",
@@ -254,7 +313,7 @@ const RestaurantDialog = ({
         .update({
           name: formattedName,
           slug,
-          image: image || null,
+          image: finalImage,
           address,
           website: website || null,
           phone: phone || null,
@@ -278,6 +337,15 @@ const RestaurantDialog = ({
           isClosable: true,
         });
         return;
+      }
+
+      // L'ancienne couverture (si stockée dans notre bucket) est désormais
+      // orpheline → on la supprime (best effort, ne bloque pas le succès).
+      if (imageFile) {
+        const oldPath = bucketPathFromPublicUrl(initialData.image);
+        if (oldPath && oldPath !== bucketPathFromPublicUrl(finalImage)) {
+          removeFromBucket(oldPath);
+        }
       }
 
       toast({
@@ -311,7 +379,7 @@ const RestaurantDialog = ({
     const { error } = await supabaseClient.from("restaurants").insert({
       name: formattedName,
       slug,
-      image: image || null,
+      image: finalImage,
       address,
       website: website || null,
       phone: phone || null,
@@ -375,14 +443,15 @@ const RestaurantDialog = ({
               placeholder="Adresse"
             />
           </label>
-          <label className="flex flex-col gap-1.5 md:col-span-2">
-            <span className="text-sm font-medium text-foreground">Image (URL)</span>
-            <Input
-              value={image}
-              onChange={(e) => setImage(e.target.value)}
-              placeholder="URL de l'image"
+          <div className="flex flex-col gap-1.5 md:col-span-2">
+            <span className="text-sm font-medium text-foreground">Image</span>
+            <ImageUploadField
+              previewUrl={imagePreview ?? (image || null)}
+              onPick={pickImage}
+              onClear={clearImage}
+              disabled={isSubmitting}
             />
-          </label>
+          </div>
           <label className="flex flex-col gap-1.5 md:col-span-2">
             <span className="text-sm font-medium text-foreground">Site web</span>
             <Input
