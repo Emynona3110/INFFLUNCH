@@ -18,6 +18,13 @@
 -- Paramètres ajustables : voir le bloc `declare` de recalc_relevance().
 -- =============================================================================
 
+-- 0) Colonne note bayésienne (sert au classement du Top 3) --------------------
+-- Note "vraie" corrigée du faible nb d'avis (0..5). Calculée par recalc_relevance
+-- en même temps que relevance. Le Top 3 trie dessus → un 5,0 avec 1 avis ne passe
+-- plus devant un 4,5 avec 50 avis.
+alter table public.restaurants
+  add column if not exists bayes_rating real not null default 0;
+
 -- 1) Fonction de calcul (appelable directement pour un backfill) ---------------
 -- security definer : le calcul écrit dans restaurants (RLS admin-only) ; il
 -- s'exécute donc avec les droits du propriétaire, comme recalc_restaurant_rating.
@@ -57,13 +64,16 @@ begin
   where r.slug is distinct from 'test';
 
   update public.restaurants r
-  set relevance = round(s.score::numeric, 2)::real
+  set relevance    = round(s.score::numeric, 2)::real,
+      bayes_rating = round(s.qval::numeric, 2)::real
   from (
     select
       r2.id,
+      -- Q bayésien sur 0..5 (réutilisé pour bayes_rating ET la qualité)
+      ((r2.reviews * r2.rating + m_conf * prior_c)
+        / nullif(r2.reviews + m_conf, 0)) as qval,
       100 * (
           w_quality * (
-            -- Q bayésien sur 0..5, normalisé /5
             ((r2.reviews * r2.rating + m_conf * prior_c)
               / nullif(r2.reviews + m_conf, 0)) / 5.0
           )
