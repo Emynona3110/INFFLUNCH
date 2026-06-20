@@ -96,8 +96,8 @@ const ForcePasswordChangeGate = ({ children }: Props) => {
               onChange={setConfirm}
               isInvalid={confirm !== "" && confirm !== password}
             />
-            <Button type="submit" disabled={isLoading || !canSubmit} className="w-full">
-              {isLoading ? "…" : "Valider"}
+            <Button type="submit" loading={isLoading} disabled={!canSubmit} className="w-full">
+              Valider
             </Button>
           </form>
         </Card>

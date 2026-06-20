@@ -111,8 +111,8 @@ const ChangePasswordDialog = ({ isOpen, onClose }: ChangePasswordDialogProps) =>
           <Button type="button" variant="outline" onClick={handleClose}>
             Annuler
           </Button>
-          <Button type="submit" disabled={isLoading || !canSubmit}>
-            {isLoading ? "…" : "Valider"}
+          <Button type="submit" loading={isLoading} disabled={!canSubmit}>
+            Valider
           </Button>
         </div>
       </form>

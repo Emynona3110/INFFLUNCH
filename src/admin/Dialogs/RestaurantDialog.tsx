@@ -12,6 +12,7 @@ import { FiChevronDown, FiPlus, FiCheck, FiX } from "react-icons/fi";
 import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 /** Met en forme un label de tag (1re lettre de chaque mot en majuscule). */
 const formatTagLabel = (input: string) =>
@@ -477,7 +478,7 @@ const RestaurantDialog = ({
                   disabled={tagSubmitting || !newTag.trim()}
                   className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-lg bg-primary/10 text-primary transition hover:bg-primary/20 disabled:pointer-events-none disabled:opacity-50"
                 >
-                  <FiCheck className="h-5 w-5" />
+                  {tagSubmitting ? <Spinner /> : <FiCheck className="h-5 w-5" />}
                 </button>
                 <button
                   type="button"
@@ -529,7 +530,8 @@ const RestaurantDialog = ({
                   transitionDuration: holding ? `${HOLD_MS}ms` : "150ms",
                 }}
               />
-              <span className="relative">
+              <span className="relative inline-flex items-center gap-2">
+                {isDeleting && <Spinner />}
                 {isDeleting ? "Suppression…" : "Supprimer"}
               </span>
             </button>
@@ -541,13 +543,10 @@ const RestaurantDialog = ({
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={isSubmitting || locationLoading || !name.trim() || !address.trim()}
+            loading={isSubmitting || locationLoading}
+            disabled={!name.trim() || !address.trim()}
           >
-            {isSubmitting || locationLoading
-              ? "…"
-              : initialData
-              ? "Modifier"
-              : "Ajouter"}
+            {initialData ? "Modifier" : "Ajouter"}
           </Button>
         </div>
       </div>

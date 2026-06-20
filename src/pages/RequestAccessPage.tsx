@@ -88,7 +88,8 @@ const RequestAccessPage = () => {
 
               <Button
                 type="submit"
-                disabled={isLoading || !isValidEmail(email) || !token}
+                loading={isLoading}
+                disabled={!isValidEmail(email) || !token}
                 className="w-full"
               >
                 {isLoading ? "Envoi…" : "Envoyer ma demande"}

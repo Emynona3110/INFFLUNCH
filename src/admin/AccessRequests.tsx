@@ -9,6 +9,7 @@ import useAccessRequests, {
   requestTypes,
 } from "../hooks/useAccessRequests";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { Tooltip } from "@/components/ui/tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -18,6 +19,9 @@ const AccessRequests = () => {
 
   const [activeType, setActiveType] = useState(requestTypes[0].type);
   const [processingId, setProcessingId] = useState<number | null>(null);
+  const [processingAction, setProcessingAction] = useState<
+    "accept" | "reject" | null
+  >(null);
   const [credentials, setCredentials] = useState<{
     email: string;
     tempPassword: string;
@@ -43,6 +47,7 @@ const AccessRequests = () => {
 
   const handleAccept = async (req: AccessRequest) => {
     setProcessingId(req.id);
+    setProcessingAction("accept");
     const { data, error } = await supabaseClient.functions.invoke(
       "admin-create-user",
       { body: { email: req.email, type: req.type } }
@@ -58,6 +63,7 @@ const AccessRequests = () => {
         }
       }
       setProcessingId(null);
+    setProcessingAction(null);
       toast({
         title: "Action impossible",
         description: description || "Une erreur est survenue.",
@@ -70,14 +76,17 @@ const AccessRequests = () => {
 
     await setState(req.id, "Accepted");
     setProcessingId(null);
+    setProcessingAction(null);
     setCredentials({ email: data.email, tempPassword: data.tempPassword });
     queryClient.invalidateQueries({ queryKey: ["access-requests"] });
   };
 
   const handleReject = async (req: AccessRequest) => {
     setProcessingId(req.id);
+    setProcessingAction("reject");
     const { error } = await setState(req.id, "Rejected");
     setProcessingId(null);
+    setProcessingAction(null);
     if (error) {
       toast({
         title: "Erreur",
@@ -181,7 +190,12 @@ const AccessRequests = () => {
                               onClick={() => handleAccept(req)}
                               className="grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-full text-emerald-600 transition hover:bg-emerald-500/10 disabled:pointer-events-none disabled:opacity-50"
                             >
-                              <FiCheck className="h-5 w-5" />
+                              {processingId === req.id &&
+                              processingAction === "accept" ? (
+                                <Spinner />
+                              ) : (
+                                <FiCheck className="h-5 w-5" />
+                              )}
                             </button>
                           </Tooltip>
                           <Tooltip label="Refuser">
@@ -192,7 +206,12 @@ const AccessRequests = () => {
                               onClick={() => handleReject(req)}
                               className="grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-full text-destructive transition hover:bg-destructive/10 disabled:pointer-events-none disabled:opacity-50"
                             >
-                              <FiX className="h-5 w-5" />
+                              {processingId === req.id &&
+                              processingAction === "reject" ? (
+                                <Spinner />
+                              ) : (
+                                <FiX className="h-5 w-5" />
+                              )}
                             </button>
                           </Tooltip>
                         </div>
