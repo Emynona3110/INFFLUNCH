@@ -132,9 +132,9 @@ const AccessRequests = () => {
       ) : sorted.length === 0 ? (
         <p className="text-foreground/60">Aucune demande.</p>
       ) : (
-        <div className="min-h-0 flex-1 overflow-hidden rounded-card border border-border bg-card">
+        <div className="flex max-h-full flex-col overflow-hidden rounded-card border border-border bg-card">
           <ScrollArea
-            className="h-full os-grid"
+            className="min-h-0 os-grid"
             style={{ ["--grid-right" as string]: "117px" }}
           >
             <table className="w-full border-separate border-spacing-0 text-sm" style={{ minWidth: 600 }}>
