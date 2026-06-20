@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { FaTrash } from "react-icons/fa";
+import { FiEdit2 } from "react-icons/fi";
 import { BsBan } from "react-icons/bs";
 import supabaseClient from "../services/supabaseClient";
 import badgeMap from "../services/badgeMap";
@@ -169,9 +170,9 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
                       type="button"
                       onClick={() => onEdit?.(row)}
                       aria-label="Modifier"
-                      className="grid h-9 w-9 cursor-pointer place-items-center rounded-lg border border-border text-base leading-none text-foreground/70 transition hover:bg-muted"
+                      className="grid h-9 w-9 cursor-pointer place-items-center rounded-lg border border-border text-foreground/70 transition hover:bg-muted"
                     >
-                      ✎
+                      <FiEdit2 className="h-4 w-4" />
                     </button>
                     <button
                       type="button"

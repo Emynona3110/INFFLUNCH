@@ -19,14 +19,22 @@ export type Restaurant = {
 import useSupabaseQuery from "./useSupabaseQuery";
 import { slugify } from "../utils/slugify";
 import supabaseClient from "../services/supabaseClient";
+import useIsAdmin from "./useIsAdmin";
 import { RestaurantFilters } from "../pages/UserPage";
 
 const useRestaurants = (restaurantFilters: RestaurantFilters) => {
   const { id, slug, sortOrder, minRate, tags, badges, searchText } =
     restaurantFilters;
+  const isAdmin = useIsAdmin();
 
   const buildQuery = () => {
     let query = supabaseClient.from("restaurants").select();
+
+    // Le restaurant de test (slug "test") n'est visible/accessible que par les
+    // admins — masqué de la grille ET de l'accès direct à la fiche.
+    if (!isAdmin) {
+      query = query.neq("slug", "test");
+    }
 
     if (id) {
       query = query.eq("id", id);
@@ -58,7 +66,7 @@ const useRestaurants = (restaurantFilters: RestaurantFilters) => {
   };
 
   return useSupabaseQuery<Restaurant>(
-    ["restaurants", restaurantFilters],
+    ["restaurants", restaurantFilters, isAdmin],
     buildQuery
   );
 };

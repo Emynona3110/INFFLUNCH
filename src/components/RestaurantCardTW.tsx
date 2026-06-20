@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { FaStar } from "react-icons/fa";
+import { FiEdit2 } from "react-icons/fi";
 import { HiOutlineLocationMarker } from "react-icons/hi";
 import { Restaurant } from "@/hooks/useRestaurants";
 import noImage from "@/assets/no-image.jpg";
@@ -75,7 +76,7 @@ const RestaurantCardTW = ({
           <Tooltip label="Top 3 des mieux notés">
             <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground shadow">
               <img src={topRatedIcon} alt="" className="h-3.5 w-3.5" />
-              Top
+              Top 3
             </span>
           </Tooltip>
         )}
@@ -117,9 +118,9 @@ const RestaurantCardTW = ({
                   onEdit();
                 }}
                 aria-label="Modifier le restaurant"
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-base leading-none text-foreground/50 transition hover:bg-muted hover:text-primary"
+                className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-foreground/50 transition hover:bg-muted hover:text-primary"
               >
-                ✎
+                <FiEdit2 className="h-4 w-4" />
               </button>
             </Tooltip>
           )}

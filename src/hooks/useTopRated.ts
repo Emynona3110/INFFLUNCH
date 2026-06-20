@@ -8,6 +8,8 @@ const useTopRated = () =>
       .select("id")
       .order("rating", { ascending: false })
       .neq("reviews", 0)
+      // Le resto de test n'est jamais Top 3, quel que soit le rôle.
+      .neq("slug", "test")
       .limit(3)
   );
 

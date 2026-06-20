@@ -1,5 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { FaStar } from "react-icons/fa";
 import {
@@ -8,19 +9,24 @@ import {
   FiPhone,
   FiGlobe,
   FiExternalLink,
+  FiEdit2,
+  FiTrash2,
 } from "react-icons/fi";
 import useRestaurants from "@/hooks/useRestaurants";
 import useTopRated from "@/hooks/useTopRated";
 import useFavorites from "@/hooks/useFavorites";
+import useReviews from "@/hooks/useReviews";
+import useSession from "@/hooks/useSession";
+import useIsAdmin from "@/hooks/useIsAdmin";
+import supabaseClient from "@/services/supabaseClient";
 import { defaultRestaurantFilters } from "@/pages/UserPage";
 import badgeMap, { topRatedIcon } from "@/services/badgeMap";
 import RestaurantMiniMap from "@/components/RestaurantMiniMap";
 import LikeButton from "@/components/LikeButton";
-import {
-  sampleComments,
-  formatAuthorName,
-  authorInitials,
-} from "@/data/sampleComments";
+import ReviewForm from "@/components/ReviewForm";
+import HoldToDeleteButton from "@/components/HoldToDeleteButton";
+import { formatAuthorName, authorInitials } from "@/utils/authorName";
+import { toast } from "@/lib/toast";
 import noImage from "@/assets/no-image.jpg";
 import { cn } from "@/lib/utils";
 
@@ -89,6 +95,15 @@ const RestaurantPage = () => {
     removeFavorite,
   } = useFavorites();
 
+  const { sessionData } = useSession();
+  const userId = sessionData?.user?.id;
+  const isAdmin = useIsAdmin();
+  const queryClient = useQueryClient();
+  const { data: reviews = [], isPending: reviewsLoading } = useReviews(
+    restaurant?.id
+  );
+  const [showForm, setShowForm] = useState(false);
+
   // Remonte en haut quand on ouvre une nouvelle fiche.
   useEffect(() => window.scrollTo({ top: 0 }), [slug]);
 
@@ -125,10 +140,22 @@ const RestaurantPage = () => {
   const tags = restaurant.tags ?? [];
   const hasRating = !!restaurant.rating || restaurant.reviews > 0;
 
-  const totalReviews = sampleComments.length;
+  const totalReviews = reviews.length;
+  const myReview = reviews.find((r) => r.user_id === userId) ?? null;
   // Répartition par note (5→1) pour les barres type Amazon.
   const ratingCounts = (star: number) =>
-    sampleComments.filter((c) => Math.round(c.rating) === star).length;
+    reviews.filter((r) => r.rating === star).length;
+
+  const deleteReview = async (id: number) => {
+    const { error } = await supabaseClient.from("reviews").delete().eq("id", id);
+    if (error) {
+      toast({ title: "Erreur", description: error.message, status: "error", duration: 5000 });
+      return;
+    }
+    queryClient.invalidateQueries({ queryKey: ["reviews", restaurant.id] });
+    queryClient.invalidateQueries({ queryKey: ["restaurants"] });
+    toast({ title: "Avis supprimé", status: "success", duration: 2500 });
+  };
 
   return (
     <motion.div
@@ -312,22 +339,30 @@ const RestaurantPage = () => {
                 aria-level={2}
                 className="font-display text-lg font-bold text-card-foreground"
               >
-                Avis de la communauté
+                Avis des collaborateurs
               </div>
-              {/* TODO (fonctionnel) : formulaire d'avis. Note par défaut = 0
-                  étoile, saisie obligatoire de 1 à 5 étoiles avant envoi. */}
-              <button
-                type="button"
-                disabled
-                title="Bientôt disponible"
-                className="cursor-not-allowed rounded-lg bg-primary/90 px-3.5 py-1.5 text-sm font-medium text-primary-foreground opacity-60"
-              >
-                Écrire un avis
-              </button>
+              {!myReview && !showForm && (
+                <button
+                  type="button"
+                  onClick={() => setShowForm(true)}
+                  className="rounded-lg bg-primary px-3.5 py-1.5 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
+                >
+                  Écrire un avis
+                </button>
+              )}
             </div>
+
+            {showForm && (
+              <ReviewForm
+                restaurantId={restaurant.id}
+                existing={myReview}
+                onDone={() => setShowForm(false)}
+              />
+            )}
 
             {/* Répartition par note (type Amazon). Moyenne et total d'avis sont
                 déjà affichés dans l'entête, pas de doublon ici. */}
+            {totalReviews > 0 && (
             <div className="mb-5 space-y-1.5 rounded-xl bg-muted/40 p-4">
               {[5, 4, 3, 2, 1].map((star) => {
                 const count = ratingCounts(star);
@@ -351,41 +386,87 @@ const RestaurantPage = () => {
                 );
               })}
             </div>
+            )}
 
             {/* Liste */}
-            <ul className="m-0 list-none space-y-4 p-0">
-              {sampleComments.map((c) => (
-                <li
-                  key={c.id}
-                  className="border-t border-border/60 pt-4 first:border-t-0 first:pt-0"
-                >
-                  <div className="flex items-start gap-3">
-                    <div
-                      className={cn(
-                        "grid h-10 w-10 shrink-0 place-items-center rounded-full text-sm font-bold",
-                        avatarColor(c.email)
-                      )}
+            {reviewsLoading ? (
+              <div className="flex justify-center py-8">
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
+              </div>
+            ) : reviews.length === 0 ? (
+              <p className="py-6 text-center text-sm text-foreground/55">
+                Aucun avis pour le moment. Sois le premier à en laisser un !
+              </p>
+            ) : (
+              <ul className="m-0 list-none space-y-4 p-0">
+                {reviews.map((r) => {
+                  const mine = r.user_id === userId;
+                  return (
+                    <li
+                      key={r.id}
+                      className="border-t border-border/60 pt-4"
                     >
-                      {authorInitials(c.email)}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5">
-                        <span className="font-semibold text-card-foreground">
-                          {formatAuthorName(c.email)}
-                        </span>
-                        <span className="text-xs text-foreground/45">
-                          {formatDate(c.date)}
-                        </span>
+                      <div className="flex items-start gap-3">
+                        <div
+                          className={cn(
+                            "grid h-10 w-10 shrink-0 place-items-center rounded-full text-sm font-bold",
+                            avatarColor(r.email ?? "?")
+                          )}
+                        >
+                          {authorInitials(r.email)}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5">
+                            <span
+                              className={cn(
+                                "font-semibold",
+                                mine ? "text-primary" : "text-card-foreground"
+                              )}
+                            >
+                              {formatAuthorName(r.email)}
+                            </span>
+                            <span className="text-xs text-foreground/45">
+                              {formatDate(r.created_at)}
+                            </span>
+                          </div>
+                          <div className="mt-1 flex items-center gap-3">
+                            <Stars rating={r.rating} size={16} />
+                            {(mine || isAdmin) && (
+                              <div className="flex items-center gap-2 text-xs">
+                                {mine && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowForm(true)}
+                                    className="inline-flex items-center gap-1 text-foreground/55 transition hover:text-primary"
+                                  >
+                                    <FiEdit2 className="h-3.5 w-3.5" /> Modifier
+                                  </button>
+                                )}
+                                {mine && (
+                                  <span className="text-foreground/25">|</span>
+                                )}
+                                <HoldToDeleteButton
+                                  onConfirm={() => deleteReview(r.id)}
+                                  className="inline-flex items-center rounded-full px-2.5 py-0.5 text-foreground/55 hover:text-destructive"
+                                  progressClassName="bg-destructive/15"
+                                >
+                                  <FiTrash2 className="h-3.5 w-3.5" /> Supprimer
+                                </HoldToDeleteButton>
+                              </div>
+                            )}
+                          </div>
+                          {r.comment && (
+                            <p className="mt-1.5 text-sm leading-relaxed text-foreground/75">
+                              {r.comment}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                      <Stars rating={c.rating} size={13} />
-                      <p className="mt-1.5 text-sm leading-relaxed text-foreground/75">
-                        {c.text}
-                      </p>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </section>
       </div>
     </motion.div>
