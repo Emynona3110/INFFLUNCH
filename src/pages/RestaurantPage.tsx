@@ -260,41 +260,32 @@ const RestaurantPage = () => {
         </div>
       </div>
 
-      {/* Corps : 2 colonnes */}
-      {/* Corps. Sur mobile l'ordre est atouts → coordonnées → carte → photos →
-          avis (order-1..4) ; à partir de lg, colonne gauche (atouts + photos +
-          avis) et sidebar à droite (placement explicite col-start/row-start). */}
-      <div className="mt-6 grid gap-6 lg:grid-cols-3">
-        {/* Colonne gauche (atouts + photos + avis). Desktop : flex col occupant
-            2/3. Mobile : display:contents pour que la sidebar (coordonnées +
-            carte, order-2) s'intercale → atouts → infos → photos → avis. */}
-        <div className="contents lg:col-span-2 lg:flex lg:flex-col lg:gap-6">
-          {/* Atouts */}
-          {visibleBadges.length > 0 && (
-            <section className="order-1 rounded-card border border-border bg-card p-5">
+      {/* Atouts : tuiles directement sous le hero, sans carte de section. */}
+      {visibleBadges.length > 0 && (
+        <div className="mt-6 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
+          {visibleBadges.map((b) => (
             <div
-              role="heading"
-              aria-level={2}
-              className="mb-3 font-display text-lg font-bold text-card-foreground"
+              key={b}
+              className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-3 text-center"
             >
-              Les atouts
+              <img src={badgeMap[b]} alt="" className="h-8 w-8 object-contain" />
+              <span className="text-xs font-medium leading-tight text-foreground/80">
+                {b}
+              </span>
             </div>
-            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-              {visibleBadges.map((b) => (
-                <div
-                  key={b}
-                  className="flex flex-col items-center gap-2 rounded-xl border border-border bg-muted/40 p-3 text-center"
-                >
-                  <img src={badgeMap[b]} alt="" className="h-8 w-8 object-contain" />
-                  <span className="text-xs font-medium leading-tight text-foreground/80">
-                    {b}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+          ))}
+        </div>
+      )}
 
+      {/* Corps : 2 colonnes (les atouts sont au-dessus, hors grille).
+          Sur mobile l'ordre est coordonnées → carte → photos → avis (order-2..4) ;
+          à partir de lg, colonne gauche (photos + avis) et sidebar à droite
+          (placement explicite col-start/row-start). */}
+      <div className="mt-6 grid gap-6 lg:grid-cols-3">
+        {/* Colonne gauche (photos + avis). Desktop : flex col occupant 2/3.
+            Mobile : display:contents pour que la sidebar (coordonnées + carte,
+            order-2) s'intercale → infos → photos → avis. */}
+        <div className="contents lg:col-span-2 lg:flex lg:flex-col lg:gap-6">
           {/* Photos (galerie collaborateurs) */}
           <div className="order-3">
             <RestaurantGallery
