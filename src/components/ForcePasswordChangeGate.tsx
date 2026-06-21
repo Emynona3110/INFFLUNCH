@@ -85,16 +85,33 @@ const ForcePasswordChangeGate = ({ children }: Props) => {
               handleSubmit();
             }}
           >
+            {/* Champ username (email) pour que le gestionnaire de mdp associe
+                le nouveau mot de passe au bon compte. Masqué mais présent. */}
+            <input
+              type="email"
+              name="username"
+              autoComplete="username"
+              value={sessionData?.user?.email ?? ""}
+              readOnly
+              tabIndex={-1}
+              aria-hidden="true"
+              className="sr-only"
+            />
             <PasswordField
               label="Nouveau mot de passe"
               value={password}
               onChange={setPassword}
+              autoComplete="new-password"
+              name="new-password"
+              autoFocus
             />
             <PasswordField
               label="Confirme le mot de passe"
               value={confirm}
               onChange={setConfirm}
               isInvalid={confirm !== "" && confirm !== password}
+              autoComplete="new-password"
+              name="confirm-password"
             />
             <Button type="submit" loading={isLoading} disabled={!canSubmit} className="w-full">
               Valider

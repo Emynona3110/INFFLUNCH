@@ -90,21 +90,38 @@ const ChangePasswordDialog = ({ isOpen, onClose }: ChangePasswordDialogProps) =>
           </div>
         )}
 
+        {/* Username (email) caché → le gestionnaire associe le mdp au compte. */}
+        <input
+          type="email"
+          name="username"
+          autoComplete="username"
+          value={sessionData?.user?.email ?? ""}
+          readOnly
+          tabIndex={-1}
+          aria-hidden="true"
+          className="sr-only"
+        />
         <PasswordField
           label="Ancien mot de passe"
           value={oldPassword}
           onChange={setOldPassword}
+          autoComplete="current-password"
+          name="current-password"
         />
         <PasswordField
           label="Nouveau mot de passe"
           value={newPassword}
           onChange={setNewPassword}
+          autoComplete="new-password"
+          name="new-password"
         />
         <PasswordField
           label="Confirmer le nouveau mot de passe"
           value={confirm}
           onChange={setConfirm}
           isInvalid={confirm !== "" && confirm !== newPassword}
+          autoComplete="new-password"
+          name="confirm-password"
         />
 
         <div className="mt-2 flex justify-end gap-2">

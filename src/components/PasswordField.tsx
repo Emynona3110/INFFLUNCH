@@ -7,10 +7,24 @@ interface PasswordFieldProps {
   value: string;
   onChange: (value: string) => void;
   isInvalid?: boolean;
+  /** Indispensable aux gestionnaires de mdp : "current-password"/"new-password". */
+  autoComplete?: string;
+  name?: string;
+  id?: string;
+  autoFocus?: boolean;
 }
 
 /** Champ mot de passe avec bouton œil (masqué par défaut → œil barré). */
-const PasswordField = ({ label, value, onChange, isInvalid }: PasswordFieldProps) => {
+const PasswordField = ({
+  label,
+  value,
+  onChange,
+  isInvalid,
+  autoComplete,
+  name,
+  id,
+  autoFocus,
+}: PasswordFieldProps) => {
   const [show, setShow] = useState(false);
 
   return (
@@ -20,6 +34,10 @@ const PasswordField = ({ label, value, onChange, isInvalid }: PasswordFieldProps
         <input
           type={show ? "text" : "password"}
           value={value}
+          name={name}
+          id={id}
+          autoComplete={autoComplete}
+          autoFocus={autoFocus}
           onChange={(e) => onChange(e.target.value)}
           className={cn(
             "h-10 w-full rounded-lg border bg-background pl-3 pr-10 text-sm text-foreground outline-none transition focus-visible:ring-2 focus-visible:ring-primary/25",

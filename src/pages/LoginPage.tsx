@@ -63,6 +63,8 @@ const LoginPage = () => {
               </span>
               <Input
                 type="email"
+                name="username"
+                autoComplete="username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -79,6 +81,8 @@ const LoginPage = () => {
               >
                 <Input
                   type={showPassword ? "text" : "password"}
+                  name="current-password"
+                  autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
