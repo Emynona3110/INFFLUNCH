@@ -1,10 +1,12 @@
 import { ReactNode, useState } from "react";
 import supabaseClient from "../services/supabaseClient";
+import { storeCredential } from "../utils/credentials";
 import useSession from "../hooks/useSession";
 import Layout from "./Layout";
 import PasswordField from "./PasswordField";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface Props {
   children: ReactNode;
@@ -52,6 +54,8 @@ const ForcePasswordChangeGate = ({ children }: Props) => {
       setError("Impossible de mettre à jour le mot de passe. Réessaie.");
       return;
     }
+    // Propose l'enregistrement du mdp au gestionnaire (associé à l'email).
+    await storeCredential(sessionData?.user?.email ?? "", password);
     // La session est mise à jour (USER_UPDATED) → le gate laisse passer.
   };
 
@@ -85,23 +89,27 @@ const ForcePasswordChangeGate = ({ children }: Props) => {
               handleSubmit();
             }}
           >
-            {/* Champ username (email) pour que le gestionnaire de mdp associe
-                le nouveau mot de passe au bon compte. Masqué mais présent. */}
-            <input
-              type="email"
-              name="username"
-              autoComplete="username"
-              value={sessionData?.user?.email ?? ""}
-              readOnly
-              tabIndex={-1}
-              aria-hidden="true"
-              className="sr-only"
-            />
+            {/* Email (lecture seule) visible : le gestionnaire l'ignore en
+                sr-only → on l'affiche pour associer le mdp au bon compte. */}
+            <label className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium text-foreground">Compte</span>
+              <Input
+                type="email"
+                id="username"
+                name="username"
+                autoComplete="username"
+                value={sessionData?.user?.email ?? ""}
+                readOnly
+                tabIndex={-1}
+                className="cursor-default text-foreground/70"
+              />
+            </label>
             <PasswordField
               label="Nouveau mot de passe"
               value={password}
               onChange={setPassword}
               autoComplete="new-password"
+              id="new-password"
               name="new-password"
               autoFocus
             />
@@ -111,6 +119,7 @@ const ForcePasswordChangeGate = ({ children }: Props) => {
               onChange={setConfirm}
               isInvalid={confirm !== "" && confirm !== password}
               autoComplete="new-password"
+              id="confirm-password"
               name="confirm-password"
             />
             <Button type="submit" loading={isLoading} disabled={!canSubmit} className="w-full">

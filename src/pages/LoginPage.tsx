@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { VscEye, VscEyeClosed } from "react-icons/vsc";
 import supabaseClient from "../services/supabaseClient";
+import { storeCredential } from "../utils/credentials";
 import Layout from "../components/Layout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,8 @@ const LoginPage = () => {
       setEmail("");
       setPassword("");
     } else {
+      // Propose l'enregistrement du mdp (l'AJAX ne déclenche pas l'heuristique).
+      await storeCredential(email, password);
       navigate("/restaurants");
     }
   };
@@ -63,6 +66,7 @@ const LoginPage = () => {
               </span>
               <Input
                 type="email"
+                id="username"
                 name="username"
                 autoComplete="username"
                 value={email}
@@ -81,6 +85,7 @@ const LoginPage = () => {
               >
                 <Input
                   type={showPassword ? "text" : "password"}
+                  id="current-password"
                   name="current-password"
                   autoComplete="current-password"
                   value={password}

@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { toast } from "@/lib/toast";
 import supabaseClient from "../services/supabaseClient";
+import { storeCredential } from "../utils/credentials";
 import useSession from "../hooks/useSession";
 import PasswordField from "./PasswordField";
 import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface ChangePasswordDialogProps {
   isOpen: boolean;
@@ -64,6 +66,9 @@ const ChangePasswordDialog = ({ isOpen, onClose }: ChangePasswordDialogProps) =>
       return;
     }
 
+    // Propose la mise à jour du mdp enregistré (associé à l'email).
+    await storeCredential(email, newPassword);
+
     toast({
       title: "Mot de passe mis à jour",
       status: "success",
@@ -90,22 +95,27 @@ const ChangePasswordDialog = ({ isOpen, onClose }: ChangePasswordDialogProps) =>
           </div>
         )}
 
-        {/* Username (email) caché → le gestionnaire associe le mdp au compte. */}
-        <input
-          type="email"
-          name="username"
-          autoComplete="username"
-          value={sessionData?.user?.email ?? ""}
-          readOnly
-          tabIndex={-1}
-          aria-hidden="true"
-          className="sr-only"
-        />
+        {/* Email (lecture seule) visible : le gestionnaire de mdp l'ignore en
+            sr-only, donc on l'affiche pour associer le mot de passe au compte. */}
+        <label className="flex flex-col gap-1.5">
+          <span className="text-sm font-medium text-foreground">Compte</span>
+          <Input
+            type="email"
+            id="username"
+            name="username"
+            autoComplete="username"
+            value={sessionData?.user?.email ?? ""}
+            readOnly
+            tabIndex={-1}
+            className="cursor-default text-foreground/70"
+          />
+        </label>
         <PasswordField
           label="Ancien mot de passe"
           value={oldPassword}
           onChange={setOldPassword}
           autoComplete="current-password"
+          id="current-password"
           name="current-password"
         />
         <PasswordField
@@ -113,6 +123,7 @@ const ChangePasswordDialog = ({ isOpen, onClose }: ChangePasswordDialogProps) =>
           value={newPassword}
           onChange={setNewPassword}
           autoComplete="new-password"
+          id="new-password"
           name="new-password"
         />
         <PasswordField
@@ -121,6 +132,7 @@ const ChangePasswordDialog = ({ isOpen, onClose }: ChangePasswordDialogProps) =>
           onChange={setConfirm}
           isInvalid={confirm !== "" && confirm !== newPassword}
           autoComplete="new-password"
+          id="confirm-password"
           name="confirm-password"
         />
 

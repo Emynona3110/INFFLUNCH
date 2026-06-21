@@ -60,6 +60,7 @@ const ForgotPassword = () => {
                 </span>
                 <Input
                   type="email"
+                  id="username"
                   name="username"
                   autoComplete="username"
                   value={email}
