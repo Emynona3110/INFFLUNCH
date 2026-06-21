@@ -1,12 +1,14 @@
 -- =============================================================================
 -- Profils utilisateurs + avatars (photos de profil) — 2026-06-21
--- - Bucket `avatars` (public). Fichier nommé par l'id : "{userId}.webp",
---   écrasé à chaque changement (upsert).
--- - Table `profiles` : ligne éditable par chaque utilisateur pour SA ligne
---   (la table `users` reste admin-only). `avatar_updated_at` sert de version
---   (cache-busting via ?v=) et indique qui possède une pp personnalisée.
+-- - Bucket `avatars` (public). Fichier à NOM ALÉATOIRE dans un dossier par
+--   utilisateur : "{userId}/{uuid}.webp" → URL publique NON devinable (sécurité)
+--   et l'ancien fichier est supprimé à chaque changement (chemin gardé en base).
+-- - Table `profiles` : ligne éditable par chaque utilisateur pour SA ligne.
+--   `avatar_path` = chemin du fichier courant (null = pas de pp).
+-- - RLS storage "own-folder" : chacun n'écrit / lit / supprime QUE dans son
+--   dossier "{son_id}/…" (la lecture pour autrui se fait via l'URL publique).
 --
--- À exécuter sur le projet Supabase (ref ilonqaqyqmvsfskwgqka).
+-- Idempotent (migre une installation existante). À exécuter sur Supabase.
 -- =============================================================================
 
 -- 1) Bucket avatars ------------------------------------------------------------
@@ -16,20 +18,22 @@ on conflict (id) do nothing;
 
 -- 2) Table profiles ------------------------------------------------------------
 create table if not exists public.profiles (
-  id                uuid primary key references auth.users(id) on delete cascade,
-  avatar_updated_at timestamptz,           -- null = pas de pp perso
-  created_at        timestamptz not null default now()
+  id          uuid primary key references auth.users(id) on delete cascade,
+  avatar_path text,                         -- null = pas de pp perso
+  created_at  timestamptz not null default now()
 );
+
+-- Migration depuis l'ancienne version (avatar_updated_at → avatar_path).
+alter table public.profiles drop column if exists avatar_updated_at;
+alter table public.profiles add column if not exists avatar_path text;
 
 alter table public.profiles enable row level security;
 
--- Lecture par tous les authentifiés (pour afficher les avatars des auteurs d'avis).
 drop policy if exists "profiles select authenticated" on public.profiles;
 create policy "profiles select authenticated"
 on public.profiles for select to authenticated
 using (true);
 
--- Chacun crée / met à jour UNIQUEMENT sa propre ligne.
 drop policy if exists "profiles insert own" on public.profiles;
 create policy "profiles insert own"
 on public.profiles for insert to authenticated
@@ -41,38 +45,30 @@ on public.profiles for update to authenticated
 using (id = auth.uid())
 with check (id = auth.uid());
 
--- 3) RLS storage.objects pour le bucket avatars --------------------------------
--- Bucket public → lecture via URL publique sans policy SELECT (pas de listing).
--- Le fichier est nommé par le PRÉFIXE de l'email ("{prefixe}.webp"). On garde une
--- policy simple (bucket_id) pour les authentifiés : pas de blocage RLS. Risque
--- résiduel (un user pourrait écraser la pp d'un autre) acceptable pour un outil
--- interne (~100 collègues de confiance).
+-- 3) RLS storage.objects pour le bucket avatars (own-folder) -------------------
+-- Bucket public → lecture des images via URL publique (pas de policy SELECT
+-- nécessaire pour AFFICHER). La policy SELECT ci-dessous est limitée au dossier
+-- de l'utilisateur : elle sert uniquement à ce que `remove` retrouve SES anciens
+-- fichiers (pas de listing global → pas d'avertissement Supabase).
 
--- Lecture limitée à SA PROPRE pp (nécessaire pour que `remove` la retrouve au
--- changement). Restreinte à "{prefixe_email}.webp" → pas de listing global du
--- bucket (évite l'avertissement Supabase « clients can list all files »).
--- L'expression reproduit exactement la clé calculée côté client (avatarKey).
-drop policy if exists "avatars read authenticated" on storage.objects;
-drop policy if exists "avatars read own" on storage.objects;
+-- Nettoyage des variantes précédentes.
+drop policy if exists "avatars write authenticated"  on storage.objects;
+drop policy if exists "avatars update authenticated" on storage.objects;
+drop policy if exists "avatars delete authenticated" on storage.objects;
+drop policy if exists "avatars read authenticated"   on storage.objects;
+drop policy if exists "avatars read own"             on storage.objects;
+drop policy if exists "avatars insert own"           on storage.objects;
+drop policy if exists "avatars update own"           on storage.objects;
+drop policy if exists "avatars delete own"           on storage.objects;
+
+create policy "avatars insert own"
+on storage.objects for insert to authenticated
+with check (bucket_id = 'avatars' and name like (auth.uid()::text || '/%'));
+
 create policy "avatars read own"
 on storage.objects for select to authenticated
-using (
-  bucket_id = 'avatars'
-  and name = regexp_replace(lower(split_part(auth.email(), '@', 1)), '[^a-z0-9._-]', '-', 'g') || '.webp'
-);
+using (bucket_id = 'avatars' and name like (auth.uid()::text || '/%'));
 
-drop policy if exists "avatars insert own" on storage.objects;
-create policy "avatars write authenticated"
-on storage.objects for insert to authenticated
-with check (bucket_id = 'avatars');
-
-drop policy if exists "avatars update own" on storage.objects;
-create policy "avatars update authenticated"
-on storage.objects for update to authenticated
-using (bucket_id = 'avatars')
-with check (bucket_id = 'avatars');
-
-drop policy if exists "avatars delete own" on storage.objects;
-create policy "avatars delete authenticated"
+create policy "avatars delete own"
 on storage.objects for delete to authenticated
-using (bucket_id = 'avatars');
+using (bucket_id = 'avatars' and name like (auth.uid()::text || '/%'));

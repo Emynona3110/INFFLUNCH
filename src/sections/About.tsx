@@ -1,8 +1,14 @@
+import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 
 const About = () => {
   return (
-    <div className="tw-scope flex w-full items-center justify-center px-4">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+      className="tw-scope flex w-full items-center justify-center px-4"
+    >
       <Card className="w-full max-w-2xl p-8">
         <div
           role="heading"
@@ -33,7 +39,7 @@ const About = () => {
           </p>
         </div>
       </Card>
-    </div>
+    </motion.div>
   );
 };
 

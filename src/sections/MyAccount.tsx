@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { FaStar } from "react-icons/fa";
 import { FiCamera, FiTrash2, FiChevronRight } from "react-icons/fi";
 import { toast } from "@/lib/toast";
@@ -41,7 +42,7 @@ const MyAccount = () => {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const email = sessionData?.user?.email;
-  const hasAvatar = !!profile?.avatar_updated_at;
+  const hasAvatar = !!profile?.avatar_path;
 
   const handleLogout = async () => {
     await signOut();
@@ -72,7 +73,12 @@ const MyAccount = () => {
   };
 
   return (
-    <div className="tw-scope w-full max-w-2xl space-y-6">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+      className="tw-scope w-full max-w-2xl space-y-6"
+    >
       {/* Profil */}
       <Card className="p-8">
         <div
@@ -87,7 +93,7 @@ const MyAccount = () => {
           <div className="relative">
             <Avatar
               email={email}
-              avatarUpdatedAt={profile?.avatar_updated_at}
+              avatarPath={profile?.avatar_path}
               size={96}
               className="ring-2 ring-border"
             />
@@ -105,11 +111,11 @@ const MyAccount = () => {
             {hasAvatar && (
               <HoldToDeleteButton
                 onConfirm={handleRemove}
-                aria-label="Maintenir pour retirer la photo"
-                className="absolute -right-1 -top-1 grid h-7 w-7 place-items-center rounded-full bg-destructive text-white shadow-md"
+                title="Maintenir pour retirer la photo"
+                className="absolute -right-1 -top-1 grid h-8 w-8 place-items-center rounded-full bg-destructive text-white shadow-md"
                 progressClassName="bg-white/40"
               >
-                <FiTrash2 className="h-3.5 w-3.5" />
+                <FiTrash2 className="h-4 w-4" />
               </HoldToDeleteButton>
             )}
           </div>
@@ -202,7 +208,7 @@ const MyAccount = () => {
         isOpen={isDialogOpen}
         onClose={() => setDialogOpen(false)}
       />
-    </div>
+    </motion.div>
   );
 };
 

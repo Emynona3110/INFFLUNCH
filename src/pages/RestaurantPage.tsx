@@ -360,7 +360,7 @@ const RestaurantPage = () => {
                       <div className="flex items-start gap-3">
                         <Avatar
                           email={r.email}
-                          avatarUpdatedAt={r.avatar_updated_at}
+                          avatarPath={r.avatar_path}
                           size={40}
                         />
                         <div className="min-w-0 flex-1">

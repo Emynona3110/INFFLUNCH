@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { avatarUrl } from "@/services/avatar";
 import { authorInitials } from "@/utils/authorName";
 import { cn } from "@/lib/utils";
@@ -15,8 +16,8 @@ export const avatarColor = (key: string) =>
 
 interface Props {
   email?: string | null;
-  /** profiles.avatar_updated_at : présent ⇒ pp personnalisée. */
-  avatarUpdatedAt?: string | null;
+  /** profiles.avatar_path : chemin de la pp perso (null ⇒ initiales). */
+  avatarPath?: string | null;
   /** Taille en px (carré). */
   size?: number;
   className?: string;
@@ -24,20 +25,36 @@ interface Props {
 
 /**
  * Avatar d'un utilisateur : photo de profil personnalisée si elle existe,
- * sinon initiales colorées (dérivées de l'email).
+ * sinon initiales colorées (dérivées de l'email). La pp apparaît en fondu une
+ * fois chargée (évite l'apparition brusque), sur un fond neutre le temps du load.
  */
-const Avatar = ({ email, avatarUpdatedAt, size = 40, className }: Props) => {
-  const url = avatarUrl(email, avatarUpdatedAt);
+const Avatar = ({ email, avatarPath, size = 40, className }: Props) => {
+  const url = avatarUrl(avatarPath);
+  const [loaded, setLoaded] = useState(false);
   const dim = { height: size, width: size };
+
+  // Réinitialise le fondu à chaque changement de pp (nouvelle URL).
+  useEffect(() => setLoaded(false), [url]);
 
   if (url) {
     return (
-      <img
-        src={url}
-        alt=""
+      <span
         style={dim}
-        className={cn("shrink-0 rounded-full object-cover", className)}
-      />
+        className={cn(
+          "relative block shrink-0 overflow-hidden rounded-full bg-muted",
+          className
+        )}
+      >
+        <img
+          src={url}
+          alt=""
+          onLoad={() => setLoaded(true)}
+          className={cn(
+            "h-full w-full object-cover transition-opacity duration-500",
+            loaded ? "opacity-100" : "opacity-0"
+          )}
+        />
+      </span>
     );
   }
 

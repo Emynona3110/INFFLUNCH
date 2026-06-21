@@ -2,23 +2,22 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import supabaseClient from "../services/supabaseClient";
 import useSession from "./useSession";
 import { compressImage } from "../utils/imageCompress";
-import { AVATARS_BUCKET, avatarKey } from "../services/avatar";
+import { AVATARS_BUCKET, newAvatarPath } from "../services/avatar";
 
 export interface Profile {
   id: string;
-  avatar_updated_at: string | null;
+  avatar_path: string | null;
 }
 
 /**
  * Profil de l'utilisateur courant (avatar) + actions upload/suppression de la pp.
- * L'avatar est compressé (limite HAUTE seulement, pas de rejet pour une petite
- * image) et stocké sous "{id}.webp" (écrasé à chaque changement). `profiles`
- * garde la version (avatar_updated_at) pour le cache-busting et savoir qui a une pp.
+ * L'avatar est compressé (limite HAUTE seulement) et stocké sous un nom ALÉATOIRE
+ * "{userId}/{uuid}.webp" (URL non devinable). À chaque changement/retrait,
+ * l'ANCIEN fichier est supprimé du bucket (chemin courant gardé dans profiles).
  */
 const useProfile = () => {
   const { sessionData } = useSession();
   const userId = sessionData?.user?.id;
-  const email = sessionData?.user?.email;
   const queryClient = useQueryClient();
   const key = ["profile", userId];
 
@@ -28,7 +27,7 @@ const useProfile = () => {
     queryFn: async () => {
       const { data, error } = await supabaseClient
         .from("profiles")
-        .select("id, avatar_updated_at")
+        .select("id, avatar_path")
         .eq("id", userId as string)
         .maybeSingle();
       if (error) throw new Error(error.message);
@@ -39,12 +38,12 @@ const useProfile = () => {
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: key });
     queryClient.invalidateQueries({ queryKey: ["profiles"] });
+    queryClient.invalidateQueries({ queryKey: ["reviews"] });
   };
 
   const uploadAvatar = useMutation({
     mutationFn: async (file: File) => {
-      const key = avatarKey(email);
-      if (!userId || !key) throw new Error("Non connecté");
+      if (!userId) throw new Error("Non connecté");
       if (!file.type.startsWith("image/"))
         throw new Error("Le fichier doit être une image");
 
@@ -52,37 +51,50 @@ const useProfile = () => {
       // ni de rejet pour une image trop petite).
       const { blob } = await compressImage(file, { maxSize: 512, quality: 0.85 });
 
-      // L'upsert:true est rejeté par la RLS storage ici → on supprime l'ancien
-      // fichier (nécessite la policy SELECT avatars) puis on uploade en
-      // upsert:false (qui, lui, passe).
-      await supabaseClient.storage.from(AVATARS_BUCKET).remove([key]);
+      const oldPath = query.data?.avatar_path ?? null;
+      const path = newAvatarPath(userId);
+
       const { error: upErr } = await supabaseClient.storage
         .from(AVATARS_BUCKET)
-        .upload(key, blob, { contentType: "image/webp", upsert: false });
+        .upload(path, blob, { contentType: "image/webp", upsert: false });
       if (upErr) throw new Error(`Avatar (storage) : ${upErr.message}`);
 
       const { error: pErr } = await supabaseClient
         .from("profiles")
-        .upsert({ id: userId, avatar_updated_at: new Date().toISOString() });
+        .upsert({ id: userId, avatar_path: path });
       if (pErr) throw new Error(`Profil (base) : ${pErr.message}`);
+
+      // Supprime l'ancien fichier pour ne pas accumuler (best effort).
+      if (oldPath && oldPath !== path) {
+        await supabaseClient.storage.from(AVATARS_BUCKET).remove([oldPath]);
+      }
     },
     onSuccess: invalidate,
   });
 
   const removeAvatar = useMutation({
     mutationFn: async () => {
-      const key = avatarKey(email);
-      if (!userId || !key) throw new Error("Non connecté");
-      await supabaseClient.storage.from(AVATARS_BUCKET).remove([key]);
+      if (!userId) throw new Error("Non connecté");
+      const oldPath = query.data?.avatar_path ?? null;
+
       const { error } = await supabaseClient
         .from("profiles")
-        .upsert({ id: userId, avatar_updated_at: null });
+        .upsert({ id: userId, avatar_path: null });
       if (error) throw new Error(error.message);
+
+      if (oldPath) {
+        await supabaseClient.storage.from(AVATARS_BUCKET).remove([oldPath]);
+      }
     },
     onSuccess: invalidate,
   });
 
-  return { profile: query.data ?? null, isPending: query.isPending, uploadAvatar, removeAvatar };
+  return {
+    profile: query.data ?? null,
+    isPending: query.isPending,
+    uploadAvatar,
+    removeAvatar,
+  };
 };
 
 export default useProfile;

@@ -11,8 +11,8 @@ export interface Review {
   updated_at: string;
   /** Email de l'auteur (jointure public.users), pour l'affichage du nom. */
   email: string | null;
-  /** Version de l'avatar de l'auteur (jointure profiles) ; null = pas de pp. */
-  avatar_updated_at: string | null;
+  /** Chemin de l'avatar de l'auteur (jointure profiles) ; null = pas de pp. */
+  avatar_path: string | null;
 }
 
 /**
@@ -44,7 +44,7 @@ const useReviews = (restaurantId: number | undefined) =>
           supabaseClient.from("users").select("id, email").in("id", ids),
           supabaseClient
             .from("profiles")
-            .select("id, avatar_updated_at")
+            .select("id, avatar_path")
             .in("id", ids),
         ]);
         emailById = Object.fromEntries(
@@ -53,7 +53,7 @@ const useReviews = (restaurantId: number | undefined) =>
         avatarById = Object.fromEntries(
           (profiles ?? []).map((p) => [
             p.id as string,
-            p.avatar_updated_at as string | null,
+            p.avatar_path as string | null,
           ])
         );
       }
@@ -61,7 +61,7 @@ const useReviews = (restaurantId: number | undefined) =>
       return rows.map((r) => ({
         ...r,
         email: emailById[r.user_id] ?? null,
-        avatar_updated_at: avatarById[r.user_id] ?? null,
+        avatar_path: avatarById[r.user_id] ?? null,
       }));
     },
   });

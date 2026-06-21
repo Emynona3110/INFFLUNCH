@@ -3,27 +3,18 @@ import supabaseClient from "./supabaseClient";
 export const AVATARS_BUCKET = "avatars";
 
 /**
- * Clé du fichier avatar : préfixe de l'email (avant le @), nettoyé pour un nom
- * de fichier valide, + ".webp". Écrasé à chaque changement. Ex :
- *   "cdubois@infflux.com" → "cdubois.webp".
+ * Chemin d'un nouvel avatar : dossier par utilisateur + nom ALÉATOIRE →
+ * "{userId}/{uuid}.webp". URL publique non devinable (sécurité) et chaque
+ * changement produit un nouveau chemin (l'ancien est supprimé par useProfile).
  */
-export const avatarKey = (email: string | null | undefined): string | null => {
-  const local = (email ?? "").split("@")[0].toLowerCase().replace(/[^a-z0-9._-]/g, "-");
-  return local ? `${local}.webp` : null;
-};
+export const newAvatarPath = (userId: string) =>
+  `${userId}/${crypto.randomUUID()}.webp`;
 
-/**
- * URL publique de l'avatar d'un utilisateur, ou null s'il n'en a pas.
- * `avatarUpdatedAt` (de profiles) sert de version : `?v=` busté au changement
- * (le chemin étant fixe, sans ça le cache afficherait l'ancienne image).
- */
+/** URL publique de l'avatar à partir de son chemin (null si pas de pp). */
 export const avatarUrl = (
-  email: string | null | undefined,
-  avatarUpdatedAt: string | null | undefined
+  avatarPath: string | null | undefined
 ): string | null => {
-  const key = avatarKey(email);
-  if (!key || !avatarUpdatedAt) return null;
-  const base = supabaseClient.storage.from(AVATARS_BUCKET).getPublicUrl(key).data
+  if (!avatarPath) return null;
+  return supabaseClient.storage.from(AVATARS_BUCKET).getPublicUrl(avatarPath).data
     .publicUrl;
-  return `${base}?v=${new Date(avatarUpdatedAt).getTime()}`;
 };
