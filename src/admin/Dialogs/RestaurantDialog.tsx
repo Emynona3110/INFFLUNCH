@@ -19,6 +19,7 @@ import {
   bucketPathFromPublicUrl,
   removeFromBucket,
 } from "../../services/uploadImage";
+import { coverPathBase } from "../../services/storagePaths";
 import { FiChevronDown, FiPlus, FiCheck, FiX } from "react-icons/fi";
 import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -172,13 +173,24 @@ const RestaurantDialog = ({
   const handleDelete = async () => {
     if (!initialData?.id) return;
     setIsDeleting(true);
+
+    // On collecte les chemins des fichiers AVANT la suppression : la cascade
+    // efface les lignes restaurant_photos mais PAS les fichiers du bucket.
+    const { data: photoRows } = await supabaseClient
+      .from("restaurant_photos")
+      .select("storage_path")
+      .eq("restaurant_id", initialData.id);
+    const filePaths = (photoRows ?? []).map((p) => p.storage_path as string);
+    const coverPath = bucketPathFromPublicUrl(initialData.image);
+    if (coverPath) filePaths.push(coverPath);
+
     const { error } = await supabaseClient
       .from("restaurants")
       .delete()
       .eq("id", initialData.id);
-    setIsDeleting(false);
 
     if (error) {
+      setIsDeleting(false);
       toast({
         title: "Erreur",
         description: error.message,
@@ -189,6 +201,10 @@ const RestaurantDialog = ({
       return;
     }
 
+    // Purge des fichiers du bucket (couverture + galerie) — best effort.
+    if (filePaths.length) await removeFromBucket(filePaths);
+
+    setIsDeleting(false);
     toast({
       title: "Restaurant supprimé",
       status: "success",
@@ -264,6 +280,9 @@ const RestaurantDialog = ({
   const isUnchanged = (existing: Partial<Restaurant>) => {
     return (
       existing.name === formatName(name) &&
+      // Compare aussi le slug : si la logique de slugify a évolué, un même nom
+      // peut produire un nouveau slug → on doit alors permettre la mise à jour.
+      existing.slug === slugify(formatName(name)) &&
       existing.image === (image || null) &&
       existing.address === address &&
       existing.website === (website || null) &&
@@ -298,15 +317,16 @@ const RestaurantDialog = ({
       return;
     }
 
-    // Upload de la nouvelle image (si un fichier a été choisi) → URL publique.
+    // Upload de la couverture (si un fichier a été choisi) → "{slug}/cover-...".
     let finalImage: string | null = image || null;
     if (imageFile) {
       try {
-        const res = await uploadImageToBucket(imageFile, "covers", {
-          maxSize: 2000,
-          quality: 0.9,
-        });
-        finalImage = res.url;
+        finalImage = (
+          await uploadImageToBucket(imageFile, coverPathBase(slug), {
+            maxSize: 2000,
+            quality: 0.9,
+          })
+        ).url;
       } catch (err: any) {
         toast({
           title: "Échec de l'envoi de l'image",

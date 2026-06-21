@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 
 interface Props {
   restaurantId: number;
+  slug: string;
   userId?: string;
   isAdmin: boolean;
 }
@@ -28,9 +29,9 @@ interface Props {
  * Chacun peut supprimer ses propres photos ; un admin peut en supprimer
  * n'importe laquelle (modération).
  */
-const RestaurantGallery = ({ restaurantId, userId, isAdmin }: Props) => {
+const RestaurantGallery = ({ restaurantId, slug, userId, isAdmin }: Props) => {
   const { data: photos = [], isPending, upload, remove } =
-    useRestaurantPhotos(restaurantId);
+    useRestaurantPhotos(restaurantId, slug);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [lightbox, setLightbox] = useState<RestaurantPhoto | null>(null);
 

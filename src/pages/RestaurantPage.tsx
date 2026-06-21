@@ -286,6 +286,7 @@ const RestaurantPage = () => {
           <div className="order-3">
             <RestaurantGallery
               restaurantId={restaurant.id}
+              slug={restaurant.slug}
               userId={userId}
               isAdmin={isAdmin}
             />

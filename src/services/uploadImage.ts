@@ -1,19 +1,20 @@
 import supabaseClient from "./supabaseClient";
 import { compressImage, CompressOptions } from "../utils/imageCompress";
-import { PHOTOS_BUCKET } from "../hooks/useRestaurantPhotos";
+import { PHOTOS_BUCKET } from "./storagePaths";
 
 /**
  * Compresse une image puis l'upload dans le bucket Storage, et renvoie son URL
- * publique + son chemin. Mutualise la logique compress → upload → getPublicUrl
+ * publique + son chemin. `pathBase` = chemin SANS extension (l'extension est
+ * ajoutée selon le format compressé). Mutualise compress → upload → getPublicUrl
  * (galerie ET image de couverture des restaurants).
  */
 export async function uploadImageToBucket(
   file: File,
-  folder: string,
+  pathBase: string,
   compress?: CompressOptions
 ): Promise<{ url: string; path: string }> {
   const { blob, ext } = await compressImage(file, compress);
-  const path = `${folder}/${crypto.randomUUID()}.${ext}`;
+  const path = `${pathBase}.${ext}`;
 
   const { error } = await supabaseClient.storage
     .from(PHOTOS_BUCKET)
@@ -36,7 +37,10 @@ export function bucketPathFromPublicUrl(url: string | null | undefined): string 
   return i === -1 ? null : url.slice(i + marker.length);
 }
 
-/** Supprime un fichier du bucket (best effort). */
-export async function removeFromBucket(path: string): Promise<void> {
-  await supabaseClient.storage.from(PHOTOS_BUCKET).remove([path]);
+/** Supprime un ou plusieurs fichiers du bucket (best effort). */
+export async function removeFromBucket(
+  paths: string | string[]
+): Promise<void> {
+  const list = Array.isArray(paths) ? paths : [paths];
+  if (list.length) await supabaseClient.storage.from(PHOTOS_BUCKET).remove(list);
 }

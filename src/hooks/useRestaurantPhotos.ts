@@ -1,8 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import supabaseClient from "../services/supabaseClient";
 import { compressImage } from "../utils/imageCompress";
-
-export const PHOTOS_BUCKET = "restaurant-photos";
+import { PHOTOS_BUCKET, galleryPathBase } from "../services/storagePaths";
 
 export interface RestaurantPhoto {
   id: number;
@@ -27,7 +26,10 @@ const publicUrl = (path: string) =>
  * restaurant_photos ne porte que les métadonnées. Comme reviews, pas de FK
  * directe vers public.users → jointure manuelle pour l'email de l'auteur.
  */
-const useRestaurantPhotos = (restaurantId: number | undefined) => {
+const useRestaurantPhotos = (
+  restaurantId: number | undefined,
+  slug?: string
+) => {
   const queryClient = useQueryClient();
   const key = ["restaurant-photos", restaurantId];
 
@@ -73,13 +75,13 @@ const useRestaurantPhotos = (restaurantId: number | undefined) => {
       /** Admin : attribuer la photo à un autre user_id. Défaut = auteur courant. */
       authorId?: string;
     }) => {
-      if (!restaurantId) throw new Error("Restaurant inconnu");
+      if (!restaurantId || !slug) throw new Error("Restaurant inconnu");
       if (!file.type.startsWith("image/")) {
         throw new Error("Le fichier doit être une image");
       }
 
       const { blob, width, height, ext } = await compressImage(file);
-      const path = `${restaurantId}/${crypto.randomUUID()}.${ext}`;
+      const path = `${galleryPathBase(slug)}.${ext}`;
 
       const { error: upErr } = await supabaseClient.storage
         .from(PHOTOS_BUCKET)
