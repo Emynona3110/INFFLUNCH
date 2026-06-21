@@ -258,26 +258,22 @@ const RestaurantPage = () => {
             </div>
           )}
         </div>
+
+        {/* Atouts : petites icônes (sans texte, infobulles) en bas à droite. */}
+        {visibleBadges.length > 0 && (
+          <div className="absolute bottom-5 right-5 flex flex-wrap justify-end gap-1.5 md:bottom-7 md:right-7">
+            {visibleBadges.map((b) => (
+              <Tooltip key={b} label={b}>
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-card/85 shadow-sm backdrop-blur">
+                  <img src={badgeMap[b]} alt={b} className="h-5 w-5 object-contain" />
+                </span>
+              </Tooltip>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Atouts : tuiles directement sous le hero, sans carte de section. */}
-      {visibleBadges.length > 0 && (
-        <div className="mt-6 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
-          {visibleBadges.map((b) => (
-            <div
-              key={b}
-              className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-3 text-center"
-            >
-              <img src={badgeMap[b]} alt="" className="h-8 w-8 object-contain" />
-              <span className="text-xs font-medium leading-tight text-foreground/80">
-                {b}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Corps : 2 colonnes (les atouts sont au-dessus, hors grille).
+      {/* Corps : 2 colonnes (les atouts sont dans le hero, en bas à droite).
           Sur mobile l'ordre est coordonnées → carte → photos → avis (order-2..4) ;
           à partir de lg, colonne gauche (photos + avis) et sidebar à droite
           (placement explicite col-start/row-start). */}
