@@ -261,14 +261,13 @@ const RestaurantPage = () => {
       </div>
 
       {/* Corps : 2 colonnes */}
-      {/* Corps. Sur mobile l'ordre est atouts → coordonnées → situation → avis
-          (infos pratiques avant les avis) ; à partir de lg, colonne gauche
-          (atouts + avis) et sidebar à droite (order + placement explicite). */}
+      {/* Corps. Sur mobile l'ordre est atouts → coordonnées → carte → photos →
+          avis (order-1..4) ; à partir de lg, colonne gauche (atouts + photos +
+          avis) et sidebar à droite (placement explicite col-start/row-start). */}
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
-        {/* Colonne gauche (atouts + avis). Desktop : flex col occupant 2/3 →
-            les avis sont collés sous les atouts, indépendamment de la hauteur
-            de la sidebar. Mobile : display:contents pour laisser la sidebar
-            s'intercaler entre les deux (ordre : atouts → infos → avis). */}
+        {/* Colonne gauche (atouts + photos + avis). Desktop : flex col occupant
+            2/3. Mobile : display:contents pour que la sidebar (coordonnées +
+            carte, order-2) s'intercale → atouts → infos → photos → avis. */}
         <div className="contents lg:col-span-2 lg:flex lg:flex-col lg:gap-6">
           {/* Atouts */}
           {visibleBadges.length > 0 && (
@@ -280,22 +279,24 @@ const RestaurantPage = () => {
             >
               Les atouts
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
               {visibleBadges.map((b) => (
-                <span
+                <div
                   key={b}
-                  className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/40 px-3 py-1.5 text-sm font-medium text-foreground/80"
+                  className="flex flex-col items-center gap-2 rounded-xl border border-border bg-muted/40 p-3 text-center"
                 >
-                  <img src={badgeMap[b]} alt="" className="h-4 w-4 object-contain" />
-                  {b}
-                </span>
+                  <img src={badgeMap[b]} alt="" className="h-8 w-8 object-contain" />
+                  <span className="text-xs font-medium leading-tight text-foreground/80">
+                    {b}
+                  </span>
+                </div>
               ))}
             </div>
           </section>
         )}
 
           {/* Photos (galerie collaborateurs) */}
-          <div className="order-2">
+          <div className="order-3">
             <RestaurantGallery
               restaurantId={restaurant.id}
               userId={userId}
@@ -443,7 +444,7 @@ const RestaurantPage = () => {
         </div>
 
         {/* Sidebar : coordonnées + carte. Indépendante (pas de row-span). */}
-        <aside className="order-3 space-y-6 self-start lg:col-start-3 lg:row-start-1">
+        <aside className="order-2 space-y-6 self-start lg:col-start-3 lg:row-start-1">
           {/* Coordonnées */}
           <section className="rounded-card border border-border bg-card p-5">
             <div
