@@ -213,7 +213,7 @@ const RestaurantPage = () => {
         <div className="absolute inset-x-0 bottom-0 p-5 md:p-7">
           {tags.length > 0 && (
             <div className="mb-3 flex flex-wrap gap-1.5">
-              {tags.slice(0, 4).map((tag) => (
+              {tags.map((tag) => (
                 <span
                   key={tag}
                   className="rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-medium text-white backdrop-blur-sm"

@@ -56,6 +56,11 @@ const RestaurantCardTW = ({
   const isTop = topRated.some((t) => t.id === restaurant.id);
   const visibleBadges = (restaurant.badges ?? []).filter((b) => badgeMap[b]);
 
+  // Tags : on en montre au plus 3 sur la card, le reste résumé en "+N".
+  const tags = restaurant.tags ?? [];
+  const MAX_TAGS = 3;
+  const extraTags = tags.length - MAX_TAGS;
+
   return (
     <article
       onClick={() => navigate(`/restaurant/${restaurant.slug}`)}
@@ -139,11 +144,16 @@ const RestaurantCardTW = ({
 
         <div className="flex items-center justify-between gap-2">
           <div className="flex flex-wrap gap-1.5">
-            {(restaurant.tags ?? []).slice(0, 3).map((tag) => (
+            {tags.slice(0, MAX_TAGS).map((tag) => (
               <Badge key={tag} variant="primary">
                 {tag}
               </Badge>
             ))}
+            {extraTags > 0 && (
+              <Tooltip label={tags.slice(MAX_TAGS).join(", ")}>
+                <Badge variant="muted">+{extraTags}</Badge>
+              </Tooltip>
+            )}
           </div>
 
           <LikeButton
