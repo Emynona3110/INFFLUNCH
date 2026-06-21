@@ -28,7 +28,8 @@ import HoldToDeleteButton from "@/components/HoldToDeleteButton";
 import RestaurantDialog from "@/admin/Dialogs/RestaurantDialog";
 import RestaurantGallery from "@/components/RestaurantGallery";
 import { Tooltip } from "@/components/ui/tooltip";
-import { formatAuthorName, authorInitials } from "@/utils/authorName";
+import { formatAuthorName } from "@/utils/authorName";
+import Avatar from "@/components/Avatar";
 import { toast } from "@/lib/toast";
 import noImage from "@/assets/no-image.jpg";
 import { cn } from "@/lib/utils";
@@ -63,17 +64,6 @@ const formatDate = (iso: string) =>
     month: "long",
     year: "numeric",
   });
-
-// Couleur d'avatar dérivée du nom (palette douce, déterministe).
-const avatarColors = [
-  "bg-sky-500/15 text-sky-600",
-  "bg-violet-500/15 text-violet-600",
-  "bg-emerald-500/15 text-emerald-600",
-  "bg-amber-500/15 text-amber-600",
-  "bg-rose-500/15 text-rose-600",
-];
-const avatarColor = (key: string) =>
-  avatarColors[key.charCodeAt(0) % avatarColors.length];
 
 /* -------------------------------- page --------------------------------- */
 
@@ -368,14 +358,11 @@ const RestaurantPage = () => {
                       className="border-t border-border/60 pt-4"
                     >
                       <div className="flex items-start gap-3">
-                        <div
-                          className={cn(
-                            "grid h-10 w-10 shrink-0 place-items-center rounded-full text-sm font-bold",
-                            avatarColor(r.email ?? "?")
-                          )}
-                        >
-                          {authorInitials(r.email)}
-                        </div>
+                        <Avatar
+                          email={r.email}
+                          avatarUpdatedAt={r.avatar_updated_at}
+                          size={40}
+                        />
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5">
                             <span

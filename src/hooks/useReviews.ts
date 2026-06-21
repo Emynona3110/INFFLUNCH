@@ -11,6 +11,8 @@ export interface Review {
   updated_at: string;
   /** Email de l'auteur (jointure public.users), pour l'affichage du nom. */
   email: string | null;
+  /** Version de l'avatar de l'auteur (jointure profiles) ; null = pas de pp. */
+  avatar_updated_at: string | null;
 }
 
 /**
@@ -36,17 +38,31 @@ const useReviews = (restaurantId: number | undefined) =>
       const ids = [...new Set(rows.map((r) => r.user_id))];
 
       let emailById: Record<string, string> = {};
+      let avatarById: Record<string, string | null> = {};
       if (ids.length) {
-        const { data: users } = await supabaseClient
-          .from("users")
-          .select("id, email")
-          .in("id", ids);
+        const [{ data: users }, { data: profiles }] = await Promise.all([
+          supabaseClient.from("users").select("id, email").in("id", ids),
+          supabaseClient
+            .from("profiles")
+            .select("id, avatar_updated_at")
+            .in("id", ids),
+        ]);
         emailById = Object.fromEntries(
           (users ?? []).map((u) => [u.id as string, u.email as string])
         );
+        avatarById = Object.fromEntries(
+          (profiles ?? []).map((p) => [
+            p.id as string,
+            p.avatar_updated_at as string | null,
+          ])
+        );
       }
 
-      return rows.map((r) => ({ ...r, email: emailById[r.user_id] ?? null }));
+      return rows.map((r) => ({
+        ...r,
+        email: emailById[r.user_id] ?? null,
+        avatar_updated_at: avatarById[r.user_id] ?? null,
+      }));
     },
   });
 
