@@ -212,7 +212,7 @@ const RestaurantPage = () => {
         {/* Bandeau bas */}
         <div className="absolute inset-x-0 bottom-0 p-5 md:p-7">
           {tags.length > 0 && (
-            <div className="mb-3 flex flex-wrap gap-1.5">
+            <div className="mb-3 flex max-w-sm flex-wrap gap-1.5">
               {tags.map((tag) => (
                 <span
                   key={tag}
