@@ -27,3 +27,7 @@ export const coverPathBase = (slug: string) => `${slug}/cover-${storageStamp()}`
 /** Chemin (sans extension) d'une photo de galerie d'un resto. */
 export const galleryPathBase = (slug: string) =>
   `${slug}/${storageStamp()}-${shortId()}`;
+
+/** Chemin (sans extension) d'un fichier de menu d'un resto (pdf/image). */
+export const menuPathBase = (slug: string) =>
+  `${slug}/menu/${storageStamp()}-${shortId()}`;

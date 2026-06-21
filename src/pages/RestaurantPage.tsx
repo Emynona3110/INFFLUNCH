@@ -27,6 +27,7 @@ import ReviewForm from "@/components/ReviewForm";
 import HoldToDeleteButton from "@/components/HoldToDeleteButton";
 import RestaurantDialog from "@/admin/Dialogs/RestaurantDialog";
 import RestaurantGallery from "@/components/RestaurantGallery";
+import RestaurantMenus from "@/components/RestaurantMenus";
 import { Tooltip } from "@/components/ui/tooltip";
 import { formatAuthorName } from "@/utils/authorName";
 import Avatar from "@/components/Avatar";
@@ -462,6 +463,14 @@ const RestaurantPage = () => {
               )}
             </ul>
           </section>
+
+          {/* Menu (lien / PDF / photos, collaboratif) — avant la carte */}
+          <RestaurantMenus
+            restaurantId={restaurant.id}
+            slug={restaurant.slug}
+            userId={userId}
+            isAdmin={isAdmin}
+          />
 
           {/* Carte */}
           <section className="overflow-hidden rounded-card border border-border bg-card">
