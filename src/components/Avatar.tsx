@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { avatarUrl } from "@/services/avatar";
 import { authorInitials } from "@/utils/authorName";
 import { cn } from "@/lib/utils";
@@ -25,18 +24,17 @@ interface Props {
 
 /**
  * Avatar d'un utilisateur : photo de profil personnalisée si elle existe,
- * sinon initiales colorées (dérivées de l'email). La pp apparaît en fondu une
- * fois chargée (évite l'apparition brusque), sur un fond neutre le temps du load.
+ * sinon initiales colorées (dérivées de l'email).
  */
 const Avatar = ({ email, avatarPath, size = 40, className }: Props) => {
   const url = avatarUrl(avatarPath);
-  const [loaded, setLoaded] = useState(false);
   const dim = { height: size, width: size };
 
-  // Réinitialise le fondu à chaque changement de pp (nouvelle URL).
-  useEffect(() => setLoaded(false), [url]);
-
   if (url) {
+    // Image rendue telle quelle, sans gating JS d'opacité (onLoad/decode) : une
+    // image en cache peut être prête avant l'attache du handler → la pp restait
+    // invisible (cercle vide) lors des transitions SPA. Fond neutre le temps du
+    // chargement initial.
     return (
       <span
         style={dim}
@@ -45,15 +43,7 @@ const Avatar = ({ email, avatarPath, size = 40, className }: Props) => {
           className
         )}
       >
-        <img
-          src={url}
-          alt=""
-          onLoad={() => setLoaded(true)}
-          className={cn(
-            "h-full w-full object-cover transition-opacity duration-500",
-            loaded ? "opacity-100" : "opacity-0"
-          )}
-        />
+        <img src={url} alt="" className="h-full w-full object-cover" />
       </span>
     );
   }
