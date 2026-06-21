@@ -12,6 +12,8 @@ interface Props {
   progressClassName?: string;
   children: ReactNode;
   disabled?: boolean;
+  /** Libellé accessible / title (défaut : « Maintenir pour supprimer »). */
+  title?: string;
 }
 
 /**
@@ -26,6 +28,7 @@ const HoldToDeleteButton = ({
   progressClassName = "bg-white/30",
   children,
   disabled,
+  title = "Maintenir pour supprimer",
 }: Props) => {
   const [holding, setHolding] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -66,8 +69,8 @@ const HoldToDeleteButton = ({
       onPointerLeave={cancel}
       onPointerCancel={cancel}
       onContextMenu={(e) => e.preventDefault()}
-      aria-label="Maintenir pour supprimer"
-      title="Maintenir pour supprimer"
+      aria-label={title}
+      title={title}
       className={cn(
         "relative cursor-pointer touch-none select-none overflow-hidden transition disabled:pointer-events-none disabled:opacity-50",
         className

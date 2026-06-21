@@ -4,6 +4,7 @@ import supabaseClient from "../services/supabaseClient";
 export interface AppUser {
   id: string;
   email: string;
+  role: string;
 }
 
 /**
@@ -19,7 +20,7 @@ const useUsers = (enabled = true) =>
     queryFn: async () => {
       const { data, error } = await supabaseClient
         .from("users")
-        .select("id, email")
+        .select("id, email, role")
         .order("email", { ascending: true });
       if (error) throw new Error(error.message);
       return (data ?? []) as AppUser[];
