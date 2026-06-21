@@ -67,19 +67,32 @@ const LikeButton = ({
         className
       )}
     >
-      <FaRegHeart className={cn(iconClassName, emptyClassName)} />
+      {/* Les deux cœurs sont empilés dans la MÊME cellule de grille
+          (col-start-1/row-start-1) → centrage identique, donc parfaitement
+          superposés (pas de décalage entre vide et plein). Léger translate-y
+          pour optiquement centrer la forme (haute dans son viewBox). */}
+      <FaRegHeart
+        className={cn(
+          iconClassName,
+          emptyClassName,
+          "col-start-1 row-start-1 translate-y-[1.5%]"
+        )}
+      />
       <AnimatePresence initial={false}>
         {isLiked && (
           <motion.span
             key="full"
-            className="absolute inset-0 grid place-items-center"
+            className="col-start-1 row-start-1 grid place-items-center"
             initial={{ scale: 0 }}
             // Légèrement plus grand que le cœur vide pour recouvrir son liseré.
             animate={{ scale: 1.12 }}
             exit={{ scale: 0 }}
             transition={{ duration: 0.25, ease: "easeInOut" }}
           >
-            <FaHeart className={iconClassName} style={{ color: "#ff6b81" }} />
+            <FaHeart
+              className={cn(iconClassName, "translate-y-[1.5%]")}
+              style={{ color: "#ff6b81" }}
+            />
           </motion.span>
         )}
       </AnimatePresence>
