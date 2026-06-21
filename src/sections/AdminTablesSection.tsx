@@ -10,12 +10,12 @@ import { cn } from "@/lib/utils";
 const tagsSection = adminSections.find((s) => s.tableName === "tags")!;
 
 const tabs = [
-  { key: "tags", label: "Tags" },
   { key: "users", label: "Utilisateurs" },
+  { key: "tags", label: "Tags" },
 ] as const;
 
 const AdminTablesSection = () => {
-  const [active, setActive] = useState<(typeof tabs)[number]["key"]>("tags");
+  const [active, setActive] = useState<(typeof tabs)[number]["key"]>("users");
   const [addSignal, setAddSignal] = useState(0);
 
   return (
