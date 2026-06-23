@@ -9,6 +9,7 @@ import FilterDialog from "./FilterDialog";
 import FavoritesToggle from "./FavoritesToggle";
 import useIsAdmin from "../hooks/useIsAdmin";
 import useAccessRequests from "../hooks/useAccessRequests";
+import useChangelogSeen from "../hooks/useChangelogSeen";
 import RestaurantDialog from "@/admin/Dialogs/RestaurantDialog";
 import { Tooltip } from "@/components/ui/tooltip";
 import {
@@ -42,6 +43,9 @@ const Navbar = ({
   // Puce "demandes en attente" (admins uniquement, la requête est gated par rôle).
   const { data: requests = [] } = useAccessRequests();
   const pendingCount = requests.filter((r) => r.state === "Waiting").length;
+
+  // Puce "nouveautés non vues" (tous les utilisateurs).
+  const { hasUnseen } = useChangelogSeen();
 
   return (
     <div className="flex h-full w-full select-none items-center justify-between gap-1">
@@ -96,6 +100,9 @@ const Navbar = ({
                   {item.path === "admin/demandes" && pendingCount > 0 && (
                     <span className="absolute right-0 top-2.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-card" />
                   )}
+                  {item.path === "nouveautes" && hasUnseen && (
+                    <span className="absolute right-0 top-2.5 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />
+                  )}
                 </button>
               </div>
             );
@@ -137,6 +144,9 @@ const Navbar = ({
                     {item.label}
                     {item.path === "admin/demandes" && pendingCount > 0 && (
                       <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-card" />
+                    )}
+                    {item.path === "nouveautes" && hasUnseen && (
+                      <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />
                     )}
                   </button>
                 ))}

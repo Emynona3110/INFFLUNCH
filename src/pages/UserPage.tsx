@@ -12,6 +12,7 @@ import { useState } from "react";
 import { SortOrder } from "../components/SortSelector";
 import MyAccount from "../sections/MyAccount";
 import About from "../sections/About";
+import Nouveautes from "../sections/Nouveautes";
 import AccessRequests from "../admin/AccessRequests";
 import AdminTablesSection from "../sections/AdminTablesSection";
 import AdminGuard from "../components/AdminGuard";
@@ -26,10 +27,12 @@ export const buildUserSections = (isAdmin: boolean) =>
         { label: "Restaurants", path: "restaurants" },
         { label: "Demandes", path: "admin/demandes" },
         { label: "Tables", path: "admin/tables" },
+        { label: "Nouveautés", path: "nouveautes" },
         { label: "Mon compte", path: "mon-compte" },
       ]
     : [
         { label: "Restaurants", path: "restaurants" },
+        { label: "Nouveautés", path: "nouveautes" },
         { label: "Mon compte", path: "mon-compte" },
         { label: "À propos", path: "a-propos" },
       ];
@@ -104,6 +107,7 @@ const UserPage = () => {
         <Route path="restaurant/:slug" element={<RestaurantPage />} />
         <Route path="mon-compte" element={<MyAccount />} />
         <Route path="a-propos" element={<About />} />
+        <Route path="nouveautes" element={<Nouveautes />} />
         {/* Pages admin sous /admin/* derrière un garde unique. */}
         <Route path="admin" element={<AdminGuard />}>
           <Route index element={<Navigate to="demandes" replace />} />
