@@ -14,6 +14,7 @@ export type Restaurant = {
   website: string;
   lat: number | null;
   lng: number | null;
+  walk_minutes: number | null;
 };
 
 import useSupabaseQuery from "./useSupabaseQuery";

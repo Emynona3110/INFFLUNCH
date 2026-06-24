@@ -15,6 +15,9 @@ dist-ssr
 # Outillage / mémoire Claude (local, peut contenir des secrets)
 .claude/
 
+# Graphify : graphe de connaissances régénérable (artefact dérivé)
+graphify-out/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -101,6 +101,9 @@ const RestaurantCardTW = ({
         <span className="absolute bottom-3 left-3 inline-flex items-center gap-1 rounded-full bg-white/55 px-2.5 py-1 text-xs font-medium text-foreground backdrop-blur-sm dark:bg-black/45 dark:text-white">
           <HiOutlineLocationMarker className="h-3.5 w-3.5" />
           {restaurant.distanceLabel}
+          {restaurant.walk_minutes != null && (
+            <span className="opacity-60">· {restaurant.walk_minutes} min</span>
+          )}
         </span>
       </div>
 

@@ -133,7 +133,6 @@ const RestaurantPage = () => {
   const liked = favoriteIds.includes(restaurant.id);
   const visibleBadges = (restaurant.badges ?? []).filter((b) => badgeMap[b]);
   const tags = restaurant.tags ?? [];
-  const hasRating = !!restaurant.rating || restaurant.reviews > 0;
 
   const totalReviews = reviews.length;
   const myReview = reviews.find((r) => r.user_id === userId) ?? null;
@@ -197,7 +196,7 @@ const RestaurantPage = () => {
           }}
           iconClassName="h-5 w-5"
           emptyClassName="text-foreground/60"
-          className="absolute right-4 top-4 h-11 w-11 bg-card/85 shadow-md backdrop-blur hover:bg-card"
+          className="absolute bottom-5 right-5 h-11 w-11 bg-card/85 shadow-md backdrop-blur hover:bg-card md:bottom-7 md:right-7"
         />
 
         {/* Bandeau bas */}
@@ -235,24 +234,11 @@ const RestaurantPage = () => {
               </Tooltip>
             )}
           </div>
-          {hasRating && (
-            <div className="mt-2 flex items-center gap-2 text-white/90">
-              <Stars rating={restaurant.rating ?? 0} size={18} />
-              {!!restaurant.rating && (
-                <span className="text-sm font-semibold">{restaurant.rating}</span>
-              )}
-              {restaurant.reviews > 0 && (
-                <span className="text-sm text-white/70">
-                  ({restaurant.reviews} avis)
-                </span>
-              )}
-            </div>
-          )}
         </div>
 
-        {/* Atouts : petites icônes (sans texte, infobulles) en bas à droite. */}
+        {/* Atouts : petites icônes (sans texte, infobulles) en haut à droite. */}
         {visibleBadges.length > 0 && (
-          <div className="absolute bottom-5 right-5 flex flex-wrap justify-end gap-1.5 md:bottom-7 md:right-7">
+          <div className="absolute right-4 top-4 flex flex-wrap justify-end gap-1.5">
             {visibleBadges.map((b) => (
               <Tooltip key={b} label={b}>
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-card/85 shadow-sm backdrop-blur">
@@ -488,6 +474,7 @@ const RestaurantPage = () => {
               lat={restaurant.lat}
               lng={restaurant.lng}
               distanceLabel={restaurant.distanceLabel}
+              walkMinutes={restaurant.walk_minutes}
             />
           </section>
         </aside>

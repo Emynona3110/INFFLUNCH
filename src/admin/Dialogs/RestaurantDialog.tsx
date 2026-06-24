@@ -20,6 +20,7 @@ import {
   removeFromBucket,
 } from "../../services/uploadImage";
 import { coverPathBase } from "../../services/storagePaths";
+import { fetchWalkMinutes, estimateWalkMinutes } from "../../services/walkTime";
 import { FiChevronDown, FiPlus, FiCheck, FiX } from "react-icons/fi";
 import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -317,6 +318,14 @@ const RestaurantDialog = ({
       return;
     }
 
+    // Temps de marche réel depuis INFFLUX (Edge Function ORS). En cas
+    // d'indisponibilité, repli sur une estimation à partir du vol d'oiseau.
+    let walkMinutes = await fetchWalkMinutes(
+      location.coords.lat,
+      location.coords.lng
+    );
+    if (walkMinutes == null) walkMinutes = estimateWalkMinutes(location.distanceKm);
+
     // Upload de la couverture (si un fichier a été choisi) → "{slug}/cover-...".
     let finalImage: string | null = image || null;
     if (imageFile) {
@@ -372,6 +381,7 @@ const RestaurantDialog = ({
           distanceLabel: location.formattedDistance,
           lat: location.coords.lat,
           lng: location.coords.lng,
+          walk_minutes: walkMinutes,
           tags: tags.length ? tags : null,
           badges: orderedBadges,
         })
@@ -438,6 +448,7 @@ const RestaurantDialog = ({
       distanceLabel: location.formattedDistance,
       lat: location.coords.lat,
       lng: location.coords.lng,
+      walk_minutes: walkMinutes,
       tags: tags.length ? tags : null,
       badges: orderedBadges,
     });

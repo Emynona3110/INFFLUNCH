@@ -64,9 +64,17 @@ interface Props {
   lat?: number | null;
   lng?: number | null;
   distanceLabel?: string;
+  /** Temps de marche réel (minutes) — affiché à côté de la distance. */
+  walkMinutes?: number | null;
 }
 
-const RestaurantMiniMap = ({ address, lat, lng, distanceLabel }: Props) => {
+const RestaurantMiniMap = ({
+  address,
+  lat,
+  lng,
+  distanceLabel,
+  walkMinutes,
+}: Props) => {
   const { theme } = useTheme();
   const hasStored = lat != null && lng != null;
 
@@ -177,6 +185,7 @@ const RestaurantMiniMap = ({ address, lat, lng, distanceLabel }: Props) => {
         {distanceLabel && (
           <span className="inline-flex h-7 items-center rounded-full bg-primary px-3 text-xs font-semibold text-primary-foreground shadow">
             {distanceLabel}
+            {walkMinutes != null && ` · ${walkMinutes} min`}
           </span>
         )}
         <button
