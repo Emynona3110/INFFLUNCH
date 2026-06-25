@@ -38,3 +38,24 @@ export const geocodeAddress = async (address: string): Promise<Coords> => {
   cache.set(address, coords);
   return coords;
 };
+
+/**
+ * Géocodage INVERSE (coords → adresse) via Nominatim. Sert à proposer la
+ * correction d'adresse quand on repositionne l'épingle sur la carte. Reconstruit
+ * une adresse concise depuis les composants (numéro + rue, code postal + ville).
+ */
+export const reverseGeocode = async (
+  lat: number,
+  lng: number
+): Promise<string> => {
+  const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
+  const res = await fetch(url, { headers: { "Accept-Language": "fr" } });
+  if (!res.ok) throw new Error("Géocodage inverse impossible");
+  const data = await res.json();
+  const a = data?.address ?? {};
+  const line1 = [a.house_number, a.road].filter(Boolean).join(" ");
+  const city = a.city || a.town || a.village || a.municipality || "";
+  const line2 = [a.postcode, city].filter(Boolean).join(" ");
+  const concise = [line1, line2].filter(Boolean).join(", ");
+  return concise || data?.display_name || "";
+};

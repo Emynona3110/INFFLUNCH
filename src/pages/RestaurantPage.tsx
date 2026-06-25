@@ -26,6 +26,7 @@ import LikeButton from "@/components/LikeButton";
 import ReviewForm from "@/components/ReviewForm";
 import HoldToDeleteButton from "@/components/HoldToDeleteButton";
 import RestaurantDialog from "@/admin/Dialogs/RestaurantDialog";
+import LocationEditDialog from "@/components/LocationEditDialog";
 import RestaurantGallery from "@/components/RestaurantGallery";
 import RestaurantMenus from "@/components/RestaurantMenus";
 import { Tooltip } from "@/components/ui/tooltip";
@@ -98,6 +99,7 @@ const RestaurantPage = () => {
   );
   const [showForm, setShowForm] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [mapEditOpen, setMapEditOpen] = useState(false);
 
   // Remonte en haut quand on ouvre une nouvelle fiche.
   useEffect(() => window.scrollTo({ top: 0 }), [slug]);
@@ -460,7 +462,7 @@ const RestaurantPage = () => {
 
           {/* Carte */}
           <section className="overflow-hidden rounded-card border border-border bg-card">
-            <div className="border-b border-border px-5 py-3">
+            <div className="flex items-center justify-between gap-2 border-b border-border px-5 py-3">
               <div
                 role="heading"
                 aria-level={2}
@@ -468,6 +470,18 @@ const RestaurantPage = () => {
               >
                 Carte
               </div>
+              {isAdmin && (
+                <Tooltip label="Modifier la position">
+                  <button
+                    type="button"
+                    onClick={() => setMapEditOpen(true)}
+                    aria-label="Modifier la position"
+                    className="grid h-8 w-8 place-items-center rounded-full text-foreground/50 transition hover:bg-muted hover:text-primary"
+                  >
+                    <FiEdit2 className="h-4 w-4" />
+                  </button>
+                </Tooltip>
+              )}
             </div>
             <RestaurantMiniMap
               address={restaurant.address}
@@ -481,15 +495,27 @@ const RestaurantPage = () => {
       </div>
 
       {isAdmin && (
-        <RestaurantDialog
-          isOpen={editOpen}
-          onClose={() => setEditOpen(false)}
-          onSuccess={() => {
-            setEditOpen(false);
-            queryClient.invalidateQueries();
-          }}
-          initialData={restaurant}
-        />
+        <>
+          <RestaurantDialog
+            isOpen={editOpen}
+            onClose={() => setEditOpen(false)}
+            onSuccess={() => {
+              setEditOpen(false);
+              queryClient.invalidateQueries();
+            }}
+            initialData={restaurant}
+          />
+          <LocationEditDialog
+            isOpen={mapEditOpen}
+            onClose={() => setMapEditOpen(false)}
+            restaurant={{
+              id: restaurant.id,
+              address: restaurant.address,
+              lat: restaurant.lat,
+              lng: restaurant.lng,
+            }}
+          />
+        </>
       )}
     </motion.div>
   );

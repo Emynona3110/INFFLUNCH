@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Polyline, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { FiNavigation, FiPlus, FiMinus } from "react-icons/fi";
+import { FiNavigation } from "react-icons/fi";
+import MapZoomControl from "@/components/MapZoomControl";
 import { geocodeAddress, INFFLUX_COORDS, Coords } from "@/services/geocode";
 import { useTheme } from "@/lib/theme";
 import inffluxLogo from "@/assets/infflux.svg";
@@ -160,25 +161,7 @@ const RestaurantMiniMap = ({
       </MapContainer>
 
       {/* Zoom +/- */}
-      <div className="absolute right-3 top-3 z-[500] flex flex-col overflow-hidden rounded-full bg-card shadow">
-        <button
-          type="button"
-          onClick={() => map?.zoomIn()}
-          aria-label="Zoomer"
-          className="grid h-7 w-7 place-items-center text-foreground/80 transition hover:bg-muted hover:text-primary"
-        >
-          <FiPlus className="h-4 w-4" />
-        </button>
-        <span className="h-px bg-border" />
-        <button
-          type="button"
-          onClick={() => map?.zoomOut()}
-          aria-label="Dézoomer"
-          className="grid h-7 w-7 place-items-center text-foreground/80 transition hover:bg-muted hover:text-primary"
-        >
-          <FiMinus className="h-4 w-4" />
-        </button>
-      </div>
+      <MapZoomControl map={map} />
 
       {/* Distance + recentrage INFFLUX + itinéraire */}
       <div className="absolute bottom-3 right-3 z-[500] flex items-center gap-2">
