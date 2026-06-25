@@ -91,7 +91,7 @@ const AdminUsers = () => {
         <div className="flex max-h-full flex-col overflow-hidden rounded-card border border-border bg-card">
           <ScrollArea
             className="min-h-0 os-grid"
-            style={{ ["--grid-right" as string]: "117px" }}
+            style={{ ["--grid-right" as string]: "120px" }}
           >
             <table
               className="w-full border-separate border-spacing-0 text-sm"
@@ -105,7 +105,7 @@ const AdminUsers = () => {
                       className={cn(
                         "sticky top-0 bg-muted px-4 py-3 text-xs font-semibold uppercase tracking-wide text-foreground/55 shadow-[inset_0_-1px_0_0_var(--border)]",
                         h === "Actions"
-                          ? "right-0 z-20 w-px whitespace-nowrap text-center shadow-[inset_1px_0_0_0_var(--border),inset_0_-1px_0_0_var(--border)]"
+                          ? "right-0 z-20 w-[120px] text-center shadow-[inset_1px_0_0_0_var(--border),inset_0_-1px_0_0_var(--border)]"
                           : "z-10 text-left"
                       )}
                     >
@@ -123,13 +123,13 @@ const AdminUsers = () => {
                       key={u.id}
                       className="transition hover:bg-muted/40 [&>td]:border-t [&>td]:border-border/60"
                     >
-                      <td className="px-4 py-3 text-foreground/90">
+                      <td className="px-4 py-1.5 text-foreground/90">
                         {u.email}
                         {isMe && (
                           <span className="ml-2 text-xs text-foreground/45">(moi)</span>
                         )}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-1.5">
                         <span
                           className={cn(
                             "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium",
@@ -141,7 +141,7 @@ const AdminUsers = () => {
                           {isAdmin ? "Admin" : "Membre"}
                         </span>
                       </td>
-                      <td className="sticky right-0 z-[1] w-px whitespace-nowrap bg-card px-4 py-3 text-center shadow-[inset_1px_0_0_0_var(--border)]">
+                      <td className="sticky right-0 z-[1] w-[120px] bg-card px-4 py-1.5 text-center shadow-[inset_1px_0_0_0_var(--border)]">
                         <div className="flex justify-center gap-2">
                           <Tooltip
                             label={
@@ -154,7 +154,7 @@ const AdminUsers = () => {
                               onConfirm={() => handleReset(u)}
                               disabled={isMe}
                               title="Maintenir pour réinitialiser le mot de passe"
-                              className="grid h-9 w-9 place-items-center rounded-full text-primary hover:bg-primary/10"
+                              className="grid h-8 w-8 place-items-center rounded-full text-primary hover:bg-primary/10"
                               progressClassName="bg-primary/20"
                             >
                               <FiKey className="h-4 w-4" />
@@ -171,7 +171,7 @@ const AdminUsers = () => {
                               onConfirm={() => handleDelete(u)}
                               disabled={isMe}
                               title="Maintenir pour supprimer l'utilisateur"
-                              className="grid h-9 w-9 place-items-center rounded-full text-destructive hover:bg-destructive/10"
+                              className="grid h-8 w-8 place-items-center rounded-full text-destructive hover:bg-destructive/10"
                               progressClassName="bg-destructive/20"
                             >
                               <FiTrash2 className="h-4 w-4" />

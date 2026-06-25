@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { FaTrash } from "react-icons/fa";
-import { FiEdit2 } from "react-icons/fi";
+import { FiEdit2, FiTrash2 } from "react-icons/fi";
 import { BsBan } from "react-icons/bs";
 import supabaseClient from "../services/supabaseClient";
 import badgeMap from "../services/badgeMap";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip } from "@/components/ui/tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface AdminTableProps {
@@ -77,7 +77,7 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
     <div className="tw-scope flex max-h-full flex-col overflow-hidden rounded-card border border-border bg-card">
       <ScrollArea
         className="min-h-0 os-grid"
-        style={{ ["--grid-right" as string]: "117px" }}
+        style={{ ["--grid-right" as string]: "120px" }}
       >
         <table
           className="w-full border-separate border-spacing-0 text-sm"
@@ -93,7 +93,7 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
                   {col}
                 </th>
               ))}
-              <th className="sticky right-0 top-0 z-20 w-px whitespace-nowrap bg-muted px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-foreground/55 shadow-[inset_1px_0_0_0_var(--border),inset_0_-1px_0_0_var(--border)]">
+              <th className="sticky right-0 top-0 z-20 w-[120px] bg-muted px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-foreground/55 shadow-[inset_1px_0_0_0_var(--border),inset_0_-1px_0_0_var(--border)]">
                 Actions
               </th>
             </tr>
@@ -115,7 +115,7 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
                     col.toLowerCase().includes("website");
 
                   return (
-                    <td key={col} className="px-4 py-3 align-middle text-foreground/90">
+                    <td key={col} className="px-4 py-1.5 align-middle text-foreground/90">
                       {value === null || value === undefined || value === "" ? (
                         <BsBan className="text-foreground/30" />
                       ) : isImage ? (
@@ -164,24 +164,28 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
                     </td>
                   );
                 })}
-                <td className="sticky right-0 z-[1] w-px whitespace-nowrap bg-card px-4 py-3 text-center align-middle shadow-[inset_1px_0_0_0_var(--border)]">
+                <td className="sticky right-0 z-[1] w-[120px] bg-card px-4 py-1.5 text-center align-middle shadow-[inset_1px_0_0_0_var(--border)]">
                   <div className="flex justify-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => onEdit?.(row)}
-                      aria-label="Modifier"
-                      className="grid h-9 w-9 cursor-pointer place-items-center rounded-lg border border-border text-foreground/70 transition hover:bg-muted"
-                    >
-                      <FiEdit2 className="h-4 w-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onDelete?.(row.id)}
-                      aria-label="Supprimer"
-                      className="grid h-9 w-9 cursor-pointer place-items-center rounded-lg bg-destructive/10 text-destructive transition hover:bg-destructive/20"
-                    >
-                      <FaTrash />
-                    </button>
+                    <Tooltip label="Modifier">
+                      <button
+                        type="button"
+                        onClick={() => onEdit?.(row)}
+                        aria-label="Modifier"
+                        className="grid h-8 w-8 cursor-pointer place-items-center rounded-full text-primary transition hover:bg-primary/10"
+                      >
+                        <FiEdit2 className="h-4 w-4" />
+                      </button>
+                    </Tooltip>
+                    <Tooltip label="Supprimer">
+                      <button
+                        type="button"
+                        onClick={() => onDelete?.(row.id)}
+                        aria-label="Supprimer"
+                        className="grid h-8 w-8 cursor-pointer place-items-center rounded-full text-destructive transition hover:bg-destructive/10"
+                      >
+                        <FiTrash2 className="h-4 w-4" />
+                      </button>
+                    </Tooltip>
                   </div>
                 </td>
               </tr>

@@ -1,23 +1,25 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { FiCopy, FiCheck, FiX } from "react-icons/fi";
+import { FiCopy, FiCheck, FiX, FiTrash2 } from "react-icons/fi";
 import { toast } from "@/lib/toast";
 import supabaseClient from "../services/supabaseClient";
 import useAccessRequests, {
   AccessRequest,
   RequestState,
-  requestTypes,
+  RequestType,
 } from "../hooks/useAccessRequests";
+import HoldToDeleteButton from "../components/HoldToDeleteButton";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Tooltip } from "@/components/ui/tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
-const AccessRequests = () => {
+// Table d'une catégorie de demandes. Les onglets (Inscription / Mot de passe)
+// sont gérés par la section Admin parente, qui passe le type actif.
+const AccessRequests = ({ activeType }: { activeType: RequestType }) => {
   const queryClient = useQueryClient();
 
-  const [activeType, setActiveType] = useState(requestTypes[0].type);
   const [processingId, setProcessingId] = useState<number | null>(null);
   const [processingAction, setProcessingAction] = useState<
     "accept" | "reject" | null
@@ -28,10 +30,6 @@ const AccessRequests = () => {
   } | null>(null);
 
   const { data: requests = [], isPending, error } = useAccessRequests();
-
-  // Nombre de demandes en attente par type (pour les puces des onglets).
-  const waitingByType = (type: AccessRequest["type"]) =>
-    requests.filter((r) => r.type === type && r.state === "Waiting").length;
 
   // Demandes du type actif, en attente d'abord.
   const sorted = requests
@@ -100,6 +98,25 @@ const AccessRequests = () => {
     queryClient.invalidateQueries({ queryKey: ["access-requests"] });
   };
 
+  // Suppression d'une demande obsolète (uniquement traitée : acceptée/refusée).
+  const handleDelete = async (req: AccessRequest) => {
+    const { error } = await supabaseClient
+      .from("waiting_list")
+      .delete()
+      .eq("id", req.id);
+    if (error) {
+      toast({
+        title: "Erreur",
+        description: error.message,
+        status: "error",
+        duration: 4000,
+        isClosable: true,
+      });
+      return;
+    }
+    queryClient.invalidateQueries({ queryKey: ["access-requests"] });
+  };
+
   const copy = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({ title: "Copié", status: "success", duration: 1500 });
@@ -107,31 +124,6 @@ const AccessRequests = () => {
 
   return (
     <div className="tw-scope flex h-full w-full flex-col px-4 pb-4">
-      <div className="mb-3 flex min-h-10 flex-wrap items-center gap-2">
-        {requestTypes.map((t) => {
-          const isActive = t.type === activeType;
-          const waiting = waitingByType(t.type);
-          return (
-            <button
-              key={t.type}
-              type="button"
-              onClick={() => setActiveType(t.type)}
-              className={cn(
-                "relative inline-flex cursor-pointer items-center rounded-full px-4 py-1.5 text-sm font-medium transition",
-                isActive
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-foreground/70 hover:bg-muted/70"
-              )}
-            >
-              {t.label}
-              {waiting > 0 && (
-                <span className="absolute right-0.5 top-0.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-background" />
-              )}
-            </button>
-          );
-        })}
-      </div>
-
       {isPending ? (
         <div className="flex h-[40vh] items-center justify-center">
           <div className="h-10 w-10 animate-spin rounded-full border-2 border-border border-t-primary" />
@@ -144,18 +136,18 @@ const AccessRequests = () => {
         <div className="flex max-h-full flex-col overflow-hidden rounded-card border border-border bg-card">
           <ScrollArea
             className="min-h-0 os-grid"
-            style={{ ["--grid-right" as string]: "117px" }}
+            style={{ ["--grid-right" as string]: "120px" }}
           >
             <table className="w-full border-separate border-spacing-0 text-sm" style={{ minWidth: 600 }}>
               <thead>
                 <tr>
-                  {["Email", "Date", "Statut / Action"].map((h) => (
+                  {["Email", "Date", "Statut", "Actions"].map((h) => (
                     <th
                       key={h}
                       className={cn(
                         "sticky top-0 bg-muted px-4 py-3 text-xs font-semibold uppercase tracking-wide text-foreground/55 shadow-[inset_0_-1px_0_0_var(--border)]",
-                        h === "Statut / Action"
-                          ? "right-0 z-20 w-px whitespace-nowrap text-center shadow-[inset_1px_0_0_0_var(--border),inset_0_-1px_0_0_var(--border)]"
+                        h === "Actions"
+                          ? "right-0 z-20 w-[120px] text-center shadow-[inset_1px_0_0_0_var(--border),inset_0_-1px_0_0_var(--border)]"
                           : "z-10 text-left"
                       )}
                     >
@@ -170,51 +162,17 @@ const AccessRequests = () => {
                 return (
                   <tr
                     key={req.id}
-                    className={cn(
-                      "transition [&>td]:border-t [&>td]:border-border/60",
-                      pending ? "hover:bg-muted/40" : "opacity-60"
-                    )}
+                    className="transition hover:bg-muted/40 [&>td]:border-t [&>td]:border-border/60"
                   >
-                    <td className="px-4 py-3 text-foreground/90">{req.email}</td>
-                    <td className="px-4 py-3 text-foreground/70">
+                    <td className="px-4 py-1.5 text-foreground/90">{req.email}</td>
+                    <td className="px-4 py-1.5 text-foreground/70">
                       {new Date(req.created_at).toLocaleDateString("fr-FR")}
                     </td>
-                    <td className="sticky right-0 z-[1] w-px whitespace-nowrap bg-card px-4 py-3 text-center shadow-[inset_1px_0_0_0_var(--border)]">
+                    <td className="px-4 py-1.5">
                       {pending ? (
-                        <div className="flex justify-center gap-2">
-                          <Tooltip label="Accepter">
-                            <button
-                              type="button"
-                              aria-label="Accepter"
-                              disabled={processingId === req.id}
-                              onClick={() => handleAccept(req)}
-                              className="grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-full text-emerald-600 transition hover:bg-emerald-500/10 disabled:pointer-events-none disabled:opacity-50"
-                            >
-                              {processingId === req.id &&
-                              processingAction === "accept" ? (
-                                <Spinner />
-                              ) : (
-                                <FiCheck className="h-5 w-5" />
-                              )}
-                            </button>
-                          </Tooltip>
-                          <Tooltip label="Refuser">
-                            <button
-                              type="button"
-                              aria-label="Refuser"
-                              disabled={processingId === req.id}
-                              onClick={() => handleReject(req)}
-                              className="grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-full text-destructive transition hover:bg-destructive/10 disabled:pointer-events-none disabled:opacity-50"
-                            >
-                              {processingId === req.id &&
-                              processingAction === "reject" ? (
-                                <Spinner />
-                              ) : (
-                                <FiX className="h-5 w-5" />
-                              )}
-                            </button>
-                          </Tooltip>
-                        </div>
+                        <span className="inline-flex rounded-full bg-amber-500/15 px-2.5 py-0.5 text-xs font-medium text-amber-600">
+                          En attente
+                        </span>
                       ) : req.state === "Accepted" ? (
                         <span className="inline-flex rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-medium text-emerald-600">
                           Acceptée
@@ -224,6 +182,57 @@ const AccessRequests = () => {
                           Refusée
                         </span>
                       )}
+                    </td>
+                    <td className="sticky right-0 z-[1] w-[120px] bg-card px-4 py-1.5 text-center shadow-[inset_1px_0_0_0_var(--border)]">
+                      <div className="flex h-8 items-center justify-center gap-2">
+                        {pending ? (
+                          <>
+                            <Tooltip label="Accepter">
+                              <button
+                                type="button"
+                                aria-label="Accepter"
+                                disabled={processingId === req.id}
+                                onClick={() => handleAccept(req)}
+                                className="grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-full text-emerald-600 transition hover:bg-emerald-500/10 disabled:pointer-events-none disabled:opacity-50"
+                              >
+                                {processingId === req.id &&
+                                processingAction === "accept" ? (
+                                  <Spinner />
+                                ) : (
+                                  <FiCheck className="h-4 w-4" />
+                                )}
+                              </button>
+                            </Tooltip>
+                            <Tooltip label="Refuser">
+                              <button
+                                type="button"
+                                aria-label="Refuser"
+                                disabled={processingId === req.id}
+                                onClick={() => handleReject(req)}
+                                className="grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-full text-destructive transition hover:bg-destructive/10 disabled:pointer-events-none disabled:opacity-50"
+                              >
+                                {processingId === req.id &&
+                                processingAction === "reject" ? (
+                                  <Spinner />
+                                ) : (
+                                  <FiX className="h-4 w-4" />
+                                )}
+                              </button>
+                            </Tooltip>
+                          </>
+                        ) : (
+                          <Tooltip label="Maintenir pour supprimer">
+                            <HoldToDeleteButton
+                              onConfirm={() => handleDelete(req)}
+                              title="Maintenir pour supprimer la demande"
+                              className="grid h-8 w-8 place-items-center rounded-full text-destructive hover:bg-destructive/10"
+                              progressClassName="bg-destructive/20"
+                            >
+                              <FiTrash2 className="h-4 w-4" />
+                            </HoldToDeleteButton>
+                          </Tooltip>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );

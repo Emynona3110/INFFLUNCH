@@ -96,18 +96,16 @@ const DataManager = ({ section, addSignal }: DataManagerProps) => {
   };
 
   return (
-    <div className="tw-scope flex h-full flex-col p-4 pt-0">
-      <div className="min-h-0 flex-1">
-        <AdminTable
-          tableName={tableName}
-          columns={columns}
-          onEdit={(data) => {
-            setEditData(data);
-            setIsDialogOpen(true);
-          }}
-          onDelete={(id) => setDeleteId(id)}
-        />
-      </div>
+    <div className="tw-scope flex h-full w-full flex-col px-4 pb-4">
+      <AdminTable
+        tableName={tableName}
+        columns={columns}
+        onEdit={(data) => {
+          setEditData(data);
+          setIsDialogOpen(true);
+        }}
+        onDelete={(id) => setDeleteId(id)}
+      />
 
       {/* Dialogs d'édition (encore Chakra — migration étape 2) */}
       {renderDialog()}

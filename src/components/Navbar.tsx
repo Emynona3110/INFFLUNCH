@@ -97,8 +97,8 @@ const Navbar = ({
                       {item.label}
                     </span>
                   </span>
-                  {item.path === "admin/demandes" && pendingCount > 0 && (
-                    <span className="absolute right-0 top-2.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-card" />
+                  {item.path === "admin" && pendingCount > 0 && (
+                    <span className="absolute right-0 top-2.5 h-2.5 w-2.5 rounded-full bg-[#f79220] ring-2 ring-card" />
                   )}
                   {item.path === "nouveautes" && hasUnseen && (
                     <span className="absolute right-0 top-2.5 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />
@@ -142,8 +142,8 @@ const Navbar = ({
                     )}
                   >
                     {item.label}
-                    {item.path === "admin/demandes" && pendingCount > 0 && (
-                      <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-card" />
+                    {item.path === "admin" && pendingCount > 0 && (
+                      <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-[#f79220] ring-2 ring-card" />
                     )}
                     {item.path === "nouveautes" && hasUnseen && (
                       <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />

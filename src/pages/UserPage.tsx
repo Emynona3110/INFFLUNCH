@@ -13,8 +13,7 @@ import { SortOrder } from "../components/SortSelector";
 import MyAccount from "../sections/MyAccount";
 import About from "../sections/About";
 import Nouveautes from "../sections/Nouveautes";
-import AccessRequests from "../admin/AccessRequests";
-import AdminTablesSection from "../sections/AdminTablesSection";
+import AdminSection from "../sections/AdminSection";
 import AdminGuard from "../components/AdminGuard";
 import Layout from "../components/Layout";
 import useIsAdmin from "../hooks/useIsAdmin";
@@ -25,8 +24,7 @@ export const buildUserSections = (isAdmin: boolean) =>
   isAdmin
     ? [
         { label: "Restaurants", path: "restaurants" },
-        { label: "Demandes", path: "admin/demandes" },
-        { label: "Tables", path: "admin/tables" },
+        { label: "Admin", path: "admin" },
         { label: "Nouveautés", path: "nouveautes" },
         { label: "Mon compte", path: "mon-compte" },
       ]
@@ -80,8 +78,7 @@ const UserPage = () => {
   // avec scroll interne (pas de scroll de page) ; restaurants/fiche = scroll de page.
   const centerContent =
     currentPage === "mon-compte" || currentPage === "a-propos";
-  const fillContent =
-    currentPage === "admin/demandes" || currentPage === "admin/tables";
+  const fillContent = currentPage === "admin";
 
   return (
     <Layout
@@ -110,9 +107,7 @@ const UserPage = () => {
         <Route path="nouveautes" element={<Nouveautes />} />
         {/* Pages admin sous /admin/* derrière un garde unique. */}
         <Route path="admin" element={<AdminGuard />}>
-          <Route index element={<Navigate to="demandes" replace />} />
-          <Route path="demandes" element={<AccessRequests />} />
-          <Route path="tables" element={<AdminTablesSection />} />
+          <Route index element={<AdminSection />} />
         </Route>
         <Route path="*" element={<Beeeh />} />
       </Routes>

@@ -138,6 +138,21 @@ body {
   background-clip: padding-box;
 }
 
+/* Autofill Chrome/WebKit : par défaut il force un fond clair + texte sombre,
+   ce qui « blanchit » les champs (notamment mot de passe) en mode sombre et
+   rend l'icône œil invisible. On repeint le fond via box-shadow inset =
+   --background et on force la couleur du texte = --foreground. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--foreground) !important;
+  caret-color: var(--foreground);
+  -webkit-box-shadow: 0 0 0 1000px var(--background) inset !important;
+  box-shadow: 0 0 0 1000px var(--background) inset !important;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
 /* Reset minimal SCOPÉ à la zone Tailwind (pas de fuite vers Chakra) */
 @layer base {
   .tw-scope,
