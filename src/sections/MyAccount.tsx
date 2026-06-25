@@ -186,15 +186,15 @@ const MyAccount = () => {
                         {r.restaurant?.name ?? "Restaurant supprimé"}
                       </span>
                       <Stars n={r.rating} />
+                      <span className="text-xs text-foreground/45">
+                        · {formatDate(r.created_at)}
+                      </span>
                     </div>
                     {r.comment && (
-                      <p className="mt-0.5 truncate text-sm text-foreground/70">
+                      <p className="mb-0 mt-0.5 truncate text-sm text-foreground/70">
                         {r.comment}
                       </p>
                     )}
-                    <span className="text-xs text-foreground/45">
-                      {formatDate(r.created_at)}
-                    </span>
                   </div>
                   <FiChevronRight className="h-5 w-5 shrink-0 text-foreground/30" />
                 </button>

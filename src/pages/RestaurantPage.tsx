@@ -333,11 +333,11 @@ const RestaurantPage = () => {
               <div className="flex justify-center py-8">
                 <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
               </div>
-            ) : visibleReviews.length === 0 ? (
+            ) : totalReviews === 0 ? (
               <p className="py-6 text-center text-sm text-foreground/55">
                 Aucun avis pour le moment. Sois le premier à en laisser un !
               </p>
-            ) : (
+            ) : visibleReviews.length === 0 ? null : (
               <ul className="m-0 list-none space-y-4 p-0">
                 {visibleReviews.map((r) => {
                   const mine = r.user_id === userId;
