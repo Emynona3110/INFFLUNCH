@@ -105,7 +105,7 @@ const FilterDialog = ({ restaurantFilters, onFilterChange }: FilterDialogProps) 
                 <option value="reviews">Nombre d'avis</option>
                 <option value="created_at">Ajout récent</option>
               </select>
-              <FiChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/50" />
+              <FiChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground opacity-50" />
             </div>
           </div>
 
@@ -175,7 +175,7 @@ const FilterDialog = ({ restaurantFilters, onFilterChange }: FilterDialogProps) 
                   </option>
                 ))}
               </select>
-              <FiChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/50" />
+              <FiChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground opacity-50" />
             </div>
           </div>
 

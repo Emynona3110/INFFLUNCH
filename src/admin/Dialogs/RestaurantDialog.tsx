@@ -571,7 +571,7 @@ const RestaurantDialog = ({
                     </option>
                   ))}
                 </select>
-                <FiChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/50" />
+                <FiChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground opacity-50" />
               </div>
               {!creatingTag && (
                 <button

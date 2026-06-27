@@ -8,6 +8,9 @@ import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/lib/toast";
 
+/** Longueur max du commentaire d'avis. */
+const MAX_COMMENT = 1000;
+
 interface Props {
   restaurantId: number;
   /** Avis existant de l'utilisateur (édition) ou null/undefined (création). */
@@ -84,11 +87,15 @@ const ReviewForm = ({ restaurantId, existing, onDone }: Props) => {
 
       <textarea
         value={comment}
-        onChange={(e) => setComment(e.target.value)}
+        onChange={(e) => setComment(e.target.value.slice(0, MAX_COMMENT))}
         placeholder="Ton avis (optionnel)…"
         rows={4}
+        maxLength={MAX_COMMENT}
         className="mt-4 w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/25"
       />
+      <div className="mt-1 text-right text-xs text-foreground/45">
+        {comment.length}/{MAX_COMMENT}
+      </div>
 
       <div className="mt-6 flex justify-end gap-2">
         <Button variant="outline" onClick={onDone}>

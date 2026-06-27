@@ -179,7 +179,7 @@ const Navbar = ({
                   type="button"
                   aria-label="Ajouter un restaurant"
                   onClick={() => setAddOpen(true)}
-                  className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-full text-foreground/60 transition hover:bg-muted hover:text-primary"
+                  className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-primary"
                 >
                   <FiPlus className="h-6 w-6" />
                 </button>

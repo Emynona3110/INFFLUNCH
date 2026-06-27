@@ -190,7 +190,7 @@ export default function LocationEditDialog({
             <div className="flex min-h-10 flex-1 items-center gap-2 rounded-lg border border-border bg-background px-3 py-2">
               <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-0.5 text-sm">
                 <span className="text-foreground/50 line-through">{address || "—"}</span>
-                <FiArrowRight className="h-4 w-4 shrink-0 text-foreground/40" />
+                <FiArrowRight className="h-4 w-4 shrink-0 text-foreground opacity-40" />
                 <span className="break-words font-medium text-primary">{detected}</span>
                 {!/^\d/.test((detected ?? "").trim()) && (
                   <span className="text-xs text-foreground/50">(n° à compléter)</span>

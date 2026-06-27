@@ -112,7 +112,7 @@ const RestaurantMenus = ({ restaurantId, slug, userId, isAdmin }: Props) => {
         </div>
       ) : menus.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-8 text-center text-foreground/50">
-          <FiBookOpen className="h-8 w-8" />
+          <FiBookOpen className="h-8 w-8 text-foreground opacity-50" />
           <p className="text-sm">
             Aucun menu pour le moment. Partage-en un (lien, PDF ou photo) !
           </p>
@@ -148,7 +148,7 @@ const RestaurantMenus = ({ restaurantId, slug, userId, isAdmin }: Props) => {
                   <span className="flex items-center gap-1.5 truncate font-medium text-card-foreground">
                     {label}
                     {!isImage && (
-                      <FiExternalLink className="h-3.5 w-3.5 shrink-0 text-foreground/40" />
+                      <FiExternalLink className="h-3.5 w-3.5 shrink-0 text-foreground opacity-40" />
                     )}
                   </span>
                   {menu.email && (
@@ -186,7 +186,7 @@ const RestaurantMenus = ({ restaurantId, slug, userId, isAdmin }: Props) => {
                     <HoldToDeleteButton
                       onConfirm={() => handleDelete(menu)}
                       title="Maintenir pour supprimer"
-                      className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-foreground/40 transition hover:bg-destructive/10 hover:text-destructive"
+                      className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
                       progressClassName="bg-destructive/70"
                     >
                       <FiTrash2 className="h-4 w-4" />

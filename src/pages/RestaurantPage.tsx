@@ -140,9 +140,14 @@ const RestaurantPage = () => {
   const myReview = reviews.find((r) => r.user_id === userId) ?? null;
   // On affiche toujours son propre avis (même sans texte), mais ceux des autres
   // uniquement s'ils ont un commentaire (une note seule n'apporte rien à lire).
-  const visibleReviews = reviews.filter(
-    (r) => r.user_id === userId || r.comment?.trim()
-  );
+  // Son propre avis toujours en premier (comme YouTube), le reste inchangé.
+  const visibleReviews = reviews
+    .filter((r) => r.user_id === userId || r.comment?.trim())
+    .sort((a, b) => {
+      if (a.user_id === userId) return -1;
+      if (b.user_id === userId) return 1;
+      return 0;
+    });
   // Répartition par note (5→1) pour les barres type Amazon.
   const ratingCounts = (star: number) =>
     reviews.filter((r) => r.rating === star).length;
@@ -169,7 +174,7 @@ const RestaurantPage = () => {
       <button
         type="button"
         onClick={() => navigate("/restaurants")}
-        className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-foreground/60 transition hover:text-primary"
+        className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition hover:text-primary"
       >
         <FiArrowLeft className="h-4 w-4" /> Tous les restaurants
       </button>
@@ -198,7 +203,7 @@ const RestaurantPage = () => {
           }}
           iconClassName="h-5 w-5"
           emptyClassName="text-foreground/60"
-          className="absolute bottom-5 right-5 h-11 w-11 bg-card/85 shadow-md backdrop-blur hover:bg-card md:bottom-7 md:right-7"
+          className="absolute bottom-5 right-5 z-10 h-11 w-11 bg-card/85 shadow-md backdrop-blur hover:bg-card md:bottom-7 md:right-7"
         />
 
         {/* Bandeau bas */}
@@ -350,7 +355,7 @@ const RestaurantPage = () => {
                         <Avatar
                           email={r.email}
                           avatarPath={r.avatar_path}
-                          size={40}
+                          size={44}
                         />
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5">
@@ -362,38 +367,36 @@ const RestaurantPage = () => {
                             >
                               {formatAuthorName(r.email)}
                             </span>
-                            <span className="text-xs text-foreground/45">
-                              {formatDate(r.created_at)}
-                            </span>
-                          </div>
-                          <div className="mt-1 flex items-center gap-3">
-                            <Stars rating={r.rating} size={16} />
                             {(mine || isAdmin) && (
-                              <div className="flex items-center gap-2 text-xs">
+                              <div className="flex items-center gap-1">
                                 {mine && (
                                   <button
                                     type="button"
                                     onClick={() => setShowForm(true)}
-                                    className="inline-flex items-center gap-1 text-foreground/55 transition hover:text-primary"
+                                    aria-label="Modifier"
+                                    className="grid h-7 w-7 place-items-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-primary"
                                   >
-                                    <FiEdit2 className="h-3.5 w-3.5" /> Modifier
+                                    <FiEdit2 className="h-3.5 w-3.5" />
                                   </button>
-                                )}
-                                {mine && (
-                                  <span className="text-foreground/25">|</span>
                                 )}
                                 <HoldToDeleteButton
                                   onConfirm={() => deleteReview(r.id)}
-                                  className="inline-flex items-center rounded-full px-2.5 py-0.5 text-foreground/55 hover:text-destructive"
+                                  className="grid h-7 w-7 place-items-center rounded-full text-muted-foreground hover:text-destructive"
                                   progressClassName="bg-destructive/15"
                                 >
-                                  <FiTrash2 className="h-3.5 w-3.5" /> Supprimer
+                                  <FiTrash2 className="h-3.5 w-3.5" />
                                 </HoldToDeleteButton>
                               </div>
                             )}
                           </div>
+                          <div className="mt-1 flex items-center gap-2">
+                            <Stars rating={r.rating} size={16} />
+                            <span className="text-xs text-foreground/45">
+                              {formatDate(r.created_at)}
+                            </span>
+                          </div>
                           {r.comment && (
-                            <p className="mt-1.5 text-sm leading-relaxed text-foreground/75">
+                            <p className="mb-0 mt-1.5 text-sm leading-relaxed text-foreground/75">
                               {r.comment}
                             </p>
                           )}
@@ -476,7 +479,7 @@ const RestaurantPage = () => {
                     type="button"
                     onClick={() => setMapEditOpen(true)}
                     aria-label="Modifier la position"
-                    className="grid h-8 w-8 place-items-center rounded-full text-foreground/50 transition hover:bg-muted hover:text-primary"
+                    className="grid h-8 w-8 place-items-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-primary"
                   >
                     <FiEdit2 className="h-4 w-4" />
                   </button>

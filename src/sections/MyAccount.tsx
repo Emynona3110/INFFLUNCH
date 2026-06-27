@@ -196,7 +196,7 @@ const MyAccount = () => {
                       </p>
                     )}
                   </div>
-                  <FiChevronRight className="h-5 w-5 shrink-0 text-foreground/30" />
+                  <FiChevronRight className="h-5 w-5 shrink-0 text-foreground opacity-30" />
                 </button>
               </li>
             ))}

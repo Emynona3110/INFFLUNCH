@@ -10,6 +10,8 @@ import {
 import useRestaurantPhotos, {
   RestaurantPhoto,
 } from "@/hooks/useRestaurantPhotos";
+import useReactions from "@/hooks/useReactions";
+import EmojiReactions from "@/components/EmojiReactions";
 import HoldToDeleteButton from "@/components/HoldToDeleteButton";
 import PhotoUploadDialog from "@/components/PhotoUploadDialog";
 import { toast } from "@/lib/toast";
@@ -34,6 +36,12 @@ const RestaurantGallery = ({ restaurantId, slug, userId, isAdmin }: Props) => {
     useRestaurantPhotos(restaurantId, slug);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [lightbox, setLightbox] = useState<RestaurantPhoto | null>(null);
+
+  // Réactions emoji sur les photos de la galerie (affichées dans la lightbox).
+  const photoReactions = useReactions(
+    "photo",
+    photos.map((p) => p.id)
+  );
 
   // Carrousel : fenêtre de 3 photos, sauts de 3 (clampés pour rester pleine et
   // atteindre le bord). Flèches masquées aux extrémités.
@@ -130,7 +138,7 @@ const RestaurantGallery = ({ restaurantId, slug, userId, isAdmin }: Props) => {
         </div>
       ) : photos.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-8 text-center text-foreground/50">
-          <FiImage className="h-8 w-8" />
+          <FiImage className="h-8 w-8 text-foreground opacity-50" />
           <p className="text-sm">
             Aucune photo pour le moment. Partage la première !
           </p>
@@ -170,6 +178,9 @@ const RestaurantGallery = ({ restaurantId, slug, userId, isAdmin }: Props) => {
           >
           {photos.map((photo) => {
             const canDelete = isAdmin || photo.user_id === userId;
+            const reactTotal = Object.values(
+              photoReactions.summaryFor(photo.id).counts
+            ).reduce((a, b) => a + b, 0);
             return (
               <div
                 key={photo.id}
@@ -188,6 +199,12 @@ const RestaurantGallery = ({ restaurantId, slug, userId, isAdmin }: Props) => {
                     className="absolute inset-0 h-full w-full object-cover transition duration-300 group-hover:scale-105"
                   />
                 </button>
+                {/* Total de réactions (toujours visible) */}
+                {reactTotal > 0 && (
+                  <span className="pointer-events-none absolute left-1.5 top-1.5 inline-flex items-center gap-0.5 rounded-full bg-black/55 px-1.5 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
+                    ❤️ {reactTotal}
+                  </span>
+                )}
                 {/* Auteur au survol */}
                 {photo.email && (
                   <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-2.5 pb-1.5 pt-6 opacity-0 transition group-hover:opacity-100">
@@ -235,6 +252,23 @@ const RestaurantGallery = ({ restaurantId, slug, userId, isAdmin }: Props) => {
             )}
             onClick={(e) => e.stopPropagation()}
           />
+          {/* Réactions sur la photo ouverte */}
+          {((photoReactions.canReact && lightbox.user_id !== userId) ||
+            Object.values(
+              photoReactions.summaryFor(lightbox.id).counts
+            ).some((n) => n > 0)) && (
+            <div
+              className="absolute bottom-5 left-1/2 -translate-x-1/2 rounded-full bg-black/55 px-3 py-1.5 backdrop-blur-sm"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <EmojiReactions
+                summary={photoReactions.summaryFor(lightbox.id)}
+                onToggle={(emoji) => photoReactions.toggle(lightbox.id, emoji)}
+                disabled={!photoReactions.canReact || lightbox.user_id === userId}
+                onDark
+              />
+            </div>
+          )}
         </div>
       )}
 

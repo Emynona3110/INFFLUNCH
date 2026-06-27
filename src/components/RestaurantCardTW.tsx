@@ -126,7 +126,7 @@ const RestaurantCardTW = ({
                   onEdit();
                 }}
                 aria-label="Modifier le restaurant"
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-foreground/50 transition hover:bg-muted hover:text-primary"
+                className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-primary"
               >
                 <FiEdit2 className="h-4 w-4" />
               </button>
