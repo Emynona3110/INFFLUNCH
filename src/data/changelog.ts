@@ -20,6 +20,15 @@ export interface ChangelogEntry {
 export const changelog: ChangelogEntry[] = [
   // ───────────────────────── Juin 2026 ─────────────────────────
   {
+    date: "2026-06-27",
+    title: "Nouveaux modes d'affichage",
+    points: [
+      "Vue liste compacte des restaurants",
+      "Carte globale de tous les restaurants",
+      "Le mode d'affichage choisi est mémorisé",
+    ],
+  },
+  {
     date: "2026-06-21",
     title: "Profil utilisateur",
     points: [

@@ -20,7 +20,7 @@ interface Props {
   onEdit?: () => void;
 }
 
-function Stars({ rating }: { rating: number }) {
+export function Stars({ rating }: { rating: number }) {
   // Arrondi au demi-point pour un remplissage partiel (comme la version d'origine)
   const rounded = Math.floor((rating ?? 0) * 2) / 2;
   const pct = (rounded / 5) * 100;

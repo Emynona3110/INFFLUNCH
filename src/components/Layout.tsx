@@ -1,6 +1,6 @@
 import Footer from "./Footer";
 import Navbar from "./Navbar";
-import { RestaurantFilters } from "../pages/UserPage";
+import { RestaurantFilters, ViewMode } from "../pages/UserPage";
 import { cn } from "@/lib/utils";
 
 interface LayoutProps {
@@ -18,6 +18,8 @@ interface LayoutProps {
     restaurantFilters: RestaurantFilters;
     onFilterChange: (query: RestaurantFilters) => void;
     onSearch: (input: string) => void;
+    viewMode: ViewMode;
+    onViewModeChange: (mode: ViewMode) => void;
   };
 }
 

@@ -35,6 +35,9 @@ export const buildUserSections = (isAdmin: boolean) =>
         { label: "À propos", path: "a-propos" },
       ];
 
+/** Modes d'affichage de la liste des restaurants (grille = défaut). */
+export type ViewMode = "grid" | "list" | "map";
+
 export interface RestaurantFilters {
   id?: number;
   slug?: string;
@@ -65,6 +68,33 @@ const UserPage = () => {
   const [restaurantFilters, setRestaurantFilters] = useState<RestaurantFilters>(
     defaultRestaurantFilters
   );
+  // Mode d'affichage : on garde le choix de l'utilisateur d'une session à
+  // l'autre (localStorage, comme le thème). À défaut de préférence enregistrée,
+  // la vue liste est le défaut sur mobile (< md = 768px), la grille sinon.
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    try {
+      const saved = localStorage.getItem("viewMode");
+      if (saved === "grid" || saved === "list" || saved === "map") return saved;
+    } catch {
+      /* localStorage indisponible */
+    }
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia("(max-width: 767px)").matches
+    ) {
+      return "list";
+    }
+    return "grid";
+  });
+
+  const changeViewMode = (mode: ViewMode) => {
+    setViewMode(mode);
+    try {
+      localStorage.setItem("viewMode", mode);
+    } catch {
+      /* localStorage indisponible */
+    }
+  };
 
   // Fiche d'un restaurant : pas d'onglet actif, la navbar se réduit (pas de
   // recherche/filtres). Sinon, l'onglet correspondant à l'URL.
@@ -78,7 +108,10 @@ const UserPage = () => {
   // avec scroll interne (pas de scroll de page) ; restaurants/fiche = scroll de page.
   const centerContent =
     currentPage === "mon-compte" || currentPage === "a-propos";
-  const fillContent = currentPage === "admin";
+  // La carte globale occupe toute la hauteur (pas de scroll de page).
+  const fillContent =
+    currentPage === "admin" ||
+    (currentPage === "restaurants" && viewMode === "map");
 
   return (
     <Layout
@@ -93,13 +126,20 @@ const UserPage = () => {
           setRestaurantFilters({ ...restaurantFilters, ...query }),
         onSearch: (input) =>
           setRestaurantFilters({ ...restaurantFilters, searchText: input }),
+        viewMode,
+        onViewModeChange: changeViewMode,
       }}
     >
       <Routes>
         <Route index element={<Navigate to="restaurants" replace />} />
         <Route
           path="restaurants"
-          element={<RestaurantGrid restaurantFilters={restaurantFilters} />}
+          element={
+            <RestaurantGrid
+              restaurantFilters={restaurantFilters}
+              viewMode={viewMode}
+            />
+          }
         />
         <Route path="restaurant/:slug" element={<RestaurantPage />} />
         <Route path="mon-compte" element={<MyAccount />} />
