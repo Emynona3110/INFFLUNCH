@@ -105,7 +105,7 @@ const RestaurantsMap = ({ restaurants }: Props) => {
           <Marker
             key={r.id}
             position={[r.lat as number, r.lng as number]}
-            icon={pinIcon("#EA580C")}
+            icon={pinIcon("#f79220")}
             eventHandlers={{ click: () => navigate(`/restaurant/${r.slug}`) }}
           >
             {/* Infos au survol ; le clic sur le pin ouvre la fiche. */}
