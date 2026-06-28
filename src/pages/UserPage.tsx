@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 import RestaurantGrid from "../sections/RestaurantGrid";
 import RestaurantPage from "./RestaurantPage";
-import Beeeh from "../sections/Beeeh";
+import PageNotFound from "./PageNotFound";
 import { useState } from "react";
 import { SortOrder } from "../components/SortSelector";
 import MyAccount from "../sections/MyAccount";
@@ -149,7 +149,7 @@ const UserPage = () => {
         <Route path="admin" element={<AdminGuard />}>
           <Route index element={<AdminSection />} />
         </Route>
-        <Route path="*" element={<Beeeh />} />
+        <Route path="*" element={<PageNotFound />} />
       </Routes>
     </Layout>
   );

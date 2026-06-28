@@ -35,6 +35,7 @@ import Avatar from "@/components/Avatar";
 import { toast } from "@/lib/toast";
 import noImage from "@/assets/no-image.jpg";
 import { cn } from "@/lib/utils";
+import Beeeh from "@/sections/Beeeh";
 
 /* ------------------------------ helpers UI ------------------------------ */
 
@@ -115,11 +116,11 @@ const RestaurantPage = () => {
   }
 
   if (error || !restaurant) {
+    // Slug inexistant (pas d'erreur, juste aucun résultat) : easter egg 🐑.
+    if (!error) return <Beeeh />;
     return (
       <div className="tw-scope mx-auto max-w-[1100px] py-16 text-center">
-        <p className="text-foreground/70">
-          {error ? `Erreur : ${error}` : "Ce restaurant est introuvable."}
-        </p>
+        <p className="text-foreground/70">{`Erreur : ${error}`}</p>
         <button
           type="button"
           onClick={() => navigate("/restaurants")}

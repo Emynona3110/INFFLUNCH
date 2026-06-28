@@ -50,8 +50,8 @@ const Layout = ({
           <div className="flex min-h-full flex-col">
             <div
               className={cn(
-                "mx-auto w-full max-w-[1200px] flex-1 px-4 py-6",
-                centerContent && "flex items-center justify-center"
+                "mx-auto flex w-full max-w-[1200px] flex-1 flex-col px-4 py-6",
+                centerContent && "items-center justify-center"
               )}
             >
               {children}
