@@ -8,6 +8,7 @@ import useSession from "../hooks/useSession";
 import useProfile from "../hooks/useProfile";
 import useMyReviews from "../hooks/useMyReviews";
 import Avatar from "../components/Avatar";
+import AchievementsGallery from "./AchievementsGallery";
 import HoldToDeleteButton from "../components/HoldToDeleteButton";
 import ChangePasswordDialog from "../components/ChangePasswordDialog";
 import { Card } from "@/components/ui/card";
@@ -32,12 +33,21 @@ const Stars = ({ n }: { n: number }) => (
   </span>
 );
 
+const subTabs = [
+  { key: "profil", label: "Compte" },
+  { key: "avis", label: "Avis" },
+  { key: "succes", label: "Succès" },
+] as const;
+
+type SubTabKey = (typeof subTabs)[number]["key"];
+
 const MyAccount = () => {
   const navigate = useNavigate();
   const { sessionData, signOut, error } = useSession();
   const { profile, uploadAvatar, removeAvatar } = useProfile();
   const { data: reviews = [], isPending: reviewsLoading } = useMyReviews();
 
+  const [active, setActive] = useState<SubTabKey>("profil");
   const [isDialogOpen, setDialogOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -73,20 +83,46 @@ const MyAccount = () => {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35 }}
-      className="tw-scope w-full max-w-2xl space-y-6"
-    >
+    <div className="tw-scope w-full">
+      {/* Sous-sections (pills) collées sous la navbar, comme la section Admin. */}
+      <div className="mb-6 flex flex-wrap justify-center gap-2">
+        {subTabs.map((t) => {
+          const isActive = active === t.key;
+          return (
+            <button
+              key={t.key}
+              type="button"
+              onClick={() => setActive(t.key)}
+              className={cn(
+                "inline-flex cursor-pointer items-center rounded-full px-4 py-1.5 text-sm font-medium transition",
+                isActive
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-foreground/70 hover:bg-muted/70"
+              )}
+            >
+              {t.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Carte de la sous-section active, centrée horizontalement. */}
+      <motion.div
+        key={active}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="mx-auto w-full max-w-2xl space-y-6"
+      >
       {/* Profil */}
+      {active === "profil" && (
       <Card className="p-8">
         <div
           role="heading"
           aria-level={1}
           className="text-center font-display text-2xl font-extrabold text-card-foreground"
         >
-          Mon compte
+          Compte
         </div>
 
         <div className="mt-6 flex flex-col items-center gap-3">
@@ -145,15 +181,17 @@ const MyAccount = () => {
           </Button>
         </div>
       </Card>
+      )}
 
-      {/* Mes avis */}
+      {/* Avis */}
+      {active === "avis" && (
       <Card className="p-6">
         <div
           role="heading"
           aria-level={2}
           className="mb-4 font-display text-lg font-bold text-card-foreground"
         >
-          Mes avis
+          Avis
           {reviews.length > 0 && (
             <span className="ml-2 text-sm font-medium text-foreground/45">
               ({reviews.length})
@@ -203,12 +241,17 @@ const MyAccount = () => {
           </ul>
         )}
       </Card>
+      )}
+
+      {/* Mes succès */}
+      {active === "succes" && <AchievementsGallery />}
+      </motion.div>
 
       <ChangePasswordDialog
         isOpen={isDialogOpen}
         onClose={() => setDialogOpen(false)}
       />
-    </motion.div>
+    </div>
   );
 };
 

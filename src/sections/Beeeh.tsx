@@ -1,5 +1,9 @@
 import { motion, useAnimation, AnimatePresence } from "framer-motion";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import useAchievements from "@/hooks/useAchievements";
+
+/** Nombre de nourritures consécutives (sans quitter la page) pour le gourou. */
+const GOUROU_STREAK = 50;
 
 /** Emojis liés à la nourriture (hors fruits) qui tombent. */
 const FOOD_EMOJIS = [
@@ -26,7 +30,14 @@ const Beeeh = () => {
   const controls = useAnimation();
   const idRef = useRef(0);
   const wobblingRef = useRef(false);
+  const streakRef = useRef(0);
   const [items, setItems] = useState<FallingItem[]>([]);
+  const { unlock } = useAchievements();
+
+  // Succès « Anti-panurgisme » : avoir trouvé le mouton (afficher cette page).
+  useEffect(() => {
+    unlock("anti_panurgisme");
+  }, [unlock]);
 
   const spawnEmoji = useCallback(() => {
     const layoutW = Math.min(window.innerWidth, LAYOUT_MAX);
@@ -77,6 +88,12 @@ const Beeeh = () => {
       scaleX: [1, 1.12, 0.94, 1.1, 0.95, 1.08, 0.97, 1],
       transition: { duration: 0.9, ease: "easeInOut" },
     });
+
+    // Succès nourriture. Le streak se remet à zéro en quittant la page (le ref
+    // est recréé au prochain montage) → « 50 fois d'affilée ».
+    streakRef.current += 1;
+    if (streakRef.current === 1) unlock("berger_dun_jour");
+    if (streakRef.current >= GOUROU_STREAK) unlock("gourou_du_troupeau");
   };
 
   const handleImageLoad = () => {

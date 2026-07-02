@@ -26,12 +26,12 @@ export const buildUserSections = (isAdmin: boolean) =>
         { label: "Restaurants", path: "restaurants" },
         { label: "Admin", path: "admin" },
         { label: "Nouveautés", path: "nouveautes" },
-        { label: "Mon compte", path: "mon-compte" },
+        { label: "Mon Profil", path: "mon-compte" },
       ]
     : [
         { label: "Restaurants", path: "restaurants" },
         { label: "Nouveautés", path: "nouveautes" },
-        { label: "Mon compte", path: "mon-compte" },
+        { label: "Mon Profil", path: "mon-compte" },
         { label: "À propos", path: "a-propos" },
       ];
 
@@ -104,10 +104,10 @@ const UserPage = () => {
     : sections.find((section) => location.pathname.includes(section.path))
         ?.path ?? sections[0].path;
 
-  // mon-compte / à propos = contenu centré ; demandes / tables = pleine hauteur
-  // avec scroll interne (pas de scroll de page) ; restaurants/fiche = scroll de page.
-  const centerContent =
-    currentPage === "mon-compte" || currentPage === "a-propos";
+  // à propos = contenu centré ; mon-compte gère lui-même sa mise en page (pills
+  // en haut, carte centrée) ; demandes / tables = pleine hauteur avec scroll
+  // interne (pas de scroll de page) ; restaurants/fiche = scroll de page.
+  const centerContent = currentPage === "a-propos";
   // La carte globale occupe toute la hauteur (pas de scroll de page).
   const fillContent =
     currentPage === "admin" ||
