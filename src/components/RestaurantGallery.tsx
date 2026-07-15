@@ -178,9 +178,12 @@ const RestaurantGallery = ({ restaurantId, slug, userId, isAdmin }: Props) => {
           >
           {photos.map((photo) => {
             const canDelete = isAdmin || photo.user_id === userId;
-            const reactTotal = Object.values(
-              photoReactions.summaryFor(photo.id).counts
-            ).reduce((a, b) => a + b, 0);
+            const reactCounts = photoReactions.summaryFor(photo.id).counts;
+            // Emojis uniques présents sur la photo, du plus fréquent au moins fréquent.
+            const reactEntries = Object.entries(reactCounts)
+              .filter(([, n]) => n > 0)
+              .sort((a, b) => b[1] - a[1]);
+            const reactTotal = reactEntries.reduce((sum, [, n]) => sum + n, 0);
             return (
               <div
                 key={photo.id}
@@ -199,10 +202,24 @@ const RestaurantGallery = ({ restaurantId, slug, userId, isAdmin }: Props) => {
                     className="absolute inset-0 h-full w-full object-cover transition duration-300 group-hover:scale-105"
                   />
                 </button>
-                {/* Total de réactions (toujours visible) */}
+                {/* Éventail des emojis présents (plus fréquent en avant) + total */}
                 {reactTotal > 0 && (
-                  <span className="pointer-events-none absolute left-1.5 top-1.5 inline-flex items-center gap-0.5 rounded-full bg-black/55 px-1.5 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
-                    ❤️ {reactTotal}
+                  <span className="pointer-events-none absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded-full bg-black/55 px-1.5 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
+                    <span className="flex items-center">
+                      {reactEntries.map(([emoji], i) => (
+                        <span
+                          key={emoji}
+                          className="relative inline-block text-[11px] leading-none"
+                          style={{
+                            marginLeft: i === 0 ? 0 : "-3px",
+                            zIndex: reactEntries.length - i,
+                          }}
+                        >
+                          {emoji}
+                        </span>
+                      ))}
+                    </span>
+                    {reactTotal}
                   </span>
                 )}
                 {/* Auteur au survol */}
