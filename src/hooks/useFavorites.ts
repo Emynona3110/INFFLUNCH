@@ -32,7 +32,10 @@ const useFavorites = () => {
     },
   });
 
-  const invalidate = () => queryClient.invalidateQueries({ queryKey });
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey });
+    queryClient.invalidateQueries({ queryKey: ["achievement-metrics"] });
+  };
 
   const addMutation = useMutation({
     mutationFn: async (restaurantId: number) => {

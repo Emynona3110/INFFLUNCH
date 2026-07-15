@@ -18,6 +18,15 @@ export interface ChangelogEntry {
 }
 
 export const changelog: ChangelogEntry[] = [
+  // ──────────────────────── Juillet 2026 ────────────────────────
+  {
+    date: "2026-07-15",
+    title: "Succès à débloquer",
+    points: [
+      "Galerie « Mes succès » avec taux de rareté",
+      "Quelques succès secrets à dénicher",
+    ],
+  },
   // ───────────────────────── Juin 2026 ─────────────────────────
   {
     date: "2026-06-27",

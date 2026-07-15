@@ -115,8 +115,10 @@ const useReactions = (targetType: ReactionTarget, targetIds: number[]) => {
       if (error) throw new Error(error.message);
     },
     // On rafraîchit toutes les réactions de ce type (clé partielle).
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["reactions", targetType] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["reactions", targetType] });
+      queryClient.invalidateQueries({ queryKey: ["achievement-metrics"] });
+    },
   });
 
   return {

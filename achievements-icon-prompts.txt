@@ -1,0 +1,162 @@
+================================================================================
+PROMPTS ICÔNES SUCCÈS — INFFLUNCH (pour Gemini)
+================================================================================
+
+À SAVOIR : Gemini génère du RASTER (PNG), pas du SVG. Workflow :
+  1) Générer chaque icône une par une (prompts ci-dessous, bloc de style inclus).
+  2) Fond NOIR uni (#000000), carré, haute résolution → plus facile à détourer
+     (le noir se supprime bien au tracé / à la sélection par couleur).
+  3) Détourer le fond noir puis vectoriser en SVG propre (aplats 2 couleurs) :
+     - Illustrator : Objet > Vectorisation de l'image (Mode Couleur, Palette
+       limitée 2-3 couleurs), régler "Ignorer le blanc"/fond > Développer, puis
+       forcer les hex exacts et supprimer le fond noir tracé.
+     - ou gratuit : vectorizer.ai / Inkscape (Tracer le bitmap) / potrace.
+  4) Nettoyer + exporter SVG (attributs de présentation, minifié), passer SVGO.
+
+Astuce : nomme le fichier final avec l'ID indiqué (ex. anti_panurgisme.svg),
+range-les dans public/achievements/ pour l'intégration ensuite.
+
+Suffixe utile à ajouter à un prompt si besoin (rappel format) :
+  "1024x1024, solid pure black background (#000000), single centered icon."
+
+Style commun (rappel) : Minimalist flat vector icon, single centered subject,
+clean geometric rounded shapes, thick uniform strokes, subtle soft depth, strict
+duotone palette (deep royal blue #113894 primary + warm orange #EA580C accent),
+no text, solid pure black background (#000000), square 1:1.
+
+
+================================================================================
+EASTER EGG — MOUTONS (succès secrets)
+================================================================================
+
+--- 1. anti_panurgisme — "Anti-panurgisme" (trouver un mouton) ---------------
+Minimalist flat vector icon, single centered subject, clean geometric rounded
+shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
+royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
+black background (#000000), square 1:1. Subject: a single sheep stepping out of a line of
+identical sheep, breaking away from the herd, standing out.
+
+--- 2. berger_dun_jour — "Berger d'un jour" (nourrir un mouton) --------------
+Minimalist flat vector icon, single centered subject, clean geometric rounded
+shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
+royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
+black background (#000000), square 1:1. Subject: a hand offering a golden wheat sheaf / hay to a
+small cute sheep.
+
+--- 3. gourou_du_troupeau — "Gourou du troupeau" (nourrir 50x d'affilée) -----
+Minimalist flat vector icon, single centered subject, clean geometric rounded
+shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
+royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
+black background (#000000), square 1:1. Subject: a wise sheep guru wearing a tiny halo and a
+pointed sage hat, serene expression.
+
+
+================================================================================
+AVIS
+================================================================================
+
+--- 4. premier_avis — "Critique en herbe" (1er avis) ------------------------
+Minimalist flat vector icon, single centered subject, clean geometric rounded
+shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
+royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
+black background (#000000), square 1:1. Subject: a pencil with a small sprouting green-blue leaf,
+next to a single review star.
+
+--- 5. critique_confirme — "Palais aguerri" (10 avis) -----------------------
+Minimalist flat vector icon, single centered subject, clean geometric rounded
+shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
+royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
+black background (#000000), square 1:1. Subject: crossed fork and knife with three small stars
+above, refined tasting emblem.
+
+--- 6. plume_gastronomique — "Plume gastronomique" (50 avis) ----------------
+Minimalist flat vector icon, single centered subject, clean geometric rounded
+shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
+royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
+black background (#000000), square 1:1. Subject: an elegant writing quill pen dipped over a
+chef's toque, with one shining star.
+
+
+================================================================================
+PHOTOS
+================================================================================
+
+--- 7. premiere_photo — "Apprenti photographe" (1re photo) ------------------
+Minimalist flat vector icon, single centered subject, clean geometric rounded
+shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
+royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
+black background (#000000), square 1:1. Subject: a plate of food surrounded by a ring light, with
+a couple of small like bubbles.
+
+--- 8. objectif_midi — "Influenceur culinaire" (10 photos) ------------------
+Minimalist flat vector icon, single centered subject, clean geometric rounded
+shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
+royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
+black background (#000000), square 1:1. Subject: a fan / spread of several overlapping Polaroid
+photos of food dishes, one small sparkle.
+
+--- 9. paparazzi_pause — "Pizzarazzi" (50 photos) ---------------------------
+Minimalist flat vector icon, single centered subject, clean geometric rounded
+shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
+royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
+black background (#000000), square 1:1. Subject: a pizza slice merged with a camera lens, playful
+flash sparkles around it.
+
+
+================================================================================
+RÉACTIONS
+================================================================================
+
+--- 10. premiere_reaction — "Petit geste" (1re réaction) --------------------
+Minimalist flat vector icon, single centered subject, clean geometric rounded
+shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
+royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
+black background (#000000), square 1:1. Subject: a single thumbs-up hand inside a soft speech
+bubble.
+
+--- 11. public_conquis — "Public conquis" (réagir à 20 photos) --------------
+Minimalist flat vector icon, single centered subject, clean geometric rounded
+shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
+royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
+black background (#000000), square 1:1. Subject: two hands clapping with small motion sparkles,
+applause.
+
+--- 12. approuve — "Approuvé" (recevoir 10 réactions) -----------------------
+Minimalist flat vector icon, single centered subject, clean geometric rounded
+shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
+royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
+black background (#000000), square 1:1. Subject: a heart with a small orange approval checkmark
+badge.
+
+
+================================================================================
+FAVORIS
+================================================================================
+
+--- 13. quinte_gagnant — "Le quinté gagnant" (5 favoris) --------------------
+Minimalist flat vector icon, single centered subject, clean geometric rounded
+shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
+royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
+black background (#000000), square 1:1. Subject: a lucky horseshoe surrounded by five small
+hearts, winning bet motif.
+
+
+================================================================================
+ASSIDUITÉ / MÉTA
+================================================================================
+
+--- 14. fidele_au_poste — "Fidèle au poste" (5 jours d'affilée) -------------
+Minimalist flat vector icon, single centered subject, clean geometric rounded
+shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
+royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
+black background (#000000), square 1:1. Subject: a calendar showing a streak of five checked
+days, with a small orange flame.
+
+--- 15. troupeau_complet — "Complétionniste" (tous les autres succès) -------
+Minimalist flat vector icon, single centered subject, clean geometric rounded
+shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
+royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
+black background (#000000), square 1:1. Subject: a shining trophy cup with a star, completion
+award.
+
+================================================================================

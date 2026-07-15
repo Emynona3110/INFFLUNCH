@@ -104,7 +104,10 @@ const useRestaurantPhotos = (
         throw new Error(insErr.message);
       }
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: key }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: key });
+      queryClient.invalidateQueries({ queryKey: ["achievement-metrics"] });
+    },
   });
 
   const remove = useMutation({

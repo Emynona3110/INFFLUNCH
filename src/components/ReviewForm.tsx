@@ -36,6 +36,7 @@ const ReviewForm = ({ restaurantId, existing, onDone }: Props) => {
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ["reviews", restaurantId] });
     queryClient.invalidateQueries({ queryKey: ["restaurants"] });
+    queryClient.invalidateQueries({ queryKey: ["achievement-metrics"] });
   };
 
   const submit = async () => {

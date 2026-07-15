@@ -1,6 +1,7 @@
 import { useEffect, useState, ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import supabaseClient from "../services/supabaseClient";
+import AchievementTriggers from "../components/AchievementTriggers";
 
 interface WrapperProps {
   children: ReactNode;
@@ -23,7 +24,14 @@ const Wrapper = ({ children }: WrapperProps) => {
     );
   }
 
-  return authenticated ? <>{children}</> : <Navigate to="/login" replace />;
+  return authenticated ? (
+    <>
+      {children}
+      <AchievementTriggers />
+    </>
+  ) : (
+    <Navigate to="/login" replace />
+  );
 };
 
 export default Wrapper;
