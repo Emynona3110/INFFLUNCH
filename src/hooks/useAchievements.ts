@@ -65,6 +65,8 @@ const useAchievements = () => {
       const achievement = ACHIEVEMENTS_BY_ID[id];
       if (achievement) showAchievementToast(achievement);
       queryClient.invalidateQueries({ queryKey: ["achievements", userId] });
+      // Le déblocage change aussi les % de rareté (on vient de s'y ajouter).
+      queryClient.invalidateQueries({ queryKey: ["achievement-stats"] });
     },
     [userId, queryClient]
   );
