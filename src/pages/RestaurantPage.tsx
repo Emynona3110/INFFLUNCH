@@ -102,8 +102,12 @@ const RestaurantPage = () => {
   const [editOpen, setEditOpen] = useState(false);
   const [mapEditOpen, setMapEditOpen] = useState(false);
 
-  // Remonte en haut quand on ouvre une nouvelle fiche.
-  useEffect(() => window.scrollTo({ top: 0 }), [slug]);
+  // Remonte en haut quand on ouvre une nouvelle fiche. Corps de bloc obligatoire :
+  // une flèche à expression retournerait la valeur de scrollTo, que React prendrait
+  // pour une fonction de nettoyage (→ crash "destroy is not a function" au démontage).
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [slug]);
 
   /* --------------------------- états de chargement --------------------------- */
 
