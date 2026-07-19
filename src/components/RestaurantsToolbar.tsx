@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { FiPlus, FiGrid, FiList, FiMap } from "react-icons/fi";
+import { LuDices } from "react-icons/lu";
+import { IconType } from "react-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import SearchInput from "./SearchInput";
 import FilterDialog from "./FilterDialog";
@@ -18,10 +20,11 @@ interface RestaurantsToolbarProps {
   onViewModeChange: (mode: ViewMode) => void;
 }
 
-const VIEW_MODES: { mode: ViewMode; label: string; Icon: typeof FiGrid }[] = [
+const VIEW_MODES: { mode: ViewMode; label: string; Icon: IconType }[] = [
   { mode: "grid", label: "Grille", Icon: FiGrid },
   { mode: "list", label: "Liste", Icon: FiList },
   { mode: "map", label: "Carte", Icon: FiMap },
+  { mode: "roulette", label: "Roulette", Icon: LuDices },
 ];
 
 /**
@@ -46,7 +49,7 @@ const RestaurantsToolbar = ({
         <SearchInput onSearch={onSearch} />
       </div>
 
-      {/* Toggle d'affichage : grille (défaut) / liste / carte globale */}
+      {/* Toggle d'affichage : grille (défaut) / liste / carte / roue */}
       <div className="flex items-center gap-0.5 rounded-full bg-muted p-0.5">
         {VIEW_MODES.map(({ mode, label, Icon }) => {
           const active = viewMode === mode;

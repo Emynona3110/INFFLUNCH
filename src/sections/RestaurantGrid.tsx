@@ -9,11 +9,18 @@ import useIsAdmin from "../hooks/useIsAdmin";
 import RestaurantCardTW from "@/components/RestaurantCardTW";
 import RestaurantRow from "@/components/RestaurantRow";
 import RestaurantsMap from "@/components/RestaurantsMap";
+import RestaurantRoulette from "@/components/RestaurantRoulette";
 import RestaurantDialog from "@/admin/Dialogs/RestaurantDialog";
 
 interface RestaurantGridProps {
   restaurantFilters: RestaurantFilters;
   viewMode: ViewMode;
+  /** Restos exclus de la roue (mémorisés au niveau page). */
+  rouletteExcluded: Set<number>;
+  onRouletteExcludedChange: (next: Set<number>) => void;
+  /** Dernier resto tiré, mémorisé au niveau page (persiste au changement de vue). */
+  rouletteWinnerId: number | null;
+  onRouletteWinnerChange: (id: number | null) => void;
 }
 
 const CardSkeleton = () => (
@@ -44,7 +51,14 @@ const RowSkeleton = () => (
   </div>
 );
 
-const RestaurantGrid = ({ restaurantFilters, viewMode }: RestaurantGridProps) => {
+const RestaurantGrid = ({
+  restaurantFilters,
+  viewMode,
+  rouletteExcluded,
+  onRouletteExcludedChange,
+  rouletteWinnerId,
+  onRouletteWinnerChange,
+}: RestaurantGridProps) => {
   const { data, error, loading } = useRestaurants(restaurantFilters);
   const topRatedResult = useTopRated();
   const isAdmin = useIsAdmin();
@@ -115,6 +129,27 @@ const RestaurantGrid = ({ restaurantFilters, viewMode }: RestaurantGridProps) =>
       return <RestaurantsMap restaurants={filteredData} />;
     }
 
+    // --- Roue (Surprise du midi) ---
+    if (viewMode === "roulette") {
+      if (isLoading) {
+        return (
+          <div className="flex h-full items-center justify-center">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
+          </div>
+        );
+      }
+      return (
+        <RestaurantRoulette
+          pool={filteredData}
+          excludedIds={rouletteExcluded}
+          onExcludedChange={onRouletteExcludedChange}
+          winnerId={rouletteWinnerId}
+          onWinnerChange={onRouletteWinnerChange}
+          cardProps={itemProps}
+        />
+      );
+    }
+
     // --- Liste ---
     if (viewMode === "list") {
       return (
@@ -162,7 +197,13 @@ const RestaurantGrid = ({ restaurantFilters, viewMode }: RestaurantGridProps) =>
   };
 
   return (
-    <div className={viewMode === "map" ? "tw-scope h-full" : "tw-scope min-h-[60vh]"}>
+    <div
+      className={
+        viewMode === "map" || viewMode === "roulette"
+          ? "tw-scope h-full"
+          : "tw-scope min-h-[60vh]"
+      }
+    >
       {renderContent()}
 
       {isAdmin && (

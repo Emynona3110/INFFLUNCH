@@ -37,7 +37,7 @@ export const buildUserSections = (isAdmin: boolean) =>
       ];
 
 /** Modes d'affichage de la liste des restaurants (grille = défaut). */
-export type ViewMode = "grid" | "list" | "map";
+export type ViewMode = "grid" | "list" | "map" | "roulette";
 
 export interface RestaurantFilters {
   id?: number;
@@ -75,7 +75,13 @@ const UserPage = () => {
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
     try {
       const saved = localStorage.getItem("viewMode");
-      if (saved === "grid" || saved === "list" || saved === "map") return saved;
+      if (
+        saved === "grid" ||
+        saved === "list" ||
+        saved === "map" ||
+        saved === "roulette"
+      )
+        return saved;
     } catch {
       /* localStorage indisponible */
     }
@@ -97,6 +103,20 @@ const UserPage = () => {
     }
   };
 
+  // Restos exclus de la roue (décochés dans la popup de sélection). Mémorisé en
+  // mémoire comme les filtres : survit au changement de vue, remis à zéro au
+  // rechargement de la page. Modèle par exclusion → par défaut, tout participe.
+  const [rouletteExcluded, setRouletteExcluded] = useState<Set<number>>(
+    new Set()
+  );
+  // Dernier restaurant tiré : conservé quand on quitte/revient sur la vue roue,
+  // effacé dès que la sélection change.
+  const [rouletteWinnerId, setRouletteWinnerId] = useState<number | null>(null);
+  const handleRouletteExcludedChange = (next: Set<number>) => {
+    setRouletteExcluded(next);
+    setRouletteWinnerId(null);
+  };
+
   // Fiche d'un restaurant : pas d'onglet actif, la navbar se réduit (pas de
   // recherche/filtres). Sinon, l'onglet correspondant à l'URL.
   const isRestaurantDetail = location.pathname.includes("/restaurant/");
@@ -109,10 +129,11 @@ const UserPage = () => {
   // en haut, carte centrée) ; demandes / tables = pleine hauteur avec scroll
   // interne (pas de scroll de page) ; restaurants/fiche = scroll de page.
   const centerContent = currentPage === "a-propos";
-  // La carte globale occupe toute la hauteur (pas de scroll de page).
+  // La carte globale et la roue occupent toute la hauteur (pas de scroll de page).
   const fillContent =
     currentPage === "admin" ||
-    (currentPage === "restaurants" && viewMode === "map");
+    (currentPage === "restaurants" &&
+      (viewMode === "map" || viewMode === "roulette"));
 
   return (
     <Layout
@@ -149,6 +170,10 @@ const UserPage = () => {
             <RestaurantGrid
               restaurantFilters={restaurantFilters}
               viewMode={viewMode}
+              rouletteExcluded={rouletteExcluded}
+              onRouletteExcludedChange={handleRouletteExcludedChange}
+              rouletteWinnerId={rouletteWinnerId}
+              onRouletteWinnerChange={setRouletteWinnerId}
             />
           }
         />
