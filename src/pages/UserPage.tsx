@@ -6,6 +6,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import RestaurantGrid from "../sections/RestaurantGrid";
+import RestaurantsToolbar from "../components/RestaurantsToolbar";
 import RestaurantPage from "./RestaurantPage";
 import PageNotFound from "./PageNotFound";
 import { useState } from "react";
@@ -121,14 +122,24 @@ const UserPage = () => {
       navbarProps={{
         page: currentPage,
         setPage: (page) => navigate("/" + page),
-        restaurantFilters,
         onFilterChange: (query) =>
           setRestaurantFilters({ ...restaurantFilters, ...query }),
-        onSearch: (input) =>
-          setRestaurantFilters({ ...restaurantFilters, searchText: input }),
-        viewMode,
-        onViewModeChange: changeViewMode,
       }}
+      toolbar={
+        currentPage === "restaurants" ? (
+          <RestaurantsToolbar
+            restaurantFilters={restaurantFilters}
+            onFilterChange={(query) =>
+              setRestaurantFilters({ ...restaurantFilters, ...query })
+            }
+            onSearch={(input) =>
+              setRestaurantFilters({ ...restaurantFilters, searchText: input })
+            }
+            viewMode={viewMode}
+            onViewModeChange={changeViewMode}
+          />
+        ) : undefined
+      }
     >
       <Routes>
         <Route index element={<Navigate to="restaurants" replace />} />

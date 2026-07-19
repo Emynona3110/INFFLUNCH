@@ -1,6 +1,6 @@
 import Footer from "./Footer";
 import Navbar from "./Navbar";
-import { RestaurantFilters, ViewMode } from "../pages/UserPage";
+import { RestaurantFilters } from "../pages/UserPage";
 import { cn } from "@/lib/utils";
 
 interface LayoutProps {
@@ -15,12 +15,13 @@ interface LayoutProps {
   navbarProps?: {
     page: string;
     setPage: (page: string) => void;
-    restaurantFilters: RestaurantFilters;
     onFilterChange: (query: RestaurantFilters) => void;
-    onSearch: (input: string) => void;
-    viewMode: ViewMode;
-    onViewModeChange: (mode: ViewMode) => void;
   };
+  /**
+   * Barre d'outils propre à une page (ex. Restaurants), rendue dans un second
+   * bandeau sticky sous la navbar. La navbar reste dédiée à la navigation.
+   */
+  toolbar?: React.ReactNode;
 }
 
 const Layout = ({
@@ -29,6 +30,7 @@ const Layout = ({
   fillContent = false,
   withNavbar = false,
   navbarProps,
+  toolbar,
 }: LayoutProps) => {
   return (
     <div className="tw-scope flex h-screen flex-col bg-background text-foreground">
@@ -36,6 +38,14 @@ const Layout = ({
         <header className="sticky top-0 z-[1000] flex h-[60px] shrink-0 items-center border-b border-border bg-card px-4 shadow-sm">
           <Navbar {...navbarProps} />
         </header>
+      )}
+
+      {toolbar && (
+        <div className="sticky top-[60px] z-[999] shrink-0 border-b border-border bg-card px-4 shadow-sm">
+          <div className="mx-auto flex h-[56px] w-full max-w-[1200px] items-center">
+            {toolbar}
+          </div>
+        </div>
       )}
 
       {fillContent ? (
