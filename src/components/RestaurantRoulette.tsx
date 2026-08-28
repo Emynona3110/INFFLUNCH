@@ -1,11 +1,12 @@
 import { ComponentProps, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { HiOutlineLocationMarker } from "react-icons/hi";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { LuDices } from "react-icons/lu";
 import { Button } from "@/components/ui/button";
 import RestaurantCardTW from "@/components/RestaurantCardTW";
 import RouletteSelectionDialog from "@/components/RouletteSelectionDialog";
 import { Restaurant } from "@/hooks/useRestaurants";
+import useAchievements from "@/hooks/useAchievements";
 import noImage from "@/assets/no-image.jpg";
 
 const ITEM_H = 88; // hauteur d'une ligne de la roulette (px)
@@ -15,6 +16,11 @@ const SPIN_LEN = 40; // nombre de vignettes défilantes avant le gagnant
 const SPIN_DURATION = 4.6; // durée du défilement (s)
 const RECENT_KEY = "rouletteRecent";
 const RECENT_MAX = 3; // on évite de retomber sur les N derniers tirés
+
+// Nombre de lancers depuis le chargement de la page (succès « Indécis »).
+// Volontairement au niveau module : conservé au changement de vue, remis à zéro
+// au rechargement complet de la page.
+let sessionSpinCount = 0;
 
 const readRecent = (): number[] => {
   try {
@@ -73,20 +79,14 @@ const buildReel = (pool: Restaurant[], winner: Restaurant) => {
 };
 
 const ReelRow = ({ resto }: { resto: Restaurant }) => (
-  <div className="flex items-center gap-3 px-3" style={{ height: ITEM_H }}>
+  <div className="flex items-center gap-3 px-7" style={{ height: ITEM_H }}>
     <img
       src={resto.image || noImage}
       alt=""
       className="h-16 w-20 shrink-0 rounded-lg object-cover"
     />
-    <div className="min-w-0 flex-1">
-      <div className="truncate font-display text-lg font-bold text-card-foreground">
-        {resto.name}
-      </div>
-      <div className="mt-0.5 flex items-center gap-1 text-xs text-foreground/55">
-        <HiOutlineLocationMarker className="h-3.5 w-3.5" />
-        {resto.distanceLabel}
-      </div>
+    <div className="min-w-0 flex-1 truncate font-display text-lg font-bold text-card-foreground">
+      {resto.name}
     </div>
   </div>
 );
@@ -117,6 +117,7 @@ const RestaurantRoulette = ({
   onWinnerChange,
   cardProps,
 }: RestaurantRouletteProps) => {
+  const { unlock } = useAchievements();
   const [spinKey, setSpinKey] = useState(0);
   // idle = en attente du clic « Lancer » ; result à l'arrivée si un tirage est
   // déjà mémorisé (retour sur la vue). Pas de tirage automatique.
@@ -144,7 +145,17 @@ const RestaurantRoulette = ({
   const targetY = spin ? RING_TOP - spin.winnerIndex * ITEM_H : 0;
   const rolling = phase === "spinning";
 
+  // Un seul resto possible (filtres) : pas de roue, on l'affiche directement.
+  const single = pool.length === 1 ? pool[0] : null;
+
   const launch = () => {
+    // Succès « Dé pipé » : lancer avec un seul resto, réduit volontairement
+    // (d'autres restos existent mais ont été décochés).
+    if (selectedPool.length === 1 && pool.length > 1) unlock("de_pipe");
+    // Succès « Indécis » : 5 lancers dans la même session (secret).
+    sessionSpinCount += 1;
+    if (sessionSpinCount >= 5) unlock("indecis");
+
     setSpinKey((k) => k + 1);
     setPhase("spinning");
   };
@@ -158,7 +169,17 @@ const RestaurantRoulette = ({
           className="flex items-center justify-center"
           style={{ height: SLOT_H }}
         >
-        {selectedPool.length === 0 ? (
+        {single ? (
+          // ---- Un seul resto correspond aux filtres : affiché directement ----
+          <motion.div
+            key={single.id}
+            initial={{ scale: 0.96, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="w-full"
+          >
+            <RestaurantCardTW {...cardProps(single)} />
+          </motion.div>
+        ) : selectedPool.length === 0 ? (
           <p className="rounded-card border border-border bg-card p-8 text-center text-sm text-foreground/60">
             Aucun restaurant sélectionné pour la roue. Ouvre
             <span className="font-medium text-foreground"> Modifier la sélection </span>
@@ -180,11 +201,17 @@ const RestaurantRoulette = ({
             className="relative w-full overflow-hidden rounded-card border border-border bg-muted/40"
             style={{ height: SLOT_H }}
           >
-            {/* Fenêtre de sélection centrale */}
+            {/* Zone de sélection : deux rails fins qui s'estompent sur les côtés
+                et deux chevrons qui pointent la ligne gagnante (pas de cadre). */}
             <div
-              className="pointer-events-none absolute inset-x-0 z-10 rounded-lg ring-2 ring-primary"
+              className="pointer-events-none absolute inset-x-0 z-10"
               style={{ top: RING_TOP, height: ITEM_H }}
-            />
+            >
+              <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
+              <div className="absolute inset-x-8 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
+              <FiChevronRight className="absolute left-1.5 top-1/2 h-5 w-5 -translate-y-1/2 text-accent" />
+              <FiChevronLeft className="absolute right-1.5 top-1/2 h-5 w-5 -translate-y-1/2 text-accent" />
+            </div>
             {/* Dégradés haut/bas pour l'effet de profondeur */}
             <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-16 bg-gradient-to-b from-card to-transparent" />
             <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 bg-gradient-to-t from-card to-transparent" />
@@ -198,6 +225,8 @@ const RestaurantRoulette = ({
                 pushRecent(spin.winner.id);
                 onWinnerChange(spin.winner.id);
                 setPhase("result");
+                // Succès « Gambling » : un tirage est allé au bout.
+                unlock("gambling");
               }}
             >
               {spin.reel.map((resto, i) => (
@@ -218,24 +247,31 @@ const RestaurantRoulette = ({
         )}
         </div>
 
-        {/* Actions : désactivées pendant le défilement. */}
-        <div className="mt-4 flex items-stretch gap-2">
-          <Button
-            variant="outline"
-            className="h-auto min-h-10 flex-1 px-2 py-1.5 leading-tight"
-            disabled={rolling}
-            onClick={() => setSelectionOpen(true)}
-          >
-            Modifier la sélection
-          </Button>
-          <Button
-            className="h-auto min-h-10 flex-1 px-2 py-1.5 leading-tight"
-            disabled={rolling || selectedPool.length === 0}
-            onClick={launch}
-          >
-            Lancer
-          </Button>
-        </div>
+        {single ? (
+          // Un seul resto possible : ni sélection ni tirage.
+          <p className="mt-4 flex min-h-10 items-center justify-center text-center text-sm text-foreground/60">
+            Un seul restaurant correspond aux filtres.
+          </p>
+        ) : (
+          /* Actions : désactivées pendant le défilement. */
+          <div className="mt-4 flex items-stretch gap-2">
+            <Button
+              variant="outline"
+              className="h-auto min-h-10 flex-1 px-2 py-1.5 leading-tight"
+              disabled={rolling}
+              onClick={() => setSelectionOpen(true)}
+            >
+              Modifier la sélection
+            </Button>
+            <Button
+              className="h-auto min-h-10 flex-1 px-2 py-1.5 leading-tight"
+              disabled={rolling || selectedPool.length === 0}
+              onClick={launch}
+            >
+              Lancer
+            </Button>
+          </div>
+        )}
       </div>
 
       <RouletteSelectionDialog

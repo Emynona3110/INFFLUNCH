@@ -18,6 +18,15 @@ export interface ChangelogEntry {
 }
 
 export const changelog: ChangelogEntry[] = [
+  // ───────────────────────── Août 2026 ─────────────────────────
+  {
+    date: "2026-08-28",
+    title: "Surprise du midi",
+    points: [
+      "Nouveau mode d'affichage : une roue qui tire un restaurant au hasard",
+      "Choix des restaurants qui participent au tirage",
+    ],
+  },
   // ──────────────────────── Juillet 2026 ────────────────────────
   {
     date: "2026-07-15",

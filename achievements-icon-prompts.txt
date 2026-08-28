@@ -159,4 +159,62 @@ royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
 black background (#000000), square 1:1. Subject: a shining trophy cup with a star, completion
 award.
 
+
+================================================================================
+ROULETTE — SURPRISE DU MIDI
+================================================================================
+
+--- 16. gambling — "Gambling" (tirer le repas au hasard) --------------------
+Minimalist flat vector icon, single centered subject, clean geometric rounded
+shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
+royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
+black background (#000000), square 1:1. Subject: a top-down casino roulette wheel, ring segments
+alternating deep royal blue and white, thick blue outline, with the central casino spinning
+cross / turret hub in warm orange.
+
+--- 17. indecis — "Indécis" (lancer la roue 5 fois, succès secret) ----------
+Minimalist flat vector icon, single centered subject, clean geometric rounded
+shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
+royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
+black background (#000000), square 1:1. Subject: a balance scale with two hanging pans, level and
+perfectly balanced, with a small floating orange question mark above the central pivot,
+unable to choose between options.
+
+--- 18. de_pipe — "Dé pipé" (lancer avec un seul resto, succès secret) ------
+Minimalist flat vector icon, single centered subject, clean geometric rounded
+shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
+royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
+black background (#000000), square 1:1. Subject: a single loaded / weighted dice tilted on one
+corner, all visible faces showing the same one pip, with a tiny sly wink sparkle, cheating motif.
+
+
+--- VERSION GRILLE (les 3 d'un coup, fond TRANSPARENT, style blanc+contour bleu,
+    3 variations demandées à Gemini) — cellules : 1=gambling, 2=indecis, 3=de_pipe
+
+A single square image, fully transparent background (PNG, alpha), containing a
+clean 1-row by 3-column grid of 3 minimalist flat vector achievement icons,
+evenly spaced with generous equal padding around each icon so they can be
+cropped individually. No text, no labels, no captions anywhere.
+
+Consistent icon set style across ALL 3: minimalist flat vector, single centered
+subject per cell, clean geometric rounded shapes, thick uniform strokes, subtle
+soft depth. White fills with deep royal blue #113894 outlines and strokes as the
+primary color, and warm orange #EA580C as the accent for small highlights only.
+Same line weight, same visual scale and margins for every icon, professional
+cohesive icon set, crisp high detail. Each icon sits directly on the transparent
+background (no tiles, no frames, no drop cards).
+
+The 3 icons, in reading order (left to right):
+1) a top-down casino roulette wheel, its ring segments alternating deep royal
+blue #113894 and white, thick blue outline, with the central casino spinning
+cross / turret hub in warm orange #EA580C;
+2) a balance scale with two hanging pans, hanging level and perfectly balanced,
+white pans with blue frame and center post, and a small warm orange question
+mark floating above the central pivot, unable to choose between options;
+3) a single minimalist die (cube) in three-quarter view, white faces with blue
+outline, one orange pip centered on each of the three visible faces.
+
+Square 1:1 canvas, high resolution, transparent background. Generate 3 distinct
+variations of this icon set.
+
 ================================================================================

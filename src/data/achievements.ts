@@ -22,6 +22,10 @@ export type AchievementId =
   | "approuve"
   // Favoris
   | "quinte_gagnant"
+  // Roulette (Surprise du midi)
+  | "gambling"
+  | "indecis"
+  | "de_pipe"
   // Méta / assiduité
   | "fidele_au_poste"
   | "troupeau_complet";
@@ -151,6 +155,31 @@ export const ACHIEVEMENTS: Achievement[] = [
     condition: "Avoir 5 restaurants favoris",
     icon: "🐎",
     image: "/achievements/quinte_gagnant.svg",
+  },
+
+  // — Roulette (Surprise du midi) —
+  {
+    id: "gambling",
+    title: "Gambling",
+    condition: "Tirer le repas au hasard",
+    icon: "🎰",
+    image: "/achievements/gambling.svg",
+  },
+  {
+    id: "indecis",
+    title: "Indécis",
+    condition: "Lancer la roue 5 fois de suite",
+    icon: "🤔",
+    image: "/achievements/indecis.svg",
+    secret: true,
+  },
+  {
+    id: "de_pipe",
+    title: "Dé pipé",
+    condition: "Lancer la roue avec un seul restaurant",
+    icon: "🎲",
+    image: "/achievements/de_pipe.svg",
+    secret: true,
   },
 
   // — Méta / assiduité —
