@@ -14,6 +14,7 @@ import { SortOrder } from "../components/SortSelector";
 import MyAccount from "../sections/MyAccount";
 import About from "../sections/About";
 import Nouveautes from "../sections/Nouveautes";
+import LunchToday from "../sections/LunchToday";
 import AdminSection from "../sections/AdminSection";
 import AdminGuard from "../components/AdminGuard";
 import Layout from "../components/Layout";
@@ -25,12 +26,14 @@ export const buildUserSections = (isAdmin: boolean) =>
   isAdmin
     ? [
         { label: "Restaurants", path: "restaurants" },
+        { label: "Midi", path: "midi" },
         { label: "Admin", path: "admin" },
         { label: "Nouveautés", path: "nouveautes" },
         { label: "Mon Profil", path: "mon-compte" },
       ]
     : [
         { label: "Restaurants", path: "restaurants" },
+        { label: "Midi", path: "midi" },
         { label: "Nouveautés", path: "nouveautes" },
         { label: "Mon Profil", path: "mon-compte" },
         { label: "À propos", path: "a-propos" },
@@ -177,6 +180,7 @@ const UserPage = () => {
             />
           }
         />
+        <Route path="midi" element={<LunchToday />} />
         <Route path="restaurant/:slug" element={<RestaurantPage />} />
         <Route path="mon-compte" element={<MyAccount />} />
         <Route path="a-propos" element={<About />} />

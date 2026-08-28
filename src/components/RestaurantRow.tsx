@@ -7,6 +7,7 @@ import badgeMap, { topRatedIcon } from "@/services/badgeMap";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip } from "@/components/ui/tooltip";
 import LikeButton from "@/components/LikeButton";
+import LunchAvatars from "@/components/LunchAvatars";
 import { Stars } from "@/components/RestaurantCardTW";
 import { cn } from "@/lib/utils";
 
@@ -121,6 +122,9 @@ const RestaurantRow = ({
 
       {/* Distance + actions */}
       <div className="flex shrink-0 items-center gap-3">
+        {/* Collègues qui déjeunent ici aujourd'hui (rien s'il n'y en a pas). */}
+        <LunchAvatars restaurantId={restaurant.id} size={22} />
+
         <span className="hidden items-center gap-1 whitespace-nowrap text-xs font-medium text-foreground/60 sm:inline-flex">
           <HiOutlineLocationMarker className="h-3.5 w-3.5" />
           {restaurant.distanceLabel}

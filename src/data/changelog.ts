@@ -21,6 +21,15 @@ export const changelog: ChangelogEntry[] = [
   // ───────────────────────── Août 2026 ─────────────────────────
   {
     date: "2026-08-28",
+    title: "Qui déjeune où",
+    points: [
+      "Nouvel onglet Midi : indique où tu déjeunes aujourd'hui",
+      "Les tablées se forment toutes seules, et se mettent à jour en direct",
+      "Les collègues inscrits apparaissent sur les restaurants",
+    ],
+  },
+  {
+    date: "2026-08-28",
     title: "Surprise du midi",
     points: [
       "Nouveau mode d'affichage : une roue qui tire un restaurant au hasard",

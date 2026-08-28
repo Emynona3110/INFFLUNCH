@@ -23,6 +23,8 @@ import { defaultRestaurantFilters } from "@/pages/UserPage";
 import badgeMap, { topRatedIcon } from "@/services/badgeMap";
 import RestaurantMiniMap from "@/components/RestaurantMiniMap";
 import LikeButton from "@/components/LikeButton";
+import LunchButton from "@/components/LunchButton";
+import LunchAvatars from "@/components/LunchAvatars";
 import ReviewForm from "@/components/ReviewForm";
 import HoldToDeleteButton from "@/components/HoldToDeleteButton";
 import RestaurantDialog from "@/admin/Dialogs/RestaurantDialog";
@@ -260,6 +262,14 @@ const RestaurantPage = () => {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Déjeuner du jour : sous le hero pour ne jamais recouvrir le nom. Les
+          collègues déjà inscrits s'affichent en éventail à gauche du bouton, à
+          la même hauteur que lui. */}
+      <div className="mt-4 flex items-center justify-end gap-3">
+        <LunchAvatars restaurantId={restaurant.id} size={42} max={5} />
+        <LunchButton restaurantId={restaurant.id} />
       </div>
 
       {/* Corps : 2 colonnes (les atouts sont dans le hero, en bas à droite).

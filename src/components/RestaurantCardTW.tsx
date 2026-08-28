@@ -8,6 +8,7 @@ import badgeMap, { topRatedIcon } from "@/services/badgeMap";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip } from "@/components/ui/tooltip";
 import LikeButton from "@/components/LikeButton";
+import LunchAvatars from "@/components/LunchAvatars";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -105,6 +106,12 @@ const RestaurantCardTW = ({
             <span className="opacity-60">· {restaurant.walk_minutes} min</span>
           )}
         </span>
+
+        {/* Collègues qui déjeunent ici aujourd'hui (rien s'il n'y en a pas). */}
+        <LunchAvatars
+          restaurantId={restaurant.id}
+          className="absolute bottom-3 right-3"
+        />
       </div>
 
       {/* Corps */}

@@ -6,6 +6,7 @@ import ColorModeSwitch from "./ColorModeSwitch";
 import useIsAdmin from "../hooks/useIsAdmin";
 import useAccessRequests from "../hooks/useAccessRequests";
 import useChangelogSeen from "../hooks/useChangelogSeen";
+import useLunchToday from "../hooks/useLunchToday";
 import {
   buildUserSections,
   defaultRestaurantFilters,
@@ -30,6 +31,11 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
 
   // Puce "nouveautés non vues" (tous les utilisateurs).
   const { hasUnseen } = useChangelogSeen();
+
+  // Puce "midi" : des collègues se sont positionnés et pas moi → invitation à
+  // choisir. Disparaît dès qu'on a déclaré son restaurant du jour.
+  const { participants, myRestaurantId } = useLunchToday();
+  const lunchPending = participants.length > 0 && myRestaurantId == null;
 
   return (
     <div className="flex h-full w-full select-none items-center justify-between gap-1">
@@ -87,6 +93,9 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
                   {item.path === "nouveautes" && hasUnseen && (
                     <span className="absolute right-0 top-2.5 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />
                   )}
+                  {item.path === "midi" && lunchPending && (
+                    <span className="absolute right-0 top-2.5 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />
+                  )}
                 </button>
               </div>
             );
@@ -130,6 +139,9 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
                       <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-[#f79220] ring-2 ring-card" />
                     )}
                     {item.path === "nouveautes" && hasUnseen && (
+                      <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />
+                    )}
+                    {item.path === "midi" && lunchPending && (
                       <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />
                     )}
                   </button>
