@@ -11,6 +11,7 @@ import {
   FiExternalLink,
   FiEdit2,
   FiTrash2,
+  FiSlash,
 } from "react-icons/fi";
 import useRestaurants from "@/hooks/useRestaurants";
 import useTopRated from "@/hooks/useTopRated";
@@ -25,6 +26,7 @@ import RestaurantMiniMap from "@/components/RestaurantMiniMap";
 import LikeButton from "@/components/LikeButton";
 import LunchButton from "@/components/LunchButton";
 import LunchAvatars from "@/components/LunchAvatars";
+import ClosedBadge from "@/components/ClosedBadge";
 import ReviewForm from "@/components/ReviewForm";
 import HoldToDeleteButton from "@/components/HoldToDeleteButton";
 import RestaurantDialog from "@/admin/Dialogs/RestaurantDialog";
@@ -140,6 +142,9 @@ const RestaurantPage = () => {
 
   const isTop = topRated.some((t) => t.id === restaurant.id);
   const liked = favoriteIds.includes(restaurant.id);
+  // Contributions (avis / photos / menus) : verrouillables indépendamment de la
+  // fermeture. Le contenu déjà publié reste visible dans tous les cas.
+  const canContribute = restaurant.contributions_enabled !== false;
   const visibleBadges = (restaurant.badges ?? []).filter((b) => badgeMap[b]);
   const tags = restaurant.tags ?? [];
 
@@ -191,9 +196,14 @@ const RestaurantPage = () => {
         <img
           src={restaurant.image ?? noImage}
           alt={restaurant.name}
-          className="h-full w-full object-cover"
+          className={cn(
+            "h-full w-full object-cover",
+            restaurant.closed && "grayscale"
+          )}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
+
+        {restaurant.closed && <ClosedBadge className="absolute left-4 top-4" />}
 
         {isTop && (
           <span className="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow">
@@ -267,10 +277,18 @@ const RestaurantPage = () => {
       {/* Déjeuner du jour : sous le hero pour ne jamais recouvrir le nom. Les
           collègues déjà inscrits s'affichent en éventail à gauche du bouton, à
           la même hauteur que lui. */}
-      <div className="mt-4 flex items-center justify-end gap-3">
-        <LunchAvatars restaurantId={restaurant.id} size={42} max={5} />
-        <LunchButton restaurantId={restaurant.id} />
-      </div>
+      {restaurant.closed ? (
+        <div className="mt-4 flex items-center gap-2.5 rounded-card border border-border bg-muted/40 px-4 py-3 text-sm text-foreground/70">
+          <FiSlash className="h-4 w-4 shrink-0 text-foreground/45" />
+          Ce restaurant a définitivement fermé. Sa fiche reste consultable, mais
+          on ne peut plus y déjeuner.
+        </div>
+      ) : (
+        <div className="mt-4 flex items-center justify-end gap-3">
+          <LunchAvatars restaurantId={restaurant.id} size={42} max={5} />
+          <LunchButton restaurantId={restaurant.id} />
+        </div>
+      )}
 
       {/* Corps : 2 colonnes (les atouts sont dans le hero, en bas à droite).
           Sur mobile l'ordre est coordonnées → carte → photos → avis (order-2..4) ;
@@ -282,14 +300,14 @@ const RestaurantPage = () => {
             order-2) s'intercale → infos → photos → avis. */}
         <div className="contents lg:col-span-2 lg:flex lg:flex-col lg:gap-6">
           {/* Photos (galerie collaborateurs) */}
-          <div className="order-3">
-            <RestaurantGallery
-              restaurantId={restaurant.id}
-              slug={restaurant.slug}
-              userId={userId}
-              isAdmin={isAdmin}
-            />
-          </div>
+          <RestaurantGallery
+            className="order-3"
+            restaurantId={restaurant.id}
+            slug={restaurant.slug}
+            userId={userId}
+            isAdmin={isAdmin}
+            canContribute={canContribute}
+          />
 
           {/* Avis */}
           <section className="order-4 rounded-card border border-border bg-card p-5">
@@ -301,7 +319,7 @@ const RestaurantPage = () => {
               >
                 Avis des collaborateurs
               </div>
-              {!myReview && !showForm && (
+              {canContribute && !myReview && !showForm && (
                 <button
                   type="button"
                   onClick={() => setShowForm(true)}
@@ -312,7 +330,7 @@ const RestaurantPage = () => {
               )}
             </div>
 
-            {showForm && (
+            {canContribute && showForm && (
               <ReviewForm
                 restaurantId={restaurant.id}
                 existing={myReview}
@@ -355,7 +373,8 @@ const RestaurantPage = () => {
               </div>
             ) : totalReviews === 0 ? (
               <p className="py-6 text-center text-sm text-foreground/55">
-                Aucun avis pour le moment. Sois le premier à en laisser un !
+                Aucun avis pour le moment.
+                {canContribute && " Sois le premier à en laisser un !"}
               </p>
             ) : visibleReviews.length === 0 ? null : (
               <ul className="m-0 list-none space-y-4 p-0">
@@ -384,7 +403,7 @@ const RestaurantPage = () => {
                             </span>
                             {(mine || isAdmin) && (
                               <div className="flex items-center gap-1">
-                                {mine && (
+                                {mine && canContribute && (
                                   <button
                                     type="button"
                                     onClick={() => setShowForm(true)}
@@ -476,6 +495,7 @@ const RestaurantPage = () => {
             slug={restaurant.slug}
             userId={userId}
             isAdmin={isAdmin}
+            canContribute={canContribute}
           />
 
           {/* Carte */}

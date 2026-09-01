@@ -12,6 +12,8 @@ const useTopRated = () =>
       .neq("reviews", 0)
       // Le resto de test n'est jamais Top 3, quel que soit le rôle.
       .neq("slug", "test")
+      // Un restaurant fermé ne peut plus être mis en avant.
+      .eq("closed", false)
       .limit(3)
   );
 

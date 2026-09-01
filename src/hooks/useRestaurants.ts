@@ -15,6 +15,10 @@ export type Restaurant = {
   lat: number | null;
   lng: number | null;
   walk_minutes: number | null;
+  /** Restaurant définitivement fermé : gardé pour l'historique, relégué en bas. */
+  closed: boolean;
+  /** Autorise les nouveaux avis / photos / menus (le contenu existant reste). */
+  contributions_enabled: boolean;
 };
 
 import useSupabaseQuery from "./useSupabaseQuery";
@@ -63,7 +67,11 @@ const useRestaurants = (restaurantFilters: RestaurantFilters) => {
     }
 
     const asc = sortOrder === "distance";
-    return query.order(sortOrder, { ascending: asc });
+    // Les fermés restent consultables mais passent toujours en fin de liste,
+    // quel que soit le tri choisi (false avant true en ordre croissant).
+    return query
+      .order("closed", { ascending: true })
+      .order(sortOrder, { ascending: asc });
   };
 
   return useSupabaseQuery<Restaurant>(

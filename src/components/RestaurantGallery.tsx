@@ -23,6 +23,11 @@ interface Props {
   slug: string;
   userId?: string;
   isAdmin: boolean;
+  /** false = restaurant verrouillé : plus de nouvelle photo (l'existant reste). */
+  canContribute?: boolean;
+  /** Classes de placement : portées par la section elle-même pour qu'elle ne
+   *  laisse aucun vide dans la grille quand elle ne s'affiche pas. */
+  className?: string;
 }
 
 /**
@@ -31,7 +36,14 @@ interface Props {
  * Chacun peut supprimer ses propres photos ; un admin peut en supprimer
  * n'importe laquelle (modération).
  */
-const RestaurantGallery = ({ restaurantId, slug, userId, isAdmin }: Props) => {
+const RestaurantGallery = ({
+  restaurantId,
+  slug,
+  userId,
+  isAdmin,
+  canContribute = true,
+  className,
+}: Props) => {
   const { data: photos = [], isPending, upload, remove } =
     useRestaurantPhotos(restaurantId, slug);
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -59,7 +71,7 @@ const RestaurantGallery = ({ restaurantId, slug, userId, isAdmin }: Props) => {
   // 1 photo par personne et par restaurant, sauf les admins (aligné sur le
   // trigger en base). On masque alors le bouton et on guide l'utilisateur.
   const hasOwnPhoto = photos.some((p) => p.user_id === userId);
-  const canUpload = isAdmin || !hasOwnPhoto;
+  const canUpload = canContribute && (isAdmin || !hasOwnPhoto);
 
   const handleUpload = async (files: File[], authorId?: string) => {
     let ok = 0;
@@ -100,8 +112,13 @@ const RestaurantGallery = ({ restaurantId, slug, userId, isAdmin }: Props) => {
     }
   };
 
+  // Contributions bloquées et aucune photo : la section n'a plus rien à dire.
+  if (!canContribute && !isPending && photos.length === 0) return null;
+
   return (
-    <section className="rounded-card border border-border bg-card p-5">
+    <section
+      className={cn("rounded-card border border-border bg-card p-5", className)}
+    >
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div
           role="heading"
@@ -125,11 +142,11 @@ const RestaurantGallery = ({ restaurantId, slug, userId, isAdmin }: Props) => {
             <FiPlus className="h-4 w-4" />
             Ajouter une photo
           </button>
-        ) : (
+        ) : canContribute ? (
           <span className="text-xs text-foreground/45">
             Tu as déjà partagé une photo ici.
           </span>
-        )}
+        ) : null}
       </div>
 
       {isPending ? (

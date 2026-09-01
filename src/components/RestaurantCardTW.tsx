@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip } from "@/components/ui/tooltip";
 import LikeButton from "@/components/LikeButton";
 import LunchAvatars from "@/components/LunchAvatars";
+import ClosedBadge from "@/components/ClosedBadge";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -75,8 +76,13 @@ const RestaurantCardTW = ({
         <img
           src={restaurant.image ?? noImage}
           alt={restaurant.name}
-          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          className={cn(
+            "h-full w-full object-cover transition-transform duration-300 group-hover:scale-105",
+            restaurant.closed && "grayscale"
+          )}
         />
+
+        {restaurant.closed && <ClosedBadge className="absolute left-3 top-3" />}
 
         {isTop && (
           <Tooltip label="Top 3 des mieux notés">

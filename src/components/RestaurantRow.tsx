@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip } from "@/components/ui/tooltip";
 import LikeButton from "@/components/LikeButton";
 import LunchAvatars from "@/components/LunchAvatars";
+import ClosedBadge from "@/components/ClosedBadge";
 import { Stars } from "@/components/RestaurantCardTW";
 import { cn } from "@/lib/utils";
 
@@ -52,8 +53,14 @@ const RestaurantRow = ({
         <img
           src={restaurant.image ?? noImage}
           alt={restaurant.name}
-          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          className={cn(
+            "h-full w-full object-cover transition-transform duration-300 group-hover:scale-105",
+            restaurant.closed && "grayscale"
+          )}
         />
+        {restaurant.closed && (
+          <ClosedBadge compact className="absolute left-1 top-1" />
+        )}
         {isTop && (
           <Tooltip label="Top 3 des mieux notés">
             <span className="absolute left-1 top-1 inline-flex items-center gap-1 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground shadow">

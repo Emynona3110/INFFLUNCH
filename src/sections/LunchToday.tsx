@@ -248,7 +248,10 @@ const LunchToday = () => {
                     <img
                       src={restaurant.image || noImage}
                       alt=""
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      className={cn(
+                        "h-full w-full object-cover transition-transform duration-300 group-hover:scale-105",
+                        restaurant.closed && "grayscale"
+                      )}
                     />
                     {/* Nombre de convives, en pastille sur la vignette. */}
                     <motion.span
@@ -296,8 +299,9 @@ const LunchToday = () => {
                   </div>
 
                   {/* Rejoindre : uniquement sur les tablées où je ne suis pas
-                      (la mienne se quitte depuis l'encart du haut). */}
-                  {!mine && (
+                      (la mienne se quitte depuis l'encart du haut), et jamais
+                      sur un restaurant fermé entre-temps. */}
+                  {!mine && !restaurant.closed && (
                     <Button
                       className="shrink-0"
                       disabled={saving}

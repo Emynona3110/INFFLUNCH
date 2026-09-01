@@ -60,6 +60,11 @@ const RestaurantDialog = ({
   const [phone, setPhone] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [badges, setBadges] = useState<string[]>([]);
+  // Restaurant fermé : on garde la fiche (avis, photos, menus, historique) mais
+  // elle passe en noir et blanc, en fin de liste, et n'est plus choisissable
+  // pour le midi. Indépendant du verrou de contributions juste en dessous.
+  const [closed, setClosed] = useState(false);
+  const [contributionsEnabled, setContributionsEnabled] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [creatingTag, setCreatingTag] = useState(false);
   const [newTag, setNewTag] = useState("");
@@ -134,6 +139,8 @@ const RestaurantDialog = ({
       setPhone(initialData.phone || "");
       setTags(initialData.tags || []);
       setBadges(initialData.badges || []);
+      setClosed(initialData.closed ?? false);
+      setContributionsEnabled(initialData.contributions_enabled ?? true);
     } else if (!isOpen) {
       setName("");
       setImage("");
@@ -144,6 +151,8 @@ const RestaurantDialog = ({
       setPhone("");
       setTags([]);
       setBadges([]);
+      setClosed(false);
+      setContributionsEnabled(true);
       setCreatingTag(false);
       setNewTag("");
       cancelHold();
@@ -289,7 +298,9 @@ const RestaurantDialog = ({
       existing.website === (website || null) &&
       existing.phone === (phone || null) &&
       JSON.stringify(existing.tags?.sort()) === JSON.stringify(tags.sort()) &&
-      JSON.stringify(existing.badges?.sort()) === JSON.stringify(badges.sort())
+      JSON.stringify(existing.badges?.sort()) === JSON.stringify(badges.sort()) &&
+      (existing.closed ?? false) === closed &&
+      (existing.contributions_enabled ?? true) === contributionsEnabled
     );
   };
 
@@ -384,6 +395,8 @@ const RestaurantDialog = ({
           walk_minutes: walkMinutes,
           tags: tags.length ? tags : null,
           badges: orderedBadges,
+          closed,
+          contributions_enabled: contributionsEnabled,
         })
         .eq("id", initialData.id);
 
@@ -451,6 +464,8 @@ const RestaurantDialog = ({
       walk_minutes: walkMinutes,
       tags: tags.length ? tags : null,
       badges: orderedBadges,
+      closed,
+      contributions_enabled: contributionsEnabled,
     });
 
     setIsSubmitting(false);
@@ -633,6 +648,33 @@ const RestaurantDialog = ({
               <BadgesToggles selected={badges} onChange={setBadges} />
             </div>
           </div>
+        </div>
+
+        {/* Statut : fermeture et verrou des contributions (indépendants). */}
+        <div className="flex flex-wrap gap-x-8 gap-y-3 rounded-xl border border-border bg-muted/30 p-4">
+          <label className="flex cursor-pointer items-center gap-2.5">
+            <input
+              type="checkbox"
+              checked={closed}
+              onChange={(e) => setClosed(e.target.checked)}
+              className="h-4 w-4 shrink-0 cursor-pointer accent-primary"
+            />
+            <span className="text-sm font-medium text-foreground">
+              Restaurant fermé
+            </span>
+          </label>
+
+          <label className="flex cursor-pointer items-center gap-2.5">
+            <input
+              type="checkbox"
+              checked={!contributionsEnabled}
+              onChange={(e) => setContributionsEnabled(!e.target.checked)}
+              className="h-4 w-4 shrink-0 cursor-pointer accent-primary"
+            />
+            <span className="text-sm font-medium text-foreground">
+              Bloquer les contributions
+            </span>
+          </label>
         </div>
       </div>
 

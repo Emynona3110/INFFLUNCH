@@ -22,6 +22,8 @@ interface Props {
   slug: string;
   userId?: string;
   isAdmin: boolean;
+  /** false = restaurant verrouillé : plus de nouveau menu (l'existant reste). */
+  canContribute?: boolean;
 }
 
 const KIND_LABEL: Record<RestaurantMenu["kind"], string> = {
@@ -42,7 +44,13 @@ const KindIcon = ({ kind }: { kind: RestaurantMenu["kind"] }) => {
  * s'ouvrent dans un nouvel onglet ; les images ouvrent une lightbox. Chacun peut
  * supprimer ses propres entrées ; un admin peut en supprimer n'importe laquelle.
  */
-const RestaurantMenus = ({ restaurantId, slug, userId, isAdmin }: Props) => {
+const RestaurantMenus = ({
+  restaurantId,
+  slug,
+  userId,
+  isAdmin,
+  canContribute = true,
+}: Props) => {
   const { data: menus = [], isPending, add, remove } = useRestaurantMenus(
     restaurantId,
     slug
@@ -80,6 +88,9 @@ const RestaurantMenus = ({ restaurantId, slug, userId, isAdmin }: Props) => {
     }
   };
 
+  // Contributions bloquées et aucun menu : la section n'a plus rien à dire.
+  if (!canContribute && !isPending && menus.length === 0) return null;
+
   return (
     <section className="rounded-card border border-border bg-card p-5">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -96,14 +107,16 @@ const RestaurantMenus = ({ restaurantId, slug, userId, isAdmin }: Props) => {
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={() => setAddOpen(true)}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-1.5 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
-        >
-          <FiPlus className="h-4 w-4" />
-          Ajouter un menu
-        </button>
+        {canContribute && (
+          <button
+            type="button"
+            onClick={() => setAddOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-1.5 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
+          >
+            <FiPlus className="h-4 w-4" />
+            Ajouter un menu
+          </button>
+        )}
       </div>
 
       {isPending ? (

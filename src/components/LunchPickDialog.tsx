@@ -28,9 +28,11 @@ const LunchPickDialog = ({
   const [search, setSearch] = useState("");
 
   const results = useMemo(() => {
+    // Un restaurant fermé n'est plus proposable pour le midi.
+    const open = restaurants.filter((r) => !r.closed);
     const needle = slugify(search);
-    if (!needle) return restaurants;
-    return restaurants.filter((r) => slugify(r.name).includes(needle));
+    if (!needle) return open;
+    return open.filter((r) => slugify(r.name).includes(needle));
   }, [restaurants, search]);
 
   return (

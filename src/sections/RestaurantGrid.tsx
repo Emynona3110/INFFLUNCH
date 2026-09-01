@@ -144,7 +144,7 @@ const RestaurantGrid = ({
       }
       return (
         <RestaurantRoulette
-          pool={filteredData}
+          pool={filteredData.filter((r) => !r.closed)}
           excludedIds={rouletteExcluded}
           onExcludedChange={onRouletteExcludedChange}
           winnerId={rouletteWinnerId}
