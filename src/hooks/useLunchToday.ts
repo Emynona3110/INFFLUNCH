@@ -17,7 +17,7 @@ export const parisDay = () =>
   new Date().toLocaleDateString("en-CA", { timeZone: "Europe/Paris" });
 
 /* ---------------------------- canal Realtime ----------------------------- */
-// Le hook est monté par la page /midi, la fiche resto et chaque card : on
+// Le hook est monté par la page /dejeuner, la fiche resto et chaque card : on
 // partage un seul canal pour tout le monde (compteur de références) au lieu
 // d'en ouvrir un par instance.
 let channel: ReturnType<typeof supabaseClient.channel> | null = null;

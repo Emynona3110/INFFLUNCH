@@ -27,7 +27,7 @@ const todayLabel = () => {
 const spring = { type: "spring" as const, stiffness: 380, damping: 30 };
 
 /**
- * Section « Midi » : qui déjeune où aujourd'hui. Il n'y a ni organisateur ni
+ * Section « Déjeuner » : qui déjeune où aujourd'hui. Il n'y a ni organisateur ni
  * invitation — chacun déclare son restaurant du jour et les tablées se forment
  * par regroupement. La liste se met à jour en direct (Realtime) ; les arrivées
  * et départs se font en fondu, sans animation de position (les cartes ne

@@ -37,7 +37,7 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
   // dans la galerie (onglet Succès de Mon Profil).
   const { hasUnseen: hasUnseenAchievements } = useAchievementsSeen();
 
-  // Puce "midi" : des collègues se sont positionnés et pas moi → invitation à
+  // Puce "déjeuner" : des collègues se sont positionnés et pas moi → invitation à
   // choisir. Disparaît dès qu'on a déclaré son restaurant du jour.
   const { participants, myRestaurantId } = useLunchToday();
   const lunchPending = participants.length > 0 && myRestaurantId == null;
@@ -98,7 +98,7 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
                   {item.path === "nouveautes" && hasUnseen && (
                     <span className="absolute right-0 top-2.5 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />
                   )}
-                  {item.path === "midi" && lunchPending && (
+                  {item.path === "dejeuner" && lunchPending && (
                     <span className="absolute right-0 top-2.5 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />
                   )}
                   {item.path === "mon-compte" && hasUnseenAchievements && (
@@ -149,7 +149,7 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
                     {item.path === "nouveautes" && hasUnseen && (
                       <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />
                     )}
-                    {item.path === "midi" && lunchPending && (
+                    {item.path === "dejeuner" && lunchPending && (
                       <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />
                     )}
                     {item.path === "mon-compte" && hasUnseenAchievements && (

@@ -26,14 +26,14 @@ export const buildUserSections = (isAdmin: boolean) =>
   isAdmin
     ? [
         { label: "Restaurants", path: "restaurants" },
-        { label: "Midi", path: "midi" },
+        { label: "Déjeuner", path: "dejeuner" },
         { label: "Admin", path: "admin" },
         { label: "Nouveautés", path: "nouveautes" },
         { label: "Mon Profil", path: "mon-compte" },
       ]
     : [
         { label: "Restaurants", path: "restaurants" },
-        { label: "Midi", path: "midi" },
+        { label: "Déjeuner", path: "dejeuner" },
         { label: "Nouveautés", path: "nouveautes" },
         { label: "Mon Profil", path: "mon-compte" },
         { label: "À propos", path: "a-propos" },
@@ -180,7 +180,9 @@ const UserPage = () => {
             />
           }
         />
-        <Route path="midi" element={<LunchToday />} />
+        <Route path="dejeuner" element={<LunchToday />} />
+        {/* Compat : ancien chemin de l'onglet, renommé « Déjeuner ». */}
+        <Route path="midi" element={<Navigate to="/dejeuner" replace />} />
         <Route path="restaurant/:slug" element={<RestaurantPage />} />
         <Route path="mon-compte" element={<MyAccount />} />
         <Route path="a-propos" element={<About />} />
