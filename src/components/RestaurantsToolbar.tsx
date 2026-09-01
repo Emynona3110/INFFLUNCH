@@ -46,7 +46,7 @@ const RestaurantsToolbar = ({
   return (
     <div className="flex w-full select-none items-center gap-2">
       <div className="min-w-0 flex-1">
-        <SearchInput onSearch={onSearch} />
+        <SearchInput value={restaurantFilters.searchText} onSearch={onSearch} />
       </div>
 
       {/* Toggle d'affichage : grille (défaut) / liste / carte / roue */}

@@ -105,9 +105,13 @@ const RestaurantGrid = ({
     onEdit: isAdmin ? () => setEditTarget(restaurant) : undefined,
   });
 
-  const emptyMessage = restaurantFilters.favoritesOnly
-    ? "Aucun restaurant ne fait partie de vos favoris."
-    : "Aucun restaurant ne correspond à votre recherche.";
+  // Le message « aucun favori » ne vaut que si la liste de favoris est vraiment
+  // vide : avec des favoris et une recherche qui ne donne rien, c'est bien la
+  // recherche (ou les filtres) qui n'aboutit pas.
+  const emptyMessage =
+    restaurantFilters.favoritesOnly && favoriteIds.length === 0
+      ? "Aucun restaurant ne fait partie de vos favoris."
+      : "Aucun restaurant ne correspond à votre recherche.";
 
   const renderContent = () => {
     if (error) {

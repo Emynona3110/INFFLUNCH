@@ -3,12 +3,14 @@ import { authorInitials } from "@/utils/authorName";
 import { cn } from "@/lib/utils";
 
 // Palette douce et déterministe pour les avatars par défaut (initiales).
+// Fonds OPAQUES : ces pastilles se posent sur les photos des restaurants (page
+// Midi, cards), où un fond translucide laissait transparaître l'image.
 const avatarColors = [
-  "bg-sky-500/15 text-sky-600",
-  "bg-violet-500/15 text-violet-600",
-  "bg-emerald-500/15 text-emerald-600",
-  "bg-amber-500/15 text-amber-600",
-  "bg-rose-500/15 text-rose-600",
+  "bg-sky-100 text-sky-700 dark:bg-sky-900 dark:text-sky-200",
+  "bg-violet-100 text-violet-700 dark:bg-violet-900 dark:text-violet-200",
+  "bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200",
+  "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-200",
+  "bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-200",
 ];
 export const avatarColor = (key: string) =>
   avatarColors[(key.charCodeAt(0) || 0) % avatarColors.length];

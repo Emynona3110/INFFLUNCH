@@ -141,7 +141,9 @@ const LunchToday = () => {
       {loading ? (
         <div className="mb-6 flex items-center gap-3 rounded-card border border-border bg-card px-5 py-4">
           <span className="h-10 w-10 shrink-0 animate-pulse rounded-full bg-foreground/10" />
-          <span className="h-5 w-52 animate-pulse rounded bg-foreground/10" />
+          <div className="flex h-12 items-center">
+            <span className="h-5 w-52 animate-pulse rounded bg-foreground/10" />
+          </div>
         </div>
       ) : (
       <div
@@ -163,7 +165,7 @@ const LunchToday = () => {
           >
             <LuUtensils className="h-5 w-5" />
           </span>
-          <div className="min-w-0">
+          <div className="flex h-12 min-w-0 flex-col justify-center">
             {hasPlan ? (
               <>
                 <div className="text-sm text-foreground/55">
