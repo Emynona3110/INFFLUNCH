@@ -1,5 +1,6 @@
 import { toast as sonner } from "sonner";
 import { Achievement } from "@/data/achievements";
+import { cn } from "@/lib/utils";
 
 /**
  * Toast de déblocage de succès, style Steam : icône + « Succès débloqué » +
@@ -7,10 +8,24 @@ import { Achievement } from "@/data/achievements";
  * On rend une carte custom (pas les couleurs sonner par défaut) et on la scope
  * à `.tw-scope` car le toast est monté hors de la zone Tailwind de l'app.
  */
-export function showAchievementToast(a: Achievement) {
+export function showAchievementToast(a: Achievement, onClick?: () => void) {
   sonner.custom(
-    () => (
-      <div className="tw-scope flex w-[330px] items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-lg">
+    (id) => (
+      <div
+        role={onClick ? "button" : undefined}
+        onClick={
+          onClick
+            ? () => {
+                sonner.dismiss(id);
+                onClick();
+              }
+            : undefined
+        }
+        className={cn(
+          "tw-scope flex w-[330px] items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-lg",
+          onClick && "cursor-pointer transition hover:border-primary/40"
+        )}
+      >
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-2xl">
           {a.image ? (
             <img src={a.image} alt="" className="h-9 w-9 object-contain" />

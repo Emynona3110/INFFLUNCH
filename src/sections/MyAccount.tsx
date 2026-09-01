@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaStar } from "react-icons/fa";
 import { FiCamera, FiTrash2, FiChevronRight } from "react-icons/fi";
@@ -7,6 +7,7 @@ import { toast } from "@/lib/toast";
 import useSession from "../hooks/useSession";
 import useProfile from "../hooks/useProfile";
 import useMyReviews from "../hooks/useMyReviews";
+import useAchievementsSeen from "../hooks/useAchievementsSeen";
 import Avatar from "../components/Avatar";
 import AchievementsGallery from "./AchievementsGallery";
 import HoldToDeleteButton from "../components/HoldToDeleteButton";
@@ -47,7 +48,25 @@ const MyAccount = () => {
   const { profile, uploadAvatar, removeAvatar } = useProfile();
   const { data: reviews = [], isPending: reviewsLoading } = useMyReviews();
 
-  const [active, setActive] = useState<SubTabKey>("profil");
+  // Onglet ouvert : pilotable par l'URL (?tab=succes) — c'est ce que vise le
+  // clic sur un toast de succès.
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const isTabKey = (v: string | null): v is SubTabKey =>
+    subTabs.some((t) => t.key === v);
+  const [active, setActive] = useState<SubTabKey>(() =>
+    isTabKey(tabParam) ? tabParam : "profil"
+  );
+  useEffect(() => {
+    if (isTabKey(tabParam)) setActive(tabParam);
+  }, [tabParam]);
+
+  // Pastille « succès non vus » : elle s'éteint dès qu'on ouvre la galerie.
+  const { hasUnseen: hasUnseenAchievements, markSeen } = useAchievementsSeen();
+  useEffect(() => {
+    if (active === "succes") markSeen();
+  }, [active, markSeen]);
+
   const [isDialogOpen, setDialogOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -94,13 +113,16 @@ const MyAccount = () => {
               type="button"
               onClick={() => setActive(t.key)}
               className={cn(
-                "inline-flex cursor-pointer items-center rounded-full px-4 py-1.5 text-sm font-medium transition",
+                "relative inline-flex cursor-pointer items-center rounded-full px-4 py-1.5 text-sm font-medium transition",
                 isActive
                   ? "bg-primary text-primary-foreground"
                   : "bg-muted text-foreground/70 hover:bg-muted/70"
               )}
             >
               {t.label}
+              {t.key === "succes" && hasUnseenAchievements && !isActive && (
+                <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-background" />
+              )}
             </button>
           );
         })}

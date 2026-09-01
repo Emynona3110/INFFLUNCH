@@ -1,8 +1,11 @@
-import { FiLock } from "react-icons/fi";
+import { FiLock, FiTrash2 } from "react-icons/fi";
 import { Card } from "@/components/ui/card";
+import HoldToDeleteButton from "@/components/HoldToDeleteButton";
 import useAchievements from "@/hooks/useAchievements";
 import useAchievementStats from "@/hooks/useAchievementStats";
-import { ACHIEVEMENTS } from "@/data/achievements";
+import useIsAdmin from "@/hooks/useIsAdmin";
+import { ACHIEVEMENTS, AchievementId } from "@/data/achievements";
+import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 
 const formatDate = (iso: string) =>
@@ -18,8 +21,9 @@ const formatDate = (iso: string) =>
  * condition ni de l'intitulé avant déblocage).
  */
 const AchievementsGallery = () => {
-  const { unlockedIds, unlockedAt, loading } = useAchievements();
+  const { unlockedIds, unlockedAt, resetOne, loading } = useAchievements();
   const { percentById, ready: statsReady } = useAchievementStats();
+  const isAdmin = useIsAdmin();
   const unlockedCount = ACHIEVEMENTS.filter((a) => unlockedIds.includes(a.id)).length;
 
   // Tri : du plus courant au plus rare (% d'obtention décroissant → les plus
@@ -31,6 +35,26 @@ const AchievementsGallery = () => {
     if (ra !== rb) return rb - ra;
     return a.title.localeCompare(b.title, "fr");
   });
+
+  // Reverrouillage d'UN succès (admin seulement) : outil de test pour revoir
+  // son toast de déblocage. S'il est toujours mérité, il revient aussitôt.
+  const handleReset = async (id: AchievementId) => {
+    try {
+      await resetOne(id);
+      toast({
+        title: "Succès reverrouillé",
+        status: "success",
+        duration: 2500,
+      });
+    } catch (e) {
+      toast({
+        title: "Erreur",
+        description: e instanceof Error ? e.message : String(e),
+        status: "error",
+        duration: 5000,
+      });
+    }
+  };
 
   return (
     <Card className="p-6">
@@ -129,6 +153,18 @@ const AchievementsGallery = () => {
                     <span className="shrink-0 whitespace-nowrap pl-2 text-xs font-semibold text-foreground/45">
                       {percent.toFixed(1)}%
                     </span>
+                  )}
+
+                  {/* Reverrouiller ce succès (admin) : outil de test. */}
+                  {isAdmin && unlocked && (
+                    <HoldToDeleteButton
+                      onConfirm={() => handleReset(a.id)}
+                      title="Maintenir pour reverrouiller ce succès"
+                      className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-muted-foreground hover:text-destructive"
+                      progressClassName="bg-destructive/15"
+                    >
+                      <FiTrash2 className="h-3.5 w-3.5" />
+                    </HoldToDeleteButton>
                   )}
                 </div>
               </li>
