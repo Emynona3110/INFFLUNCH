@@ -90,14 +90,14 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: "critique_confirme",
     title: "Palais aguerri",
-    condition: "Publier 10 avis",
+    condition: "Publier 5 avis",
     icon: "👅",
     image: "/achievements/palais_aguerri.svg",
   },
   {
     id: "plume_gastronomique",
     title: "Plume gastronomique",
-    condition: "Publier 50 avis",
+    condition: "Publier 20 avis",
     icon: "🖋️",
     image: "/achievements/plume_gastronomique.svg",
   },
@@ -113,14 +113,14 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: "objectif_midi",
     title: "Influenceur culinaire",
-    condition: "Ajouter 10 photos",
+    condition: "Ajouter 5 photos",
     icon: "🤳",
     image: "/achievements/influenceur_culinaire.svg",
   },
   {
     id: "paparazzi_pause",
     title: "Pizzarazzi",
-    condition: "Ajouter 50 photos",
+    condition: "Ajouter 20 photos",
     icon: "🍕",
     image: "/achievements/pizzarazzi.svg",
   },
@@ -143,7 +143,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: "approuve",
     title: "Approuvé",
-    condition: "Recevoir 10 réactions sur vos photos",
+    condition: "Recevoir 5 réactions sur vos photos",
     icon: "❤️",
     image: "/achievements/approuve.svg",
   },

@@ -99,14 +99,14 @@ const useAchievementTriggers = () => {
 
     const reached: AchievementId[] = [];
     if (metrics.reviews >= 1) reached.push("premier_avis");
-    if (metrics.reviews >= 10) reached.push("critique_confirme");
-    if (metrics.reviews >= 50) reached.push("plume_gastronomique");
+    if (metrics.reviews >= 5) reached.push("critique_confirme");
+    if (metrics.reviews >= 20) reached.push("plume_gastronomique");
     if (metrics.photos >= 1) reached.push("premiere_photo");
-    if (metrics.photos >= 10) reached.push("objectif_midi");
-    if (metrics.photos >= 50) reached.push("paparazzi_pause");
+    if (metrics.photos >= 5) reached.push("objectif_midi");
+    if (metrics.photos >= 20) reached.push("paparazzi_pause");
     if (metrics.reactionsGivenDistinct >= 1) reached.push("premiere_reaction");
     if (metrics.reactionsGivenDistinct >= 20) reached.push("public_conquis");
-    if (metrics.reactionsReceived >= 10) reached.push("approuve");
+    if (metrics.reactionsReceived >= 5) reached.push("approuve");
     if (metrics.favorites >= 5) reached.push("quinte_gagnant");
     if (metrics.loginStreak >= 5) reached.push("fidele_au_poste");
     reached.forEach((id) => unlock(id));
