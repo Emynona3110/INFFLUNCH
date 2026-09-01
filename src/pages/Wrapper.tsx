@@ -2,6 +2,7 @@ import { useEffect, useState, ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import supabaseClient from "../services/supabaseClient";
 import AchievementTriggers from "../components/AchievementTriggers";
+import RestaurantsPrefetch from "../components/RestaurantsPrefetch";
 
 interface WrapperProps {
   children: ReactNode;
@@ -28,6 +29,7 @@ const Wrapper = ({ children }: WrapperProps) => {
     <>
       {children}
       <AchievementTriggers />
+      <RestaurantsPrefetch />
     </>
   ) : (
     <Navigate to="/login" replace />
