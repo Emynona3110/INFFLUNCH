@@ -130,7 +130,8 @@ const RestaurantGrid = ({
           </div>
         );
       }
-      return <RestaurantsMap restaurants={filteredData} />;
+      // Les restaurants fermés ne sont pas placés sur la carte.
+      return <RestaurantsMap restaurants={filteredData.filter((r) => !r.closed)} />;
     }
 
     // --- Roue (Surprise du midi) ---

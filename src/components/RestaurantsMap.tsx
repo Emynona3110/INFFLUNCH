@@ -18,7 +18,8 @@ import inffluxLogo from "@/assets/infflux.svg";
 import inffluxLogoWhite from "@/assets/w-infflux.svg";
 
 /**
- * Carte globale de TOUS les restaurants situés (lat/lng en base), positionnés
+ * Carte globale des restaurants situés (lat/lng en base ; les fermés sont
+ * écartés en amont par la grille), positionnés
  * autour d'INFFLUX. Même socle open source que la minimap (Leaflet + tuiles OSM,
  * dark mode via filtre CSS .osm-map.is-dark). Les restos sans coordonnées sont
  * ignorés (badge récap en bas).
@@ -105,7 +106,7 @@ const RestaurantsMap = ({ restaurants }: Props) => {
           <Marker
             key={r.id}
             position={[r.lat as number, r.lng as number]}
-            icon={pinIcon(r.closed ? "#94a3b8" : "#f79220")}
+            icon={pinIcon("#f79220")}
             eventHandlers={{ click: () => navigate(`/restaurant/${r.slug}`) }}
           >
             {/* Infos au survol ; le clic sur le pin ouvre la fiche. */}
@@ -114,11 +115,6 @@ const RestaurantsMap = ({ restaurants }: Props) => {
                 <div className="font-display text-sm font-bold text-card-foreground">
                   {r.name}
                 </div>
-                {r.closed && (
-                  <div className="mt-0.5 text-[11px] font-semibold uppercase tracking-wide text-foreground/50">
-                    Fermé
-                  </div>
-                )}
                 {r.rating != null && r.rating > 0 && (
                   <div className="mt-0.5 flex items-center gap-1 text-xs text-foreground/70">
                     <FaStar className="h-3 w-3 text-amber-500" />
