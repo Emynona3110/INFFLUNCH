@@ -38,6 +38,10 @@ interface RestaurantDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  /** Appelée après une suppression réussie ; à défaut, on retombe sur
+   *  `onSuccess`. Permet à l'appelant de quitter la fiche supprimée plutôt que
+   *  de la recharger (elle n'existe plus). */
+  onDeleted?: () => void;
   initialData?: Partial<Restaurant>;
 }
 
@@ -45,6 +49,7 @@ const RestaurantDialog = ({
   isOpen,
   onClose,
   onSuccess,
+  onDeleted,
   initialData,
 }: RestaurantDialogProps) => {
 
@@ -222,7 +227,7 @@ const RestaurantDialog = ({
       duration: 3000,
       isClosable: true,
     });
-    onSuccess?.();
+    (onDeleted ?? onSuccess)?.();
     onClose();
   };
 

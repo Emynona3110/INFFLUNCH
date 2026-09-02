@@ -546,6 +546,13 @@ const RestaurantPage = () => {
               setEditOpen(false);
               queryClient.invalidateQueries();
             }}
+            // La fiche n'existe plus : on quitte la page avant de rafraîchir,
+            // sinon le slug devenu introuvable affiche l'easter egg 🐑.
+            onDeleted={() => {
+              setEditOpen(false);
+              navigate("/", { replace: true });
+              queryClient.invalidateQueries();
+            }}
             initialData={restaurant}
           />
           <LocationEditDialog
