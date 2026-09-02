@@ -68,6 +68,20 @@ const haversineKm = (a, b) => {
 };
 const estimateWalkMinutes = (km) => Math.max(1, Math.round((km / 5) * 60 * 1.3));
 
+// Les scores de pertinence dépendent du temps de marche : on les recalcule
+// avant de sortir, quel que soit le nombre de lignes traitées.
+const recalcAndExit = async (code) => {
+  const { error: rpcError } = await supabase.rpc("recalc_relevance");
+  if (rpcError) {
+    console.warn(
+      `⚠️  recalc_relevance() a échoué (${rpcError.message}) — à relancer dans l'éditeur SQL.`
+    );
+  } else {
+    console.log("✅ Pertinence recalculée.");
+  }
+  process.exit(code);
+};
+
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
 
 const { error: authError } = await supabase.auth.signInWithPassword({
@@ -93,7 +107,7 @@ if (error) {
 
 if (!restaurants.length) {
   console.log("✅ Rien à faire : tous les restaurants ont déjà un temps de marche.");
-  process.exit(0);
+  await recalcAndExit(0);
 }
 
 console.log(`→ ${restaurants.length} restaurant(s) à calculer…\n`);
@@ -134,4 +148,4 @@ for (const r of restaurants) {
 console.log(
   `\nTerminé : ${ok} ok (dont ${estimated} estimés), ${failed} échec(s).`
 );
-process.exit(0);
+await recalcAndExit(0);

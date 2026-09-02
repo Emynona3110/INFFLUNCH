@@ -3,7 +3,10 @@
 // À lancer UNE fois après la migration sql/2026-06-19_restaurants_coords.sql.
 //
 // Géocode via Nominatim (1,1 s entre chaque appel = politique d'usage) et écrit
-// lat/lng en base. Pas de clé service_role : on se connecte avec un compte ADMIN
+// lat/lng en base, AVEC la distance à vol d'oiseau depuis INFFLUX et son libellé
+// (`distance` / `distanceLabel`) : sans eux, pas de pastille « 400m » sur les cards
+// ni de score de proximité — ils n'étaient jusque-là écrits que par le dialog admin.
+// Pas de clé service_role : on se connecte avec un compte ADMIN
 // (les updates passent par la RLS admin de la table restaurants).
 //
 // Usage (PowerShell) :
@@ -53,6 +56,27 @@ if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
 }
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+const INFFLUX = { lat: 48.8487433, lng: 2.4280408 };
+
+// Distance vol d'oiseau (km) — même calcul que Leaflet `distanceTo` côté front.
+const haversineKm = (a, b) => {
+  const R = 6371;
+  const dLat = ((b.lat - a.lat) * Math.PI) / 180;
+  const dLng = ((b.lng - a.lng) * Math.PI) / 180;
+  const s =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((a.lat * Math.PI) / 180) *
+      Math.cos((b.lat * Math.PI) / 180) *
+      Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(s), Math.sqrt(1 - s));
+};
+
+// Libellé historique : « 1.2km » au-delà du kilomètre, « 350m » en dessous.
+const formatDistance = (km) =>
+  km >= 1
+    ? `${(Math.round(km * 10) / 10).toFixed(1)}km`
+    : `${Math.round((km * 1000) / 10) * 10}m`;
 
 const geocode = async (address) => {
   const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(
@@ -110,12 +134,20 @@ for (const r of restaurants) {
   }
   try {
     const { lat, lng } = await geocode(r.address);
+    const distanceKm = haversineKm(INFFLUX, { lat, lng });
     const { error: upErr } = await supabase
       .from("restaurants")
-      .update({ lat, lng })
+      .update({
+        lat,
+        lng,
+        distance: distanceKm,
+        distanceLabel: formatDistance(distanceKm),
+      })
       .eq("id", r.id);
     if (upErr) throw upErr;
-    console.log(`✅ ${r.name} → ${lat.toFixed(5)}, ${lng.toFixed(5)}`);
+    console.log(
+      `✅ ${r.name} → ${lat.toFixed(5)}, ${lng.toFixed(5)} (${formatDistance(distanceKm)})`
+    );
     ok++;
   } catch (e) {
     console.warn(`❌ ${r.name} : ${e.message}`);
