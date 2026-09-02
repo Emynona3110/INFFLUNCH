@@ -1,14 +1,19 @@
 import { FiBell, FiBellOff } from "react-icons/fi";
 import { toast } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
-import { Tooltip } from "@/components/ui/tooltip";
 import usePushNotifications from "@/hooks/usePushNotifications";
 
 /**
- * Bouton cloche de la section Admin : abonne (ou désabonne) CET appareil aux
- * notifications de nouvelles demandes d'accès. Sur iPhone, l'app doit avoir été
- * ajoutée à l'écran d'accueil et ouverte depuis cette icône — sinon iOS ne
- * fournit pas le push et on l'explique au clic.
+ * Abonne (ou désabonne) CET appareil aux notifications de nouvelles demandes
+ * d'accès. Affiché dans « Mon compte », l'appelant se charge de le réserver aux
+ * admins — ce sont les seuls concernés par ces demandes.
+ *
+ * L'abonnement est propre au navigateur : le libellé le rappelle, sinon on
+ * croit l'avoir activé partout depuis n'importe quel appareil.
+ *
+ * Sur iPhone, l'app doit avoir été ajoutée à l'écran d'accueil et ouverte
+ * depuis cette icône — sinon iOS ne fournit pas le push, et on l'explique au
+ * clic plutôt que de masquer le bouton.
  */
 const PushToggle = () => {
   const { supported, blockedOnIOS, enabled, ready, busy, toggle } =
@@ -40,22 +45,16 @@ const PushToggle = () => {
     });
   };
 
-  const label = enabled
-    ? "Notifications activées sur cet appareil"
-    : "Être notifié des nouvelles demandes sur cet appareil";
-
   return (
-    <Tooltip label={label}>
-      <Button
-        variant={enabled ? "primarySoft" : "outline"}
-        onClick={handleClick}
-        loading={busy || !ready}
-        aria-label={label}
-        className="px-3"
-      >
-        {enabled ? <FiBell size={18} /> : <FiBellOff size={18} />}
-      </Button>
-    </Tooltip>
+    <Button
+      variant={enabled ? "primarySoft" : "outline"}
+      onClick={handleClick}
+      loading={busy || !ready}
+      className="w-full"
+    >
+      {enabled ? <FiBell className="h-4 w-4" /> : <FiBellOff className="h-4 w-4" />}
+      {enabled ? "Notifications activées" : "Activer les notifications"}
+    </Button>
   );
 };
 

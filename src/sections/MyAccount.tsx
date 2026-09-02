@@ -8,10 +8,12 @@ import useSession from "../hooks/useSession";
 import useProfile from "../hooks/useProfile";
 import useMyReviews from "../hooks/useMyReviews";
 import useAchievementsSeen from "../hooks/useAchievementsSeen";
+import useIsAdmin from "../hooks/useIsAdmin";
 import Avatar from "../components/Avatar";
 import AchievementsGallery from "./AchievementsGallery";
 import HoldToDeleteButton from "../components/HoldToDeleteButton";
 import ChangePasswordDialog from "../components/ChangePasswordDialog";
+import PushToggle from "../components/PushToggle";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -47,6 +49,9 @@ const MyAccount = () => {
   const { sessionData, signOut, error } = useSession();
   const { profile, uploadAvatar, removeAvatar } = useProfile();
   const { data: reviews = [], isPending: reviewsLoading } = useMyReviews();
+  // Les notifications push ne concernent que les demandes d'accès :
+  // inutile de proposer la cloche à qui ne les traite pas.
+  const isAdmin = useIsAdmin();
 
   // Onglet ouvert : pilotable par l'URL (?tab=succes) — c'est ce que vise le
   // clic sur un toast de succès.
@@ -195,6 +200,7 @@ const MyAccount = () => {
         <div className="my-6 h-px bg-border" />
 
         <div className="flex flex-col gap-3">
+          {isAdmin && <PushToggle />}
           <Button variant="outline" onClick={() => setDialogOpen(true)}>
             Changer le mot de passe
           </Button>
