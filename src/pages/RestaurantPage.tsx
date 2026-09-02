@@ -44,7 +44,9 @@ import Beeeh from "@/sections/Beeeh";
 /* ------------------------------ helpers UI ------------------------------ */
 
 function Stars({ rating, size = 18 }: { rating: number; size?: number }) {
-  const rounded = Math.floor((rating ?? 0) * 2) / 2;
+  // Même règle que sur les cards : dès qu'il y a une décimale, demi-étoile.
+  const value = rating ?? 0;
+  const rounded = Math.floor(value) + (value % 1 === 0 ? 0 : 0.5);
   const pct = (rounded / 5) * 100;
   return (
     <span className="relative inline-flex">
@@ -208,7 +210,7 @@ const RestaurantPage = () => {
         {isTop && (
           <span className="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow">
             <img src={topRatedIcon} alt="" className="h-3.5 w-3.5" />
-            Top 3
+            Top 5
           </span>
         )}
 

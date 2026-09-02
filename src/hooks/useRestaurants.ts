@@ -73,9 +73,18 @@ const useRestaurants = (restaurantFilters: RestaurantFilters) => {
     const asc = sortOrder === "distance";
     // Les fermés restent consultables mais passent toujours en fin de liste,
     // quel que soit le tri choisi (false avant true en ordre croissant).
-    return query
+    const ordered = query
       .order("closed", { ascending: true })
       .order(sortOrder, { ascending: asc });
+
+    // À note égale, le plus commenté passe devant (un 4,5 sur 20 avis vaut
+    // mieux qu'un 4,5 sur 1 avis), puis la pertinence tranche.
+    if (sortOrder === "rating") {
+      return ordered
+        .order("reviews", { ascending: false })
+        .order("relevance", { ascending: false });
+    }
+    return ordered;
   };
 
   // `favoritesOnly` est appliqué côté client (RestaurantGrid) : l'exclure de la

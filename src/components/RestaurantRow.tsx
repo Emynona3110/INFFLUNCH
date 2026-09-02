@@ -62,10 +62,10 @@ const RestaurantRow = ({
           <ClosedBadge compact className="absolute left-1 top-1" />
         )}
         {isTop && (
-          <Tooltip label="Top 3 des mieux notés">
+          <Tooltip label="Top 5 des mieux notés">
             <span className="absolute left-1 top-1 inline-flex items-center gap-1 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground shadow">
               <img src={topRatedIcon} alt="" className="h-3 w-3" />
-              Top 3
+              Top 5
             </span>
           </Tooltip>
         )}

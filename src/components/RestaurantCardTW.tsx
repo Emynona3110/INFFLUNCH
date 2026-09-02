@@ -23,8 +23,11 @@ interface Props {
 }
 
 export function Stars({ rating }: { rating: number }) {
-  // Arrondi au demi-point pour un remplissage partiel (comme la version d'origine)
-  const rounded = Math.floor((rating ?? 0) * 2) / 2;
+  // Toute note non entière affiche une demi-étoile : 4,2 comme 4,8 se lisent
+  // « 4 étoiles et demie ». Seule une note pile entière montre des étoiles
+  // pleines — c'est le repère attendu, plus lisible qu'un remplissage exact.
+  const value = rating ?? 0;
+  const rounded = Math.floor(value) + (value % 1 === 0 ? 0 : 0.5);
   const pct = (rounded / 5) * 100;
   return (
     <span className="relative inline-flex">
@@ -85,10 +88,10 @@ const RestaurantCardTW = ({
         {restaurant.closed && <ClosedBadge className="absolute left-3 top-3" />}
 
         {isTop && (
-          <Tooltip label="Top 3 des mieux notés">
+          <Tooltip label="Top 5 des mieux notés">
             <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground shadow">
               <img src={topRatedIcon} alt="" className="h-3.5 w-3.5" />
-              Top 3
+              Top 5
             </span>
           </Tooltip>
         )}

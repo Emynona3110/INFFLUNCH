@@ -1,20 +1,36 @@
 import useSupabaseQuery from "./useSupabaseQuery";
 import supabaseClient from "../services/supabaseClient";
 
+/** Nombre d'avis minimum pour prétendre au Top 5 : éligible dès le premier avis
+ *  (choix assumé — un resto noté une fois peut donc être en tête). À monter si
+ *  un unique avis enthousiaste fausse trop le classement. */
+const MIN_REVIEWS = 1;
+
+/**
+ * Les 5 restaurants les mieux notés (pastille « Top 5 » + anneau sur la card).
+ *
+ * Classement sur la note BRUTE, dans l'ordre : note, puis nombre d'avis (à note
+ * égale, le plus commenté est le mieux établi), puis note bayésienne (elle
+ * départage deux restos de même note et même nombre d'avis en tenant compte du
+ * prior), puis le nom pour que l'ordre soit stable d'un chargement à l'autre.
+ *
+ * Éligibilité : au moins MIN_REVIEWS avis (1 aujourd'hui, donc tout resto noté
+ * concourt ; seuls ceux sans aucun avis sont écartés, leur note valant 0). Le
+ * resto de test et les fermés sont exclus quel que soit le rôle.
+ */
 const useTopRated = () =>
   useSupabaseQuery<{ id: number }>(["restaurants", "topRated"], () =>
     supabaseClient
       .from("restaurants")
       .select("id")
-      // Tri sur la note bayésienne (corrigée du faible nb d'avis) et non la note
-      // brute : un 5,0 avec 1 avis ne passe plus devant un 4,5 avec 50 avis.
-      .order("bayes_rating", { ascending: false })
-      .neq("reviews", 0)
-      // Le resto de test n'est jamais Top 3, quel que soit le rôle.
+      .gte("reviews", MIN_REVIEWS)
       .neq("slug", "test")
-      // Un restaurant fermé ne peut plus être mis en avant.
       .eq("closed", false)
-      .limit(3)
+      .order("rating", { ascending: false })
+      .order("reviews", { ascending: false })
+      .order("bayes_rating", { ascending: false })
+      .order("name", { ascending: true })
+      .limit(5)
   );
 
 export default useTopRated;
