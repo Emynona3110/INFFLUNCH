@@ -37,11 +37,11 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
   // dans la galerie (onglet Succès de Mon Profil).
   const { hasUnseen: hasUnseenAchievements } = useAchievementsSeen();
 
-  // Puce "déjeuner" : je n'ai pas encore dit où je mange aujourd'hui. Elle
-  // disparaît dès que j'ai déclaré mon restaurant du jour. On attend la fin du
+  // Puce "déjeuner" : je n'ai rien déclaré pour aujourd'hui. Elle disparaît dès
+  // que j'ai choisi un restaurant OU dit que je ne mange pas au resto. On attend la fin du
   // chargement, sinon elle clignote à chaque arrivée sur l'app.
-  const { myRestaurantId, loading: lunchLoading } = useLunchToday();
-  const lunchPending = !lunchLoading && myRestaurantId == null;
+  const { hasPlan, loading: lunchLoading } = useLunchToday();
+  const lunchPending = !lunchLoading && !hasPlan;
 
   return (
     <div className="flex h-full w-full select-none items-center justify-between gap-1">

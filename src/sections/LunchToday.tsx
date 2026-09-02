@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { LuUtensils } from "react-icons/lu";
+import { LuUtensils, LuUtensilsCrossed } from "react-icons/lu";
 import { Button } from "@/components/ui/button";
 import Avatar from "@/components/Avatar";
 import LunchPickDialog from "@/components/LunchPickDialog";
@@ -44,6 +44,7 @@ const LunchToday = () => {
   const {
     participants,
     byRestaurant,
+    hasPlan,
     myRestaurantId,
     loading,
     saving,
@@ -54,6 +55,15 @@ const LunchToday = () => {
   const restById = useMemo(
     () => new Map(restaurants.map((r) => [r.id, r])),
     [restaurants]
+  );
+
+  // « Inscrits » = ceux qui vont au restaurant. Déclarer qu'on ne mange pas au
+  // resto est une information PRIVÉE : elle ne sert qu'à l'utilisateur (état de
+  // son encart, extinction de la puce de l'onglet) et n'apparaît nulle part
+  // pour les autres — ni dans le compteur, ni dans les tablées.
+  const registered = useMemo(
+    () => participants.filter((p) => p.restaurant_id != null),
+    [participants]
   );
 
   // Une tablée par restaurant, la plus fournie en premier (nom en cas d'égalité).
@@ -75,7 +85,9 @@ const LunchToday = () => {
   // L'état de l'encart ne dépend QUE du midi (déjà connu), jamais du chargement
   // de la liste des restaurants : sinon on affiche une fraction de seconde
   // « pas encore choisi » (bouton bleu) avant que le nom du resto n'arrive.
-  const hasPlan = myRestaurantId != null;
+  // hasPlan couvre les deux déclarations possibles : un restaurant, ou « pas au
+  // resto » (gamelle, télétravail…) qui ne porte pas de restaurant.
+  const skipsRestaurant = hasPlan && myRestaurantId == null;
   const myRestaurant = myRestaurantId ? restById.get(myRestaurantId) : undefined;
   // Nom du resto choisi : null tant qu'on l'ignore (→ ligne fantôme).
   const myRestaurantName =
@@ -95,6 +107,8 @@ const LunchToday = () => {
   };
 
   const join = (restaurantId: number) => guard(() => setLunch(restaurantId));
+  /** « Je ne mange pas au resto » : une intention sans restaurant. */
+  const skip = () => guard(() => setLunch(null));
   const leave = () => guard(() => clearLunch());
 
   return (
@@ -117,19 +131,19 @@ const LunchToday = () => {
           <p className="mt-0.5 text-sm text-foreground/55">{todayLabel()}</p>
         </div>
 
-        {participants.length > 0 && (
+        {registered.length > 0 && (
           <div className="flex shrink-0 items-baseline gap-1.5">
             <motion.span
-              key={participants.length}
+              key={registered.length}
               initial={{ scale: 0.6, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={spring}
               className="font-display text-3xl font-extrabold leading-none text-primary"
             >
-              {participants.length}
+              {registered.length}
             </motion.span>
             <span className="text-sm text-foreground/55">
-              inscrit{participants.length > 1 ? "s" : ""}
+              inscrit{registered.length > 1 ? "s" : ""}
             </span>
           </div>
         )}
@@ -163,10 +177,18 @@ const LunchToday = () => {
                 : "bg-primary/10 text-primary"
             )}
           >
-            <LuUtensils className="h-5 w-5" />
+            {skipsRestaurant ? (
+              <LuUtensilsCrossed className="h-5 w-5" />
+            ) : (
+              <LuUtensils className="h-5 w-5" />
+            )}
           </span>
           <div className="flex h-12 min-w-0 flex-col justify-center">
-            {hasPlan ? (
+            {skipsRestaurant ? (
+              <div className="text-sm text-foreground/70">
+                Ce midi, tu ne manges pas au restaurant.
+              </div>
+            ) : hasPlan ? (
               <>
                 <div className="text-sm text-foreground/55">
                   Ce midi, tu vas au
@@ -193,12 +215,17 @@ const LunchToday = () => {
               Annuler
             </Button>
           ) : (
-            <Button
-              onClick={() => setPickOpen(true)}
-              disabled={saving || restaurantsLoading}
-            >
-              Choisir un restaurant
-            </Button>
+            <>
+              <Button
+                onClick={() => setPickOpen(true)}
+                disabled={saving || restaurantsLoading}
+              >
+                Choisir un restaurant
+              </Button>
+              <Button variant="outline" onClick={skip} disabled={saving}>
+                Pas de resto
+              </Button>
+            </>
           )}
         </div>
       </div>

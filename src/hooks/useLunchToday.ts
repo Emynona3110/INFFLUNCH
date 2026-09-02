@@ -5,7 +5,8 @@ import supabaseClient from "../services/supabaseClient";
 
 export interface LunchParticipant {
   user_id: string;
-  restaurant_id: number;
+  /** null = la personne a déclaré ne pas manger au restaurant aujourd'hui. */
+  restaurant_id: number | null;
   /** Email (jointure public.users), pour le nom affiché. */
   email: string | null;
   /** profiles.avatar_path, null = initiales. */
@@ -58,6 +59,9 @@ const closeChannel = () => {
  * chargée en une requête, puis groupée par restaurant. Une personne n'a qu'une
  * seule intention par jour (clé primaire user_id + day) : changer de
  * restaurant est un upsert, se retirer un delete.
+ *
+ * Une intention sans restaurant (`restaurant_id` null) veut dire « je ne mange
+ * pas au resto ce midi » — gamelle, télétravail, peu importe.
  */
 const useLunchToday = () => {
   const { sessionData } = useSession();
@@ -84,7 +88,10 @@ const useLunchToday = () => {
         .eq("day", day);
       if (error) throw new Error(error.message);
 
-      const rows = (data ?? []) as { user_id: string; restaurant_id: number }[];
+      const rows = (data ?? []) as {
+        user_id: string;
+        restaurant_id: number | null;
+      }[];
       if (rows.length === 0) return [];
 
       // lunch_plans référence auth.users : on joint manuellement public.users
@@ -130,8 +137,9 @@ const useLunchToday = () => {
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey });
 
+  // restaurantId null = « je ne mange pas au resto ce midi ».
   const setMutation = useMutation({
-    mutationFn: async (restaurantId: number) => {
+    mutationFn: async (restaurantId: number | null) => {
       if (!userId) throw new Error("Session expirée, reconnecte-toi.");
       const { error } = await supabaseClient
         .from("lunch_plans")
@@ -160,6 +168,7 @@ const useLunchToday = () => {
   const byRestaurant = useMemo(() => {
     const map = new Map<number, LunchParticipant[]>();
     participants.forEach((p) => {
+      if (p.restaurant_id == null) return; // « pas au resto » : pas de tablée
       const list = map.get(p.restaurant_id);
       if (list) list.push(p);
       else map.set(p.restaurant_id, [p]);
@@ -172,7 +181,11 @@ const useLunchToday = () => {
   return {
     participants,
     byRestaurant,
-    /** Restaurant où je déjeune aujourd'hui, null si je n'ai pas choisi. */
+    /** J'ai déclaré quelque chose aujourd'hui — restaurant ou « pas au resto ».
+     *  Le « pas au resto » ne regarde que l'intéressé : il n'est ni compté ni
+     *  affiché ailleurs, il sert juste à éteindre la puce de l'onglet. */
+    hasPlan: !!myPlan,
+    /** Restaurant où je déjeune, null si je n'ai pas choisi OU pas de resto. */
     myRestaurantId: myPlan?.restaurant_id ?? null,
     loading: isPending,
     saving: setMutation.isPending || clearMutation.isPending,
