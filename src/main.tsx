@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import App from "./App";
 import { ThemeProvider, useTheme } from "./lib/theme";
+import { registerServiceWorker } from "./services/push";
 import "overlayscrollbars/overlayscrollbars.css";
 import "./tailwind.css";
 
@@ -21,6 +22,10 @@ const ThemedToaster = () => {
   const { theme } = useTheme();
   return <Toaster richColors position="bottom-right" theme={theme} />;
 };
+
+// Service worker : uniquement pour recevoir les notifications push (aucun
+// cache offline). Sans lui, pas d'abonnement possible.
+registerServiceWorker();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

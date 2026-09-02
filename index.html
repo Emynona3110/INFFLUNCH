@@ -4,6 +4,14 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="src/assets/bg-infflux.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- PWA : nécessaire pour les notifications push (sur iOS, elles
+         n'existent que pour une app ajoutée à l'écran d'accueil). -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="INFFLUNCH" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="theme-color" content="#113894" />
     <!-- Hors des résultats de recherche (site interne). N.B. : ne restreint PAS
          l'accès — la vraie protection reste l'authentification + RLS. -->
     <meta name="robots" content="noindex, nofollow" />

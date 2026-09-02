@@ -2,6 +2,7 @@ import { useState } from "react";
 import DataManager from "../admin/DataManager";
 import AdminUsers from "../admin/AdminUsers";
 import AccessRequests from "../admin/AccessRequests";
+import PushToggle from "../admin/PushToggle";
 import useAccessRequests from "../hooks/useAccessRequests";
 import { adminSections } from "../services/adminSections";
 import { Button } from "@/components/ui/button";
@@ -62,12 +63,19 @@ const AdminSection = () => {
             );
           })}
         </div>
-        {/* "Ajouter +" uniquement pour le CRUD générique (Tags). */}
-        {active === "tags" && (
-          <Button variant="primarySoft" onClick={() => setAddSignal((n) => n + 1)}>
-            Ajouter +
-          </Button>
-        )}
+        <div className="flex shrink-0 items-center gap-2">
+          {/* Cloche : notifications de nouvelles demandes sur CET appareil. */}
+          <PushToggle />
+          {/* "Ajouter +" uniquement pour le CRUD générique (Tags). */}
+          {active === "tags" && (
+            <Button
+              variant="primarySoft"
+              onClick={() => setAddSignal((n) => n + 1)}
+            >
+              Ajouter +
+            </Button>
+          )}
+        </div>
       </div>
       <div className="min-h-0 flex-1">
         {active === "tags" ? (

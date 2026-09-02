@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FiMoreVertical } from "react-icons/fi";
 import darkLogo from "../assets/infflux.svg";
 import lightLogo from "../assets/w-infflux.svg";
@@ -14,6 +14,7 @@ import {
   RestaurantFilters,
 } from "../pages/UserPage";
 import { cn } from "@/lib/utils";
+import { setFaviconBadge } from "@/lib/faviconBadge";
 
 interface NavbarProps {
   page: string;
@@ -42,6 +43,17 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
   // chargement, sinon elle clignote à chaque arrivée sur l'app.
   const { hasPlan, loading: lunchLoading } = useLunchToday();
   const lunchPending = !lunchLoading && !hasPlan;
+
+  // Report des puces sur l'icône d'onglet du navigateur (et sur l'icône
+  // d'application en PWA installée) : une seule pastille, dès qu'au moins une
+  // puce est allumée dans la navbar.
+  const hasDot =
+    pendingCount > 0 || hasUnseen || hasUnseenAchievements || lunchPending;
+  useEffect(() => {
+    setFaviconBadge(hasDot);
+  }, [hasDot]);
+  // Navbar démontée (déconnexion, pages publiques) : on retire la pastille.
+  useEffect(() => () => setFaviconBadge(false), []);
 
   return (
     <div className="flex h-full w-full select-none items-center justify-between gap-1">
