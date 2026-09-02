@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
+import { FiChevronDown } from "react-icons/fi";
 import { toast } from "@/lib/toast";
 import supabaseClient from "../../services/supabaseClient";
+import {
+  DEFAULT_TAG_CATEGORY,
+  TAG_CATEGORIES,
+  TagCategory,
+  formatTagLabel,
+} from "../../services/tagCategories";
 import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,33 +16,32 @@ interface TagDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
-  initialData?: { id: number; label: string };
+  initialData?: { id: number; label: string; category?: TagCategory };
 }
-
-const formatLabel = (input: string) =>
-  input
-    .split(" ")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-    .join(" ")
-    .trim();
 
 const TagDialog = ({ isOpen, onClose, onSuccess, initialData }: TagDialogProps) => {
   const [label, setLabel] = useState("");
+  const [category, setCategory] = useState<TagCategory>(DEFAULT_TAG_CATEGORY);
   const [original, setOriginal] = useState("");
+  const [originalCategory, setOriginalCategory] =
+    useState<TagCategory>(DEFAULT_TAG_CATEGORY);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    const formatted = initialData?.label ? formatLabel(initialData.label) : "";
+    const formatted = initialData?.label ? formatTagLabel(initialData.label).trim() : "";
+    const initialCategory = initialData?.category ?? DEFAULT_TAG_CATEGORY;
     setLabel(formatted);
     setOriginal(formatted);
+    setCategory(initialCategory);
+    setOriginalCategory(initialCategory);
   }, [isOpen, initialData]);
 
   const handleSubmit = async () => {
-    const formatted = formatLabel(label);
+    const formatted = formatTagLabel(label).trim();
     if (!formatted) return;
 
     if (initialData) {
-      if (formatted === original) {
+      if (formatted === original && category === originalCategory) {
         toast({
           title: "Aucune modification",
           description: "Les données étaient identiques.",
@@ -49,7 +55,7 @@ const TagDialog = ({ isOpen, onClose, onSuccess, initialData }: TagDialogProps) 
       setIsSubmitting(true);
       const { error: updateError } = await supabaseClient
         .from("tags")
-        .update({ label: formatted })
+        .update({ label: formatted, category })
         .eq("id", initialData.id);
 
       if (updateError) {
@@ -66,13 +72,18 @@ const TagDialog = ({ isOpen, onClose, onSuccess, initialData }: TagDialogProps) 
 
       const { data: updated, error: fetchError } = await supabaseClient
         .from("tags")
-        .select("label")
+        .select("label, category")
         .eq("id", initialData.id)
         .maybeSingle();
 
       setIsSubmitting(false);
 
-      if (fetchError || !updated || formatLabel(updated.label) === original) {
+      const unchanged =
+        !!updated &&
+        formatTagLabel(updated.label).trim() === original &&
+        updated.category === originalCategory;
+
+      if (fetchError || !updated || unchanged) {
         toast({
           title: "Aucune modification détectée",
           description: "L'enregistrement n'a pas changé dans la base.",
@@ -93,7 +104,7 @@ const TagDialog = ({ isOpen, onClose, onSuccess, initialData }: TagDialogProps) 
     setIsSubmitting(true);
     const { error: insertError } = await supabaseClient
       .from("tags")
-      .insert({ label: formatted });
+      .insert({ label: formatted, category });
     setIsSubmitting(false);
 
     if (insertError) {
@@ -115,7 +126,11 @@ const TagDialog = ({ isOpen, onClose, onSuccess, initialData }: TagDialogProps) 
   const disabled =
     isSubmitting ||
     !label.trim() ||
-    (!!initialData && formatLabel(label) === original);
+    (!!initialData &&
+      formatTagLabel(label).trim() === original &&
+      category === originalCategory);
+
+  const hint = TAG_CATEGORIES.find((c) => c.value === category)?.hint;
 
   return (
     <Dialog open={isOpen} onClose={onClose}>
@@ -134,8 +149,27 @@ const TagDialog = ({ isOpen, onClose, onSuccess, initialData }: TagDialogProps) 
             autoFocus
             value={label}
             placeholder="ex : Végétarien"
-            onChange={(e) => setLabel(formatLabel(e.target.value))}
+            onChange={(e) => setLabel(formatTagLabel(e.target.value))}
           />
+        </label>
+
+        <label className="flex flex-col gap-1.5">
+          <span className="text-sm font-medium text-foreground">Catégorie</span>
+          <div className="relative">
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value as TagCategory)}
+              className="h-10 w-full cursor-pointer appearance-none rounded-lg border border-border bg-background pl-3 pr-9 text-sm text-foreground outline-none transition focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/25"
+            >
+              {TAG_CATEGORIES.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+            <FiChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground opacity-50" />
+          </div>
+          {hint && <span className="text-xs text-foreground/55">{hint}</span>}
         </label>
 
         <div className="mt-2 flex justify-end gap-2">

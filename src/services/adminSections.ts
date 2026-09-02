@@ -13,7 +13,7 @@ export const adminSections: AdminSection[] = [
     label: "Tags",
     path: "admin/tags",
     tableName: "tags",
-    columns: ["id", "label"],
+    columns: ["id", "label", "category"],
   },
   {
     label: "Badges",

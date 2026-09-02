@@ -8,6 +8,7 @@ import badgeMap, { topRatedIcon } from "@/services/badgeMap";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip } from "@/components/ui/tooltip";
 import LikeButton from "@/components/LikeButton";
+import useSortedTags from "@/hooks/useSortedTags";
 import LunchAvatars from "@/components/LunchAvatars";
 import ClosedBadge from "@/components/ClosedBadge";
 import { cn } from "@/lib/utils";
@@ -61,8 +62,9 @@ const RestaurantCardTW = ({
   const isTop = topRated.some((t) => t.id === restaurant.id);
   const visibleBadges = (restaurant.badges ?? []).filter((b) => badgeMap[b]);
 
-  // Tags : on en montre au plus 3 sur la card, le reste résumé en "+N".
-  const tags = restaurant.tags ?? [];
+  // Tags : origines d'abord, puis caractéristiques, puis plats. On en montre au
+  // plus 3 sur la card, le reste résumé en "+N".
+  const tags = useSortedTags(restaurant.tags);
   const MAX_TAGS = 3;
   const extraTags = tags.length - MAX_TAGS;
 

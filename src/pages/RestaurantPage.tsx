@@ -17,6 +17,7 @@ import useRestaurants from "@/hooks/useRestaurants";
 import useTopRated from "@/hooks/useTopRated";
 import useFavorites from "@/hooks/useFavorites";
 import useReviews from "@/hooks/useReviews";
+import useSortedTags from "@/hooks/useSortedTags";
 import useSession from "@/hooks/useSession";
 import useIsAdmin from "@/hooks/useIsAdmin";
 import supabaseClient from "@/services/supabaseClient";
@@ -104,6 +105,9 @@ const RestaurantPage = () => {
   const { data: reviews = [], isPending: reviewsLoading } = useReviews(
     restaurant?.id
   );
+  // Ordre des tags : origines, puis caractéristiques, puis plats. Appelé ici
+  // (avant les retours anticipés de chargement) pour respecter l'ordre des hooks.
+  const tags = useSortedTags(restaurant?.tags);
   const [showForm, setShowForm] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [mapEditOpen, setMapEditOpen] = useState(false);
@@ -148,7 +152,6 @@ const RestaurantPage = () => {
   // fermeture. Le contenu déjà publié reste visible dans tous les cas.
   const canContribute = restaurant.contributions_enabled !== false;
   const visibleBadges = (restaurant.badges ?? []).filter((b) => badgeMap[b]);
-  const tags = restaurant.tags ?? [];
 
   const totalReviews = reviews.length;
   const myReview = reviews.find((r) => r.user_id === userId) ?? null;

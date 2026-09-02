@@ -26,14 +26,12 @@ import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-
-/** Met en forme un label de tag (1re lettre de chaque mot en majuscule). */
-const formatTagLabel = (input: string) =>
-  input
-    .split(" ")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-    .join(" ")
-    .trim();
+import {
+  DEFAULT_TAG_CATEGORY,
+  TAG_CATEGORIES,
+  TagCategory,
+  formatTagLabel,
+} from "../../services/tagCategories";
 
 interface RestaurantDialogProps {
   isOpen: boolean;
@@ -68,6 +66,8 @@ const RestaurantDialog = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [creatingTag, setCreatingTag] = useState(false);
   const [newTag, setNewTag] = useState("");
+  const [newTagCategory, setNewTagCategory] =
+    useState<TagCategory>(DEFAULT_TAG_CATEGORY);
   const [tagSubmitting, setTagSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   // Suppression par appui long (2s) avec barre de progression dans le bouton.
@@ -226,7 +226,7 @@ const RestaurantDialog = ({
   };
 
   const handleCreateTag = async () => {
-    const formatted = formatTagLabel(newTag);
+    const formatted = formatTagLabel(newTag).trim();
     if (!formatted) return;
 
     // Évite un doublon (insensible à la casse) déjà présent en base.
@@ -244,7 +244,7 @@ const RestaurantDialog = ({
     setTagSubmitting(true);
     const { error } = await supabaseClient
       .from("tags")
-      .insert({ label: formatted });
+      .insert({ label: formatted, category: newTagCategory });
     setTagSubmitting(false);
 
     if (error) {
@@ -263,6 +263,7 @@ const RestaurantDialog = ({
     setTags([...tags, formatted].sort());
     setCreatingTag(false);
     setNewTag("");
+    setNewTagCategory(DEFAULT_TAG_CATEGORY);
     toast({ title: "Tag créé", status: "success", duration: 2500, isClosable: true });
   };
 
@@ -491,10 +492,15 @@ const RestaurantDialog = ({
     onClose();
   };
 
-  const tagOptions = (availableTags ?? [])
-    .map((t) => t.label)
-    .filter((o) => !tags.includes(o))
-    .sort();
+  // Le choix se fait par catégorie (origine / caractéristique / spécialité) :
+  // avec plus d'une centaine de tags, une liste plate serait illisible.
+  const tagGroups = TAG_CATEGORIES.map((c) => ({
+    label: c.label,
+    options: (availableTags ?? [])
+      .filter((t) => t.category === c.value && !tags.includes(t.label))
+      .map((t) => t.label)
+      .sort((a, b) => a.localeCompare(b, "fr")),
+  })).filter((g) => g.options.length > 0);
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="max-w-3xl">
@@ -580,10 +586,14 @@ const RestaurantDialog = ({
                   className="h-10 w-full cursor-pointer appearance-none rounded-lg border border-border bg-background pl-3 pr-9 text-sm text-foreground outline-none transition focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/25"
                 >
                   <option value="">Choisir un tag</option>
-                  {tagOptions.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
-                    </option>
+                  {tagGroups.map((group) => (
+                    <optgroup key={group.label} label={group.label}>
+                      {group.options.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </optgroup>
                   ))}
                 </select>
                 <FiChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground opacity-50" />
@@ -617,6 +627,20 @@ const RestaurantDialog = ({
                     }
                   }}
                 />
+                <div className="relative w-44 shrink-0">
+                  <select
+                    value={newTagCategory}
+                    onChange={(e) => setNewTagCategory(e.target.value as TagCategory)}
+                    className="h-10 w-full cursor-pointer appearance-none rounded-lg border border-border bg-background pl-3 pr-9 text-sm text-foreground outline-none transition focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/25"
+                  >
+                    {TAG_CATEGORIES.map((c) => (
+                      <option key={c.value} value={c.value}>
+                        {c.label}
+                      </option>
+                    ))}
+                  </select>
+                  <FiChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground opacity-50" />
+                </div>
                 <button
                   type="button"
                   aria-label="Valider le tag"
@@ -632,6 +656,7 @@ const RestaurantDialog = ({
                   onClick={() => {
                     setCreatingTag(false);
                     setNewTag("");
+                    setNewTagCategory(DEFAULT_TAG_CATEGORY);
                   }}
                   className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-lg border border-border text-foreground/70 transition hover:bg-muted"
                 >

@@ -3,6 +3,7 @@ import { FiEdit2, FiTrash2 } from "react-icons/fi";
 import { BsBan } from "react-icons/bs";
 import supabaseClient from "../services/supabaseClient";
 import badgeMap from "../services/badgeMap";
+import { tagCategoryLabel } from "../services/tagCategories";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip } from "@/components/ui/tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -11,8 +12,11 @@ interface AdminTableProps {
   tableName: string;
   columns?: string[];
   onEdit?: (data: any) => void;
-  onDelete?: (id: number) => void;
+  onDelete?: (row: any) => void;
 }
+
+/** En-têtes lisibles pour les colonnes dont le nom technique parle peu. */
+const columnLabels: Record<string, string> = { category: "catégorie" };
 
 const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) => {
   const isBadgeColumn = (col: string) =>
@@ -90,7 +94,7 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
                   key={col}
                   className="sticky top-0 z-10 bg-muted px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-foreground/55 shadow-[inset_0_-1px_0_0_var(--border)]"
                 >
-                  {col}
+                  {columnLabels[col] ?? col}
                 </th>
               ))}
               <th className="sticky right-0 top-0 z-20 w-[120px] bg-muted px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-foreground/55 shadow-[inset_1px_0_0_0_var(--border),inset_0_-1px_0_0_var(--border)]">
@@ -124,6 +128,8 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
                           alt={col}
                           className="h-10 w-10 rounded-md object-cover"
                         />
+                      ) : col === "category" ? (
+                        <Badge variant="muted">{tagCategoryLabel(value)}</Badge>
                       ) : isWebsite ? (
                         <a
                           href={value}
@@ -179,7 +185,7 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
                     <Tooltip label="Supprimer">
                       <button
                         type="button"
-                        onClick={() => onDelete?.(row.id)}
+                        onClick={() => onDelete?.(row)}
                         aria-label="Supprimer"
                         className="grid h-8 w-8 cursor-pointer place-items-center rounded-full text-destructive transition hover:bg-destructive/10"
                       >

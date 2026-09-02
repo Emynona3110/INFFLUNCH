@@ -1,6 +1,10 @@
+import type { TagCategory } from "../services/tagCategories";
+
 export type Tag = {
   id: number;
   label: string;
+  /** origine · caracteristique · specialite (voir `services/tagCategories`). */
+  category: TagCategory;
 };
 
 import useSupabaseQuery from "./useSupabaseQuery";

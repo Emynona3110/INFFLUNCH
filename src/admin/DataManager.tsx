@@ -19,8 +19,12 @@ const DataManager = ({ section, addSignal }: DataManagerProps) => {
   const { tableName, columns } = section;
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editData, setEditData] = useState<any | null>(null);
-  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [deleteRow, setDeleteRow] = useState<any | null>(null);
   const [deleting, setDeleting] = useState(false);
+  // Nombre de restaurants portant le tag qu'on s'apprête à supprimer
+  // (null = pas encore connu / table sans lien avec les restaurants).
+  const [tagUsage, setTagUsage] = useState<number | null>(null);
+  const [checkingUsage, setCheckingUsage] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -41,8 +45,31 @@ const DataManager = ({ section, addSignal }: DataManagerProps) => {
     queryClient.invalidateQueries();
   };
 
+  // Supprimer un tag le retire aussi des restaurants (trigger
+  // `trigger_tags_sync_restaurants` en base) : on prévient avant.
+  const askDelete = async (row: any) => {
+    setDeleteRow(row);
+    setTagUsage(null);
+    if (tableName !== "tags" || !row?.label) return;
+
+    setCheckingUsage(true);
+    const { count, error } = await supabaseClient
+      .from("restaurants")
+      .select("id", { count: "exact", head: true })
+      .contains("tags", [row.label]);
+    setCheckingUsage(false);
+    if (!error) setTagUsage(count ?? 0);
+  };
+
+  const closeDelete = () => {
+    setDeleteRow(null);
+    setTagUsage(null);
+    setCheckingUsage(false);
+  };
+
   const confirmDelete = async () => {
-    if (deleteId === null) return;
+    const deleteId = deleteRow?.id;
+    if (deleteId === undefined || deleteId === null) return;
     setDeleting(true);
 
     const { error: deleteError } = await supabaseClient
@@ -75,7 +102,7 @@ const DataManager = ({ section, addSignal }: DataManagerProps) => {
     }
 
     setDeleting(false);
-    setDeleteId(null);
+    closeDelete();
   };
 
   const renderDialog = () => {
@@ -104,17 +131,17 @@ const DataManager = ({ section, addSignal }: DataManagerProps) => {
           setEditData(data);
           setIsDialogOpen(true);
         }}
-        onDelete={(id) => setDeleteId(id)}
+        onDelete={askDelete}
       />
 
       {/* Dialogs d'édition (encore Chakra — migration étape 2) */}
       {renderDialog()}
 
       {/* Confirmation de suppression */}
-      {deleteId !== null && (
+      {deleteRow !== null && (
         <div
           className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/50 p-4"
-          onClick={() => setDeleteId(null)}
+          onClick={closeDelete}
         >
           <div
             className="w-full max-w-sm rounded-card border border-border bg-card p-6 shadow-xl"
@@ -128,14 +155,26 @@ const DataManager = ({ section, addSignal }: DataManagerProps) => {
               Confirmer la suppression
             </div>
             <p className="mt-3 text-sm text-foreground/80">
-              Êtes-vous sûr de vouloir supprimer cette entrée ? Cette action est
-              irréversible.
+              {checkingUsage
+                ? "Vérification des restaurants concernés…"
+                : tagUsage
+                  ? `Le tag « ${deleteRow.label} » est utilisé par ${tagUsage} restaurant${
+                      tagUsage > 1 ? "s" : ""
+                    }. Le supprimer le retirera aussi de ${
+                      tagUsage > 1 ? "ces fiches" : "cette fiche"
+                    }. Cette action est irréversible.`
+                  : "Êtes-vous sûr de vouloir supprimer cette entrée ? Cette action est irréversible."}
             </p>
             <div className="mt-6 flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setDeleteId(null)}>
+              <Button variant="outline" onClick={closeDelete}>
                 Annuler
               </Button>
-              <Button variant="destructive" onClick={confirmDelete} loading={deleting}>
+              <Button
+                variant="destructive"
+                onClick={confirmDelete}
+                loading={deleting}
+                disabled={checkingUsage}
+              >
                 Supprimer
               </Button>
             </div>
