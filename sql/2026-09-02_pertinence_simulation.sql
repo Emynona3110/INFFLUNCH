@@ -1,76 +1,83 @@
 -- =============================================================================
--- Simulation : proximité calculée sur la DISTANCE (km) — 2026-09-02
--- LECTURE SEULE : ce fichier n'écrit rien. Il montre le classement tel qu'il
--- serait avec la règle en kilomètres, pour régler les deux molettes AVANT
--- d'appliquer avec `sql/2026-09-02_pertinence_distance.sql`.
+-- Pertinence : composantes et score, restaurant par restaurant — 2026-09-02
+-- LECTURE SEULE. La formule est recopiée ici en entier avec ses paramètres en
+-- tête : le résultat ne dépend PAS de la définition actuelle de la vue, on voit
+-- donc ce que donnerait le calcul avec les réglages ci-dessous, qu'ils soient
+-- déjà appliqués en base ou non.
 --
--- Seule la proximité change : on repart des colonnes déjà calculées par la vue
--- `relevance_components` (aucune formule dupliquée) et on remplace les points
--- de proximité par ceux de la règle en distance.
---
--- Avant : marche = `walk_minutes` (ou distance × 12), plein score ≤ 10 min
---         (≈ 830 m), zéro à 30 min → tout le quartier à égalité.
--- Après : plein score ≤ `dist_free`, décroissance linéaire jusqu'à 0 à
---         `dist_max`. Distance inconnue = pas de malus (et resto invisible aux
---         non-admins de toute façon).
+-- Lecture : les trois `pts_*` s'additionnent pour faire `score` (sur 100).
 --
 -- À exécuter sur le projet Supabase (ref ilonqaqyqmvsfskwgqka).
 -- =============================================================================
 
-with params as (
-  select 0.15::numeric as dist_free,  -- ← molette 1 : km sans aucun malus
-         1.60::numeric as dist_max,   -- ← molette 2 : km où la proximité tombe à 0
-         0.15::numeric as w_prox      -- poids de la proximité (inchangé)
+with p as (
+  select 3.5::numeric  as prior_c,    -- note supposée d'un resto sans avis
+         3.0::numeric  as m_conf,     -- nb d'avis où la note réelle pèse autant
+         0.15::numeric as dist_free,  -- km sans aucun malus de proximité
+         1.60::numeric as dist_max,   -- km où la proximité tombe à 0
+         0.70::numeric as w_quality,
+         0.15::numeric as w_pop,
+         0.15::numeric as w_prox
 ),
-base as (
-  select
-    c.name,
-    c.distance_km,
-    c.walk_minutes,
-    c.proximity_01  as prox_avant,
-    c.pts_proximity as pts_prox_avant,
-    c.score         as score_avant,
-    c.relevance_stockee
-  from public.relevance_components c
-  where c.closed is not true
+fav as (
+  select restaurant_id, count(*)::numeric as favorites
+  from public.favorites
+  group by restaurant_id
 ),
-sim as (
+g as (
+  select coalesce(max(r.reviews + coalesce(f.favorites, 0)), 0)::numeric as max_pop
+  from public.restaurants r
+  left join fav f on f.restaurant_id = r.id
+  where r.slug is distinct from 'test'
+),
+calc as (
   select
-    b.*,
-    case
-      when b.distance_km is null then 1.0
+    r.name,
+    r.rating::numeric                  as note,
+    r.reviews                          as avis,
+    coalesce(f.favorites, 0)::int      as favoris,
+    round(r.distance::numeric, 3)      as distance_km,
+    -- Qualité : note bayésienne 0..5, tirée vers le prior tant qu'il y a peu
+    -- d'avis. Sans aucun avis : vaut exactement le prior (3,5).
+    (r.reviews * r.rating::numeric + p.m_conf * p.prior_c)
+      / nullif(r.reviews + p.m_conf, 0) as q_bayes,
+    -- Popularité : avis + favoris, écrasés par un log, normalisés par le max.
+    case when g.max_pop > 0
+      then ln(1 + r.reviews + coalesce(f.favorites, 0))::numeric / ln(1 + g.max_pop)
+      else 0
+    end                                as pop_01,
+    -- Proximité : 1 jusqu'à dist_free, décroissance linéaire jusqu'à 0 à
+    -- dist_max. Distance inconnue (resto non géocodé) : pas de malus, donc 1
+    -- aussi — la colonne `distance_km` vide permet de les distinguer.
+    case when r.distance is null then 1.0
       else greatest(0.0, least(1.0,
-             (p.dist_max - b.distance_km) / (p.dist_max - p.dist_free)))
-    end as prox_apres,
-    p.w_prox
-  from base b
-  cross join params p
+             (p.dist_max - r.distance::numeric) / (p.dist_max - p.dist_free)))
+    end                                as prox_01,
+    p.w_quality, p.w_pop, p.w_prox
+  from public.restaurants r
+  cross join p
+  cross join g
+  left join fav f on f.restaurant_id = r.id
+  where r.closed is not true
 )
 select
   name,
+  -- ---- Entrées ----
+  note,
+  avis,
+  favoris,
   distance_km,
-  walk_minutes,
-  prox_avant,
-  round(prox_apres, 3)                                              as prox_apres,
-  score_avant,
-  round(score_avant - pts_prox_avant + 100 * w_prox * prox_apres, 2) as score_apres,
-  round(100 * w_prox * prox_apres - pts_prox_avant, 2)              as delta,
-  relevance_stockee
-from sim
-order by score_apres desc, name;
-
--- Lectures utiles :
---   • `delta` = 0 → resto à moins de `dist_free` : rien ne change pour lui.
---   • `delta` < 0 → il recule ; c'est l'effet recherché pour les plus éloignés.
---   • Si presque tous les `score_apres` restent identiques, `dist_free` est
---     trop généreux : le baisser (0,15 → 0,10) resserre encore.
---   • Si tout s'écrase vers 49, `dist_max` est trop court : l'allonger.
---   • `score_avant` ≠ `relevance_stockee` → les scores stockés datent d'avant
---     l'écriture des distances : `select public.recalc_relevance();` suffit,
---     indépendamment de cette molette.
---   • `distance_km` vide → resto pas encore géocodé.
---
--- Étalement obtenu, une fois le changement appliqué (plus il y a de scores
--- distincts, moins il y a d'ex æquo) :
---   select count(distinct relevance) as scores_distincts, count(*) as restos
---   from public.restaurants where closed is not true;
+  -- ---- Composantes normalisées (0..1) ----
+  round(q_bayes, 2)                                  as note_bayes,
+  round(q_bayes / 5, 3)                              as qualite_01,
+  round(pop_01, 3)                                   as popularite_01,
+  round(prox_01, 3)                                  as proximite_01,
+  -- ---- Points marqués (la somme fait le score) ----
+  round(100 * w_quality * q_bayes / 5, 2)            as pts_qualite,
+  round(100 * w_pop * pop_01, 2)                     as pts_popularite,
+  round(100 * w_prox * prox_01, 2)                   as pts_proximite,
+  round(100 * (w_quality * q_bayes / 5
+             + w_pop * pop_01
+             + w_prox * prox_01), 2)                 as score
+from calc
+order by score desc, name;
