@@ -26,6 +26,7 @@ import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import TagPicker from "@/components/TagPicker";
 import {
   DEFAULT_TAG_CATEGORY,
   TAG_CATEGORIES,
@@ -492,16 +493,6 @@ const RestaurantDialog = ({
     onClose();
   };
 
-  // Le choix se fait par catégorie (origine / caractéristique / spécialité) :
-  // avec plus d'une centaine de tags, une liste plate serait illisible.
-  const tagGroups = TAG_CATEGORIES.map((c) => ({
-    label: c.label,
-    options: (availableTags ?? [])
-      .filter((t) => t.category === c.value && !tags.includes(t.label))
-      .map((t) => t.label)
-      .sort((a, b) => a.localeCompare(b, "fr")),
-  })).filter((g) => g.options.length > 0);
-
   return (
     <Dialog open={isOpen} onClose={onClose} className="max-w-3xl">
       <DialogTitle>
@@ -576,28 +567,11 @@ const RestaurantDialog = ({
               ))}
             </div>
             <div className="flex items-center gap-2">
-              <div className="relative flex-1">
-                <select
-                  value=""
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    if (v && !tags.includes(v)) setTags([...tags, v].sort());
-                  }}
-                  className="h-10 w-full cursor-pointer appearance-none rounded-lg border border-border bg-background pl-3 pr-9 text-sm text-foreground outline-none transition focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/25"
-                >
-                  <option value="">Choisir un tag</option>
-                  {tagGroups.map((group) => (
-                    <optgroup key={group.label} label={group.label}>
-                      {group.options.map((opt) => (
-                        <option key={opt} value={opt}>
-                          {opt}
-                        </option>
-                      ))}
-                    </optgroup>
-                  ))}
-                </select>
-                <FiChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground opacity-50" />
-              </div>
+              <TagPicker
+                className="flex-1"
+                selected={tags}
+                onPick={(label) => setTags([...tags, label].sort())}
+              />
               {!creatingTag && (
                 <button
                   type="button"

@@ -3,9 +3,9 @@ import { BsFilter } from "react-icons/bs";
 import { FaStar, FaRegStar } from "react-icons/fa";
 import { FiChevronDown } from "react-icons/fi";
 import { SortOrder } from "./SortSelector";
-import useTags from "../hooks/useTags";
 import { defaultRestaurantFilters, RestaurantFilters } from "../pages/UserPage";
 import BadgesToggles from "./BadgesToggles";
+import TagPicker from "./TagPicker";
 import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
@@ -51,8 +51,6 @@ const FilterDialog = ({ restaurantFilters, onFilterChange }: FilterDialogProps) 
   const [localQuery, setLocalQuery] =
     useState<RestaurantFilters>(restaurantFilters);
 
-  const { data: availableTags } = useTags();
-
   const handleOpen = () => {
     setLocalQuery(restaurantFilters);
     setIsOpen(true);
@@ -62,10 +60,6 @@ const FilterDialog = ({ restaurantFilters, onFilterChange }: FilterDialogProps) 
     onFilterChange(localQuery);
     setIsOpen(false);
   };
-
-  const selectableTags = availableTags
-    .filter((tag) => !localQuery.tags.includes(tag.label))
-    .sort((a, b) => a.label.localeCompare(b.label));
 
   return (
     <>
@@ -154,29 +148,15 @@ const FilterDialog = ({ restaurantFilters, onFilterChange }: FilterDialogProps) 
                 </span>
               )}
             </div>
-            <div className="relative">
-              <select
-                value=""
-                onChange={(e) => {
-                  const v = e.target.value;
-                  if (v && !localQuery.tags.includes(v)) {
-                    setLocalQuery((prev) => ({
-                      ...prev,
-                      tags: [...prev.tags, v].sort(),
-                    }));
-                  }
-                }}
-                className="h-10 w-full cursor-pointer appearance-none rounded-lg border border-border bg-background pl-3 pr-9 text-sm text-foreground outline-none transition focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/25"
-              >
-                <option value="">Choisir un tag</option>
-                {selectableTags.map((tag) => (
-                  <option key={tag.id} value={tag.label}>
-                    {tag.label}
-                  </option>
-                ))}
-              </select>
-              <FiChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground opacity-50" />
-            </div>
+            <TagPicker
+              selected={localQuery.tags}
+              onPick={(label) =>
+                setLocalQuery((prev) => ({
+                  ...prev,
+                  tags: [...prev.tags, label].sort(),
+                }))
+              }
+            />
           </div>
 
           {/* Badges */}
