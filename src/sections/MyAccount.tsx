@@ -11,6 +11,7 @@ import useAchievementsSeen from "../hooks/useAchievementsSeen";
 import useIsAdmin from "../hooks/useIsAdmin";
 import Avatar from "../components/Avatar";
 import AchievementsGallery from "./AchievementsGallery";
+import AdminNotes from "./AdminNotes";
 import HoldToDeleteButton from "../components/HoldToDeleteButton";
 import ChangePasswordDialog from "../components/ChangePasswordDialog";
 import PushToggle from "../components/PushToggle";
@@ -37,9 +38,11 @@ const Stars = ({ n }: { n: number }) => (
 );
 
 const subTabs = [
-  { key: "profil", label: "Compte" },
-  { key: "avis", label: "Avis" },
-  { key: "succes", label: "Succès" },
+  { key: "profil", label: "Compte", adminOnly: false },
+  { key: "avis", label: "Avis", adminOnly: false },
+  { key: "succes", label: "Succès", adminOnly: false },
+  // Carnet de backlog : ce que l'admin repère en naviguant, pour plus tard.
+  { key: "backlog", label: "Backlog", adminOnly: true },
 ] as const;
 
 type SubTabKey = (typeof subTabs)[number]["key"];
@@ -57,8 +60,10 @@ const MyAccount = () => {
   // clic sur un toast de succès.
   const [searchParams] = useSearchParams();
   const tabParam = searchParams.get("tab");
+  const visibleTabs = subTabs.filter((t) => !t.adminOnly || isAdmin);
+  // Un ?tab= qui vise un onglet masqué (ou inconnu) retombe sur « Compte ».
   const isTabKey = (v: string | null): v is SubTabKey =>
-    subTabs.some((t) => t.key === v);
+    visibleTabs.some((t) => t.key === v);
   const [active, setActive] = useState<SubTabKey>(() =>
     isTabKey(tabParam) ? tabParam : "profil"
   );
@@ -110,7 +115,7 @@ const MyAccount = () => {
     <div className="tw-scope w-full">
       {/* Sous-sections (pills) collées sous la navbar, comme la section Admin. */}
       <div className="mb-6 flex flex-wrap justify-center gap-2">
-        {subTabs.map((t) => {
+        {visibleTabs.map((t) => {
           const isActive = active === t.key;
           return (
             <button
@@ -273,6 +278,9 @@ const MyAccount = () => {
 
       {/* Mes succès */}
       {active === "succes" && <AchievementsGallery />}
+
+      {/* Backlog (admins) */}
+      {active === "backlog" && isAdmin && <AdminNotes />}
       </motion.div>
 
       <ChangePasswordDialog
