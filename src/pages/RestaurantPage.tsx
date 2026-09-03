@@ -542,8 +542,16 @@ const RestaurantPage = () => {
           <RestaurantDialog
             isOpen={editOpen}
             onClose={() => setEditOpen(false)}
-            onSuccess={() => {
+            // Renommer le resto recalcule son slug : l'URL courante porte
+            // l'ancien, devenu introuvable (easter egg 🐑). On suit la fiche.
+            // `replace` : le bouton Retour ne doit pas ramener sur l'URL morte.
+            // Comparaison brute — des slugs legacy en base ne se recalculent
+            // pas avec les règles actuelles de slugify.
+            onSuccess={(slug) => {
               setEditOpen(false);
+              if (slug && slug !== restaurant.slug) {
+                navigate(`/restaurant/${slug}`, { replace: true });
+              }
               queryClient.invalidateQueries();
             }}
             // La fiche n'existe plus : on quitte la page avant de rafraîchir,

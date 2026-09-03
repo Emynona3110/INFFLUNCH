@@ -37,7 +37,9 @@ import {
 interface RestaurantDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess?: () => void;
+  /** Reçoit le slug enregistré : renommer un restaurant le recalcule, et la
+   *  fiche resto (dont l'URL porte l'ancien slug) doit pouvoir suivre. */
+  onSuccess?: (slug?: string) => void;
   /** Appelée après une suppression réussie ; à défaut, on retombe sur
    *  `onSuccess`. Permet à l'appelant de quitter la fiche supprimée plutôt que
    *  de la recharger (elle n'existe plus). */
@@ -311,6 +313,11 @@ const RestaurantDialog = ({
     );
   };
 
+  // Comparaison d'adresses tolérante (espaces, casse) : sert à décider s'il
+  // faut regéocoder.
+  const sameAddress = (a?: string | null, b?: string | null) =>
+    (a ?? "").trim().toLowerCase() === (b ?? "").trim().toLowerCase();
+
   const handleSubmit = async () => {
     const formattedName = formatName(name.trim());
     const slug = slugify(formattedName);
@@ -321,28 +328,42 @@ const RestaurantDialog = ({
 
     setIsSubmitting(true);
 
-    let location;
-    try {
-      location = await fetchLocation(address);
-    } catch (err: any) {
-      toast({
-        title: "Erreur d'adresse",
-        description: err.message || "Adresse invalide",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
-      setIsSubmitting(false);
-      return;
-    }
+    // Adresse inchangée et coordonnées déjà en base → on ne regéocode pas :
+    // sinon un pin replacé à la main (LocationEditDialog) serait écrasé par le
+    // géocodeur à chaque enregistrement, même pour un simple changement de tag.
+    // Un resto importé sans coordonnées, lui, doit pouvoir être géocodé.
+    const keepLocation =
+      !!initialData?.id &&
+      sameAddress(address, initialData.address) &&
+      initialData.lat != null &&
+      initialData.lng != null;
 
-    // Temps de marche réel depuis INFFLUX (Edge Function ORS). En cas
-    // d'indisponibilité, repli sur une estimation à partir du vol d'oiseau.
-    let walkMinutes = await fetchWalkMinutes(
-      location.coords.lat,
-      location.coords.lng
-    );
-    if (walkMinutes == null) walkMinutes = estimateWalkMinutes(location.distanceKm);
+    let location: Awaited<ReturnType<typeof fetchLocation>> | null = null;
+    let walkMinutes: number | null = null;
+
+    if (!keepLocation) {
+      try {
+        location = await fetchLocation(address);
+      } catch (err: any) {
+        toast({
+          title: "Erreur d'adresse",
+          description: err.message || "Adresse invalide",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Temps de marche réel depuis INFFLUX (Edge Function ORS). En cas
+      // d'indisponibilité, repli sur une estimation à partir du vol d'oiseau.
+      walkMinutes = await fetchWalkMinutes(
+        location.coords.lat,
+        location.coords.lng
+      );
+      if (walkMinutes == null) walkMinutes = estimateWalkMinutes(location.distanceKm);
+    }
 
     // Upload de la couverture (si un fichier a été choisi) → "{slug}/cover-...".
     let finalImage: string | null = image || null;
@@ -395,11 +416,17 @@ const RestaurantDialog = ({
           address,
           website: website || null,
           phone: phone || null,
-          distance: location.distanceKm,
-          distanceLabel: location.formattedDistance,
-          lat: location.coords.lat,
-          lng: location.coords.lng,
-          walk_minutes: walkMinutes,
+          // Position omise quand l'adresse n'a pas bougé : les valeurs en base
+          // (éventuellement corrigées à la main) restent telles quelles.
+          ...(location
+            ? {
+                distance: location.distanceKm,
+                distanceLabel: location.formattedDistance,
+                lat: location.coords.lat,
+                lng: location.coords.lng,
+                walk_minutes: walkMinutes,
+              }
+            : {}),
           tags: tags.length ? tags : null,
           badges: orderedBadges,
           closed,
@@ -435,7 +462,7 @@ const RestaurantDialog = ({
         duration: 3000,
         isClosable: true,
       });
-      onSuccess?.();
+      onSuccess?.(slug);
       onClose();
       return;
     }
@@ -464,10 +491,10 @@ const RestaurantDialog = ({
       address,
       website: website || null,
       phone: phone || null,
-      distance: location.distanceKm,
-      distanceLabel: location.formattedDistance,
-      lat: location.coords.lat,
-      lng: location.coords.lng,
+      distance: location!.distanceKm,
+      distanceLabel: location!.formattedDistance,
+      lat: location!.coords.lat,
+      lng: location!.coords.lng,
       walk_minutes: walkMinutes,
       tags: tags.length ? tags : null,
       badges: orderedBadges,
@@ -494,7 +521,7 @@ const RestaurantDialog = ({
       duration: 3000,
       isClosable: true,
     });
-    onSuccess?.();
+    onSuccess?.(slug);
     onClose();
   };
 
