@@ -36,6 +36,9 @@ interface Props {
  * Chacun peut supprimer ses propres photos ; un admin peut en supprimer
  * n'importe laquelle (modération).
  */
+/** Photos qu'un non-admin peut ajouter sur une même fiche (miroir du trigger). */
+export const MAX_PHOTOS_PER_USER = 3;
+
 const RestaurantGallery = ({
   restaurantId,
   slug,
@@ -68,10 +71,12 @@ const RestaurantGallery = ({
   const showLeft = safeStart > 0;
   const showRight = safeStart < maxStart;
 
-  // 1 photo par personne et par restaurant, sauf les admins (aligné sur le
-  // trigger en base). On masque alors le bouton et on guide l'utilisateur.
-  const hasOwnPhoto = photos.some((p) => p.user_id === userId);
-  const canUpload = canContribute && (isAdmin || !hasOwnPhoto);
+  // MAX_PHOTOS_PER_USER photos par personne et par restaurant, sauf les admins
+  // (aligné sur le trigger en base, cf. sql/2026-09-03_photos_limite_3.sql). Le
+  // quota restant borne aussi la sélection dans le dialog d'envoi.
+  const ownPhotos = photos.filter((p) => p.user_id === userId).length;
+  const remaining = Math.max(0, MAX_PHOTOS_PER_USER - ownPhotos);
+  const canUpload = canContribute && (isAdmin || remaining > 0);
 
   const handleUpload = async (files: File[], authorId?: string) => {
     let ok = 0;
@@ -144,7 +149,7 @@ const RestaurantGallery = ({
           </button>
         ) : canContribute ? (
           <span className="text-xs text-foreground/45">
-            Tu as déjà partagé une photo ici.
+            Tu as déjà partagé {MAX_PHOTOS_PER_USER} photos ici.
           </span>
         ) : null}
       </div>
@@ -310,6 +315,8 @@ const RestaurantGallery = ({
         isOpen={uploadOpen}
         onClose={() => setUploadOpen(false)}
         isAdmin={isAdmin}
+        /* Admin non borné ; sinon ce qu'il reste du quota sur cette fiche. */
+        maxFiles={isAdmin ? undefined : remaining}
         onSubmit={handleUpload}
       />
     </section>

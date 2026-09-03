@@ -15,6 +15,8 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   isAdmin: boolean;
+  /** Nombre de fichiers acceptés en une fois (quota restant). Illimité si omis. */
+  maxFiles?: number;
   /** Upload effectif (compression incluse). authorId = admin attribuant un autre. */
   onSubmit: (files: File[], authorId?: string) => Promise<void>;
 }
@@ -29,7 +31,13 @@ interface Picked {
  * copier-coller (Ctrl+V) ou le parcours de fichiers. Pour un admin, un
  * sélecteur permet d'attribuer la/les photo(s) à un autre collaborateur.
  */
-const PhotoUploadDialog = ({ isOpen, onClose, isAdmin, onSubmit }: Props) => {
+const PhotoUploadDialog = ({
+  isOpen,
+  onClose,
+  isAdmin,
+  maxFiles,
+  onSubmit,
+}: Props) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [picked, setPicked] = useState<Picked[]>([]);
   const [dragging, setDragging] = useState(false);
@@ -38,8 +46,10 @@ const PhotoUploadDialog = ({ isOpen, onClose, isAdmin, onSubmit }: Props) => {
 
   const { data: users = [] } = useUsers(isAdmin && isOpen);
 
-  // Non-admin : une seule photo autorisée.
-  const multiple = isAdmin;
+  // Plafond de la sélection : le quota restant côté appelant, sans limite si
+  // rien n'est passé (admin). Le sélecteur de fichiers reste simple à 1 photo.
+  const limit = maxFiles ?? Infinity;
+  const multiple = limit > 1;
 
   const reset = () => {
     setPicked((prev) => {
@@ -98,7 +108,25 @@ const PhotoUploadDialog = ({ isOpen, onClose, isAdmin, onSubmit }: Props) => {
     }
 
     if (!accepted.length) return;
-    setPicked((prev) => (multiple ? [...prev, ...accepted] : accepted.slice(0, 1)));
+    setPicked((prev) => {
+      const next = multiple ? [...prev, ...accepted] : accepted;
+      // Au-delà du quota, on garde les premiers et on le dit plutôt que de
+      // laisser l'insertion échouer sur le trigger en base.
+      if (next.length > limit) {
+        toast({
+          title:
+            limit === 1
+              ? "Une seule photo possible ici"
+              : `${limit} photos possibles ici`,
+          description: "Les images en trop ont été écartées.",
+          status: "warning",
+          duration: 4000,
+        });
+        next.slice(limit).forEach((p) => URL.revokeObjectURL(p.url));
+        return next.slice(0, limit);
+      }
+      return next;
+    });
   };
 
   const removeAt = (i: number) =>
@@ -123,7 +151,7 @@ const PhotoUploadDialog = ({ isOpen, onClose, isAdmin, onSubmit }: Props) => {
     window.addEventListener("paste", onPaste);
     return () => window.removeEventListener("paste", onPaste);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, multiple]);
+  }, [isOpen, multiple, limit]);
 
   const handleConfirm = async () => {
     if (!picked.length) return;
