@@ -1,4 +1,5 @@
 import { ReactNode, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 
 interface DialogProps {
@@ -8,7 +9,15 @@ interface DialogProps {
   className?: string;
 }
 
-/** Modale Tailwind simple : overlay + carte centrée, fermeture Échap / clic extérieur. */
+/**
+ * Modale Tailwind simple : overlay + carte centrée, fermeture Échap / clic
+ * extérieur.
+ *
+ * Rendue dans un portail sur `document.body` : un parent `sticky`/`fixed` avec
+ * un z-index (la barre d'outils de l'accueil, par exemple) crée un contexte
+ * d'empilement dont la modale ne peut plus sortir — elle passait sous la
+ * navbar. Les variables de thème vivent sur `:root`, le portail n'y change rien.
+ */
 export function Dialog({ open, onClose, children, className }: DialogProps) {
   useEffect(() => {
     if (!open) return;
@@ -21,7 +30,7 @@ export function Dialog({ open, onClose, children, className }: DialogProps) {
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div
       className="tw-scope fixed inset-0 z-[1100] flex justify-center overflow-y-auto bg-black/50 p-4"
       onClick={onClose}
@@ -37,7 +46,8 @@ export function Dialog({ open, onClose, children, className }: DialogProps) {
       >
         {children}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
