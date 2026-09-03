@@ -1,18 +1,23 @@
 import useSupabaseQuery from "./useSupabaseQuery";
 import supabaseClient from "../services/supabaseClient";
 
-/** Nombre d'avis minimum pour prétendre au Top 5 : éligible dès le premier avis
- *  (choix assumé — un resto noté une fois peut donc être en tête). À monter si
- *  un unique avis enthousiaste fausse trop le classement. */
+/** Nombre d'avis minimum pour monter sur le podium : éligible dès le premier
+ *  avis (choix assumé — un resto noté une fois peut donc être en tête). À
+ *  monter si un unique avis enthousiaste fausse trop le classement. */
 const MIN_REVIEWS = 1;
 
+/** Taille du podium : or, argent, bronze. */
+const PODIUM = 3;
+
 /**
- * Les 5 restaurants les mieux notés (pastille « Top 5 » + anneau sur la card).
+ * Le podium des mieux notés — pastille « Top 1 / 2 / 3 » et anneau sur la card.
+ * La liste revient CLASSÉE : le rang d'un restaurant, c'est son index (voir
+ * `topRankOf`).
  *
  * Classement sur la note BRUTE, dans l'ordre : note, puis nombre d'avis (à note
- * égale, le plus commenté est le mieux établi), puis note bayésienne (elle
- * départage deux restos de même note et même nombre d'avis en tenant compte du
- * prior), puis le nom pour que l'ordre soit stable d'un chargement à l'autre.
+ * égale, le plus commenté est le mieux établi), puis la distance (le plus près
+ * l'emporte), puis le nom pour que l'ordre soit stable d'un chargement à
+ * l'autre. Les restos sans distance connue passent en dernier (NULLS LAST).
  *
  * Éligibilité : au moins MIN_REVIEWS avis (1 aujourd'hui, donc tout resto noté
  * concourt ; seuls ceux sans aucun avis sont écartés, leur note valant 0). Le
@@ -28,9 +33,9 @@ const useTopRated = () =>
       .eq("closed", false)
       .order("rating", { ascending: false })
       .order("reviews", { ascending: false })
-      .order("bayes_rating", { ascending: false })
+      .order("distance", { ascending: true })
       .order("name", { ascending: true })
-      .limit(5)
+      .limit(PODIUM)
   );
 
 export default useTopRated;

@@ -22,12 +22,13 @@ import useSession from "@/hooks/useSession";
 import useIsAdmin from "@/hooks/useIsAdmin";
 import supabaseClient from "@/services/supabaseClient";
 import { defaultRestaurantFilters } from "@/pages/UserPage";
-import badgeMap, { topRatedIcon } from "@/services/badgeMap";
+import badgeMap from "@/services/badgeMap";
 import RestaurantMiniMap from "@/components/RestaurantMiniMap";
 import LikeButton from "@/components/LikeButton";
 import LunchButton from "@/components/LunchButton";
 import LunchAvatars from "@/components/LunchAvatars";
 import ClosedBadge from "@/components/ClosedBadge";
+import TopBadge, { topRankOf } from "@/components/TopBadge";
 import ReviewForm from "@/components/ReviewForm";
 import HoldToDeleteButton from "@/components/HoldToDeleteButton";
 import RestaurantDialog from "@/admin/Dialogs/RestaurantDialog";
@@ -146,7 +147,7 @@ const RestaurantPage = () => {
     );
   }
 
-  const isTop = topRated.some((t) => t.id === restaurant.id);
+  const topRank = topRankOf(topRated, restaurant.id);
   const liked = favoriteIds.includes(restaurant.id);
   // Contributions (avis / photos / menus) : verrouillables indépendamment de la
   // fermeture. Le contenu déjà publié reste visible dans tous les cas.
@@ -210,12 +211,7 @@ const RestaurantPage = () => {
 
         {restaurant.closed && <ClosedBadge className="absolute left-4 top-4" />}
 
-        {isTop && (
-          <span className="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow">
-            <img src={topRatedIcon} alt="" className="h-3.5 w-3.5" />
-            Top 5
-          </span>
-        )}
+        <TopBadge rank={topRank} size="lg" className="absolute left-4 top-4" />
 
         <LikeButton
           liked={liked}

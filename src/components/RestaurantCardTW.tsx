@@ -4,13 +4,14 @@ import { FiEdit2 } from "react-icons/fi";
 import { HiOutlineLocationMarker } from "react-icons/hi";
 import { Restaurant } from "@/hooks/useRestaurants";
 import noImage from "@/assets/no-image.jpg";
-import badgeMap, { topRatedIcon } from "@/services/badgeMap";
+import badgeMap from "@/services/badgeMap";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip } from "@/components/ui/tooltip";
 import LikeButton from "@/components/LikeButton";
 import useSortedTags from "@/hooks/useSortedTags";
 import LunchAvatars from "@/components/LunchAvatars";
 import ClosedBadge from "@/components/ClosedBadge";
+import TopBadge, { topRankOf } from "@/components/TopBadge";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -59,7 +60,7 @@ const RestaurantCardTW = ({
 }: Props) => {
   const navigate = useNavigate();
 
-  const isTop = topRated.some((t) => t.id === restaurant.id);
+  const topRank = topRankOf(topRated, restaurant.id);
   const visibleBadges = (restaurant.badges ?? []).filter((b) => badgeMap[b]);
 
   // Tags : origines d'abord, puis caractéristiques, puis plats. On en montre au
@@ -89,14 +90,7 @@ const RestaurantCardTW = ({
 
         {restaurant.closed && <ClosedBadge className="absolute left-3 top-3" />}
 
-        {isTop && (
-          <Tooltip label="Top 5 des mieux notés">
-            <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground shadow">
-              <img src={topRatedIcon} alt="" className="h-3.5 w-3.5" />
-              Top 5
-            </span>
-          </Tooltip>
-        )}
+        <TopBadge rank={topRank} className="absolute left-3 top-3" />
 
         {visibleBadges.length > 0 && (
           <div className="absolute right-3 top-3 flex gap-1.5">
