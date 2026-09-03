@@ -96,7 +96,6 @@ const RestaurantGrid = ({
   const itemProps = (restaurant: Restaurant) => ({
     restaurant,
     topRated,
-    featured: topRated.some((t) => t.id === restaurant.id),
     liked: favoriteIds.includes(restaurant.id),
     onLikeToggle: async (liked: boolean) => {
       if (liked) await addFavorite(restaurant.id);

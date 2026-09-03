@@ -17,7 +17,6 @@ import { cn } from "@/lib/utils";
 interface Props {
   restaurant: Restaurant;
   topRated: { id: number }[];
-  featured?: boolean;
   liked: boolean;
   onLikeToggle: (liked: boolean) => Promise<void>;
   /** Fourni uniquement pour les admins : ouvre le dialog d'édition. */
@@ -28,7 +27,6 @@ interface Props {
 const RestaurantRow = ({
   restaurant,
   topRated = [],
-  featured = false,
   liked,
   onLikeToggle,
   onEdit,
@@ -46,10 +44,7 @@ const RestaurantRow = ({
   return (
     <article
       onClick={() => navigate(`/restaurant/${restaurant.slug}`)}
-      className={cn(
-        "group flex cursor-pointer select-none items-center gap-4 overflow-hidden rounded-card bg-card p-3 shadow-[0_8px_24px_-14px_rgba(2,8,40,0.22)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_-16px_rgba(2,8,40,0.30)]",
-        featured ? "ring-2 ring-primary" : "border border-border"
-      )}
+      className="group flex cursor-pointer select-none items-center gap-4 overflow-hidden rounded-card border border-border bg-card p-3 shadow-[0_8px_24px_-14px_rgba(2,8,40,0.22)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_-16px_rgba(2,8,40,0.30)]"
     >
       {/* Vignette */}
       <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg sm:h-20 sm:w-28">

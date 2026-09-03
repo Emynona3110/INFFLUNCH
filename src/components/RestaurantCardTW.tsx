@@ -17,7 +17,6 @@ import { cn } from "@/lib/utils";
 interface Props {
   restaurant: Restaurant;
   topRated: { id: number }[];
-  featured?: boolean;
   liked: boolean;
   onLikeToggle: (liked: boolean) => Promise<void>;
   /** Fourni uniquement pour les admins : ouvre le dialog d'édition. */
@@ -53,7 +52,6 @@ export function Stars({ rating }: { rating: number }) {
 const RestaurantCardTW = ({
   restaurant,
   topRated = [],
-  featured = false,
   liked,
   onLikeToggle,
   onEdit,
@@ -72,10 +70,7 @@ const RestaurantCardTW = ({
   return (
     <article
       onClick={() => navigate(`/restaurant/${restaurant.slug}`)}
-      className={cn(
-        "group flex h-full cursor-pointer select-none flex-col overflow-hidden rounded-card bg-card shadow-[0_10px_30px_-12px_rgba(2,8,40,0.22)] transition duration-200 transform-gpu [backface-visibility:hidden] hover:-translate-y-1 hover:shadow-[0_18px_44px_-14px_rgba(2,8,40,0.30)]",
-        featured ? "ring-2 ring-primary" : "border border-border"
-      )}
+      className="group flex h-full cursor-pointer select-none flex-col overflow-hidden rounded-card border border-border bg-card shadow-[0_10px_30px_-12px_rgba(2,8,40,0.22)] transition duration-200 transform-gpu [backface-visibility:hidden] hover:-translate-y-1 hover:shadow-[0_18px_44px_-14px_rgba(2,8,40,0.30)]"
     >
       {/* Image */}
       <div className="relative h-48 overflow-hidden">
