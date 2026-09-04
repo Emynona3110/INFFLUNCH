@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import supabaseClient from "../services/supabaseClient";
 import { NoteCategory } from "../services/noteCategories";
+import useSession from "./useSession";
 
 export interface AdminNote {
   id: number;
@@ -9,7 +10,12 @@ export interface AdminNote {
   position: number;
   done: boolean;
   done_at: string | null;
+  /** À l'origine de la note : l'admin qui l'a écrite, ou — quand elle vient
+   *  d'une demande acceptée — le collaborateur qui l'a envoyée. */
+  author_id: string | null;
   created_at: string;
+  /** Email de l'auteur (jointure manuelle, pas de FK vers public.users). */
+  email?: string | null;
 }
 
 const KEY = ["admin-notes"];
@@ -38,6 +44,8 @@ interface Rollback {
  */
 const useAdminNotes = (enabled = true) => {
   const queryClient = useQueryClient();
+  const { sessionData } = useSession();
+  const me = sessionData?.user;
 
   const query = useQuery<AdminNote[], Error>({
     queryKey: KEY,
@@ -45,11 +53,29 @@ const useAdminNotes = (enabled = true) => {
     queryFn: async () => {
       const { data, error } = await supabaseClient
         .from("admin_notes")
-        .select("id, description, category, position, done, done_at, created_at")
+        .select(
+          "id, description, category, position, done, done_at, author_id, created_at"
+        )
         .order("done", { ascending: true })
         .order("position", { ascending: true });
       if (error) throw new Error(error.message);
-      return (data ?? []) as AdminNote[];
+      const rows = (data ?? []) as AdminNote[];
+
+      // Comme les demandes : pas de FK vers public.users, on rapporte les
+      // emails en une requête plutôt qu'une par ligne.
+      const ids = [...new Set(rows.map((n) => n.author_id).filter(Boolean))];
+      if (ids.length === 0) return rows;
+      const { data: users } = await supabaseClient
+        .from("users")
+        .select("id, email")
+        .in("id", ids as string[]);
+      const emailById = Object.fromEntries(
+        (users ?? []).map((u) => [u.id as string, u.email as string])
+      );
+      return rows.map((n) => ({
+        ...n,
+        email: n.author_id ? emailById[n.author_id] ?? null : null,
+      }));
     },
   });
 
@@ -57,10 +83,10 @@ const useAdminNotes = (enabled = true) => {
     queryClient.invalidateQueries({ queryKey: KEY });
   };
 
-  /** Lignes réellement en base : la note fraîchement ajoutée porte un id
-   *  temporaire négatif tant que l'insert n'est pas revenu. */
-  const persisted = () =>
-    (queryClient.getQueryData<AdminNote[]>(KEY) ?? []).filter((n) => n.id > 0);
+  /** La liste telle qu'elle est affichée, notes optimistes comprises : deux
+   *  ajouts coup sur coup doivent recevoir deux positions distinctes, même si
+   *  le premier insert n'est pas encore revenu. */
+  const cached = () => queryClient.getQueryData<AdminNote[]>(KEY) ?? [];
 
   /** Position d'une nouvelle note : en fin de liste des notes en cours. */
   const nextPosition = (notes: AdminNote[]) => {
@@ -89,25 +115,44 @@ const useAdminNotes = (enabled = true) => {
 
   // Renvoie l'id réel de la note : l'écran des demandes le retient pour pouvoir
   // mettre à jour cette note-là plus tard plutôt que d'en créer une deuxième.
-  const add = useMutation<number, Error, { description: string; category: NoteCategory }, Rollback>({
-    mutationFn: async (note) => {
+  // `author_id` n'est passé que pour une note née d'une demande acceptée : elle
+  // garde alors le collaborateur à l'origine, pas l'admin qui l'a reprise. Sans
+  // lui, la base pose `auth.uid()` — celui qui écrit dans le carnet.
+  type NewNote = {
+    description: string;
+    category: NoteCategory;
+    author_id?: string;
+    /** Email de cet auteur, pour l'affichage optimiste seulement. */
+    email?: string | null;
+  };
+
+  const add = useMutation<number, Error, NewNote, Rollback>({
+    mutationFn: async ({ description, category, author_id }) => {
       const { data, error } = await supabaseClient
         .from("admin_notes")
-        .insert({ ...note, position: nextPosition(persisted()) })
+        .insert({
+          description,
+          category,
+          position: nextPosition(cached()),
+          ...(author_id ? { author_id } : {}),
+        })
         .select("id")
         .single();
       if (error) throw new Error(error.message);
       return data.id as number;
     },
-    ...optimistic((notes, vars: { description: string; category: NoteCategory }) => [
+    ...optimistic((notes, vars: NewNote) => [
       ...notes,
       {
         // id négatif : provisoire, remplacé par la ligne réelle au refetch.
         id: -Date.now(),
-        ...vars,
+        description: vars.description,
+        category: vars.category,
         position: nextPosition(notes),
         done: false,
         done_at: null,
+        author_id: vars.author_id ?? me?.id ?? null,
+        email: vars.author_id ? vars.email ?? null : me?.email ?? null,
         created_at: new Date().toISOString(),
       },
     ]),
@@ -133,21 +178,46 @@ const useAdminNotes = (enabled = true) => {
 
   // `done_at` est posé par le trigger en base, on n'écrit que la case cochée ;
   // côté cache on l'anticipe pour que la popup de lecture soit juste.
+  //
+  // Rouvrir une note la renvoie en FIN de liste des notes en cours, comme un
+  // ajout : elle repart d'une place où on la retrouve, quitte à la remonter à
+  // la souris — plutôt que de ressurgir au milieu, à sa position d'origine.
   const toggleDone = useMutation<void, Error, { id: number; done: boolean }, Rollback>({
     mutationFn: async ({ id, done }) => {
       const { error } = await supabaseClient
         .from("admin_notes")
-        .update({ done })
+        .update(
+          done
+            ? { done }
+            : {
+                done,
+                // Le cache porte déjà la note rouverte : on l'écarte du calcul.
+                position: nextPosition(cached().filter((n) => n.id !== id)),
+              }
+        )
         .eq("id", id);
       if (error) throw new Error(error.message);
     },
-    ...optimistic((notes, { id, done }) =>
-      notes.map((n) =>
+    // Le trigger en base termine (ou rouvre) la demande d'origine : la boîte de
+    // réception des demandes doit être relue.
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["feedback"] });
+    },
+    ...optimistic((notes, { id, done }) => {
+      const reopenedAt = done
+        ? null
+        : nextPosition(notes.filter((n) => n.id !== id));
+      return notes.map((n) =>
         n.id === id
-          ? { ...n, done, done_at: done ? new Date().toISOString() : null }
+          ? {
+              ...n,
+              done,
+              done_at: done ? new Date().toISOString() : null,
+              position: reopenedAt ?? n.position,
+            }
           : n
-      )
-    ),
+      );
+    }),
   });
 
   /** Déplacement à la souris : une seule ligne écrite, la position calculée

@@ -20,9 +20,11 @@ const tagsSection = adminSections.find((s) => s.tableName === "tags")!;
 const tabs = [
   { key: "creation", label: "Inscriptions" },
   { key: "password_reset", label: "Mot de passe" },
+  // Les demandes des collaborateurs restent avec les autres files d'attente,
+  // avant les tables de référence.
+  { key: "feedback", label: "Demandes" },
   { key: "users", label: "Utilisateurs" },
   { key: "tags", label: "Tags" },
-  { key: "feedback", label: "Demandes" },
 ] as const;
 
 type TabKey = (typeof tabs)[number]["key"];

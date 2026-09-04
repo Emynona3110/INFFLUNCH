@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import supabaseClient from "../services/supabaseClient";
 import { FeedbackStatus, FeedbackType } from "../services/feedbackTypes";
+import useRealtimeTable from "./useRealtimeTable";
 import useSession from "./useSession";
 
 export interface Feedback {
@@ -13,6 +14,15 @@ export interface Feedback {
   author_id: string;
   created_at: string;
   handled_at: string | null;
+  /** L'auteur s'est retiré : la demande sort de sa liste, mais l'admin la garde
+   *  (et le backlog qu'elle a produit continue sa vie). */
+  cancelled_at: string | null;
+  /** Nombre de versions archivées : on n'en crée une que si la demande avait
+   *  déjà été classée. Tant qu'elle attend, l'auteur retouche la version en
+   *  cours. */
+  edits: number;
+  /** Date de la dernière correction, null si la demande n'a jamais bougé. */
+  updated_at: string | null;
   /** Email de l'auteur (jointure manuelle) : seuls les admins en ont besoin. */
   email?: string | null;
 }
@@ -30,16 +40,24 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
   const { sessionData } = useSession();
   const userId = sessionData?.user?.id;
   const key = ["feedback", scope];
+  const active = enabled && (scope === "admin" || !!userId);
 
   const query = useQuery<Feedback[], Error>({
     queryKey: key,
-    enabled: enabled && (scope === "admin" || !!userId),
+    enabled: active,
     queryFn: async () => {
       let request = supabaseClient
         .from("feedback")
-        .select("id, type, message, status, note_id, author_id, created_at, handled_at")
+        .select(
+          "id, type, message, status, note_id, author_id, created_at, handled_at, cancelled_at, edits, updated_at"
+        )
         .order("created_at", { ascending: false });
-      if (scope === "mine") request = request.eq("author_id", userId as string);
+      // L'auteur ne revoit pas ce qu'il a retiré ; l'admin, si.
+      if (scope === "mine") {
+        request = request
+          .eq("author_id", userId as string)
+          .is("cancelled_at", null);
+      }
 
       const { data, error } = await request;
       if (error) throw new Error(error.message);
@@ -64,6 +82,11 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ["feedback"] });
   };
+
+  // Sync temps réel : une demande envoyée par un collègue apparaît tout de
+  // suite dans la boîte de réception admin (et sa puce), et l'auteur voit son
+  // classement sans recharger. La RLS filtre déjà ce que chacun reçoit.
+  useRealtimeTable("feedback", invalidate, active);
 
   const submit = useMutation({
     mutationFn: async (values: { type: FeedbackType; message: string }) => {
@@ -114,15 +137,33 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
     onSuccess: invalidate,
   });
 
-  const remove = useMutation({
-    mutationFn: async (id: number) => {
-      const { error } = await supabaseClient.from("feedback").delete().eq("id", id);
+  /**
+   * « Supprimer », côté auteur, et ce que ça veut dire selon le moment :
+   *   - la demande n'a laissé aucune trace — personne ne s'est prononcé, rien
+   *     dans le carnet, première version — : on l'efface pour de bon, elle
+   *     quitte aussi la boîte de réception ;
+   *   - elle a déjà été traitée, ou reprise après l'avoir été : on la marque
+   *     seulement retirée. L'admin doit pouvoir constater ce qui a été enlevé,
+   *     et ni le travail engagé ni l'historique ne s'évaporent avec elle.
+   * La RLS applique exactement la même règle.
+   */
+  const cancel = useMutation({
+    mutationFn: async (item: Feedback) => {
+      const untouched =
+        item.status === "nouveau" && !item.note_id && item.edits === 0;
+      const { error } = untouched
+        ? await supabaseClient.from("feedback").delete().eq("id", item.id)
+        : await supabaseClient
+            .from("feedback")
+            .update({ cancelled_at: new Date().toISOString() })
+            .eq("id", item.id);
       if (error) throw new Error(error.message);
+      return untouched;
     },
     onSuccess: invalidate,
   });
 
-  return { ...query, submit, edit, setStatus, remove };
+  return { ...query, submit, edit, setStatus, cancel };
 };
 
 export default useFeedback;

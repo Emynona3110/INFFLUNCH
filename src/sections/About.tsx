@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { FiArrowUpRight, FiMessageSquare } from "react-icons/fi";
 import { Card } from "@/components/ui/card";
 
 const About = () => {
@@ -33,9 +34,18 @@ const About = () => {
           </p>
 
           <p>
-            Si vous rencontrez un problème ou souhaitez faire une suggestion,
-            n'hésitez pas à contacter{" "}
-            <span className="font-semibold text-foreground">LLS</span> 😉
+            N'hésite pas à recommander{" "}
+            <span className="font-semibold text-foreground">INFFLUNCH</span> aux
+            autres collaborateurs 😉
+          </p>
+
+          <p>
+            Si tu rencontres un problème ou souhaites faire une suggestion, tu
+            peux t'exprimer juste ici{" "}
+            <FiMessageSquare className="inline h-4 w-4 align-text-bottom text-primary" />
+            {/* Même repère que dans « Mes demandes » : la flèche pointe vers le
+                bouton, en haut à droite de la barre. */}
+            <FiArrowUpRight className="inline h-4 w-4 align-text-bottom text-foreground/40" />
           </p>
         </div>
       </Card>

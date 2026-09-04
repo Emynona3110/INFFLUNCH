@@ -1,7 +1,7 @@
-import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import supabaseClient from "../services/supabaseClient";
 import useIsAdmin from "./useIsAdmin";
+import useRealtimeTable from "./useRealtimeTable";
 
 export type RequestType = "creation" | "password_reset";
 export type RequestState = "Waiting" | "Accepted" | "Rejected";
@@ -35,43 +35,12 @@ const useAccessRequests = () => {
 
   // Sync temps réel : à chaque changement sur waiting_list (nouvelle demande,
   // accept/reject…), on invalide la query → table ET puce navbar se rafraîchissent
-  // sans recharger la page. Nom de canal unique pour cohabiter avec les autres
-  // instances du hook (navbar + section). Admins uniquement.
-  // ⚠️ Nécessite que la table soit dans la publication realtime (cf.
-  // sql/2026-06-19_waiting_list_realtime.sql).
-  useEffect(() => {
-    if (!isAdmin) return;
-    let channel: ReturnType<typeof supabaseClient.channel> | null = null;
-    let cancelled = false;
-
-    (async () => {
-      // La table est protégée par RLS (lecture admin-only) : il faut passer le
-      // JWT utilisateur à la connexion Realtime, sinon elle reste "anon" et le
-      // serveur ne délivre aucun événement.
-      const { data } = await supabaseClient.auth.getSession();
-      if (cancelled) return;
-      await supabaseClient.realtime.setAuth(data.session?.access_token ?? null);
-
-      channel = supabaseClient
-        .channel(`waiting_list-rt-${Math.random().toString(36).slice(2)}`)
-        .on(
-          "postgres_changes",
-          { event: "*", schema: "public", table: "waiting_list" },
-          () =>
-            queryClient.invalidateQueries({ queryKey: ["access-requests"] })
-        )
-        .subscribe((status) => {
-          if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
-            console.warn("[realtime waiting_list] statut:", status);
-          }
-        });
-    })();
-
-    return () => {
-      cancelled = true;
-      if (channel) supabaseClient.removeChannel(channel);
-    };
-  }, [isAdmin, queryClient]);
+  // sans recharger la page. Admins uniquement (la table est en lecture admin-only).
+  useRealtimeTable(
+    "waiting_list",
+    () => queryClient.invalidateQueries({ queryKey: ["access-requests"] }),
+    isAdmin
+  );
 
   return useQuery<AccessRequest[], Error>({
     queryKey: ["access-requests"],

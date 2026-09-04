@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { FiCheck, FiMoreVertical, FiPlus, FiTrash2, FiX } from "react-icons/fi";
+import {
+  FiCheck,
+  FiChevronRight,
+  FiMoreVertical,
+  FiPlus,
+  FiTrash2,
+  FiX,
+} from "react-icons/fi";
 import { toast } from "@/lib/toast";
 import useAdminNotes, { AdminNote } from "@/hooks/useAdminNotes";
 import { NoteCategory, noteCategory } from "@/services/noteCategories";
@@ -42,6 +49,10 @@ const AdminNotes = () => {
   const [viewing, setViewing] = useState<AdminNote | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [editing, setEditing] = useState<AdminNote | null>(null);
+
+  // Les notes terminées s'empilent avec le temps : elles restent consultables,
+  // mais repliées, pour que le carnet montre d'abord ce qui reste à faire.
+  const [showDone, setShowDone] = useState(false);
 
   const [drag, setDrag] = useState<Drag | null>(null);
   const tileRefs = useRef(new Map<number, HTMLLIElement>());
@@ -225,12 +236,9 @@ const AdminNotes = () => {
           >
             {/* Une seule ligne : au-delà de la largeur, on coupe aux « … » et le
                 descriptif complet se lit dans la popup. */}
-            <p
-              className={cn(
-                "my-0 truncate text-sm text-foreground/85",
-                note.done && "line-through"
-              )}
-            >
+            {/* Pas de texte barré : le grisé de la tuile dit déjà que la note
+                est terminée, et le barré rendait le libellé pénible à relire. */}
+            <p className="my-0 truncate text-sm text-foreground/85">
               {note.description}
             </p>
           </button>
@@ -338,11 +346,24 @@ const AdminNotes = () => {
 
           {done.length > 0 && (
             <>
-              <li className="flex items-center gap-3 pt-4 text-xs font-medium uppercase tracking-wide text-foreground/40">
-                Terminé ({done.length})
-                <span className="h-px flex-1 bg-border" />
+              <li className="pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowDone((v) => !v)}
+                  aria-expanded={showDone}
+                  className="flex w-full cursor-pointer items-center gap-2 text-xs font-medium uppercase tracking-wide text-foreground/40 transition hover:text-foreground/60"
+                >
+                  <FiChevronRight
+                    className={cn(
+                      "h-3.5 w-3.5 transition-transform",
+                      showDone && "rotate-90"
+                    )}
+                  />
+                  Terminé ({done.length})
+                  <span className="h-px flex-1 bg-border" />
+                </button>
               </li>
-              {done.map(renderTile)}
+              {showDone && done.map(renderTile)}
             </>
           )}
         </ul>

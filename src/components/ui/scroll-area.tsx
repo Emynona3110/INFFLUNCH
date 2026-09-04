@@ -21,8 +21,11 @@ export function ScrollArea({
   options?: PartialOptions;
 }) {
   return (
+    // Pas de `defer` : l'initialisation différée laissait passer un rendu où
+    // l'hôte est un conteneur scrollable ordinaire — le temps d'apercevoir la
+    // barre native du navigateur, très visible en arrivant sur un onglet dont
+    // les données sont déjà en cache.
     <OverlayScrollbarsComponent
-      defer
       options={{
         scrollbars: {
           autoHide: "leave",

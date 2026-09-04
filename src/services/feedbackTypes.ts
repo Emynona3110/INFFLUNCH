@@ -40,8 +40,18 @@ export const DEFAULT_FEEDBACK_TYPE: FeedbackType = "bug";
 export const feedbackType = (value?: string | null) =>
   FEEDBACK_TYPES.find((t) => t.value === value) ?? FEEDBACK_TYPES[0];
 
-/** Sort d'une demande. « Acceptée » = reportée dans le carnet de backlog ;
- *  « Refusée » = lue et écartée. Les deux restent visibles par leur auteur. */
+/**
+ * Où en est le TRAITEMENT d'une demande — l'auteur le voit aussi, c'est la
+ * réponse qu'on lui doit :
+ *   - « En attente » : arrivée, ou corrigée depuis son classement ;
+ *   - « Acceptée »   : reportée dans le carnet de backlog ;
+ *   - « Terminée »   : la note du carnet a été cochée (posé par la base) ;
+ *   - « Refusée »    : lue et écartée.
+ *
+ * L'ordre du tableau est celui des sections de la boîte de réception admin.
+ * L'annulation par l'auteur n'est pas là-dedans : c'est une autre dimension
+ * (`feedback.cancelled_at`), qui n'interrompt pas le traitement.
+ */
 export const FEEDBACK_STATUSES = [
   {
     value: "nouveau",
@@ -51,6 +61,11 @@ export const FEEDBACK_STATUSES = [
   {
     value: "accepte",
     label: "Acceptée",
+    chip: "bg-sky-500/12 text-sky-600 dark:text-sky-400",
+  },
+  {
+    value: "termine",
+    label: "Terminée",
     chip: "bg-emerald-500/12 text-emerald-600 dark:text-emerald-400",
   },
   {
@@ -64,3 +79,10 @@ export type FeedbackStatus = (typeof FEEDBACK_STATUSES)[number]["value"];
 
 export const feedbackStatus = (value?: string | null) =>
   FEEDBACK_STATUSES.find((s) => s.value === value) ?? FEEDBACK_STATUSES[0];
+
+/** Demande retirée par son auteur : plus rien de neuf ne viendra d'elle, mais
+ *  l'admin la garde sous les yeux (et son backlog, s'il y en a un). */
+export const FEEDBACK_CANCELLED = {
+  label: "Annulée",
+  chip: "bg-muted text-foreground/55",
+} as const;

@@ -14,6 +14,7 @@ import ColorModeSwitch from "../components/ColorModeSwitch";
 import AchievementsGallery from "./AchievementsGallery";
 import AdminNotes from "./AdminNotes";
 import MyFeedback from "./MyFeedback";
+import useFeedbackSeen from "@/hooks/useFeedbackSeen";
 import HoldToDeleteButton from "../components/HoldToDeleteButton";
 import ChangePasswordDialog from "../components/ChangePasswordDialog";
 import PushToggle from "../components/PushToggle";
@@ -77,6 +78,8 @@ const MyAccount = () => {
 
   // Pastille « succès non vus » : elle s'éteint dès qu'on ouvre la galerie.
   const { hasUnseen: hasUnseenAchievements, markSeen } = useAchievementsSeen();
+  // Même signal côté « Demandes » : l'admin a classé une de mes demandes.
+  const { hasUnseen: hasUnseenFeedback } = useFeedbackSeen();
   useEffect(() => {
     if (active === "succes") markSeen();
   }, [active, markSeen]);
@@ -134,9 +137,11 @@ const MyAccount = () => {
               )}
             >
               {t.label}
-              {t.key === "succes" && hasUnseenAchievements && !isActive && (
-                <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-background" />
-              )}
+              {((t.key === "succes" && hasUnseenAchievements) ||
+                (t.key === "retours" && hasUnseenFeedback)) &&
+                !isActive && (
+                  <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-background" />
+                )}
             </button>
           );
         })}

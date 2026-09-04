@@ -5,9 +5,10 @@ import lightLogo from "../assets/w-infflux.svg";
 import FeedbackDialog from "./FeedbackDialog";
 import { Tooltip } from "@/components/ui/tooltip";
 import useIsAdmin from "../hooks/useIsAdmin";
-import useAccessRequests from "../hooks/useAccessRequests";
+import useAdminPending from "../hooks/useAdminPending";
 import useChangelogSeen from "../hooks/useChangelogSeen";
 import useAchievementsSeen from "../hooks/useAchievementsSeen";
+import useFeedbackSeen from "../hooks/useFeedbackSeen";
 import useLunchToday from "../hooks/useLunchToday";
 import {
   buildUserSections,
@@ -31,9 +32,10 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
   const isAdmin = useIsAdmin();
   const sections = buildUserSections(isAdmin);
 
-  // Puce "demandes en attente" (admins uniquement, la requête est gated par rôle).
-  const { data: requests = [] } = useAccessRequests();
-  const pendingCount = requests.filter((r) => r.state === "Waiting").length;
+  // Puce de l'onglet Admin : allumée dès qu'un de ses sous-onglets a la sienne
+  // (demandes d'accès en attente ou demandes de collaborateurs non classées).
+  // Admins uniquement, les requêtes sont gated par rôle.
+  const { total: adminPending } = useAdminPending();
 
   // Puce "nouveautés non vues" (tous les utilisateurs).
   const { hasUnseen } = useChangelogSeen();
@@ -41,6 +43,11 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
   // Puce "succès non vus" : un succès débloqué n'a pas encore été consulté
   // dans la galerie (onglet Succès de Mon Profil).
   const { hasUnseen: hasUnseenAchievements } = useAchievementsSeen();
+
+  // Puce "une de mes demandes a été classée" : l'admin a tranché depuis ma
+  // dernière visite de « Mes demandes ». Temps réel via le canal de useFeedback.
+  const { hasUnseen: hasUnseenFeedback } = useFeedbackSeen();
+  const myAccountDot = hasUnseenAchievements || hasUnseenFeedback;
 
   // Puce "déjeuner" : je n'ai rien déclaré pour aujourd'hui. Elle disparaît dès
   // que j'ai choisi un restaurant OU dit que je ne mange pas au resto. On attend la fin du
@@ -52,7 +59,7 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
   // d'application en PWA installée) : une seule pastille, dès qu'au moins une
   // puce est allumée dans la navbar.
   const hasDot =
-    pendingCount > 0 || hasUnseen || hasUnseenAchievements || lunchPending;
+    adminPending > 0 || hasUnseen || myAccountDot || lunchPending;
   useEffect(() => {
     setFaviconBadge(hasDot);
   }, [hasDot]);
@@ -109,7 +116,7 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
                       {item.label}
                     </span>
                   </span>
-                  {item.path === "admin" && pendingCount > 0 && (
+                  {item.path === "admin" && adminPending > 0 && (
                     <span className="absolute right-0 top-2.5 h-2.5 w-2.5 rounded-full bg-[#f79220] ring-2 ring-card" />
                   )}
                   {item.path === "nouveautes" && hasUnseen && (
@@ -118,7 +125,7 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
                   {item.path === "dejeuner" && lunchPending && (
                     <span className="absolute right-0 top-2.5 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />
                   )}
-                  {item.path === "mon-compte" && hasUnseenAchievements && (
+                  {item.path === "mon-compte" && myAccountDot && (
                     <span className="absolute right-0 top-2.5 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />
                   )}
                 </button>
@@ -160,7 +167,7 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
                     )}
                   >
                     {item.label}
-                    {item.path === "admin" && pendingCount > 0 && (
+                    {item.path === "admin" && adminPending > 0 && (
                       <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-[#f79220] ring-2 ring-card" />
                     )}
                     {item.path === "nouveautes" && hasUnseen && (
@@ -169,7 +176,7 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
                     {item.path === "dejeuner" && lunchPending && (
                       <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />
                     )}
-                    {item.path === "mon-compte" && hasUnseenAchievements && (
+                    {item.path === "mon-compte" && myAccountDot && (
                       <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />
                     )}
                   </button>

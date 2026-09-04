@@ -1,3 +1,6 @@
+import { ReactNode } from "react";
+import { FiArrowUpRight, FiMessageSquare } from "react-icons/fi";
+
 /**
  * Journal des nouveautés du site (changelog), en dur.
  * Affiché dans la section « Nouveautés », regroupé par mois (un cadre par mois).
@@ -13,11 +16,26 @@ export interface ChangelogEntry {
   /** "AAAA-MM-JJ" (comparable et triable tel quel). */
   date: string;
   title: string;
-  /** Sous-points, affichés en liste à puces. */
-  points: string[];
+  /** Sous-points, affichés en liste à puces. Du texte, ou du JSX quand un
+   *  point montre l'icône d'un bouton plutôt que de le décrire. */
+  points: ReactNode[];
 }
 
 export const changelog: ChangelogEntry[] = [
+  // ─────────────────────── Septembre 2026 ───────────────────────
+  {
+    date: "2026-09-04",
+    title: "Boîte à demandes",
+    points: [
+      <>
+        Signale un bug ou propose une idée en cliquant sur{" "}
+        <FiMessageSquare className="inline h-4 w-4 align-text-bottom text-primary" />
+        {/* La flèche dit où le trouver : en haut à droite, dans la barre. */}
+        <FiArrowUpRight className="inline h-4 w-4 align-text-bottom text-foreground/40" />
+      </>,
+      "Les demandes sont consultables dans Mon compte",
+    ],
+  },
   // ───────────────────────── Août 2026 ─────────────────────────
   {
     date: "2026-08-28",

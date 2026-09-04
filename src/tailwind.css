@@ -113,6 +113,22 @@ body {
   right: var(--grid-right, 120px) !important;
 }
 
+/* Hôtes OverlayScrollbars pas encore initialisés (le composant est monté en
+   `defer`) : sans ça, le fallback ci-dessous leur peint une vraie barre native
+   le temps d'un rendu — le flash bleu qu'on voyait en arrivant sur un onglet
+   dont les données étaient déjà en cache. */
+[data-overlayscrollbars-initialize]:not([data-overlayscrollbars]) {
+  /* Chrome récent et Firefox : la barre native n'existe pas, même le temps
+     d'un rendu. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+[data-overlayscrollbars-initialize]:not([data-overlayscrollbars])::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 /* Fallback natif minimaliste (zones Tailwind sans OverlayScrollbars).
    NB : pas de scrollbar-color/width — sinon Chrome ignore les ::-webkit-scrollbar. */
 .tw-scope::-webkit-scrollbar,

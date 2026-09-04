@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "@/lib/toast";
 import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import HoldToDeleteButton from "@/components/HoldToDeleteButton";
 import useFeedback, { Feedback } from "@/hooks/useFeedback";
 import { FEEDBACK_TYPES, FeedbackType } from "@/services/feedbackTypes";
 import { cn } from "@/lib/utils";
@@ -15,13 +14,27 @@ interface Props {
 }
 
 /**
+ * Message tel qu'il sera stocké. On garde la mise en forme utile et on écrase
+ * le reste : espaces et tabulations en série ramenés à un seul espace, rien qui
+ * traîne en début ou en fin de ligne, et au plus une ligne vide d'affilée.
+ * Séparer deux paragraphes est légitime ; empiler les blancs ne l'est pas — les
+ * demandes se lisent en tuiles serrées.
+ */
+const clean = (text: string) =>
+  text
+    .replace(/[^\S\n]+/g, " ")
+    .replace(/ ?\n ?/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
+/**
  * Saisie d'une demande sur l'appli : une nature, un message. Un seul formulaire
  * pour les trois natures — un bug et une idée ne méritent pas deux écrans, et on
  * ne veut surtout pas que le choix du bon endroit décourage l'envoi. Il sert
  * aussi à corriger une demande déjà envoyée, qui repart alors en attente.
  */
 const FeedbackDialog = ({ isOpen, onClose, item }: Props) => {
-  const { submit, edit, remove } = useFeedback("mine", false);
+  const { submit, edit } = useFeedback("mine", false);
   // Aucune nature présélectionnée : sans ce choix, tout arriverait en « Bug »
   // par inertie. La saisie n'est ouverte qu'une fois la nature dite.
   const [type, setType] = useState<FeedbackType | null>(null);
@@ -36,9 +49,18 @@ const FeedbackDialog = ({ isOpen, onClose, item }: Props) => {
     setMessage(item?.message ?? "");
   }, [isOpen, item]);
 
+  // Rien n'a bougé : inutile d'écrire en base (l'update ferait ressortir du
+  // grisé une demande déjà traitée côté admin) ni d'annoncer une modification.
+  const unchanged =
+    !!item && type === item.type && clean(message) === item.message;
+
   const send = async () => {
-    const text = message.trim();
+    const text = clean(message);
     if (!type || !text) return;
+    if (unchanged) {
+      onClose();
+      return;
+    }
     setBusy(true);
     try {
       if (item) await edit.mutateAsync({ id: item.id, type, message: text });
@@ -55,27 +77,6 @@ const FeedbackDialog = ({ isOpen, onClose, item }: Props) => {
     } catch (e: any) {
       toast({
         title: item ? "Modification impossible" : "Envoi impossible",
-        description: e?.message ?? "Réessaie.",
-        status: "error",
-        duration: 5000,
-      });
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  /** Supprimer ne touche qu'à la demande : ce qui a déjà été porté au carnet de
-   *  backlog y reste, c'est l'admin seul qui le gère. */
-  const destroy = async () => {
-    if (!item) return;
-    setBusy(true);
-    try {
-      await remove.mutateAsync(item.id);
-      toast({ title: "Demande supprimée", status: "success", duration: 2500 });
-      onClose();
-    } catch (e: any) {
-      toast({
-        title: "Suppression impossible",
         description: e?.message ?? "Réessaie.",
         status: "error",
         duration: 5000,
@@ -142,19 +143,9 @@ const FeedbackDialog = ({ isOpen, onClose, item }: Props) => {
         </label>
       </div>
 
-      <div className="mt-6 flex items-center justify-between gap-2">
-        <div>
-          {item && (
-            <HoldToDeleteButton
-              onConfirm={destroy}
-              disabled={busy}
-              className="inline-flex h-10 items-center rounded-lg px-4 text-sm font-medium text-destructive transition hover:bg-destructive/10"
-              progressClassName="bg-destructive/20"
-            >
-              Supprimer
-            </HoldToDeleteButton>
-          )}
-        </div>
+      {/* Pas de suppression ici : elle vit dans la popup de lecture, d'où l'on
+          arrive. */}
+      <div className="mt-6 flex justify-end">
         <div className="flex gap-2">
           <Button variant="outline" onClick={onClose} disabled={busy}>
             Annuler
@@ -162,7 +153,7 @@ const FeedbackDialog = ({ isOpen, onClose, item }: Props) => {
           <Button
             onClick={send}
             loading={busy}
-            disabled={!type || !message.trim()}
+            disabled={!type || !clean(message) || unchanged}
           >
             {item ? "Enregistrer" : "Envoyer"}
           </Button>
