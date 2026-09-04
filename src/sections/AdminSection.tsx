@@ -2,6 +2,7 @@ import { useState } from "react";
 import DataManager from "../admin/DataManager";
 import AdminUsers from "../admin/AdminUsers";
 import AccessRequests from "../admin/AccessRequests";
+import AdminFeedback, { useNewFeedbackCount } from "../admin/AdminFeedback";
 import useAccessRequests from "../hooks/useAccessRequests";
 import { adminSections } from "../services/adminSections";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,8 @@ import { cn } from "@/lib/utils";
 //    une catégorie par onglet, avec puce bleue "en attente").
 //  - Utilisateurs : composant dédié (AdminUsers).
 //  - Tags : CRUD générique (DataManager).
+//  - Demandes : boîte de réception des bugs / idées envoyés par les collègues,
+//    avec une puce tant qu'il en reste en attente.
 const tagsSection = adminSections.find((s) => s.tableName === "tags")!;
 
 const tabs = [
@@ -19,6 +22,7 @@ const tabs = [
   { key: "password_reset", label: "Mot de passe" },
   { key: "users", label: "Utilisateurs" },
   { key: "tags", label: "Tags" },
+  { key: "feedback", label: "Demandes" },
 ] as const;
 
 type TabKey = (typeof tabs)[number]["key"];
@@ -32,6 +36,9 @@ const AdminSection = () => {
   const waitingByType = (type: "creation" | "password_reset") =>
     requests.filter((r) => r.type === type && r.state === "Waiting").length;
 
+  // Puce "demandes en attente" sur l'onglet Demandes.
+  const newFeedback = useNewFeedbackCount();
+
   return (
     <div className="tw-scope flex h-full w-full flex-col">
       <div className="mb-3 flex min-h-10 items-center justify-between gap-2 px-4">
@@ -41,6 +48,8 @@ const AdminSection = () => {
             const waiting =
               t.key === "creation" || t.key === "password_reset"
                 ? waitingByType(t.key)
+                : t.key === "feedback"
+                ? newFeedback
                 : 0;
             return (
               <button
@@ -79,6 +88,8 @@ const AdminSection = () => {
           <DataManager section={tagsSection} addSignal={addSignal} />
         ) : active === "users" ? (
           <AdminUsers />
+        ) : active === "feedback" ? (
+          <AdminFeedback />
         ) : (
           <AccessRequests activeType={active} />
         )}

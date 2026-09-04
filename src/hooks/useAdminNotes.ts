@@ -87,12 +87,17 @@ const useAdminNotes = (enabled = true) => {
     onSettled: invalidate,
   });
 
-  const add = useMutation<void, Error, { description: string; category: NoteCategory }, Rollback>({
+  // Renvoie l'id réel de la note : l'écran des demandes le retient pour pouvoir
+  // mettre à jour cette note-là plus tard plutôt que d'en créer une deuxième.
+  const add = useMutation<number, Error, { description: string; category: NoteCategory }, Rollback>({
     mutationFn: async (note) => {
-      const { error } = await supabaseClient
+      const { data, error } = await supabaseClient
         .from("admin_notes")
-        .insert({ ...note, position: nextPosition(persisted()) });
+        .insert({ ...note, position: nextPosition(persisted()) })
+        .select("id")
+        .single();
       if (error) throw new Error(error.message);
+      return data.id as number;
     },
     ...optimistic((notes, vars: { description: string; category: NoteCategory }) => [
       ...notes,

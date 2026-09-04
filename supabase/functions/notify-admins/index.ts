@@ -1,8 +1,11 @@
 // Edge Function : notify-admins
-// Envoie une notification push aux ADMINS quand une demande d'accès arrive.
-// Appelée par un Database Webhook Supabase sur INSERT dans `waiting_list` : ce
-// déclencheur couvre les deux types de demandes (creation / password_reset) et
-// toutes les voies d'écriture, y compris l'Edge Function `request-access`.
+// Envoie une notification push aux ADMINS. Deux déclencheurs, deux Database
+// Webhooks Supabase pointant ici, distingués par `payload.table` :
+//   - INSERT dans `waiting_list` : une demande d'accès (creation /
+//     password_reset), quelle que soit la voie d'écriture, y compris l'Edge
+//     Function `request-access` ;
+//   - INSERT dans `feedback` : un collaborateur signale un bug ou propose une
+//     idée depuis l'appli.
 //
 // Web Push « à la main » (RFC 8188 + RFC 8291) via WebCrypto : pas de
 // dépendance npm, donc rien qui puisse casser au gré du runtime Deno.
@@ -244,6 +247,16 @@ const typeLabel: Record<string, string> = {
   password_reset: "Mot de passe oublié",
 };
 
+const feedbackLabel: Record<string, string> = {
+  bug: "Bug",
+  amelioration: "Amélioration",
+  fonctionnalite: "Fonctionnalité",
+};
+
+/** Coupe un message long : une notification push n'affiche que quelques mots. */
+const excerpt = (text: string, max = 120) =>
+  text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text;
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -259,8 +272,7 @@ Deno.serve(async (req) => {
     // sans corps est accepté (message générique).
     const payload = await req.json().catch(() => ({}));
     const record = payload?.record ?? {};
-    const email: string = record.email ?? "";
-    const type: string = record.type ?? "creation";
+    const table: string = payload?.table ?? "waiting_list";
 
     const admin = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -282,14 +294,30 @@ Deno.serve(async (req) => {
       .in("user_id", ids);
     if (subsError) return json({ error: subsError.message }, 500);
 
-    const notification = {
-      title: "Nouvelle demande d'accès",
-      body: email
-        ? `${email} — ${typeLabel[type] ?? type}`
-        : "Une demande attend une réponse.",
-      url: "/admin",
-      tag: "access-request",
-    };
+    const notification =
+      table === "feedback"
+        ? {
+            title: `Nouveau retour — ${
+              feedbackLabel[record.type] ?? record.type ?? "retour"
+            }`,
+            body: record.message
+              ? excerpt(String(record.message))
+              : "Un collaborateur a envoyé un retour.",
+            url: "/admin",
+            // Tag distinct : un retour ne doit pas remplacer la notification
+            // d'une demande d'accès en attente sur l'écran de verrouillage.
+            tag: "feedback",
+          }
+        : {
+            title: "Nouvelle demande d'accès",
+            body: record.email
+              ? `${record.email} — ${
+                  typeLabel[record.type ?? "creation"] ?? record.type
+                }`
+              : "Une demande attend une réponse.",
+            url: "/admin",
+            tag: "access-request",
+          };
 
     let sent = 0;
     const stale: string[] = [];

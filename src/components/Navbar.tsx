@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { FiMoreVertical } from "react-icons/fi";
+import { FiMessageSquare, FiMoreVertical } from "react-icons/fi";
 import darkLogo from "../assets/infflux.svg";
 import lightLogo from "../assets/w-infflux.svg";
-import ColorModeSwitch from "./ColorModeSwitch";
+import FeedbackDialog from "./FeedbackDialog";
+import { Tooltip } from "@/components/ui/tooltip";
 import useIsAdmin from "../hooks/useIsAdmin";
 import useAccessRequests from "../hooks/useAccessRequests";
 import useChangelogSeen from "../hooks/useChangelogSeen";
@@ -24,6 +25,9 @@ interface NavbarProps {
 
 const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  // Signaler un bug ou proposer une idée depuis n'importe quel écran : c'est au
+  // moment où on le rencontre qu'on le dit, pas après être allé le chercher.
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const isAdmin = useIsAdmin();
   const sections = buildUserSections(isAdmin);
 
@@ -176,7 +180,23 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
         </div>
       </div>
 
-      <ColorModeSwitch />
+      <div className="flex shrink-0 items-center gap-1">
+        <Tooltip label="Un souci, une idée ?">
+          <button
+            type="button"
+            onClick={() => setFeedbackOpen(true)}
+            aria-label="Un souci, une idée ?"
+            className="grid h-9 w-9 cursor-pointer place-items-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-primary"
+          >
+            <FiMessageSquare className="h-5 w-5" />
+          </button>
+        </Tooltip>
+      </div>
+
+      <FeedbackDialog
+        isOpen={feedbackOpen}
+        onClose={() => setFeedbackOpen(false)}
+      />
     </div>
   );
 };

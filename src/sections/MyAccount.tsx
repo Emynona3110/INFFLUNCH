@@ -10,8 +10,10 @@ import useMyReviews from "../hooks/useMyReviews";
 import useAchievementsSeen from "../hooks/useAchievementsSeen";
 import useIsAdmin from "../hooks/useIsAdmin";
 import Avatar from "../components/Avatar";
+import ColorModeSwitch from "../components/ColorModeSwitch";
 import AchievementsGallery from "./AchievementsGallery";
 import AdminNotes from "./AdminNotes";
+import MyFeedback from "./MyFeedback";
 import HoldToDeleteButton from "../components/HoldToDeleteButton";
 import ChangePasswordDialog from "../components/ChangePasswordDialog";
 import PushToggle from "../components/PushToggle";
@@ -41,6 +43,8 @@ const subTabs = [
   { key: "profil", label: "Compte", adminOnly: false },
   { key: "avis", label: "Avis", adminOnly: false },
   { key: "succes", label: "Succès", adminOnly: false },
+  // Suivi de ses propres signalements : l'envoi se fait depuis la navbar.
+  { key: "retours", label: "Demandes", adminOnly: false },
   // Carnet de backlog : ce que l'admin repère en naviguant, pour plus tard.
   { key: "backlog", label: "Backlog", adminOnly: true },
 ] as const;
@@ -148,16 +152,12 @@ const MyAccount = () => {
       >
       {/* Profil */}
       {active === "profil" && (
-      <Card className="p-8">
-        <div
-          role="heading"
-          aria-level={1}
-          className="text-center font-display text-2xl font-extrabold text-card-foreground"
-        >
-          Compte
-        </div>
+      <Card className="relative p-8">
+        {/* Thème clair/sombre : réglage personnel, il a sa place ici plutôt que
+            dans la navbar où il occupait une position permanente. */}
+        <ColorModeSwitch className="absolute right-3 top-3" />
 
-        <div className="mt-6 flex flex-col items-center gap-3">
+        <div className="flex flex-col items-center gap-3">
           <div className="relative">
             <Avatar
               email={email}
@@ -278,6 +278,9 @@ const MyAccount = () => {
 
       {/* Mes succès */}
       {active === "succes" && <AchievementsGallery />}
+
+      {/* Mes demandes */}
+      {active === "retours" && <MyFeedback />}
 
       {/* Backlog (admins) */}
       {active === "backlog" && isAdmin && <AdminNotes />}

@@ -1,11 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import {
-  DEFAULT_NOTE_CATEGORY,
-  NOTE_CATEGORIES,
-  NoteCategory,
-} from "@/services/noteCategories";
+import { NOTE_CATEGORIES, NoteCategory } from "@/services/noteCategories";
 import { AdminNote } from "@/hooks/useAdminNotes";
 import { cn } from "@/lib/utils";
 
@@ -27,19 +23,22 @@ interface Props {
  */
 const AdminNoteDialog = ({ isOpen, onClose, note, onSubmit }: Props) => {
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState<NoteCategory>(DEFAULT_NOTE_CATEGORY);
+  // Pas de catégorie par défaut à la création : on la choisit, sinon tout
+  // finirait en « Amélioration » sans y penser.
+  const [category, setCategory] = useState<NoteCategory | null>(null);
   const [busy, setBusy] = useState(false);
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
 
   // Repart du contenu de la note à chaque ouverture (ou d'un formulaire vierge).
   useEffect(() => {
     if (!isOpen) return;
     setDescription(note?.description ?? "");
-    setCategory(note?.category ?? DEFAULT_NOTE_CATEGORY);
+    setCategory(note?.category ?? null);
   }, [isOpen, note]);
 
   const submit = async () => {
     const text = description.trim();
-    if (!text) return;
+    if (!category || !text) return;
     setBusy(true);
     try {
       await onSubmit({ description: text, category });
@@ -54,25 +53,6 @@ const AdminNoteDialog = ({ isOpen, onClose, note, onSubmit }: Props) => {
       <DialogTitle>{note ? "Modifier la note" : "Nouvelle note"}</DialogTitle>
 
       <div className="mt-5 space-y-4">
-        <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-foreground">Descriptif</span>
-          <textarea
-            autoFocus
-            rows={5}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Ce que tu as repéré, en une ou deux phrases…"
-            onKeyDown={(e) => {
-              // Ctrl/⌘+Entrée valide : la note se saisit souvent à la volée.
-              if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-                e.preventDefault();
-                submit();
-              }
-            }}
-            className="w-full resize-y rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition placeholder:text-foreground/40 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/25"
-          />
-        </label>
-
         <div className="flex flex-col gap-1.5">
           <span className="text-sm font-medium text-foreground">Catégorie</span>
           <div className="flex flex-wrap gap-2">
@@ -82,7 +62,10 @@ const AdminNoteDialog = ({ isOpen, onClose, note, onSubmit }: Props) => {
                 <button
                   key={c.value}
                   type="button"
-                  onClick={() => setCategory(c.value)}
+                  onClick={() => {
+                    setCategory(c.value);
+                    descriptionRef.current?.focus();
+                  }}
                   title={c.hint}
                   aria-pressed={active}
                   className={cn(
@@ -99,13 +82,41 @@ const AdminNoteDialog = ({ isOpen, onClose, note, onSubmit }: Props) => {
             })}
           </div>
         </div>
+
+        <label className="flex flex-col gap-1.5">
+          <span className="text-sm font-medium text-foreground">Descriptif</span>
+          <textarea
+            ref={descriptionRef}
+            rows={5}
+            value={description}
+            disabled={!category}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder={
+              category
+                ? "Ce que tu as repéré, en une ou deux phrases…"
+                : "Choisir une catégorie"
+            }
+            onKeyDown={(e) => {
+              // Ctrl/⌘+Entrée valide : la note se saisit souvent à la volée.
+              if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                submit();
+              }
+            }}
+            className="w-full resize-y rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition placeholder:text-foreground/40 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/25 disabled:cursor-not-allowed disabled:bg-muted/40"
+          />
+        </label>
       </div>
 
       <div className="mt-6 flex justify-end gap-2">
         <Button variant="outline" onClick={onClose} disabled={busy}>
           Annuler
         </Button>
-        <Button onClick={submit} loading={busy} disabled={!description.trim()}>
+        <Button
+          onClick={submit}
+          loading={busy}
+          disabled={!category || !description.trim()}
+        >
           {note ? "Enregistrer" : "Ajouter"}
         </Button>
       </div>
