@@ -26,6 +26,7 @@ import badgeMap from "@/services/badgeMap";
 import RestaurantMiniMap from "@/components/RestaurantMiniMap";
 import LikeButton from "@/components/LikeButton";
 import LunchButton from "@/components/LunchButton";
+import OrderButton from "@/components/OrderButton";
 import LunchAvatars from "@/components/LunchAvatars";
 import ClosedBadge from "@/components/ClosedBadge";
 import TopBadge, { topRankOf } from "@/components/TopBadge";
@@ -290,9 +291,13 @@ const RestaurantPage = () => {
           on ne peut plus y déjeuner.
         </div>
       ) : (
-        <div className="mt-4 flex items-center justify-end gap-3">
+        <div className="mt-4 flex flex-wrap items-center justify-end gap-3">
           <LunchAvatars restaurantId={restaurant.id} size={42} max={5} />
           <LunchButton restaurantId={restaurant.id} />
+          {/* Click & collect : commander vaut « je déjeune ici ». */}
+          {restaurant.order_url && (
+            <OrderButton restaurantId={restaurant.id} url={restaurant.order_url} />
+          )}
         </div>
       )}
 

@@ -7,6 +7,7 @@ import { slugify } from "../../utils/slugify";
 import useLocations from "../../hooks/useLocations";
 import { Restaurant } from "../../hooks/useRestaurants";
 import BadgesToggles from "../../components/BadgesToggles";
+import { CLICK_COLLECT_BADGE } from "../../services/badgeMap";
 import ImageUploadField from "../../components/ImageUploadField";
 import {
   checkImageResolution,
@@ -63,6 +64,7 @@ const RestaurantDialog = ({
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [address, setAddress] = useState("");
   const [website, setWebsite] = useState("");
+  const [orderUrl, setOrderUrl] = useState("");
   const [phone, setPhone] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [badges, setBadges] = useState<string[]>([]);
@@ -144,6 +146,7 @@ const RestaurantDialog = ({
       clearPreview();
       setAddress(initialData.address || "");
       setWebsite(initialData.website || "");
+      setOrderUrl(initialData.order_url || "");
       setPhone(initialData.phone || "");
       setTags(initialData.tags || []);
       setBadges(initialData.badges || []);
@@ -305,6 +308,7 @@ const RestaurantDialog = ({
       existing.image === (image || null) &&
       existing.address === address &&
       existing.website === (website || null) &&
+      (existing.order_url ?? null) === (orderUrl.trim() || null) &&
       existing.phone === (phone || null) &&
       JSON.stringify(existing.tags?.sort()) === JSON.stringify(tags.sort()) &&
       JSON.stringify(existing.badges?.sort()) === JSON.stringify(badges.sort()) &&
@@ -415,6 +419,7 @@ const RestaurantDialog = ({
           image: finalImage,
           address,
           website: website || null,
+      order_url: orderUrl.trim() || null,
           phone: phone || null,
           // Position omise quand l'adresse n'a pas bougé : les valeurs en base
           // (éventuellement corrigées à la main) restent telles quelles.
@@ -490,6 +495,7 @@ const RestaurantDialog = ({
       image: finalImage,
       address,
       website: website || null,
+      order_url: orderUrl.trim() || null,
       phone: phone || null,
       distance: location!.distanceKm,
       distanceLabel: location!.formattedDistance,
@@ -564,6 +570,16 @@ const RestaurantDialog = ({
               value={website}
               onChange={(e) => setWebsite(e.target.value)}
               placeholder="Site web"
+            />
+          </label>
+          <label className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium text-foreground">
+              Click & collect
+            </span>
+            <Input
+              value={orderUrl}
+              onChange={(e) => setOrderUrl(e.target.value)}
+              placeholder="Page pour commander (pose le badge)"
             />
           </label>
           <label className="flex flex-col gap-1.5">
@@ -676,7 +692,12 @@ const RestaurantDialog = ({
           <div>
             <span className="text-sm font-bold text-foreground">Badges</span>
             <div className="mt-1.5">
-              <BadgesToggles selected={badges} onChange={setBadges} />
+              {/* Le badge Click & Collect se déduit de l'URL de commande. */}
+              <BadgesToggles
+                selected={badges}
+                onChange={setBadges}
+                exclude={[CLICK_COLLECT_BADGE]}
+              />
             </div>
           </div>
         </div>

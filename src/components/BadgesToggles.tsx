@@ -7,9 +7,11 @@ interface BadgesTogglesProps {
   onChange: (selected: string[]) => void;
   /** Classes ajoutées au conteneur flex (ex. "justify-center"). */
   className?: string;
+  /** Badges à ne pas proposer (ceux que la base pose elle-même). */
+  exclude?: string[];
 }
 
-const BadgesToggles = ({ selected, onChange, className }: BadgesTogglesProps) => {
+const BadgesToggles = ({ selected, onChange, className, exclude = [] }: BadgesTogglesProps) => {
   const toggleBadge = (label: string) => {
     const isSelected = selected.includes(label);
     const updated = isSelected
@@ -23,7 +25,9 @@ const BadgesToggles = ({ selected, onChange, className }: BadgesTogglesProps) =>
 
   return (
     <div className={cn("tw-scope flex flex-wrap gap-3", className)}>
-      {Object.entries(badgeMap).map(([label, src]) => (
+      {Object.entries(badgeMap)
+        .filter(([label]) => !exclude.includes(label))
+        .map(([label, src]) => (
         <BadgeButton
           key={label}
           label={label}

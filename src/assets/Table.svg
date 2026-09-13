@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Sur place : cloche de service posée sur son plateau -->
+  <!-- Cloche (demi-disque, base à y=390 = haut du plateau) -->
+  <path d="M84 390 A172 172 0 0 1 428 390 Z" fill="#E8906F" />
+  <path d="M256 218 A172 172 0 0 1 428 390 L372 390 A116 116 0 0 0 256 274 Z" fill="#D97A5C" />
+  <!-- Reflet -->
+  <path d="M132 356 A124 124 0 0 1 236 266" fill="none" stroke="#F7B79A" stroke-width="22" stroke-linecap="round" />
+  <!-- Poignée : boule ronde soudée au sommet -->
+  <circle cx="256" cy="196" r="34" fill="#B86A4C" />
+  <circle cx="246" cy="186" r="12" fill="#D97A5C" />
+  <!-- Plateau (collé sous la cloche) -->
+  <rect x="40" y="390" width="432" height="52" rx="26" fill="#B86A4C" />
+  <rect x="40" y="390" width="432" height="26" rx="13" fill="#D97A5C" />
+</svg>

@@ -12,6 +12,8 @@ export type Restaurant = {
   address: string;
   phone: string;
   website: string;
+  /** Page de commande en ligne (click & collect) ; le badge suit en base. */
+  order_url: string | null;
   lat: number | null;
   lng: number | null;
   walk_minutes: number | null;

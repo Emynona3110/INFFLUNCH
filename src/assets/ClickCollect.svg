@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Sac à emporter -->
+  <path d="M96 176 L416 176 L392 452 Q390 470 372 470 L140 470 Q122 470 120 452 Z" fill="#3B82F6" />
+  <path d="M96 176 L416 176 L410 244 L102 244 Z" fill="#2563EB" />
+  <!-- Anses -->
+  <path d="M188 176 V132 Q188 84 256 84 Q324 84 324 132 V176" fill="none" stroke="#1E3A8A" stroke-width="30" stroke-linecap="round" />
+  <!-- Curseur (clic) -->
+  <path d="M292 268 L412 336 L356 350 L392 416 L358 432 L322 366 L282 406 Z" fill="#FFFFFF" stroke="#1E3A8A" stroke-width="18" stroke-linejoin="round" />
+</svg>

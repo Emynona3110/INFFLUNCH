@@ -1,18 +1,18 @@
 import badgeVegetarian from "../assets/Vegetarian.png";
-import badgeTooGoodToGo from "../assets/TooGoodToGo.png";
-import badgeBar from "../assets/Bar.png";
-import badgeTable from "../assets/Table.png";
-import badgeTakeaway from "../assets/Takeaway.png";
-import badgeMagasin from "../assets/Magasin.svg";
+import badgeTable from "../assets/Table.svg";
+import badgeTakeaway from "../assets/Takeaway.svg";
+import badgeClickCollect from "../assets/ClickCollect.svg";
 import iconTopRated from "../assets/TopRated.png";
+
+/** Badge posé par la base (trigger) dès qu'un restaurant a une URL de
+ *  commande : il ne se coche pas à la main dans l'admin. */
+export const CLICK_COLLECT_BADGE = "Click & Collect";
 
 const badgeMap: Record<string, string> = {
   "Option Végétarienne": badgeVegetarian,
   "Sur Place": badgeTable,
   "À Emporter": badgeTakeaway,
-  Bar: badgeBar,
-  TooGoodToGo: badgeTooGoodToGo,
-  Magasin: badgeMagasin,
+  [CLICK_COLLECT_BADGE]: badgeClickCollect,
 };
 
 export const getBadgeIcon = (label: string): string | undefined =>
