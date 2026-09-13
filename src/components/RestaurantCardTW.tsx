@@ -92,7 +92,7 @@ const RestaurantCardTW = ({
             {visibleBadges.map((b) => (
               <Tooltip key={b} label={b}>
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-card/85 shadow-sm backdrop-blur">
-                  <img src={badgeMap[b]} alt={b} className="h-4 w-4 object-contain" />
+                  <img src={badgeMap[b]} alt={b} className="h-5 w-5 object-contain" />
                 </span>
               </Tooltip>
             ))}

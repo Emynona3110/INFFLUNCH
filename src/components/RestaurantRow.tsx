@@ -80,7 +80,7 @@ const RestaurantRow = ({
                     <img
                       src={badgeMap[b]}
                       alt={b}
-                      className="h-3.5 w-3.5 object-contain"
+                      className="h-4 w-4 object-contain"
                     />
                   </span>
                 </Tooltip>

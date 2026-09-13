@@ -1,4 +1,4 @@
-import badgeVegetarian from "../assets/Vegetarian.png";
+import badgeVegetarian from "../assets/Vegetarian.svg";
 import badgeTable from "../assets/Table.svg";
 import badgeTakeaway from "../assets/Takeaway.svg";
 import badgeClickCollect from "../assets/ClickCollect.svg";

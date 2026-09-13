@@ -20,7 +20,7 @@ begin
   -- badgeMap côté front, la position dans le tableau n'a pas d'importance.
   new.badges := array_remove(coalesce(new.badges, '{}'), 'Click & Collect');
   if nullif(btrim(new.order_url), '') is not null then
-    new.badges := new.badges || 'Click & Collect';
+    new.badges := array_append(new.badges, 'Click & Collect');
   else
     new.order_url := null;
   end if;
