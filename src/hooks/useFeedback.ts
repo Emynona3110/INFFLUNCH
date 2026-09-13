@@ -163,7 +163,18 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
     onSuccess: invalidate,
   });
 
-  return { ...query, submit, edit, setStatus, cancel };
+  /** Suppression pure et simple par l'admin, quel que soit l'état de la
+   *  demande (la RLS ne l'autorise qu'à lui). La note du carnet, si elle
+   *  existe, reste : c'est le backlog qui la gère. */
+  const remove = useMutation({
+    mutationFn: async (id: number) => {
+      const { error } = await supabaseClient.from("feedback").delete().eq("id", id);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: invalidate,
+  });
+
+  return { ...query, submit, edit, setStatus, cancel, remove };
 };
 
 export default useFeedback;

@@ -5,7 +5,7 @@ import { LuUtensils, LuUtensilsCrossed } from "react-icons/lu";
 import { Button } from "@/components/ui/button";
 import Avatar from "@/components/Avatar";
 import LunchPickDialog from "@/components/LunchPickDialog";
-import useLunchToday from "@/hooks/useLunchToday";
+import useLunchToday, { isWeekend } from "@/hooks/useLunchToday";
 import useRestaurants from "@/hooks/useRestaurants";
 import { defaultRestaurantFilters } from "@/pages/UserPage";
 import { formatAuthorName } from "@/utils/authorName";
@@ -88,6 +88,8 @@ const LunchToday = () => {
   // hasPlan couvre les deux déclarations possibles : un restaurant, ou « pas au
   // resto » (gamelle, télétravail…) qui ne porte pas de restaurant.
   const skipsRestaurant = hasPlan && myRestaurantId == null;
+  // Week-end sans déclaration : on ne réclame rien, l'encart reste neutre.
+  const weekendOff = !hasPlan && isWeekend();
   const myRestaurant = myRestaurantId ? restById.get(myRestaurantId) : undefined;
   // Nom du resto choisi : null tant qu'on l'ignore (→ ligne fantôme).
   const myRestaurantName =
@@ -165,7 +167,9 @@ const LunchToday = () => {
           "mb-6 flex flex-wrap items-center justify-between gap-3 rounded-card px-5 py-4 transition-colors",
           hasPlan
             ? "border border-border bg-gradient-to-r from-primary/10 to-transparent"
-            : "border border-dashed border-primary/40 bg-card"
+            : weekendOff
+              ? "border border-border bg-card"
+              : "border border-dashed border-primary/40 bg-card"
         )}
       >
         <div className="flex min-w-0 items-center gap-3">
@@ -177,7 +181,7 @@ const LunchToday = () => {
                 : "bg-primary/10 text-primary"
             )}
           >
-            {skipsRestaurant ? (
+            {skipsRestaurant || weekendOff ? (
               <LuUtensilsCrossed className="h-5 w-5" />
             ) : (
               <LuUtensils className="h-5 w-5" />
@@ -201,6 +205,10 @@ const LunchToday = () => {
                   <div className="mt-1 h-5 w-40 animate-pulse rounded bg-foreground/10" />
                 )}
               </>
+            ) : weekendOff ? (
+              <div className="text-sm text-foreground/70">
+                C'est le week-end, pas de resto du midi à choisir.
+              </div>
             ) : (
               <div className="text-sm text-foreground/70">
                 Tu n'as pas encore choisi ton restaurant pour ce midi.
@@ -214,7 +222,7 @@ const LunchToday = () => {
             <Button variant="outline" onClick={leave} loading={saving}>
               Annuler
             </Button>
-          ) : (
+          ) : weekendOff ? null : (
             <>
               <Button
                 onClick={() => setPickOpen(true)}

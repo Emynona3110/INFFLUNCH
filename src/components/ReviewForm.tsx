@@ -7,9 +7,10 @@ import StarRatingInput from "./StarRatingInput";
 import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/lib/toast";
+import { MAX_TEXT } from "@/services/textLimits";
 
 /** Longueur max du commentaire d'avis. */
-const MAX_COMMENT = 1000;
+const MAX_COMMENT = MAX_TEXT;
 
 interface Props {
   restaurantId: number;
@@ -90,9 +91,8 @@ const ReviewForm = ({ restaurantId, existing, onDone }: Props) => {
         value={comment}
         onChange={(e) => setComment(e.target.value.slice(0, MAX_COMMENT))}
         placeholder="Ton avis (optionnel)…"
-        rows={4}
         maxLength={MAX_COMMENT}
-        className="mt-4 w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/25"
+        className="mt-4 w-full h-[max(10rem,45dvh)] resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/25"
       />
       <div className="mt-1 text-right text-xs text-foreground/45">
         {comment.length}/{MAX_COMMENT}

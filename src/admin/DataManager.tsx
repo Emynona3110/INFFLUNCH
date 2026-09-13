@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "@/lib/toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import AdminTable from "./AdminTable";
 import { AdminSection } from "../services/adminSections";
 import supabaseClient from "../services/supabaseClient";
@@ -26,6 +27,7 @@ const DataManager = ({ section, addSignal }: DataManagerProps) => {
   const [tagUsage, setTagUsage] = useState<number | null>(null);
   const [checkingUsage, setCheckingUsage] = useState(false);
 
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   // Ouverture du dialog d'ajout pilotée par le parent (bouton remonté dans la
@@ -37,12 +39,16 @@ const DataManager = ({ section, addSignal }: DataManagerProps) => {
     }
   }, [addSignal]);
 
-  const handleSuccess = () => {
+  const handleSuccess = (slug?: string) => {
+    // Un restaurant qui vient d'être créé s'ouvre directement : on y est
+    // pour lui ajouter photos et menus. Une modification reste sur la table.
+    const created = tableName === "restaurants" && !editData && !!slug;
     setIsDialogOpen(false);
     setEditData(null);
     // Rafraîchit la table admin ainsi que les caches dérivés (tags, badges,
     // restaurants) utilisés ailleurs dans l'app.
     queryClient.invalidateQueries();
+    if (created) navigate(`/restaurant/${slug}`);
   };
 
   // Supprimer un tag le retire aussi des restaurants (trigger

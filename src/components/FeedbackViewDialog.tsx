@@ -62,7 +62,8 @@ const FeedbackViewDialog = ({
         {item.email && ` · ${formatAuthorName(item.email)}`}
       </p>
 
-      <p className="mb-0 mt-5 whitespace-pre-wrap break-words text-sm text-foreground/85">
+      {/* Long texte : c'est lui qui défile, pas la popup. */}
+      <p className="mb-0 mt-5 max-h-[50dvh] overflow-y-auto whitespace-pre-wrap break-words text-sm text-foreground/85">
         {item.message}
       </p>
 

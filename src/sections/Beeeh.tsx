@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import useAchievements from "@/hooks/useAchievements";
 
 /** Nombre de nourritures consécutives (sans quitter la page) pour le gourou. */
-const GOUROU_STREAK = 50;
+const GOUROU_STREAK = 20;
 
 /** Emojis liés à la nourriture (hors fruits) qui tombent. */
 const FOOD_EMOJIS = [
@@ -90,7 +90,7 @@ const Beeeh = () => {
     });
 
     // Succès nourriture. Le streak se remet à zéro en quittant la page (le ref
-    // est recréé au prochain montage) → « 50 fois d'affilée ».
+    // est recréé au prochain montage) → « 20 fois d'affilée ».
     streakRef.current += 1;
     if (streakRef.current === 1) unlock("berger_dun_jour");
     if (streakRef.current >= GOUROU_STREAK) unlock("gourou_du_troupeau");

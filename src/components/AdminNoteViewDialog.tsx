@@ -52,7 +52,8 @@ const AdminNoteViewDialog = ({ isOpen, onClose, note, onEdit }: Props) => {
         {note.done && note.done_at && ` · terminée le ${formatDate(note.done_at)}`}
       </p>
 
-      <p className="mb-0 mt-5 whitespace-pre-wrap break-words text-sm text-foreground/85">
+      {/* Long texte : c'est lui qui défile, pas la popup. */}
+      <p className="mb-0 mt-5 max-h-[50dvh] overflow-y-auto whitespace-pre-wrap break-words text-sm text-foreground/85">
         {note.description}
       </p>
 

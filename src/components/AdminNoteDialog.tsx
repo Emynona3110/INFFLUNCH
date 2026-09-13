@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { NOTE_CATEGORIES, NoteCategory } from "@/services/noteCategories";
 import { AdminNote } from "@/hooks/useAdminNotes";
 import { cn } from "@/lib/utils";
+import { MAX_TEXT } from "@/services/textLimits";
 
 interface Props {
   isOpen: boolean;
@@ -87,10 +88,10 @@ const AdminNoteDialog = ({ isOpen, onClose, note, onSubmit }: Props) => {
           <span className="text-sm font-medium text-foreground">Descriptif</span>
           <textarea
             ref={descriptionRef}
-            rows={5}
             value={description}
+            maxLength={MAX_TEXT}
             disabled={!category}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => setDescription(e.target.value.slice(0, MAX_TEXT))}
             placeholder={
               category
                 ? "Ce que tu as repéré, en une ou deux phrases…"
@@ -103,8 +104,11 @@ const AdminNoteDialog = ({ isOpen, onClose, note, onSubmit }: Props) => {
                 submit();
               }
             }}
-            className="w-full resize-y rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition placeholder:text-foreground/40 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/25 disabled:cursor-not-allowed disabled:bg-muted/40"
+            className="w-full h-[max(10rem,45dvh)] resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition placeholder:text-foreground/40 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/25 disabled:cursor-not-allowed disabled:bg-muted/40"
           />
+          <span className="text-right text-xs text-foreground/45">
+            {description.length}/{MAX_TEXT}
+          </span>
         </label>
       </div>
 

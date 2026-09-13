@@ -3,6 +3,7 @@ import { FiPlus, FiGrid, FiList, FiMap } from "react-icons/fi";
 import { LuDices } from "react-icons/lu";
 import { IconType } from "react-icons";
 import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import SearchInput from "./SearchInput";
 import FilterDialog from "./FilterDialog";
 import FavoritesToggle from "./FavoritesToggle";
@@ -42,6 +43,7 @@ const RestaurantsToolbar = ({
   const [addOpen, setAddOpen] = useState(false);
   const isAdmin = useIsAdmin();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   return (
     <div className="flex w-full select-none items-center gap-2">
@@ -100,9 +102,12 @@ const RestaurantsToolbar = ({
           <RestaurantDialog
             isOpen={addOpen}
             onClose={() => setAddOpen(false)}
-            onSuccess={() => {
+            onSuccess={(slug) => {
               setAddOpen(false);
               queryClient.invalidateQueries();
+              // On enchaîne sur la fiche toute neuve : c'est là qu'on ajoute
+              // photos et menus, autant y être tout de suite.
+              if (slug) navigate(`/restaurant/${slug}`);
             }}
           />
         </>

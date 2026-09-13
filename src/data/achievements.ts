@@ -72,7 +72,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: "gourou_du_troupeau",
     title: "Gourou du troupeau",
-    condition: "Nourrir un mouton 50 fois d'affilée",
+    condition: "Nourrir un mouton 20 fois d'affilée",
     icon: "🧙",
     image: "/achievements/gourou_du_troupeau.svg",
     secret: true,

@@ -17,6 +17,7 @@ import PhotoUploadDialog from "@/components/PhotoUploadDialog";
 import { toast } from "@/lib/toast";
 import { formatAuthorName } from "@/utils/authorName";
 import { cn } from "@/lib/utils";
+import ZoomableImage from "./ZoomableImage";
 
 interface Props {
   restaurantId: number;
@@ -283,13 +284,10 @@ const RestaurantGallery = ({
           >
             <FiX className="h-5 w-5" />
           </button>
-          <img
+          {/* Molette / pincement / double clic pour zoomer. */}
+          <ZoomableImage
             src={lightbox.url}
-            alt=""
-            className={cn(
-              "max-h-[88vh] max-w-[92vw] rounded-lg object-contain shadow-2xl"
-            )}
-            onClick={(e) => e.stopPropagation()}
+            className="max-h-[88vh] max-w-[92vw] rounded-lg object-contain shadow-2xl"
           />
           {/* Réactions sur la photo ouverte */}
           {((photoReactions.canReact && lightbox.user_id !== userId) ||

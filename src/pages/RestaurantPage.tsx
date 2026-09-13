@@ -169,6 +169,11 @@ const RestaurantPage = () => {
   // Répartition par note (5→1) pour les barres type Amazon.
   const ratingCounts = (star: number) =>
     reviews.filter((r) => r.rating === star).length;
+  // Moyenne brute des avis (pas la note bayésienne du classement : ici on
+  // rend compte de ce que les collègues ont réellement mis).
+  const averageRating = totalReviews
+    ? reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews
+    : 0;
 
   const deleteReview = async (id: number) => {
     const { error } = await supabaseClient.from("reviews").delete().eq("id", id);
@@ -339,10 +344,18 @@ const RestaurantPage = () => {
               />
             )}
 
-            {/* Répartition par note (type Amazon). Moyenne et total d'avis sont
-                déjà affichés dans l'entête, pas de doublon ici. */}
+            {/* Moyenne en étoiles, puis répartition par note (type Amazon). */}
             {totalReviews > 0 && (
             <div className="mb-5 space-y-1.5 rounded-xl bg-muted/40 p-4">
+              <div className="mb-3 flex flex-wrap items-center gap-3">
+                <span className="font-display text-3xl font-bold leading-none tabular-nums text-card-foreground">
+                  {averageRating.toFixed(1)}
+                </span>
+                <Stars rating={averageRating} size={22} />
+                <span className="text-sm text-foreground/55">
+                  {totalReviews} avis
+                </span>
+              </div>
               {[5, 4, 3, 2, 1].map((star) => {
                 const count = ratingCounts(star);
                 const pct = totalReviews ? (count / totalReviews) * 100 : 0;

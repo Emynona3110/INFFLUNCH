@@ -79,7 +79,7 @@ const AchievementsGallery = () => {
             const unlocked = unlockedIds.includes(a.id);
             const date = unlockedAt[a.id];
             const percent = percentById[a.id] ?? 0;
-            // Secret non débloqué = tout masqué ; sinon on révèle (grisé si verrouillé).
+            // Secret non débloqué = condition masquée ; sinon on révèle (grisé si verrouillé).
             const revealed = unlocked || !a.secret;
             return (
               <li key={a.id}>
@@ -142,9 +142,16 @@ const AchievementsGallery = () => {
                       </p>
                     </div>
                   ) : (
-                    <p className="m-0 flex-1 text-sm font-medium text-foreground/40">
-                      Succès secret
-                    </p>
+                    // Secret : le titre se montre, seule la condition reste à
+                    // deviner — un nom qui intrigue vaut mieux qu'un blanc.
+                    <div className="min-w-0 flex-1">
+                      <p className="m-0 truncate text-sm font-bold leading-tight text-foreground/50">
+                        {a.title}
+                      </p>
+                      <p className="m-0 mt-0.5 text-xs leading-snug text-foreground/40">
+                        Succès secret
+                      </p>
+                    </div>
                   )}
 
                   {/* Pourcentage d'obtention affiché pour TOUS les succès (y

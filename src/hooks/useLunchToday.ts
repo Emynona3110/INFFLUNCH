@@ -17,6 +17,17 @@ export interface LunchParticipant {
 export const parisDay = () =>
   new Date().toLocaleDateString("en-CA", { timeZone: "Europe/Paris" });
 
+/** Samedi ou dimanche (heure de Paris) : personne ne déjeune au bureau, on ne
+ *  pose pas la question du midi. Déclarer reste possible, on n'insiste juste
+ *  pas (pas de puce, pas d'encart en pointillés). */
+export const isWeekend = () => {
+  const day = new Date().toLocaleDateString("en-US", {
+    timeZone: "Europe/Paris",
+    weekday: "short",
+  });
+  return day === "Sat" || day === "Sun";
+};
+
 /* ---------------------------- canal Realtime ----------------------------- */
 // Le hook est monté par la page /dejeuner, la fiche resto et chaque card : on
 // partage un seul canal pour tout le monde (compteur de références) au lieu

@@ -39,7 +39,8 @@ const formatDate = (iso: string) =>
  * termine la demande (et la rouvre si on la décoche).
  */
 const AdminFeedback = () => {
-  const { data: items = [], isPending, error, setStatus } = useFeedback("admin");
+  const { data: items = [], isPending, error, setStatus, remove } =
+    useFeedback("admin");
   const { add: addNote, update: updateNote, remove: removeNote } = useAdminNotes();
   const [viewing, setViewing] = useState<Feedback | null>(null);
 
@@ -294,10 +295,22 @@ const AdminFeedback = () => {
         </div>
       )}
 
+      {/* Supprimer (appui long) : la demande disparaît pour tout le monde, sa
+          note de backlog éventuelle reste dans le carnet. */}
       <FeedbackViewDialog
         isOpen={!!viewing}
         onClose={() => setViewing(null)}
         item={viewing}
+        busy={remove.isPending}
+        onDelete={async () => {
+          if (!viewing) return;
+          try {
+            await remove.mutateAsync(viewing.id);
+            setViewing(null);
+          } catch (e) {
+            fail(e);
+          }
+        }}
       />
     </div>
   );

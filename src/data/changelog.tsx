@@ -33,7 +33,7 @@ export const changelog: ChangelogEntry[] = [
         {/* La flèche dit où le trouver : en haut à droite, dans la barre. */}
         <FiArrowUpRight className="inline h-4 w-4 align-text-bottom text-foreground/40" />
       </>,
-      "Les demandes sont consultables dans Mon compte",
+      "Les demandes sont consultables dans Mon Profil",
     ],
   },
   // ───────────────────────── Août 2026 ─────────────────────────

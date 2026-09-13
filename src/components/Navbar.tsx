@@ -9,7 +9,7 @@ import useAdminPending from "../hooks/useAdminPending";
 import useChangelogSeen from "../hooks/useChangelogSeen";
 import useAchievementsSeen from "../hooks/useAchievementsSeen";
 import useFeedbackSeen from "../hooks/useFeedbackSeen";
-import useLunchToday from "../hooks/useLunchToday";
+import useLunchToday, { isWeekend } from "../hooks/useLunchToday";
 import {
   buildUserSections,
   defaultRestaurantFilters,
@@ -53,7 +53,8 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
   // que j'ai choisi un restaurant OU dit que je ne mange pas au resto. On attend la fin du
   // chargement, sinon elle clignote à chaque arrivée sur l'app.
   const { hasPlan, loading: lunchLoading } = useLunchToday();
-  const lunchPending = !lunchLoading && !hasPlan;
+  // Le week-end, la question ne se pose pas.
+  const lunchPending = !lunchLoading && !hasPlan && !isWeekend();
 
   // Report des puces sur l'icône d'onglet du navigateur (et sur l'icône
   // d'application en PWA installée) : une seule pastille, dès qu'au moins une

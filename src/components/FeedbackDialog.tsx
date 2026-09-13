@@ -3,8 +3,15 @@ import { toast } from "@/lib/toast";
 import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import useFeedback, { Feedback } from "@/hooks/useFeedback";
-import { FEEDBACK_TYPES, FeedbackType } from "@/services/feedbackTypes";
+import useAdminNotes from "@/hooks/useAdminNotes";
+import useIsAdmin from "@/hooks/useIsAdmin";
+import {
+  FEEDBACK_TYPES,
+  FeedbackType,
+  feedbackType,
+} from "@/services/feedbackTypes";
 import { cn } from "@/lib/utils";
+import { MAX_TEXT } from "@/services/textLimits";
 
 interface Props {
   isOpen: boolean;
@@ -32,9 +39,17 @@ const clean = (text: string) =>
  * pour les trois natures — un bug et une idée ne méritent pas deux écrans, et on
  * ne veut surtout pas que le choix du bon endroit décourage l'envoi. Il sert
  * aussi à corriger une demande déjà envoyée, qui repart alors en attente.
+ *
+ * Un admin qui l'utilise n'a personne à convaincre : sa demande file droit
+ * dans le carnet de backlog, sans passer par la boîte de réception.
  */
 const FeedbackDialog = ({ isOpen, onClose, item }: Props) => {
   const { submit, edit } = useFeedback("mine", false);
+  const isAdmin = useIsAdmin();
+  const notes = useAdminNotes(false);
+  // Seule une NOUVELLE demande d'admin court-circuite : corriger une demande
+  // existante reste une correction de demande.
+  const toBacklog = isAdmin && !item;
   // Aucune nature présélectionnée : sans ce choix, tout arriverait en « Bug »
   // par inertie. La saisie n'est ouverte qu'une fois la nature dite.
   const [type, setType] = useState<FeedbackType | null>(null);
@@ -64,12 +79,22 @@ const FeedbackDialog = ({ isOpen, onClose, item }: Props) => {
     setBusy(true);
     try {
       if (item) await edit.mutateAsync({ id: item.id, type, message: text });
+      else if (toBacklog)
+        await notes.add.mutateAsync({
+          description: text,
+          category: feedbackType(type).note,
+        });
       else await submit.mutateAsync({ type, message: text });
       toast({
-        title: item ? "Demande modifiée" : "Merci !",
-        description: item
-          ? undefined
-          : "Ta demande est arrivée, tu peux la suivre dans Mon compte.",
+        title: item
+          ? "Demande modifiée"
+          : toBacklog
+            ? "Ajouté au backlog"
+            : "Merci !",
+        description:
+          item || toBacklog
+            ? undefined
+            : "Ta demande est arrivée, tu peux la suivre dans Mon compte.",
         status: "success",
         duration: 4000,
       });
@@ -88,7 +113,13 @@ const FeedbackDialog = ({ isOpen, onClose, item }: Props) => {
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="max-w-lg">
-      <DialogTitle>{item ? "Modifier la demande" : "Nouvelle demande"}</DialogTitle>
+      <DialogTitle>
+        {item
+          ? "Modifier la demande"
+          : toBacklog
+            ? "Nouvelle note de backlog"
+            : "Nouvelle demande"}
+      </DialogTitle>
 
       <div className="mt-5 space-y-4">
         {/* Les trois pastilles se suffisent : un intitulé « Nature » au-dessus
@@ -126,20 +157,23 @@ const FeedbackDialog = ({ isOpen, onClose, item }: Props) => {
         <label className="flex flex-col">
           <textarea
             ref={messageRef}
-            rows={5}
             value={message}
+            maxLength={MAX_TEXT}
             disabled={!type}
             // Le champ verrouillé dit lui-même ce qui manque.
             placeholder={type ? undefined : "Choisir une catégorie"}
-            onChange={(e) => setMessage(e.target.value)}
+            onChange={(e) => setMessage(e.target.value.slice(0, MAX_TEXT))}
             onKeyDown={(e) => {
               if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
                 e.preventDefault();
                 send();
               }
             }}
-            className="w-full resize-y rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition placeholder:text-foreground/40 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/25 disabled:cursor-not-allowed disabled:bg-muted/40"
+            className="w-full h-[max(10rem,45dvh)] resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition placeholder:text-foreground/40 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/25 disabled:cursor-not-allowed disabled:bg-muted/40"
           />
+          <span className="mt-1 text-right text-xs text-foreground/45">
+            {message.length}/{MAX_TEXT}
+          </span>
         </label>
       </div>
 
@@ -155,7 +189,7 @@ const FeedbackDialog = ({ isOpen, onClose, item }: Props) => {
             loading={busy}
             disabled={!type || !clean(message) || unchanged}
           >
-            {item ? "Enregistrer" : "Envoyer"}
+            {item ? "Enregistrer" : toBacklog ? "Ajouter" : "Envoyer"}
           </Button>
         </div>
       </div>
