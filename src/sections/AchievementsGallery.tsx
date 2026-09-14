@@ -1,8 +1,10 @@
+import { useEffect, useRef } from "react";
 import { FiLock, FiTrash2 } from "react-icons/fi";
 import { Card } from "@/components/ui/card";
 import HoldToDeleteButton from "@/components/HoldToDeleteButton";
 import useAchievements from "@/hooks/useAchievements";
 import useAchievementStats from "@/hooks/useAchievementStats";
+import useAchievementsSeen from "@/hooks/useAchievementsSeen";
 import useSecretConditions from "@/hooks/useSecretConditions";
 import useIsAdmin from "@/hooks/useIsAdmin";
 import { ACHIEVEMENTS, AchievementId } from "@/data/achievements";
@@ -26,6 +28,17 @@ const AchievementsGallery = () => {
   const { percentById, ready: statsReady } = useAchievementStats();
   // Conditions des secrets débloqués (en base, pas dans le bundle).
   const secretConditions = useSecretConditions();
+  // Pastille « nouveau » sur chaque succès débloqué depuis la dernière visite.
+  // On fige la date « vue » telle qu'elle était à l'OUVERTURE de la galerie :
+  // le parent marque tout comme vu dès l'ouverture, les pastilles doivent
+  // pourtant rester le temps de la consultation.
+  const { seenAt } = useAchievementsSeen();
+  const seenAtOnOpen = useRef<string | null>(null);
+  useEffect(() => {
+    if (seenAtOnOpen.current === null && seenAt !== null) seenAtOnOpen.current = seenAt;
+  }, [seenAt]);
+  const isNew = (date?: string) =>
+    !!date && seenAtOnOpen.current !== null && date > seenAtOnOpen.current;
   const isAdmin = useIsAdmin();
   const unlockedCount = ACHIEVEMENTS.filter((a) => unlockedIds.includes(a.id)).length;
 
@@ -85,7 +98,13 @@ const AchievementsGallery = () => {
             // Secret non débloqué = condition masquée ; sinon on révèle (grisé si verrouillé).
             const revealed = unlocked || !a.secret;
             return (
-              <li key={a.id}>
+              <li key={a.id} className="relative">
+                {unlocked && isNew(date) && (
+                  <span
+                    aria-label="Nouveau succès"
+                    className="absolute -right-1 -top-1 z-[1] h-3 w-3 rounded-full bg-primary ring-2 ring-card"
+                  />
+                )}
                 <div
                   className={cn(
                     "flex h-full items-center gap-3 rounded-xl border border-border p-3",
