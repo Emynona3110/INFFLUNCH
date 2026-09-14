@@ -25,7 +25,14 @@ const formatDate = (iso: string) =>
  * l'envoi — sans lui, une demande part dans le vide.
  */
 const MyFeedback = () => {
-  const { data: items = [], isPending, cancel } = useFeedback("mine");
+  const { data: fetched = [], isPending, cancel } = useFeedback("mine");
+  // Ce qui attend encore quelque chose d'abord ; les demandes closes
+  // (terminées, refusées) descendent en bas, chaque groupe gardant l'ordre
+  // du plus récent au plus ancien.
+  const items = [
+    ...fetched.filter((item) => !frozen(item)),
+    ...fetched.filter(frozen),
+  ];
   // Deux popups, comme le carnet de backlog : lire (clic sur la tuile), puis
   // corriger si besoin. On ne modifie donc pas par accident ce qu'on venait
   // relire. Corriger remet la demande en attente côté admin.

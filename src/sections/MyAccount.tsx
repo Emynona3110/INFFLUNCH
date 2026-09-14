@@ -8,6 +8,7 @@ import useSession from "../hooks/useSession";
 import useProfile from "../hooks/useProfile";
 import useMyReviews from "../hooks/useMyReviews";
 import useAchievementsSeen from "../hooks/useAchievementsSeen";
+import useRememberedTab from "@/hooks/useRememberedTab";
 import useIsAdmin from "../hooks/useIsAdmin";
 import Avatar from "../components/Avatar";
 import ColorModeSwitch from "../components/ColorModeSwitch";
@@ -69,12 +70,16 @@ const MyAccount = () => {
   // Un ?tab= qui vise un onglet masqué (ou inconnu) retombe sur « Compte ».
   const isTabKey = (v: string | null): v is SubTabKey =>
     visibleTabs.some((t) => t.key === v);
-  const [active, setActive] = useState<SubTabKey>(() =>
-    isTabKey(tabParam) ? tabParam : "profil"
+  // Sans ?tab=, on rouvre le sous-onglet quitté en dernier (session).
+  const [active, setActive] = useRememberedTab<SubTabKey>(
+    "mon-compte",
+    "profil",
+    isTabKey,
+    isTabKey(tabParam) ? tabParam : null
   );
   useEffect(() => {
     if (isTabKey(tabParam)) setActive(tabParam);
-  }, [tabParam]);
+  }, [tabParam, setActive]);
 
   // Pastille « succès non vus » : elle s'éteint dès qu'on ouvre la galerie.
   const { hasUnseen: hasUnseenAchievements, markSeen } = useAchievementsSeen();

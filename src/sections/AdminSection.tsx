@@ -1,4 +1,5 @@
 import { useState } from "react";
+import useRememberedTab from "@/hooks/useRememberedTab";
 import DataManager from "../admin/DataManager";
 import AdminUsers from "../admin/AdminUsers";
 import AccessRequests from "../admin/AccessRequests";
@@ -30,7 +31,12 @@ const tabs = [
 type TabKey = (typeof tabs)[number]["key"];
 
 const AdminSection = () => {
-  const [active, setActive] = useState<TabKey>("creation");
+  // On revient sur le dernier onglet ouvert quand on repasse par la navbar.
+  const [active, setActive] = useRememberedTab<TabKey>(
+    "admin",
+    "creation",
+    (v): v is TabKey => tabs.some((t) => t.key === v)
+  );
   const [addSignal, setAddSignal] = useState(0);
 
   // Puces "en attente" sur les onglets Inscription / Mot de passe.
