@@ -366,27 +366,28 @@ const PhotoGallery = ({
             )}
           </div>
 
-          {/* Barre d'infos : libellé, date, descriptif, réactions. */}
+          {/* Carte d'infos flottante sous la photo : libellé, date, descriptif,
+              réactions. Même largeur que le contenu, pas de bandeau pleine largeur. */}
           <div
             className={cn(
-              "shrink-0 border-t border-white/10 bg-black/60 px-4 py-3 backdrop-blur-sm transition-opacity duration-200 sm:px-6",
+              "shrink-0 px-4 pb-4 pt-2 transition-opacity duration-200 sm:px-6",
               zoomed && "pointer-events-none opacity-0"
             )}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="mx-auto flex w-full max-w-3xl flex-col gap-2">
-              <div className="flex items-baseline gap-2 text-xs text-white/55">
+            <div className="mx-auto flex w-full max-w-xl flex-col gap-2 rounded-2xl bg-card px-4 py-3 text-card-foreground shadow-2xl">
+              <div className="flex items-baseline gap-2 text-xs text-muted-foreground">
                 {labelOf(lightbox) &&
                   (onLabelClick ? (
                     <button
                       type="button"
                       onClick={() => onLabelClick(lightbox)}
-                      className="cursor-pointer font-medium text-white/85 underline-offset-2 hover:text-white hover:underline"
+                      className="cursor-pointer font-medium text-foreground underline-offset-2 hover:underline"
                     >
                       {labelOf(lightbox)}
                     </button>
                   ) : (
-                    <span className="font-medium text-white/85">
+                    <span className="font-medium text-foreground">
                       {labelOf(lightbox)}
                     </span>
                   ))}
@@ -411,16 +412,16 @@ const PhotoGallery = ({
                         onKeyDown={(e) => {
                           if (e.key === "Enter") saveCaption(lightbox);
                         }}
-                        className="h-9 min-w-0 flex-1 rounded-lg border border-white/25 bg-white/10 px-3 text-sm text-white outline-none transition placeholder:text-white/40 focus-visible:border-white/50"
+                        className="h-9 min-w-0 flex-1 rounded-lg border border-border bg-background px-3 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus-visible:border-primary"
                       />
-                      <span className="shrink-0 text-xs tabular-nums text-white/40">
+                      <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
                         {captionDraft.length}/{PHOTO_CAPTION_MAX}
                       </span>
                       <button
                         type="button"
                         aria-label="Enregistrer"
                         onClick={() => saveCaption(lightbox)}
-                        className="grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-full bg-white/15 text-white transition hover:bg-white/30"
+                        className="grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-full bg-primary text-primary-foreground transition hover:opacity-90"
                       >
                         <FiCheck className="h-4 w-4" />
                       </button>
@@ -433,7 +434,7 @@ const PhotoGallery = ({
                   // les autres ne voient pas la ligne du tout.
                   <div className="flex items-start gap-2">
                     {lightbox.caption && (
-                      <p className="m-0 min-w-0 flex-1 whitespace-pre-wrap break-words text-sm text-white">
+                      <p className="m-0 min-w-0 flex-1 whitespace-pre-wrap break-words text-sm text-foreground">
                         {lightbox.caption}
                       </p>
                     )}
@@ -451,7 +452,7 @@ const PhotoGallery = ({
                             : "Ajouter un descriptif"
                         }
                         onClick={() => setCaptionDraft(lightbox.caption ?? "")}
-                        className="grid h-7 w-7 shrink-0 cursor-pointer place-items-center rounded-full text-white/70 transition hover:bg-white/15 hover:text-white"
+                        className="grid h-7 w-7 shrink-0 cursor-pointer place-items-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
                       >
                         <FiEdit2 className="h-3.5 w-3.5" />
                       </button>
@@ -466,7 +467,6 @@ const PhotoGallery = ({
                 summary={photoReactions.summaryFor(lightbox.id)}
                 onToggle={(emoji) => photoReactions.toggle(lightbox.id, emoji)}
                 disabled={!photoReactions.canReact}
-                onDark
               />
             </div>
           </div>

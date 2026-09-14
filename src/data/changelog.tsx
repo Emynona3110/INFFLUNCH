@@ -24,6 +24,14 @@ export interface ChangelogEntry {
 export const changelog: ChangelogEntry[] = [
   // ─────────────────────── Septembre 2026 ───────────────────────
   {
+    date: "2026-09-14",
+    title: "Profils publics",
+    points: [
+      "Clique sur le nom d'un collègue (avis, photos, tablées) pour voir son profil",
+      "Retrouve les photos, le nombre d'avis et les succès des collaborateurs",
+    ],
+  },
+  {
     date: "2026-09-04",
     title: "Boîte à demandes",
     points: [
