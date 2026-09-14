@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { FiEdit2, FiTrash2 } from "react-icons/fi";
 import { BsBan } from "react-icons/bs";
 import supabaseClient from "../services/supabaseClient";
-import badgeMap from "../services/badgeMap";
+import badgeMap, { orderBadges } from "../services/badgeMap";
 import { tagCategoryLabel } from "../services/tagCategories";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip } from "@/components/ui/tooltip";
@@ -143,17 +143,14 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
                         value.every((v) => typeof v === "string") ? (
                         isBadgeColumn(col) ? (
                           <div className="flex flex-wrap gap-1.5">
-                            {value.map(
-                              (b: string) =>
-                                badgeMap[b] && (
-                                  <img
-                                    key={b}
-                                    src={badgeMap[b]}
-                                    alt={b}
-                                    className="h-4 w-4 object-contain"
-                                  />
-                                )
-                            )}
+                            {orderBadges(value as string[]).map((b) => (
+                              <img
+                                key={b}
+                                src={badgeMap[b]}
+                                alt={b}
+                                className="h-4 w-4 object-contain"
+                              />
+                            ))}
                           </div>
                         ) : (
                           <div className="flex flex-wrap gap-1.5">

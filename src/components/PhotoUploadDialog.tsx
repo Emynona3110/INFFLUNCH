@@ -10,6 +10,7 @@ import {
 } from "@/utils/imageCompress";
 import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
+import { PHOTO_CAPTION_MAX } from "@/services/textLimits";
 
 interface Props {
   isOpen: boolean;
@@ -18,11 +19,16 @@ interface Props {
   /** Nombre de fichiers acceptés en une fois (quota restant). Illimité si omis. */
   maxFiles?: number;
   /** Upload effectif (compression incluse). authorId = admin attribuant un autre. */
-  onSubmit: (files: File[], authorId?: string) => Promise<void>;
+  onSubmit: (items: PickedPhoto[], authorId?: string) => Promise<void>;
 }
 
-interface Picked {
+/** Une photo prête à partir : le fichier et son descriptif éventuel. */
+export interface PickedPhoto {
   file: File;
+  caption: string;
+}
+
+interface Picked extends PickedPhoto {
   url: string; // object URL pour la prévisualisation
 }
 
@@ -104,7 +110,7 @@ const PhotoUploadDialog = ({
           duration: 4000,
         });
       }
-      accepted.push({ file, url: URL.createObjectURL(file) });
+      accepted.push({ file, caption: "", url: URL.createObjectURL(file) });
     }
 
     if (!accepted.length) return;
@@ -158,7 +164,7 @@ const PhotoUploadDialog = ({
     setBusy(true);
     try {
       await onSubmit(
-        picked.map((p) => p.file),
+        picked.map(({ file, caption }) => ({ file, caption })),
         authorId || undefined
       );
       onClose();
@@ -221,23 +227,41 @@ const PhotoUploadDialog = ({
         {picked.length > 0 && (
           <div className="grid grid-cols-3 gap-2">
             {picked.map((p, i) => (
-              <div
-                key={p.url}
-                className="group relative aspect-square overflow-hidden rounded-lg bg-muted ring-1 ring-border"
-              >
-                <img
-                  src={p.url}
-                  alt=""
-                  className="absolute inset-0 h-full w-full object-cover"
+              <div key={p.url} className="flex flex-col gap-1.5">
+                <div className="group relative aspect-square overflow-hidden rounded-lg bg-muted ring-1 ring-border">
+                  <img
+                    src={p.url}
+                    alt=""
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeAt(i)}
+                    aria-label="Retirer"
+                    className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-black/55 text-white opacity-0 transition group-hover:opacity-100"
+                  >
+                    <FiX className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+                {/* Descriptif facultatif, par photo : le nom du plat suffit.
+                    Le décompte n'apparaît qu'une fois la saisie commencée. */}
+                <input
+                  value={p.caption}
+                  maxLength={PHOTO_CAPTION_MAX}
+                  placeholder="Descriptif (facultatif)"
+                  onChange={(e) => {
+                    const caption = e.target.value.slice(0, PHOTO_CAPTION_MAX);
+                    setPicked((prev) =>
+                      prev.map((q, j) => (j === i ? { ...q, caption } : q))
+                    );
+                  }}
+                  className="h-8 w-full rounded-md border border-border bg-background px-2 text-xs text-foreground outline-none transition placeholder:text-foreground/40 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/25"
                 />
-                <button
-                  type="button"
-                  onClick={() => removeAt(i)}
-                  aria-label="Retirer"
-                  className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-black/55 text-white opacity-0 transition group-hover:opacity-100"
-                >
-                  <FiX className="h-3.5 w-3.5" />
-                </button>
+                {p.caption.length > 0 && (
+                  <span className="-mt-1 text-right text-[10px] tabular-nums text-foreground/45">
+                    {p.caption.length}/{PHOTO_CAPTION_MAX}
+                  </span>
+                )}
               </div>
             ))}
           </div>

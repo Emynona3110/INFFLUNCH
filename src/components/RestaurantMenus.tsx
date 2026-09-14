@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   FiPlus,
   FiTrash2,
@@ -13,9 +13,11 @@ import useRestaurantMenus, {
   RestaurantMenu,
 } from "@/hooks/useRestaurantMenus";
 import MenuAddDialog from "@/components/MenuAddDialog";
+import ZoomableImage from "@/components/ZoomableImage";
 import HoldToDeleteButton from "@/components/HoldToDeleteButton";
 import { toast } from "@/lib/toast";
 import { formatAuthorName } from "@/utils/authorName";
+import { cn } from "@/lib/utils";
 
 interface Props {
   restaurantId: number;
@@ -57,6 +59,28 @@ const RestaurantMenus = ({
   );
   const [addOpen, setAddOpen] = useState(false);
   const [lightbox, setLightbox] = useState<RestaurantMenu | null>(null);
+  // Même visionneuse que la galerie : zoom molette / pincement / boutons, et
+  // l'habillage s'efface dès qu'on dépasse ×1.
+  const [zoomed, setZoomed] = useState(false);
+  const [zoomReset, setZoomReset] = useState(0);
+  const handleScale = useCallback((s: number) => setZoomed(s > 1.001), []);
+
+  const closeLightbox = () => {
+    setLightbox(null);
+    setZoomed(false);
+  };
+
+  // Échap : on dézoome d'abord, on sort ensuite.
+  useEffect(() => {
+    if (lightbox?.kind !== "image") return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      if (zoomed) setZoomReset((t) => t + 1);
+      else closeLightbox();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [lightbox, zoomed]);
 
   const handleAdd = async (args: Parameters<typeof add.mutateAsync>[0]) => {
     try {
@@ -212,25 +236,29 @@ const RestaurantMenus = ({
         </ul>
       )}
 
-      {/* Lightbox (images) */}
+      {/* Visionneuse (images) */}
       {lightbox?.kind === "image" && (
         <div
-          className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 p-4"
-          onClick={() => setLightbox(null)}
+          className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/85 p-4"
+          onClick={closeLightbox}
         >
           <button
             type="button"
             aria-label="Fermer"
-            className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full bg-white/15 text-white transition hover:bg-white/30"
-            onClick={() => setLightbox(null)}
+            className={cn(
+              "absolute right-4 top-4 z-[1] grid h-10 w-10 cursor-pointer place-items-center rounded-full bg-white/15 text-white transition hover:bg-white/30",
+              zoomed && "pointer-events-none opacity-0"
+            )}
+            onClick={closeLightbox}
           >
             <FiX className="h-5 w-5" />
           </button>
-          <img
+          <ZoomableImage
+            key={lightbox.id}
             src={lightbox.href}
-            alt=""
-            className="max-h-[88vh] max-w-[92vw] rounded-lg object-contain shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
+            onScaleChange={handleScale}
+            resetToken={zoomReset}
+            className="max-h-full max-w-full rounded-lg object-contain shadow-2xl"
           />
         </div>
       )}

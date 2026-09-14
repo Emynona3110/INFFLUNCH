@@ -11,6 +11,8 @@ export interface RestaurantPhoto {
   width: number | null;
   height: number | null;
   created_at: string;
+  /** Descriptif facultatif (nom du plat…), ≤ 120 caractères. */
+  caption: string | null;
   /** URL publique du fichier dans le bucket. */
   url: string;
   /** Email de l'auteur (jointure public.users), pour l'attribution. */
@@ -39,7 +41,7 @@ const useRestaurantPhotos = (
     queryFn: async () => {
       const { data, error } = await supabaseClient
         .from("restaurant_photos")
-        .select("id, restaurant_id, user_id, storage_path, width, height, created_at")
+        .select("id, restaurant_id, user_id, storage_path, width, height, created_at, caption")
         .eq("restaurant_id", restaurantId as number)
         .order("created_at", { ascending: false });
       if (error) throw new Error(error.message);
@@ -70,10 +72,13 @@ const useRestaurantPhotos = (
     mutationFn: async ({
       file,
       authorId,
+      caption,
     }: {
       file: File;
       /** Admin : attribuer la photo à un autre user_id. Défaut = auteur courant. */
       authorId?: string;
+      /** Descriptif saisi à l'envoi (facultatif). */
+      caption?: string;
     }) => {
       if (!restaurantId || !slug) throw new Error("Restaurant inconnu");
       if (!file.type.startsWith("image/")) {
@@ -95,6 +100,7 @@ const useRestaurantPhotos = (
           storage_path: path,
           width,
           height,
+          caption: caption?.trim() || null,
           // Si non fourni : la colonne prend son défaut auth.uid() (auteur courant).
           ...(authorId ? { user_id: authorId } : {}),
         });
@@ -123,7 +129,20 @@ const useRestaurantPhotos = (
     onSuccess: () => queryClient.invalidateQueries({ queryKey: key }),
   });
 
-  return { ...query, upload, remove };
+  /** Légende modifiée après coup (auteur ou admin — la RLS tranche, et le
+   *  trigger n'autorise que cette colonne). */
+  const setCaption = useMutation({
+    mutationFn: async ({ id, caption }: { id: number; caption: string }) => {
+      const { error } = await supabaseClient
+        .from("restaurant_photos")
+        .update({ caption: caption.trim() || null })
+        .eq("id", id);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: key }),
+  });
+
+  return { ...query, upload, remove, setCaption };
 };
 
 export default useRestaurantPhotos;

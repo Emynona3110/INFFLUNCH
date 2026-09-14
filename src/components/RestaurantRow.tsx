@@ -3,7 +3,7 @@ import { FiEdit2 } from "react-icons/fi";
 import { HiOutlineLocationMarker } from "react-icons/hi";
 import { Restaurant } from "@/hooks/useRestaurants";
 import noImage from "@/assets/no-image.jpg";
-import badgeMap from "@/services/badgeMap";
+import badgeMap, { orderBadges } from "@/services/badgeMap";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip } from "@/components/ui/tooltip";
 import LikeButton from "@/components/LikeButton";
@@ -34,7 +34,7 @@ const RestaurantRow = ({
   const navigate = useNavigate();
 
   const topRank = topRankOf(topRated, restaurant.id);
-  const visibleBadges = (restaurant.badges ?? []).filter((b) => badgeMap[b]);
+  const visibleBadges = orderBadges(restaurant.badges);
 
   // Ordre des tags : origines, puis caractéristiques, puis plats.
   const tags = useSortedTags(restaurant.tags);

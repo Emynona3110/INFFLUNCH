@@ -4,7 +4,7 @@ import { FiEdit2 } from "react-icons/fi";
 import { HiOutlineLocationMarker } from "react-icons/hi";
 import { Restaurant } from "@/hooks/useRestaurants";
 import noImage from "@/assets/no-image.jpg";
-import badgeMap from "@/services/badgeMap";
+import badgeMap, { orderBadges } from "@/services/badgeMap";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip } from "@/components/ui/tooltip";
 import LikeButton from "@/components/LikeButton";
@@ -59,7 +59,7 @@ const RestaurantCardTW = ({
   const navigate = useNavigate();
 
   const topRank = topRankOf(topRated, restaurant.id);
-  const visibleBadges = (restaurant.badges ?? []).filter((b) => badgeMap[b]);
+  const visibleBadges = orderBadges(restaurant.badges);
 
   // Tags : origines d'abord, puis caractéristiques, puis plats. On en montre au
   // plus 3 sur la card, le reste résumé en "+N".

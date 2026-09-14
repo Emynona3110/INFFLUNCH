@@ -13,6 +13,7 @@ import {
   FiTrash2,
   FiSlash,
 } from "react-icons/fi";
+import { LuShoppingBag } from "react-icons/lu";
 import useRestaurants from "@/hooks/useRestaurants";
 import useTopRated from "@/hooks/useTopRated";
 import useFavorites from "@/hooks/useFavorites";
@@ -22,7 +23,7 @@ import useSession from "@/hooks/useSession";
 import useIsAdmin from "@/hooks/useIsAdmin";
 import supabaseClient from "@/services/supabaseClient";
 import { defaultRestaurantFilters } from "@/pages/UserPage";
-import badgeMap from "@/services/badgeMap";
+import badgeMap, { orderBadges } from "@/services/badgeMap";
 import RestaurantMiniMap from "@/components/RestaurantMiniMap";
 import LikeButton from "@/components/LikeButton";
 import LunchButton from "@/components/LunchButton";
@@ -153,7 +154,7 @@ const RestaurantPage = () => {
   // Contributions (avis / photos / menus) : verrouillables indépendamment de la
   // fermeture. Le contenu déjà publié reste visible dans tous les cas.
   const canContribute = restaurant.contributions_enabled !== false;
-  const visibleBadges = (restaurant.badges ?? []).filter((b) => badgeMap[b]);
+  const visibleBadges = orderBadges(restaurant.badges);
 
   const totalReviews = reviews.length;
   const myReview = reviews.find((r) => r.user_id === userId) ?? null;
@@ -502,6 +503,21 @@ const RestaurantPage = () => {
                     className="inline-flex items-center gap-1 truncate text-foreground/80 transition hover:text-primary"
                   >
                     Site web <FiExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                </li>
+              )}
+              {/* Page de commande, sous le site : le bouton « Commander »
+                  du hero note aussi le déjeuner, ici c'est juste le lien. */}
+              {restaurant.order_url && (
+                <li className="flex items-center gap-3">
+                  <LuShoppingBag className="h-4 w-4 shrink-0 text-primary" />
+                  <a
+                    href={restaurant.order_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 truncate text-foreground/80 transition hover:text-primary"
+                  >
+                    Click &amp; collect <FiExternalLink className="h-3.5 w-3.5" />
                   </a>
                 </li>
               )}

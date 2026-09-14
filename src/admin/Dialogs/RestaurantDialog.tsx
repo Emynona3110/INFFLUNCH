@@ -7,14 +7,13 @@ import { slugify } from "../../utils/slugify";
 import useLocations from "../../hooks/useLocations";
 import { Restaurant } from "../../hooks/useRestaurants";
 import BadgesToggles from "../../components/BadgesToggles";
-import { CLICK_COLLECT_BADGE } from "../../services/badgeMap";
+import { CLICK_COLLECT_BADGE, orderBadges } from "../../services/badgeMap";
 import ImageUploadField from "../../components/ImageUploadField";
 import {
   checkImageResolution,
   COVER_MIN_LONG_EDGE,
   COVER_WARN_LONG_EDGE,
 } from "../../utils/imageCompress";
-import badgeMap from "../../services/badgeMap";
 import {
   uploadImageToBucket,
   bucketPathFromPublicUrl,
@@ -325,10 +324,9 @@ const RestaurantDialog = ({
   const handleSubmit = async () => {
     const formattedName = formatName(name.trim());
     const slug = slugify(formattedName);
-    const badgeOrder = Object.keys(badgeMap);
-    const orderedBadges = badges.length
-      ? badgeOrder.filter((label) => badges.includes(label))
-      : null;
+    // Même ordre qu'à l'affichage (le trigger click & collect ajoutera le
+    // sien à la fin en base, `orderBadges` remettra tout en place à la lecture).
+    const orderedBadges = badges.length ? orderBadges(badges) : null;
 
     setIsSubmitting(true);
 
