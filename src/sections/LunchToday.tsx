@@ -8,7 +8,7 @@ import LunchPickDialog from "@/components/LunchPickDialog";
 import useLunchToday, { isWeekend } from "@/hooks/useLunchToday";
 import useRestaurants from "@/hooks/useRestaurants";
 import { defaultRestaurantFilters } from "@/pages/UserPage";
-import { formatAuthorName } from "@/utils/authorName";
+import AuthorButton from "@/components/AuthorButton";
 import { toast } from "@/lib/toast";
 import noImage from "@/assets/no-image.jpg";
 import { cn } from "@/lib/utils";
@@ -328,7 +328,16 @@ const LunchToday = () => {
                         </AnimatePresence>
                       </span>
                       <span className="min-w-0 truncate text-xs text-foreground/55">
-                        {people.map((p) => formatAuthorName(p.email)).join(", ")}
+                        {people.map((p, i) => (
+                          <span key={p.user_id}>
+                            {i > 0 && ", "}
+                            <AuthorButton
+                              userId={p.user_id}
+                              email={p.email}
+                              className="hover:text-foreground"
+                            />
+                          </span>
+                        ))}
                       </span>
                     </div>
                   </div>

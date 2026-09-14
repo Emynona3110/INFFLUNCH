@@ -9,6 +9,7 @@ import useProfile from "../hooks/useProfile";
 import useMyReviews from "../hooks/useMyReviews";
 import useAchievementsSeen from "../hooks/useAchievementsSeen";
 import useRememberedTab from "@/hooks/useRememberedTab";
+import UserProfileView from "@/components/UserProfileView";
 import useIsAdmin from "../hooks/useIsAdmin";
 import Avatar from "../components/Avatar";
 import ColorModeSwitch from "../components/ColorModeSwitch";
@@ -42,13 +43,16 @@ const Stars = ({ n }: { n: number }) => (
 );
 
 const subTabs = [
-  { key: "profil", label: "Compte", adminOnly: false },
+  // Ce que les autres voient de moi, en premier.
+  { key: "profil", label: "Profil", adminOnly: false },
   { key: "avis", label: "Avis", adminOnly: false },
   { key: "succes", label: "Succès", adminOnly: false },
   // Suivi de ses propres signalements : l'envoi se fait depuis la navbar.
   { key: "retours", label: "Demandes", adminOnly: false },
   // Carnet de backlog : ce que l'admin repère en naviguant, pour plus tard.
   { key: "backlog", label: "Backlog", adminOnly: true },
+  // Les réglages en dernier : on y va rarement.
+  { key: "compte", label: "Compte", adminOnly: false },
 ] as const;
 
 type SubTabKey = (typeof subTabs)[number]["key"];
@@ -160,8 +164,13 @@ const MyAccount = () => {
         transition={{ duration: 0.3 }}
         className="mx-auto w-full max-w-2xl space-y-6"
       >
-      {/* Profil */}
-      {active === "profil" && (
+      {/* Profil : la même page que celle qu'un collègue voit de moi. */}
+      {active === "profil" && sessionData?.user?.id && (
+        <UserProfileView userId={sessionData.user.id} isMe />
+      )}
+
+      {/* Compte */}
+      {active === "compte" && (
       <Card className="relative p-8">
         {/* Thème clair/sombre : réglage personnel, il a sa place ici plutôt que
             dans la navbar où il occupait une position permanente. */}

@@ -38,8 +38,8 @@ import LocationEditDialog from "@/components/LocationEditDialog";
 import RestaurantGallery from "@/components/RestaurantGallery";
 import RestaurantMenus from "@/components/RestaurantMenus";
 import { Tooltip } from "@/components/ui/tooltip";
-import { formatAuthorName } from "@/utils/authorName";
 import Avatar from "@/components/Avatar";
+import AuthorButton from "@/components/AuthorButton";
 import { toast } from "@/lib/toast";
 import noImage from "@/assets/no-image.jpg";
 import { cn } from "@/lib/utils";
@@ -413,14 +413,14 @@ const RestaurantPage = () => {
                         />
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5">
-                            <span
+                            <AuthorButton
+                              userId={r.user_id}
+                              email={r.email}
                               className={cn(
                                 "font-semibold",
                                 mine ? "text-primary" : "text-card-foreground"
                               )}
-                            >
-                              {formatAuthorName(r.email)}
-                            </span>
+                            />
                             {(mine || isAdmin) && (
                               <div className="flex items-center gap-1">
                                 {mine && canContribute && (

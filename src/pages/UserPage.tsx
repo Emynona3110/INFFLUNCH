@@ -18,6 +18,7 @@ import LunchToday from "../sections/LunchToday";
 import AdminSection from "../sections/AdminSection";
 import AdminGuard from "../components/AdminGuard";
 import Layout from "../components/Layout";
+import ProfilePage from "./ProfilePage";
 import useIsAdmin from "../hooks/useIsAdmin";
 
 // Sections de la navbar selon le rôle. Les pages réservées aux admins vivent
@@ -120,13 +121,17 @@ const UserPage = () => {
     setRouletteWinnerId(null);
   };
 
-  // Fiche d'un restaurant : pas d'onglet actif, la navbar se réduit (pas de
-  // recherche/filtres). Sinon, l'onglet correspondant à l'URL.
+  // Fiche d'un restaurant ou profil d'un collègue : la navbar se réduit (pas
+  // de recherche/filtres), d'où `currentPage` vide. Sinon, l'onglet de l'URL.
   const isRestaurantDetail = location.pathname.includes("/restaurant/");
-  const currentPage = isRestaurantDetail
+  const isDetail = isRestaurantDetail || location.pathname.includes("/profil/");
+  const currentPage = isDetail
     ? ""
     : sections.find((section) => location.pathname.includes(section.path))
         ?.path ?? sections[0].path;
+  // Onglet surligné : une fiche resto reste « dans » Restaurants, même si la
+  // barre d'outils, elle, n'y est pas.
+  const activeTab = isRestaurantDetail ? "restaurants" : currentPage;
 
   // à propos = contenu centré ; mon-compte gère lui-même sa mise en page (pills
   // en haut, carte centrée) ; demandes / tables = pleine hauteur avec scroll
@@ -144,7 +149,7 @@ const UserPage = () => {
       centerContent={centerContent}
       fillContent={fillContent}
       navbarProps={{
-        page: currentPage,
+        page: activeTab,
         setPage: (page) => navigate("/" + page),
         onFilterChange: (query) =>
           setRestaurantFilters({ ...restaurantFilters, ...query }),
@@ -184,6 +189,7 @@ const UserPage = () => {
         {/* Compat : ancien chemin de l'onglet, renommé « Déjeuner ». */}
         <Route path="midi" element={<Navigate to="/dejeuner" replace />} />
         <Route path="restaurant/:slug" element={<RestaurantPage />} />
+        <Route path="profil/:userId" element={<ProfilePage />} />
         <Route path="mon-compte" element={<MyAccount />} />
         <Route path="a-propos" element={<About />} />
         <Route path="nouveautes" element={<Nouveautes />} />

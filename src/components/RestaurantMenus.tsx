@@ -14,9 +14,9 @@ import useRestaurantMenus, {
 } from "@/hooks/useRestaurantMenus";
 import MenuAddDialog from "@/components/MenuAddDialog";
 import ZoomableImage from "@/components/ZoomableImage";
+import AuthorButton from "@/components/AuthorButton";
 import HoldToDeleteButton from "@/components/HoldToDeleteButton";
 import { toast } from "@/lib/toast";
-import { formatAuthorName } from "@/utils/authorName";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -189,9 +189,11 @@ const RestaurantMenus = ({
                     )}
                   </span>
                   {menu.email && (
-                    <span className="block truncate text-xs text-foreground/45">
-                      {formatAuthorName(menu.email)}
-                    </span>
+                    <AuthorButton
+                      userId={menu.user_id}
+                      email={menu.email}
+                      className="block max-w-full truncate text-xs text-foreground/45 hover:text-foreground"
+                    />
                   )}
                 </span>
               </>
