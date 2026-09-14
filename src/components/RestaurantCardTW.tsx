@@ -13,6 +13,7 @@ import LunchAvatars from "@/components/LunchAvatars";
 import ClosedBadge from "@/components/ClosedBadge";
 import TopBadge, { topRankOf } from "@/components/TopBadge";
 import { cn } from "@/lib/utils";
+import { HOVER_ZOOM_IMG } from "@/lib/imageClasses";
 
 interface Props {
   restaurant: Restaurant;
@@ -78,7 +79,7 @@ const RestaurantCardTW = ({
           src={restaurant.image ?? noImage}
           alt={restaurant.name}
           className={cn(
-            "h-full w-full object-cover transition-transform duration-300 group-hover:scale-105",
+            HOVER_ZOOM_IMG,
             restaurant.closed && "grayscale"
           )}
         />

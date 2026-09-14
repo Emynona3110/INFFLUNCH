@@ -1,7 +1,8 @@
 /**
  * Compression/redimensionnement d'image côté client AVANT upload.
  * But : ne jamais envoyer un original de plusieurs Mo dans le bucket. On borne
- * la plus grande dimension et on réencode en WebP (bon rapport qualité/poids).
+ * la plus grande dimension (2400 px : de quoi zoomer ×2 sur un écran Retina
+ * sans flou) et on réencode en WebP (bon rapport qualité/poids).
  * Économise le stockage et l'egress Supabase tout en gardant une bonne qualité.
  */
 
@@ -77,7 +78,7 @@ export const checkImageResolution = async (
 
 export const compressImage = async (
   file: File,
-  { maxSize = 1600, quality = 0.82 }: CompressOptions = {}
+  { maxSize = 2400, quality = 0.82 }: CompressOptions = {}
 ): Promise<CompressedImage> => {
   const img = await loadImage(file);
 

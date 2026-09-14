@@ -12,6 +12,7 @@ import AuthorButton from "@/components/AuthorButton";
 import { toast } from "@/lib/toast";
 import noImage from "@/assets/no-image.jpg";
 import { cn } from "@/lib/utils";
+import { HOVER_ZOOM_IMG } from "@/lib/imageClasses";
 
 /** "Jeudi 28 août" (première lettre en majuscule). */
 const todayLabel = () => {
@@ -284,7 +285,7 @@ const LunchToday = () => {
                       src={restaurant.image || noImage}
                       alt=""
                       className={cn(
-                        "h-full w-full object-cover transition-transform duration-300 group-hover:scale-105",
+                        HOVER_ZOOM_IMG,
                         restaurant.closed && "grayscale"
                       )}
                     />

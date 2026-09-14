@@ -15,6 +15,7 @@ import ZoomableImage from "@/components/ZoomableImage";
 import { PHOTO_CAPTION_MAX } from "@/services/textLimits";
 import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
+import { HOVER_ZOOM_IMG } from "@/lib/imageClasses";
 
 interface Props {
   photos: RestaurantPhoto[];
@@ -199,7 +200,7 @@ const PhotoGallery = ({
               src={photo.url}
               alt=""
               loading="lazy"
-              className="absolute inset-0 h-full w-full object-cover transition duration-300 group-hover:scale-105"
+              className={HOVER_ZOOM_IMG}
             />
           </button>
           {/* Éventail des emojis présents (plus fréquent en avant) + total */}
