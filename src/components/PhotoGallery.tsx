@@ -9,6 +9,7 @@ import {
 } from "react-icons/fi";
 import { RestaurantPhoto } from "@/hooks/useRestaurantPhotos";
 import useReactions from "@/hooks/useReactions";
+import useAchievements from "@/hooks/useAchievements";
 import EmojiReactions from "@/components/EmojiReactions";
 import HoldToDeleteButton from "@/components/HoldToDeleteButton";
 import ZoomableImage from "@/components/ZoomableImage";
@@ -121,6 +122,7 @@ const PhotoGallery = ({
 
   // Réactions emoji sur les photos (éventail sur la vignette, rangée dans la
   // visionneuse).
+  const { unlock } = useAchievements();
   const photoReactions = useReactions(
     "photo",
     photos.map((p) => p.id)
@@ -466,7 +468,16 @@ const PhotoGallery = ({
                   sienne comprise. */}
               <EmojiReactions
                 summary={photoReactions.summaryFor(lightbox.id)}
-                onToggle={(emoji) => photoReactions.toggle(lightbox.id, emoji)}
+                onToggle={(emoji) => {
+                  // Succès « Narcisse » : AJOUTER une réaction sur sa propre
+                  // photo (pas la retirer).
+                  if (
+                    lightbox.user_id === userId &&
+                    !photoReactions.summaryFor(lightbox.id).mine.has(emoji)
+                  )
+                    unlock("narcisse");
+                  photoReactions.toggle(lightbox.id, emoji);
+                }}
                 disabled={!photoReactions.canReact}
               />
             </div>

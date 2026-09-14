@@ -218,3 +218,25 @@ Square 1:1 canvas, high resolution, transparent background. Generate 3 distinct
 variations of this icon set.
 
 ================================================================================
+
+
+================================================================================
+AJOUT 2026-09-14 — 2 succès secrets
+================================================================================
+
+--- jour_nuit — "Jour ! Nuit ! Jour ! Nuit !" (basculer le thème 8 fois) ------
+Minimalist flat vector icon, single centered subject, clean geometric rounded
+shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
+royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
+black background (#000000), square 1:1. Subject: a vintage wall light switch
+(toggle lever) flipped repeatedly, with motion lines, half of the icon lit by a
+small sun and the other half by a crescent moon, split down the middle —
+day on one side, night on the other.
+
+--- narcisse — "Narcisse" (réagir à sa propre photo) ---------------------------
+Minimalist flat vector icon, single centered subject, clean geometric rounded
+shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
+royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
+black background (#000000), square 1:1. Subject: a hand mirror showing a
+smiling reflection, with a small heart floating above it — admiring oneself
+and liking it.

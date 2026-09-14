@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import HoldToDeleteButton from "@/components/HoldToDeleteButton";
 import useAchievements from "@/hooks/useAchievements";
 import useAchievementStats from "@/hooks/useAchievementStats";
+import useSecretConditions from "@/hooks/useSecretConditions";
 import useIsAdmin from "@/hooks/useIsAdmin";
 import { ACHIEVEMENTS, AchievementId } from "@/data/achievements";
 import { toast } from "@/lib/toast";
@@ -23,6 +24,8 @@ const formatDate = (iso: string) =>
 const AchievementsGallery = () => {
   const { unlockedIds, unlockedAt, resetOne, loading } = useAchievements();
   const { percentById, ready: statsReady } = useAchievementStats();
+  // Conditions des secrets débloqués (en base, pas dans le bundle).
+  const secretConditions = useSecretConditions();
   const isAdmin = useIsAdmin();
   const unlockedCount = ACHIEVEMENTS.filter((a) => unlockedIds.includes(a.id)).length;
 
@@ -138,7 +141,7 @@ const AchievementsGallery = () => {
                           unlocked ? "text-foreground/55" : "text-foreground/40"
                         )}
                       >
-                        {a.condition}
+                        {a.condition ?? secretConditions[a.id]}
                       </p>
                     </div>
                   ) : (

@@ -2,6 +2,8 @@
 // Seules les obtentions sont persistées (table `user_achievements`).
 // Ajouter un succès = une entrée ici + son déclenchement (unlock) côté écran ou
 // dans le hook global `useAchievementTriggers` (paliers comptés en base).
+// Succès SECRET = pas de `condition` ici, mais une ligne dans la table
+// `achievement_secrets` (sql/2026-09-14_achievement_secrets.sql).
 
 export type AchievementId =
   // Easter egg mouton (Beeeh)
@@ -26,6 +28,9 @@ export type AchievementId =
   | "gambling"
   | "indecis"
   | "de_pipe"
+  // Easter eggs divers
+  | "jour_nuit"
+  | "narcisse"
   // Méta / assiduité
   | "fidele_au_poste"
   | "troupeau_complet";
@@ -34,8 +39,12 @@ export interface Achievement {
   id: AchievementId;
   /** Intitulé affiché (titre du succès). */
   title: string;
-  /** Condition d'obtention, telle qu'affichée. */
-  condition: string;
+  /**
+   * Condition d'obtention, telle qu'affichée. ABSENTE pour les succès secrets :
+   * elle vit en base (`achievement_secrets`, lisible une fois débloqué), pour
+   * que personne ne la trouve dans le code du navigateur.
+   */
+  condition?: string;
   /** Icône (emoji) du succès — repli si aucune image `image` n'est fournie. */
   icon: string;
   /**
@@ -56,7 +65,6 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: "anti_panurgisme",
     title: "Anti-panurgisme",
-    condition: "Vous avez trouvé un mouton",
     icon: "🐑",
     image: "/achievements/anti_panurgisme.svg",
     secret: true,
@@ -64,7 +72,6 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: "berger_dun_jour",
     title: "Berger d'un jour",
-    condition: "Nourrir un mouton",
     icon: "🌾",
     image: "/achievements/berger_dun_jour.svg",
     secret: true,
@@ -72,7 +79,6 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: "gourou_du_troupeau",
     title: "Gourou du troupeau",
-    condition: "Nourrir un mouton 20 fois d'affilée",
     icon: "🧙",
     image: "/achievements/gourou_du_troupeau.svg",
     secret: true,
@@ -168,7 +174,6 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: "indecis",
     title: "Indécis",
-    condition: "Lancer la roue 5 fois de suite",
     icon: "🤔",
     image: "/achievements/indecis.svg",
     secret: true,
@@ -176,9 +181,25 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: "de_pipe",
     title: "Dé pipé",
-    condition: "Lancer la roue avec un seul restaurant",
     icon: "🎲",
     image: "/achievements/de_pipe.svg",
+    secret: true,
+  },
+
+  // — Easter eggs divers —
+  {
+    // Jacquouille et l'interrupteur (Les Visiteurs) : « Le jour, la nuit… »
+    id: "jour_nuit",
+    title: "Jour ! Nuit ! Jour ! Nuit !",
+    icon: "🌗",
+    image: "/achievements/jour_nuit.svg",
+    secret: true,
+  },
+  {
+    id: "narcisse",
+    title: "Narcisse",
+    icon: "🪞",
+    image: "/achievements/narcisse.svg",
     secret: true,
   },
 

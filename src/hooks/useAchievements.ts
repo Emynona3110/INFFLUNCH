@@ -82,6 +82,8 @@ const useAchievements = () => {
       queryClient.invalidateQueries({ queryKey: ["achievements", userId] });
       // Le déblocage change aussi les % de rareté (on vient de s'y ajouter).
       queryClient.invalidateQueries({ queryKey: ["achievement-stats"] });
+      // Un secret débloqué rend sa condition lisible.
+      queryClient.invalidateQueries({ queryKey: ["achievement-secrets", userId] });
     },
     [userId, queryClient, navigate]
   );
@@ -104,6 +106,7 @@ const useAchievements = () => {
       fired.delete(`${userId}:${id}`);
       queryClient.invalidateQueries({ queryKey: ["achievements", userId] });
       queryClient.invalidateQueries({ queryKey: ["achievement-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["achievement-secrets", userId] });
     },
     [userId, queryClient]
   );

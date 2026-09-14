@@ -94,6 +94,12 @@ const MyAccount = () => {
   }, [active, markSeen]);
 
   const [isDialogOpen, setDialogOpen] = useState(false);
+  // Easter egg « Jour ! Nuit ! » : le GIF de Jacquouille remplace la carte
+  // Compte, le temps qu'on change de sous-onglet (ou de page : démontage).
+  const [jourNuit, setJourNuit] = useState(false);
+  useEffect(() => {
+    setJourNuit(false);
+  }, [active]);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const email = sessionData?.user?.email;
@@ -171,10 +177,30 @@ const MyAccount = () => {
 
       {/* Compte */}
       {active === "compte" && (
-      <Card className="relative p-8">
+      <Card className="relative overflow-hidden p-8">
+        {/* Easter egg : le GIF recouvre la carte en fondu, sans en changer la
+            taille, et absorbe les clics tant qu'on reste sur ce sous-onglet. */}
+        {jourNuit && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.25 }}
+            className="absolute inset-0 z-10 bg-black"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src="/easter/jour-nuit.gif"
+              alt="Le jour, la nuit, le jour, la nuit…"
+              className="h-full w-full object-cover"
+            />
+          </motion.div>
+        )}
         {/* Thème clair/sombre : réglage personnel, il a sa place ici plutôt que
             dans la navbar où il occupait une position permanente. */}
-        <ColorModeSwitch className="absolute right-3 top-3" />
+        <ColorModeSwitch
+          className="absolute right-3 top-3"
+          onJourNuit={() => setJourNuit(true)}
+        />
 
         <div className="flex flex-col items-center gap-3">
           <div className="relative">
