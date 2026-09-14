@@ -13,7 +13,6 @@ import {
   FiTrash2,
   FiSlash,
 } from "react-icons/fi";
-import { LuShoppingBag } from "react-icons/lu";
 import useRestaurants from "@/hooks/useRestaurants";
 import useTopRated from "@/hooks/useTopRated";
 import useFavorites from "@/hooks/useFavorites";
@@ -293,12 +292,10 @@ const RestaurantPage = () => {
         </div>
       ) : (
         <div className="mt-4 flex flex-wrap items-center justify-end gap-3">
-          <LunchAvatars restaurantId={restaurant.id} size={42} max={5} />
+          <LunchAvatars restaurantId={restaurant.id} size={42} max={5} interactive />
           <LunchButton restaurantId={restaurant.id} />
-          {/* Click & collect : commander vaut « je déjeune ici ». */}
-          {restaurant.order_url && (
-            <OrderButton restaurantId={restaurant.id} url={restaurant.order_url} />
-          )}
+          {/* Click & collect : la page de commande, dans un nouvel onglet. */}
+          {restaurant.order_url && <OrderButton url={restaurant.order_url} />}
         </div>
       )}
 
@@ -406,11 +403,18 @@ const RestaurantPage = () => {
                       className="border-t border-border/60 pt-4"
                     >
                       <div className="flex items-start gap-3">
-                        <Avatar
+                        {/* La photo aussi mène au profil. */}
+                        <AuthorButton
+                          userId={r.user_id}
                           email={r.email}
-                          avatarPath={r.avatar_path}
-                          size={44}
-                        />
+                          className="flex shrink-0 rounded-full leading-none transition-transform duration-150 hover:scale-105 hover:no-underline"
+                        >
+                          <Avatar
+                            email={r.email}
+                            avatarPath={r.avatar_path}
+                            size={44}
+                          />
+                        </AuthorButton>
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5">
                             <AuthorButton
@@ -503,21 +507,6 @@ const RestaurantPage = () => {
                     className="inline-flex items-center gap-1 truncate text-foreground/80 transition hover:text-primary"
                   >
                     Site web <FiExternalLink className="h-3.5 w-3.5" />
-                  </a>
-                </li>
-              )}
-              {/* Page de commande, sous le site : le bouton « Commander »
-                  du hero note aussi le déjeuner, ici c'est juste le lien. */}
-              {restaurant.order_url && (
-                <li className="flex items-center gap-3">
-                  <LuShoppingBag className="h-4 w-4 shrink-0 text-primary" />
-                  <a
-                    href={restaurant.order_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 truncate text-foreground/80 transition hover:text-primary"
-                  >
-                    Click &amp; collect <FiExternalLink className="h-3.5 w-3.5" />
                   </a>
                 </li>
               )}

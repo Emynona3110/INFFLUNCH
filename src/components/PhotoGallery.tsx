@@ -25,8 +25,6 @@ interface Props {
   labelOf: (photo: RestaurantPhoto) => string | null | undefined;
   /** Clic sur ce libellé (ouvrir le profil, ouvrir la fiche…). */
   onLabelClick?: (photo: RestaurantPhoto) => void;
-  /** Infobulle du libellé cliquable. */
-  labelTitle?: string;
   /** Suppression (auteur, ou admin). Absente = pas de corbeille. */
   onDelete?: (photo: RestaurantPhoto) => Promise<void>;
   /** Descriptif modifié par l'auteur. Absente = pas de crayon. */
@@ -56,7 +54,6 @@ const PhotoGallery = ({
   isAdmin,
   labelOf,
   onLabelClick,
-  labelTitle,
   onDelete,
   onSetCaption,
   layout = "carousel",
@@ -383,7 +380,6 @@ const PhotoGallery = ({
                   (onLabelClick ? (
                     <button
                       type="button"
-                      title={labelTitle}
                       onClick={() => onLabelClick(lightbox)}
                       className="cursor-pointer font-medium text-white/85 underline-offset-2 hover:text-white hover:underline"
                     >

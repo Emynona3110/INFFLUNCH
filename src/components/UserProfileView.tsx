@@ -203,7 +203,6 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
               const slug = (photo as PublicPhoto).restaurant?.slug;
               if (slug) navigate(`/restaurant/${slug}`);
             }}
-            labelTitle="Voir le restaurant"
             layout="grid"
             onDelete={(photo) => remove.mutateAsync(photo)}
             onSetCaption={(photo, caption) =>
