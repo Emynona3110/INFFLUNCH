@@ -78,9 +78,7 @@ const Layout = ({
           ref={mainRef}
           className="flex-1 overflow-y-auto overscroll-y-contain"
         >
-          {/* Contenu centré (login…) : sur mobile le footer est posé en bas
-              sans prendre de place, pour un vrai centrage dans l'écran. */}
-          <div className={cn("flex min-h-full flex-col", centerContent && "relative")}>
+          <div className="flex min-h-full flex-col">
             <div
               className={cn(
                 "mx-auto flex w-full max-w-[1200px] flex-1 flex-col px-2.5 py-3 sm:px-4 sm:py-6",
@@ -89,9 +87,7 @@ const Layout = ({
             >
               {content}
             </div>
-            <div className={cn(centerContent && "absolute inset-x-0 bottom-0 sm:static")}>
-              <Footer />
-            </div>
+            <Footer />
           </div>
         </main>
       )}

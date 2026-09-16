@@ -8,18 +8,18 @@ const About = () => {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className="tw-scope flex w-full items-center justify-center px-4"
+      className="tw-scope flex w-full items-center justify-center sm:px-4"
     >
-      <Card className="w-full max-w-2xl p-4 sm:p-8">
+      <Card className="w-full max-w-2xl p-5 sm:p-8">
         <div
           role="heading"
           aria-level={1}
-          className="text-center font-display text-xl sm:text-2xl font-extrabold text-card-foreground"
+          className="text-center font-display text-lg font-extrabold text-card-foreground sm:text-2xl"
         >
           À propos d'INFFLUNCH
         </div>
 
-        <div className="mt-3 sm:mt-6 space-y-4 text-[15px] leading-relaxed text-foreground/80">
+        <div className="mt-3 space-y-3 text-sm leading-relaxed text-foreground/80 sm:mt-6 sm:space-y-4 sm:text-[15px]">
           <p>
             <span className="font-semibold text-foreground">INFFLUNCH</span> est
             un projet personnel visant à offrir aux collaborateurs d'

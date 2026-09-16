@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { LuUtensils, LuUtensilsCrossed } from "react-icons/lu";
+import { FiPlus } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import Avatar from "@/components/Avatar";
 import LunchPickDialog from "@/components/LunchPickDialog";
@@ -12,6 +13,8 @@ import AuthorButton from "@/components/AuthorButton";
 import { toast } from "@/lib/toast";
 import noImage from "@/assets/no-image.jpg";
 import { cn } from "@/lib/utils";
+import { formatAuthorName } from "@/utils/authorName";
+import { SECTION_BODY } from "@/lib/sectionClasses";
 import { HOVER_ZOOM_IMG } from "@/lib/imageClasses";
 
 /** "Jeudi 28 août" (première lettre en majuscule). */
@@ -122,16 +125,16 @@ const LunchToday = () => {
       className="tw-scope mx-auto w-full max-w-2xl"
     >
       {/* Entête : le jour + le compteur, qui « pope » à chaque arrivée. */}
-      <div className="mb-5 flex items-end justify-between gap-4">
+      <div className="mb-2.5 flex items-end justify-between gap-4 sm:mb-5">
         <div>
           <div
             role="heading"
             aria-level={1}
-            className="font-display text-xl sm:text-2xl font-extrabold text-foreground"
+            className="font-display text-lg font-extrabold text-foreground sm:text-2xl"
           >
             Qui déjeune où
           </div>
-          <p className="mt-0.5 text-sm text-foreground/55">{todayLabel()}</p>
+          <p className="mb-0 mt-0.5 text-[13px] text-foreground/55 sm:text-sm">{todayLabel()}</p>
         </div>
 
         {registered.length > 0 && (
@@ -141,7 +144,7 @@ const LunchToday = () => {
               initial={{ scale: 0.6, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={spring}
-              className="font-display text-2xl sm:text-3xl font-extrabold leading-none text-primary"
+              className="font-display text-2xl font-extrabold leading-none text-primary sm:text-3xl"
             >
               {registered.length}
             </motion.span>
@@ -165,7 +168,7 @@ const LunchToday = () => {
       ) : (
       <div
         className={cn(
-          "mb-3 sm:mb-6 flex flex-wrap items-center justify-between gap-3 rounded-card px-3 py-3 sm:px-5 sm:py-4 transition-colors",
+          "mb-3 sm:mb-6 flex flex-wrap items-center justify-between gap-2.5 rounded-card px-3 py-2.5 sm:gap-3 sm:px-5 sm:py-4 transition-colors",
           hasPlan
             ? "border border-border bg-gradient-to-r from-primary/10 to-transparent"
             : weekendOff
@@ -176,7 +179,7 @@ const LunchToday = () => {
         <div className="flex min-w-0 items-center gap-3">
           <span
             className={cn(
-              "flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
+              "flex h-9 w-9 shrink-0 items-center justify-center rounded-full sm:h-10 sm:w-10",
               hasPlan
                 ? "bg-primary text-primary-foreground"
                 : "bg-primary/10 text-primary"
@@ -188,7 +191,7 @@ const LunchToday = () => {
               <LuUtensils className="h-5 w-5" />
             )}
           </span>
-          <div className="flex h-12 min-w-0 flex-col justify-center">
+          <div className="flex h-11 min-w-0 flex-col justify-center sm:h-12">
             {skipsRestaurant ? (
               <div className="text-sm text-foreground/70">
                 Ce midi, tu ne manges pas au restaurant.
@@ -212,15 +215,24 @@ const LunchToday = () => {
               </div>
             ) : (
               <div className="text-sm text-foreground/70">
-                Tu n'as pas encore choisi ton restaurant pour ce midi.
+                <span className="sm:hidden">Pas encore de resto choisi ce midi.</span>
+                <span className="hidden sm:inline">
+                  Tu n'as pas encore choisi ton restaurant pour ce midi.
+                </span>
               </div>
             )}
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-2">
+        {/* Mobile : les boutons prennent toute la largeur sous le texte. */}
+        <div className="flex w-full shrink-0 items-center gap-2 sm:w-auto">
           {hasPlan ? (
-            <Button variant="outline" onClick={leave} loading={saving}>
+            <Button
+              variant="outline"
+              onClick={leave}
+              loading={saving}
+              className="flex-1 sm:flex-none"
+            >
               Annuler
             </Button>
           ) : weekendOff ? null : (
@@ -228,10 +240,17 @@ const LunchToday = () => {
               <Button
                 onClick={() => setPickOpen(true)}
                 disabled={saving || restaurantsLoading}
+                className="flex-1 sm:flex-none"
               >
-                Choisir un restaurant
+                <span className="sm:hidden">Choisir un resto</span>
+                <span className="hidden sm:inline">Choisir un restaurant</span>
               </Button>
-              <Button variant="outline" onClick={skip} disabled={saving}>
+              <Button
+                variant="outline"
+                onClick={skip}
+                disabled={saving}
+                className="flex-1 sm:flex-none"
+              >
                 Pas de resto
               </Button>
             </>
@@ -263,7 +282,9 @@ const LunchToday = () => {
           </p>
         </motion.div>
       ) : (
-        <div className="flex flex-col gap-3">
+        /* Mobile : tablées empilées dans un cadre de section (filets) ; desktop :
+           tuiles espacées. */
+        <div className={cn(SECTION_BODY, "divide-y divide-border sm:flex sm:flex-col sm:gap-3 sm:divide-y-0")}>
           <AnimatePresence initial={false}>
             {tables.map(({ restaurant, people }) => {
               const mine = restaurant.id === myRestaurantId;
@@ -276,11 +297,14 @@ const LunchToday = () => {
                   transition={{ duration: 0.2 }}
                   onClick={() => navigate(`/restaurant/${restaurant.slug}`)}
                   className={cn(
-                    "group flex cursor-pointer select-none items-center gap-4 overflow-hidden rounded-card bg-card p-3 transition hover:-translate-y-0.5 hover:shadow-[0_14px_34px_-16px_rgba(2,8,40,0.30)]",
-                    mine ? "ring-2 ring-primary" : "border border-border"
+                    "group flex cursor-pointer select-none items-center gap-3 overflow-hidden p-2.5 transition sm:rounded-card sm:bg-card sm:gap-4 sm:p-3 sm:hover:-translate-y-0.5 sm:hover:shadow-[0_14px_34px_-16px_rgba(2,8,40,0.30)]",
+                    // Ma tablée : fond teinté sur mobile, anneau sur desktop.
+                    mine
+                      ? "bg-primary/5 sm:bg-card sm:ring-2 sm:ring-primary"
+                      : "sm:border sm:border-border"
                   )}
                 >
-                  <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg">
+                  <div className="relative h-12 w-16 shrink-0 overflow-hidden rounded-lg sm:h-16 sm:w-24">
                     <img
                       src={restaurant.image || noImage}
                       alt=""
@@ -295,7 +319,7 @@ const LunchToday = () => {
                       initial={{ scale: 0.5, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       transition={spring}
-                      className="absolute bottom-1 right-1 flex h-6 min-w-6 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-bold text-primary-foreground shadow"
+                      className="absolute bottom-0.5 right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-bold text-primary-foreground shadow sm:bottom-1 sm:right-1 sm:h-6 sm:min-w-6 sm:px-1.5 sm:text-xs"
                     >
                       {people.length}
                     </motion.span>
@@ -307,7 +331,8 @@ const LunchToday = () => {
                     </div>
 
                     <div className="mt-1 flex items-center gap-2">
-                      <span className="flex -space-x-2">
+                      {/* Mobile : pas d'avatars, seulement les noms. */}
+                      <span className="hidden -space-x-2 sm:flex">
                         <AnimatePresence initial={false}>
                           {people.slice(0, 5).map((p) => (
                             <motion.span
@@ -328,14 +353,17 @@ const LunchToday = () => {
                           ))}
                         </AnimatePresence>
                       </span>
+                      {/* Mobile : noms en texte simple (pas de lien profil,
+                          la ligne entière ouvre la fiche) ; desktop : cliquables. */}
                       <span className="min-w-0 truncate text-xs text-foreground/55">
                         {people.map((p, i) => (
                           <span key={p.user_id}>
                             {i > 0 && ", "}
+                            <span className="sm:hidden">{formatAuthorName(p.email)}</span>
                             <AuthorButton
                               userId={p.user_id}
                               email={p.email}
-                              className="hover:text-foreground"
+                              className="hidden hover:text-foreground sm:inline"
                             />
                           </span>
                         ))}
@@ -348,14 +376,16 @@ const LunchToday = () => {
                       sur un restaurant fermé entre-temps. */}
                   {!mine && !restaurant.closed && (
                     <Button
-                      className="shrink-0"
+                      aria-label="Rejoindre"
+                      className="h-9 w-9 shrink-0 rounded-full px-0 sm:h-10 sm:w-auto sm:rounded-lg sm:px-4"
                       disabled={saving}
                       onClick={(e) => {
                         e.stopPropagation();
                         join(restaurant.id);
                       }}
                     >
-                      Rejoindre
+                      <FiPlus className="h-4 w-4 sm:hidden" />
+                      <span className="hidden sm:inline">Rejoindre</span>
                     </Button>
                   )}
                 </motion.article>

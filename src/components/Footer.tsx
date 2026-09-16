@@ -1,6 +1,6 @@
 export const Footer = () => {
   return (
-    <footer className="mt-10 border-t border-border py-4 text-center text-sm text-foreground/60">
+    <footer className="mt-4 border-t border-border py-3 text-center text-xs text-foreground/60 sm:mt-10 sm:py-4 sm:text-sm">
       © 2026 Infflunch
     </footer>
   );

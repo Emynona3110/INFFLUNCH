@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils";
+import { SECTION_BODY } from "@/lib/sectionClasses";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
@@ -38,8 +40,8 @@ const CardSkeleton = () => (
 );
 
 const RowSkeleton = () => (
-  <div className="flex items-center gap-4 rounded-card border border-border bg-card p-3">
-    <div className="h-16 w-24 shrink-0 animate-pulse rounded-lg bg-foreground/10 sm:h-20 sm:w-28" />
+  <div className="flex items-center gap-4 p-2 sm:rounded-card sm:border sm:border-border sm:bg-card sm:p-3">
+    <div className="hidden h-20 w-28 shrink-0 animate-pulse rounded-lg bg-foreground/10 sm:block" />
     <div className="flex-1 space-y-2">
       <div className="h-5 w-1/3 animate-pulse rounded bg-foreground/10" />
       <div className="h-4 w-1/4 animate-pulse rounded bg-foreground/10" />
@@ -157,7 +159,9 @@ const RestaurantGrid = ({
     // --- Liste ---
     if (viewMode === "list") {
       return (
-        <div key={listKey} className="flex flex-col gap-2.5 sm:gap-3">
+        /* Mobile : lignes empilées dans un cadre de section (filets) ; desktop :
+           tuiles espacées. */
+        <div key={listKey} className={cn(SECTION_BODY, "divide-y divide-border sm:flex sm:flex-col sm:gap-3 sm:divide-y-0")}>
           {isLoading
             ? Array.from({ length: 6 }, (_, i) => <RowSkeleton key={`s-${i}`} />)
             : filteredData.map((restaurant, i) => (

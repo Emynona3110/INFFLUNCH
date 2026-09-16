@@ -57,7 +57,7 @@ const RestaurantRow = ({
   return (
     <article
       onClick={() => navigate(`/restaurant/${restaurant.slug}`)}
-      className="group flex cursor-pointer select-none items-stretch gap-2 overflow-hidden rounded-card border border-border bg-card p-2 sm:items-center sm:gap-4 sm:p-3 shadow-[0_8px_24px_-14px_rgba(2,8,40,0.22)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_-16px_rgba(2,8,40,0.30)]"
+      className="group flex cursor-pointer select-none items-stretch gap-2 overflow-hidden p-2 transition duration-200 sm:items-center sm:gap-4 sm:rounded-card sm:border sm:border-border sm:bg-card sm:p-3 sm:shadow-[0_8px_24px_-14px_rgba(2,8,40,0.22)] sm:hover:-translate-y-0.5 sm:hover:shadow-[0_14px_34px_-16px_rgba(2,8,40,0.30)]"
     >
       {/* Vignette */}
       <div className="relative hidden h-20 w-28 shrink-0 overflow-hidden rounded-lg sm:block">
@@ -100,14 +100,14 @@ const RestaurantRow = ({
 
         <div className="mt-0.5 flex min-h-6 flex-wrap items-center gap-2 text-sm text-foreground/60">
           <Stars rating={restaurant.rating ?? 0} />
-          {/* Mobile : ni note exacte ni nb d'avis, juste les étoiles. */}
           {restaurant.reviews > 0 && (
-            <span className="hidden items-center gap-2 whitespace-nowrap sm:flex">
+            <span className="flex items-center gap-1.5 whitespace-nowrap text-xs sm:gap-2 sm:text-sm">
               <span className="font-semibold text-foreground/80">
                 {restaurant.rating}
               </span>
-              <span className="text-foreground/20">|</span>
-              <span>{restaurant.reviews} avis</span>
+              {/* Mobile : note seule, sans le nombre d'avis. */}
+              <span className="hidden text-foreground/20 sm:inline">|</span>
+              <span className="hidden sm:inline">{restaurant.reviews} avis</span>
             </span>
           )}
         </div>
@@ -129,8 +129,8 @@ const RestaurantRow = ({
       </div>
 
       {/* Distance + actions */}
-      <div className="flex shrink-0 flex-col items-end justify-between gap-1 sm:flex-row sm:items-center sm:gap-3">
-        {/* Mobile : icônes atouts au-dessus du cœur. */}
+      <div className="flex shrink-0 items-center gap-2 self-center sm:gap-3">
+        {/* Mobile : icônes atouts à gauche du cœur. */}
         {badges && <div className="sm:hidden">{badges}</div>}
         {/* Collègues qui déjeunent ici aujourd'hui (rien s'il n'y en a pas). */}
         <div className="hidden sm:block">
@@ -165,8 +165,8 @@ const RestaurantRow = ({
           liked={liked}
           onToggle={onLikeToggle}
           stopPropagation
-          iconClassName="h-4 w-4 sm:h-5 sm:w-5"
-          className="h-7 w-7 shrink-0 sm:h-8 sm:w-8"
+          iconClassName="h-[18px] w-[18px] sm:h-5 sm:w-5"
+          className="h-8 w-8 shrink-0"
         />
       </div>
     </article>

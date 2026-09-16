@@ -50,17 +50,17 @@ const Nouveautes = () => {
           horizontale (left-3, centrés via -translate-x-1/2). Le rail démarre au
           centre du PREMIER nœud (l'étape du mois le plus récent). */}
       <div className="relative">
-        <span className="absolute bottom-4 left-3 top-[11px] w-px -translate-x-1/2 bg-border" />
+        <span className="absolute bottom-4 left-2 top-[11px] w-px -translate-x-1/2 bg-border sm:left-3" />
 
         <div className="space-y-4 sm:space-y-8">
           {groups.map((group) => (
-            <div key={group.key} className="space-y-4">
+            <div key={group.key} className="space-y-2.5 sm:space-y-4">
               {/* Étape : libellé du mois (sans nœud). */}
-              <div className="pl-8">
+              <div className="pl-5 sm:pl-8">
                 <div
                   role="heading"
                   aria-level={2}
-                  className="font-display text-sm font-bold uppercase tracking-wide text-foreground/50"
+                  className="font-display text-xs font-bold uppercase tracking-wide text-foreground/50 sm:text-sm"
                 >
                   {group.label}
                 </div>
@@ -68,18 +68,18 @@ const Nouveautes = () => {
 
               {/* Blocs du mois (un par nouveauté). */}
               {group.items.map((entry, i) => (
-                <div key={`${entry.date}-${i}`} className="relative pl-8">
-                  <span className="absolute left-3 top-6 h-2.5 w-2.5 -translate-x-1/2 rounded-full bg-primary ring-4 ring-background" />
+                <div key={`${entry.date}-${i}`} className="relative pl-5 sm:pl-8">
+                  <span className="absolute left-2 top-5 h-2 w-2 -translate-x-1/2 rounded-full bg-primary ring-4 ring-background sm:left-3 sm:top-6 sm:h-2.5 sm:w-2.5" />
 
                   <Card className="px-3 py-3 sm:px-5 sm:py-4">
                     <div
                       role="heading"
                       aria-level={3}
-                      className="font-display text-base font-bold leading-snug text-card-foreground"
+                      className="font-display text-sm font-bold leading-snug text-card-foreground sm:text-base"
                     >
                       {entry.title}
                     </div>
-                    <ul className="m-0 mt-1 list-disc space-y-0.5 pl-5 text-sm leading-snug text-foreground/70 marker:text-foreground/35">
+                    <ul className="m-0 mt-1 list-disc space-y-0.5 pl-4 text-[13px] leading-snug text-foreground/70 marker:text-foreground/35 sm:pl-5 sm:text-sm">
                       {entry.points.map((point, j) => (
                         <li key={j}>{point}</li>
                       ))}
