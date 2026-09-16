@@ -255,7 +255,6 @@ const AdminNotes = () => {
                 )
               }
               aria-label={note.done ? "Rouvrir la note" : "Marquer comme terminé"}
-              aria-label={note.done ? "Rouvrir la note" : "Marquer comme terminé"}
               aria-pressed={note.done}
               className={cn(
                 // Fond au survol seulement : la pastille permanente alourdissait

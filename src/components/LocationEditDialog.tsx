@@ -177,7 +177,6 @@ export default function LocationEditDialog({
             loading={geocoding}
             disabled={!address.trim()}
             aria-label="Localiser depuis l'adresse"
-            aria-label="Localiser depuis l'adresse"
             className="shrink-0"
           >
             {!geocoding && <FiMapPin className="h-4 w-4" />}
