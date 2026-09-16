@@ -11,7 +11,7 @@ const BadgeButton = ({ label, src, isActive, onToggle }: BadgeButtonProps) => (
   <button
     type="button"
     onClick={onToggle}
-    title={label}
+    aria-label={label}
     aria-label={label}
     aria-pressed={isActive}
     className={cn(

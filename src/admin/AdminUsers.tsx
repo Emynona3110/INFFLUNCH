@@ -126,7 +126,7 @@ const AdminUsers = () => {
                       // La ligne mène au profil ; les boutons d'action stoppent
                       // la propagation pour ne pas naviguer en même temps.
                       onClick={() => navigate(`/profil/${u.id}`)}
-                      title="Voir le profil"
+                      aria-label="Voir le profil"
                       className="cursor-pointer transition hover:bg-muted/40 [&>td]:border-t [&>td]:border-border/60"
                     >
                       <td className="px-4 py-1.5 text-foreground/90">
@@ -162,7 +162,7 @@ const AdminUsers = () => {
                             <HoldToDeleteButton
                               onConfirm={() => handleReset(u)}
                               disabled={isMe}
-                              title="Maintenir pour réinitialiser le mot de passe"
+                              aria-label="Maintenir pour réinitialiser le mot de passe"
                               className="grid h-8 w-8 place-items-center rounded-full text-primary hover:bg-primary/10"
                               progressClassName="bg-primary/20"
                             >
@@ -179,7 +179,7 @@ const AdminUsers = () => {
                             <HoldToDeleteButton
                               onConfirm={() => handleDelete(u)}
                               disabled={isMe}
-                              title="Maintenir pour supprimer l'utilisateur"
+                              aria-label="Maintenir pour supprimer l'utilisateur"
                               className="grid h-8 w-8 place-items-center rounded-full text-destructive hover:bg-destructive/10"
                               progressClassName="bg-destructive/20"
                             >

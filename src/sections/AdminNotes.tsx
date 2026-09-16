@@ -220,7 +220,7 @@ const AdminNotes = () => {
               tuile (l'arrondi la rogne grâce à overflow-hidden), plutôt qu'une
               pastille qui alourdirait la ligne. Le libellé reste dans la popup. */}
           <span
-            title={category.label}
+            aria-label={category.label}
             className={cn("absolute inset-y-0 left-0 w-1", category.dot)}
           />
           <span className="sr-only">{category.label}</span>
@@ -231,7 +231,7 @@ const AdminNotes = () => {
           <button
             type="button"
             onClick={() => setViewing(note)}
-            title="Voir la note"
+            aria-label="Voir la note"
             className="min-w-0 flex-1 cursor-pointer text-left after:absolute after:inset-0 after:content-['']"
           >
             {/* Une seule ligne : au-delà de la largeur, on coupe aux « … » et le
@@ -254,7 +254,7 @@ const AdminNotes = () => {
                   { onError: fail }
                 )
               }
-              title={note.done ? "Rouvrir la note" : "Marquer comme terminé"}
+              aria-label={note.done ? "Rouvrir la note" : "Marquer comme terminé"}
               aria-label={note.done ? "Rouvrir la note" : "Marquer comme terminé"}
               aria-pressed={note.done}
               className={cn(
@@ -275,7 +275,7 @@ const AdminNotes = () => {
 
             <HoldToDeleteButton
               onConfirm={() => remove.mutate(note.id, { onError: fail })}
-              title="Maintenir pour supprimer"
+              aria-label="Maintenir pour supprimer"
               className="grid h-8 w-8 place-items-center rounded-full text-foreground/35 transition hover:bg-muted hover:text-destructive"
               progressClassName="bg-destructive/25"
             >
@@ -292,7 +292,7 @@ const AdminNotes = () => {
           onPointerMove={moveDrag}
           onPointerUp={endDrag}
           onPointerCancel={() => setDrag(null)}
-          title={note.done ? undefined : "Glisser pour réordonner"}
+          aria-label={note.done ? undefined : "Glisser pour réordonner"}
           aria-hidden
           className={cn(
             "grid h-8 w-4 shrink-0 touch-none place-items-center rounded text-foreground/25 transition-colors",

@@ -62,7 +62,7 @@ const FeedbackVersions = ({ feedbackId, count }: Props) => {
                     quand elle a cédé la place : le reste alourdissait. */}
                 <p className="m-0 flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-foreground/40">
                   <span
-                    title={revType.label}
+                    aria-label={revType.label}
                     className={cn("h-1.5 w-1.5 rounded-full", revType.dot)}
                   />
                   {formatDate(rev.replaced_at)}

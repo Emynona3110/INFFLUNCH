@@ -190,7 +190,7 @@ const AdminFeedback = () => {
                     <tr
                       key={item.id}
                       onClick={() => setViewing(item)}
-                      title="Voir la demande"
+                      aria-label="Voir la demande"
                       className={cn(
                         "cursor-pointer transition hover:bg-muted/40 [&>td]:border-t [&>td]:border-border/60",
                         // Ce qui attend une décision se lit en pleine couleur ;
@@ -202,7 +202,7 @@ const AdminFeedback = () => {
                           carnet. Le libellé est dans la popup. */}
                       <td className="w-10 whitespace-nowrap px-4 py-1.5">
                         <span
-                          title={feedbackType(item.type).label}
+                          aria-label={feedbackType(item.type).label}
                           className={cn(
                             "block h-2.5 w-2.5 rounded-full",
                             feedbackType(item.type).dot

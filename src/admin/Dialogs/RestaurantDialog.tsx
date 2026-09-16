@@ -740,7 +740,7 @@ const RestaurantDialog = ({
               onPointerCancel={cancelHold}
               onContextMenu={(e) => e.preventDefault()}
               aria-label="Maintenir pour supprimer"
-              title="Maintenir pour supprimer"
+              aria-label="Maintenir pour supprimer"
               className="relative inline-flex h-10 cursor-pointer touch-none select-none items-center justify-center overflow-hidden rounded-lg bg-destructive px-4 text-sm font-medium text-white transition hover:bg-destructive/90 disabled:pointer-events-none disabled:opacity-50"
             >
               {/* Barre de progression de l'appui long */}

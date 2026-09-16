@@ -137,7 +137,7 @@ const FeedbackDialog = ({ isOpen, onClose, item }: Props) => {
                     // Enchaîner sur la saisie sans avoir à cliquer dedans.
                     messageRef.current?.focus();
                   }}
-                  title={t.hint}
+                  aria-label={t.hint}
                   aria-pressed={active}
                   className={cn(
                     "inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition",

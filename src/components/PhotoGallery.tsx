@@ -449,11 +449,6 @@ const PhotoGallery = ({
                             ? "Modifier le descriptif"
                             : "Ajouter un descriptif"
                         }
-                        title={
-                          lightbox.caption
-                            ? "Modifier le descriptif"
-                            : "Ajouter un descriptif"
-                        }
                         onClick={() => setCaptionDraft(lightbox.caption ?? "")}
                         className="grid h-7 w-7 shrink-0 cursor-pointer place-items-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
                       >

@@ -188,7 +188,7 @@ const AchievementsGallery = () => {
                   {isAdmin && unlocked && (
                     <HoldToDeleteButton
                       onConfirm={() => handleReset(a.id)}
-                      title="Maintenir pour reverrouiller ce succès"
+                      aria-label="Maintenir pour reverrouiller ce succès"
                       className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-muted-foreground hover:text-destructive"
                       progressClassName="bg-destructive/15"
                     >

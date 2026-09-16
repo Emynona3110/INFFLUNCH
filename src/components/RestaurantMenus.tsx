@@ -224,7 +224,7 @@ const RestaurantMenus = ({
                   {canDelete && (
                     <HoldToDeleteButton
                       onConfirm={() => handleDelete(menu)}
-                      title="Maintenir pour supprimer"
+                      aria-label="Maintenir pour supprimer"
                       className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
                       progressClassName="bg-destructive/70"
                     >

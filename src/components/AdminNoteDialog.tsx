@@ -67,7 +67,7 @@ const AdminNoteDialog = ({ isOpen, onClose, note, onSubmit }: Props) => {
                     setCategory(c.value);
                     descriptionRef.current?.focus();
                   }}
-                  title={c.hint}
+                  aria-label={c.hint}
                   aria-pressed={active}
                   className={cn(
                     "inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition",

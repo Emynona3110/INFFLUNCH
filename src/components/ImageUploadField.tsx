@@ -59,7 +59,7 @@ const ImageUploadField = ({ previewUrl, onPick, onClear, disabled }: Props) => {
               onClick={open}
               disabled={disabled}
               aria-label="Changer l'image"
-              title="Changer"
+              aria-label="Changer"
               className="grid h-8 w-8 place-items-center rounded-full bg-black/55 text-white backdrop-blur-sm transition hover:bg-black/75 disabled:opacity-50"
             >
               <FiRefreshCw className="h-4 w-4" />
@@ -69,7 +69,7 @@ const ImageUploadField = ({ previewUrl, onPick, onClear, disabled }: Props) => {
               onClick={onClear}
               disabled={disabled}
               aria-label="Supprimer l'image"
-              title="Supprimer"
+              aria-label="Supprimer"
               className="grid h-8 w-8 place-items-center rounded-full bg-black/55 text-white backdrop-blur-sm transition hover:bg-destructive disabled:opacity-50"
             >
               <FiTrash2 className="h-4 w-4" />

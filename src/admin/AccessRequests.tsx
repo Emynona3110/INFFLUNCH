@@ -224,7 +224,7 @@ const AccessRequests = ({ activeType }: { activeType: RequestType }) => {
                           <Tooltip label="Maintenir pour supprimer">
                             <HoldToDeleteButton
                               onConfirm={() => handleDelete(req)}
-                              title="Maintenir pour supprimer la demande"
+                              aria-label="Maintenir pour supprimer la demande"
                               className="grid h-8 w-8 place-items-center rounded-full text-destructive hover:bg-destructive/10"
                               progressClassName="bg-destructive/20"
                             >

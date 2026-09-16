@@ -114,7 +114,7 @@ const MyFeedback = () => {
                 <button
                   type="button"
                   onClick={() => setViewing(item)}
-                  title="Voir la demande"
+                  aria-label="Voir la demande"
                   className="min-w-0 flex-1 cursor-pointer text-left after:absolute after:inset-0 after:content-['']"
                 >
                   <div className="flex flex-wrap items-center gap-2">

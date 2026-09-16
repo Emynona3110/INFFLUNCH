@@ -70,7 +70,7 @@ const HoldToDeleteButton = ({
       onPointerCancel={cancel}
       onContextMenu={(e) => e.preventDefault()}
       aria-label={title}
-      title={title}
+      aria-label={title}
       className={cn(
         "relative cursor-pointer touch-none select-none overflow-hidden transition disabled:pointer-events-none disabled:opacity-50",
         className
