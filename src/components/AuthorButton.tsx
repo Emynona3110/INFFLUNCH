@@ -1,6 +1,7 @@
 import { ButtonHTMLAttributes, ReactNode, forwardRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { formatAuthorName } from "@/utils/authorName";
+import { profilePath } from "@/utils/profilePath";
 import { cn } from "@/lib/utils";
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -31,7 +32,7 @@ const AuthorButton = forwardRef<HTMLButtonElement, Props>(
           onClick?.(e);
           // Souvent posé dans une tuile elle-même cliquable : on ne l'ouvre pas.
           e.stopPropagation();
-          navigate(`/profil/${userId}`);
+          navigate(profilePath(userId, email));
         }}
         className={cn(
           // p-0 / m-0 : un bouton natif a un padding qui décalerait le nom

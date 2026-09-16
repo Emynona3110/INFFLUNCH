@@ -1,22 +1,54 @@
 import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { FiArrowLeft } from "react-icons/fi";
 import UserProfileView from "@/components/UserProfileView";
+import PageNotFound from "@/pages/PageNotFound";
 import useSession from "@/hooks/useSession";
+import supabaseClient from "@/services/supabaseClient";
+import { isUuid } from "@/utils/profilePath";
 
 /**
- * Profil d'un collègue (/profil/:userId). Son propre id renvoie vers « Mon
- * Profil », qui a la même première page et le reste en plus.
+ * Profil d'un collègue (/profil/:handle — le local-part de son email, ou son
+ * id). Son propre profil renvoie vers « Mon Profil », sous-onglet Profil, qui a
+ * la même première page et le reste en plus.
  */
 const ProfilePage = () => {
-  const { userId } = useParams<{ userId: string }>();
+  const { handle } = useParams<{ handle: string }>();
   const navigate = useNavigate();
   const { sessionData } = useSession();
 
-  if (!userId) return <Navigate to="/restaurants" replace />;
+  // Pseudo → id via la table users (lisible par tout utilisateur connecté).
+  const resolved = useQuery({
+    queryKey: ["profile-handle", handle],
+    enabled: !!handle && !isUuid(handle),
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      const { data, error } = await supabaseClient
+        .from("users")
+        .select("id")
+        .ilike("email", `${handle}@%`)
+        .limit(1)
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      return data?.id ?? null;
+    },
+  });
+
+  if (!handle) return <Navigate to="/restaurants" replace />;
+  const userId = isUuid(handle) ? handle : resolved.data;
+
+  if (!isUuid(handle) && resolved.isPending) {
+    return (
+      <div className="flex justify-center py-12">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
+      </div>
+    );
+  }
+  if (!userId) return <PageNotFound />;
   if (sessionData?.user?.id === userId)
-    // ?tab=profil : sinon on retomberait sur le sous-onglet mémorisé.
-    return <Navigate to="/mon-compte?tab=profil" replace />;
+    // L'onglet passe par l'état de navigation : l'URL reste /mon-compte.
+    return <Navigate to="/mon-compte" state={{ tab: "profil" }} replace />;
 
   return (
     <motion.div

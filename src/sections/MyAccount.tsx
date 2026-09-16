@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaStar } from "react-icons/fa";
 import { FiCamera, FiTrash2, FiChevronRight } from "react-icons/fi";
@@ -69,7 +69,11 @@ const MyAccount = () => {
   // Onglet ouvert : pilotable par l'URL (?tab=succes) — c'est ce que vise le
   // clic sur un toast de succès.
   const [searchParams] = useSearchParams();
-  const tabParam = searchParams.get("tab");
+  const location = useLocation();
+  // ?tab= (toast de succès) ou état de navigation (mon propre profil depuis
+  // un avatar : l'URL reste propre).
+  const stateTab = (location.state as { tab?: string } | null)?.tab ?? null;
+  const tabParam = searchParams.get("tab") ?? stateTab;
   const visibleTabs = subTabs.filter((t) => !t.adminOnly || isAdmin);
   // Un ?tab= qui vise un onglet masqué (ou inconnu) retombe sur « Compte ».
   const isTabKey = (v: string | null): v is SubTabKey =>

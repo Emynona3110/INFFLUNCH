@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Tooltip } from "@/components/ui/tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { profilePath } from "@/utils/profilePath";
 
 /** Extrait un message d'erreur lisible d'un retour d'Edge Function. */
 const fnError = async (error: any, data: any): Promise<string> => {
@@ -125,7 +126,7 @@ const AdminUsers = () => {
                       key={u.id}
                       // La ligne mène au profil ; les boutons d'action stoppent
                       // la propagation pour ne pas naviguer en même temps.
-                      onClick={() => navigate(`/profil/${u.id}`)}
+                      onClick={() => navigate(profilePath(u.id, u.email))}
                       aria-label="Voir le profil"
                       className="cursor-pointer transition hover:bg-muted/40 [&>td]:border-t [&>td]:border-border/60"
                     >

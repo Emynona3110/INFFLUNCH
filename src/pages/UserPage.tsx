@@ -189,7 +189,7 @@ const UserPage = () => {
         {/* Compat : ancien chemin de l'onglet, renommé « Déjeuner ». */}
         <Route path="midi" element={<Navigate to="/dejeuner" replace />} />
         <Route path="restaurant/:slug" element={<RestaurantPage />} />
-        <Route path="profil/:userId" element={<ProfilePage />} />
+        <Route path="profil/:handle" element={<ProfilePage />} />
         <Route path="mon-compte" element={<MyAccount />} />
         <Route path="a-propos" element={<About />} />
         <Route path="nouveautes" element={<Nouveautes />} />
