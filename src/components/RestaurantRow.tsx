@@ -45,7 +45,7 @@ const RestaurantRow = ({
   return (
     <article
       onClick={() => navigate(`/restaurant/${restaurant.slug}`)}
-      className="group flex cursor-pointer select-none items-center gap-4 overflow-hidden rounded-card border border-border bg-card p-3 shadow-[0_8px_24px_-14px_rgba(2,8,40,0.22)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_-16px_rgba(2,8,40,0.30)]"
+      className="group flex cursor-pointer select-none items-center gap-3 overflow-hidden sm:gap-4 rounded-card border border-border bg-card p-3 shadow-[0_8px_24px_-14px_rgba(2,8,40,0.22)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_-16px_rgba(2,8,40,0.30)]"
     >
       {/* Vignette */}
       <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg sm:h-20 sm:w-28">
@@ -65,7 +65,7 @@ const RestaurantRow = ({
 
       {/* Infos principales */}
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <div
             role="heading"
             aria-level={3}
@@ -90,10 +90,10 @@ const RestaurantRow = ({
           )}
         </div>
 
-        <div className="mt-0.5 flex min-h-6 items-center gap-2 text-sm text-foreground/60">
+        <div className="mt-0.5 flex min-h-6 flex-wrap items-center gap-2 text-sm text-foreground/60">
           <Stars rating={restaurant.rating ?? 0} />
           {restaurant.reviews > 0 && (
-            <span className="flex items-center gap-2">
+            <span className="flex items-center gap-2 whitespace-nowrap">
               <span className="font-semibold text-foreground/80">
                 {restaurant.rating}
               </span>
@@ -120,7 +120,7 @@ const RestaurantRow = ({
       </div>
 
       {/* Distance + actions */}
-      <div className="flex shrink-0 items-center gap-3">
+      <div className="flex shrink-0 flex-col items-center gap-2 sm:flex-row sm:gap-3">
         {/* Collègues qui déjeunent ici aujourd'hui (rien s'il n'y en a pas). */}
         <LunchAvatars restaurantId={restaurant.id} size={22} />
 
