@@ -40,7 +40,7 @@ const ProfilePage = () => {
 
   if (!isUuid(handle) && resolved.isPending) {
     return (
-      <div className="flex justify-center py-12">
+      <div className="flex justify-center py-8 sm:py-12">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
       </div>
     );
@@ -66,7 +66,7 @@ const ProfilePage = () => {
         <FiArrowLeft className="h-4 w-4" /> Retour
       </button>
 
-      <div className="space-y-6">
+      <div className="space-y-3 sm:space-y-6">
         <UserProfileView userId={userId} />
       </div>
     </motion.div>

@@ -179,6 +179,8 @@ input:-webkit-autofill:active {
   .tw-scope,
   .tw-scope * {
     box-sizing: border-box;
+    /* Mobile : pas de surbrillance bleue au tap (cards cliquables, boutons…). */
+    -webkit-tap-highlight-color: transparent;
     border-width: 0;
     border-style: solid;
     border-color: var(--border);
@@ -223,6 +225,12 @@ input:-webkit-autofill:active {
     -webkit-user-select: none;
   }
 
+  /* Contour de focus uniquement au clavier (:focus-visible), jamais au tap /
+     clic souris (cadre bleu natif sur mobile). */
+  .tw-scope *:focus:not(:focus-visible) {
+    outline: none;
+  }
+
   /* Images non sélectionnables et non « draggables » (galerie, vignettes…). */
   .tw-scope img {
     user-select: none;
@@ -253,7 +261,7 @@ input:-webkit-autofill:active {
 
 /* Tooltips Leaflet (carte globale, infos au survol des pins) accordés au thème :
    par défaut Leaflet impose un fond blanc → illisible en mode sombre. On force
-   fond = carte, texte = foreground, et la couleur de la flèche, dans les 2 modes. */
+   fond = carte, texte = foreground, dans les 2 modes. */
 .osm-map .leaflet-tooltip {
   background: var(--card);
   color: var(--foreground);
@@ -262,15 +270,7 @@ input:-webkit-autofill:active {
   padding: 8px 10px;
   box-shadow: 0 8px 24px -10px rgba(2, 8, 40, 0.45);
 }
-.osm-map .leaflet-tooltip-top::before {
-  border-top-color: var(--card);
-}
-.osm-map .leaflet-tooltip-bottom::before {
-  border-bottom-color: var(--card);
-}
-.osm-map .leaflet-tooltip-left::before {
-  border-left-color: var(--card);
-}
-.osm-map .leaflet-tooltip-right::before {
-  border-right-color: var(--card);
+/* Pas de petite flèche (triangle) sous la bulle. */
+.osm-map .leaflet-tooltip::before {
+  display: none;
 }

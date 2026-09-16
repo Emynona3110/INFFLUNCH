@@ -127,7 +127,7 @@ const LunchToday = () => {
           <div
             role="heading"
             aria-level={1}
-            className="font-display text-2xl font-extrabold text-foreground"
+            className="font-display text-xl sm:text-2xl font-extrabold text-foreground"
           >
             Qui déjeune où
           </div>
@@ -141,7 +141,7 @@ const LunchToday = () => {
               initial={{ scale: 0.6, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={spring}
-              className="font-display text-3xl font-extrabold leading-none text-primary"
+              className="font-display text-2xl sm:text-3xl font-extrabold leading-none text-primary"
             >
               {registered.length}
             </motion.span>
@@ -156,7 +156,7 @@ const LunchToday = () => {
           Pendant le chargement, encart neutre (ni texte ni bouton) : c'est ce
           qui évitait de « faire clignoter » le bouton au changement d'onglet. */}
       {loading ? (
-        <div className="mb-6 flex items-center gap-3 rounded-card border border-border bg-card px-5 py-4">
+        <div className="mb-3 sm:mb-6 flex items-center gap-3 rounded-card border border-border bg-card px-3 py-3 sm:px-5 sm:py-4">
           <span className="h-10 w-10 shrink-0 animate-pulse rounded-full bg-foreground/10" />
           <div className="flex h-12 items-center">
             <span className="h-5 w-52 animate-pulse rounded bg-foreground/10" />
@@ -165,7 +165,7 @@ const LunchToday = () => {
       ) : (
       <div
         className={cn(
-          "mb-6 flex flex-wrap items-center justify-between gap-3 rounded-card px-5 py-4 transition-colors",
+          "mb-3 sm:mb-6 flex flex-wrap items-center justify-between gap-3 rounded-card px-3 py-3 sm:px-5 sm:py-4 transition-colors",
           hasPlan
             ? "border border-border bg-gradient-to-r from-primary/10 to-transparent"
             : weekendOff
@@ -199,7 +199,7 @@ const LunchToday = () => {
                   Ce midi, tu vas au
                 </div>
                 {myRestaurantName ? (
-                  <div className="truncate font-display text-lg font-bold text-card-foreground">
+                  <div className="truncate font-display text-base font-bold sm:text-lg text-card-foreground">
                     {myRestaurantName}
                   </div>
                 ) : (
@@ -249,7 +249,7 @@ const LunchToday = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="flex flex-col items-center gap-3 rounded-card border border-dashed border-border bg-card px-6 py-12 text-center"
+          className="flex flex-col items-center gap-3 rounded-card border border-dashed border-border bg-card px-4 py-8 sm:px-6 sm:py-12 text-center"
         >
           <motion.span
             animate={{ y: [0, -6, 0] }}
@@ -302,7 +302,7 @@ const LunchToday = () => {
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <div className="truncate font-display text-lg font-bold text-card-foreground">
+                    <div className="truncate font-display text-base font-bold sm:text-lg text-card-foreground">
                       {restaurant.name}
                     </div>
 

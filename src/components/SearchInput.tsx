@@ -8,6 +8,8 @@ interface SearchInputProps {
    *  filtre, lui, restait actif. */
   value?: string;
   onSearch: (input: string) => void;
+  /** Focus immédiat à l'affichage (barre dépliée sur mobile). */
+  autoFocus?: boolean;
 }
 
 /**
@@ -16,7 +18,11 @@ interface SearchInputProps {
  * débouncée, relançait une requête par mot tapé pour un gain nul à notre
  * échelle. La croix, elle, vide et relance aussitôt.
  */
-const SearchInput = ({ value: current = "", onSearch }: SearchInputProps) => {
+const SearchInput = ({
+  value: current = "",
+  onSearch,
+  autoFocus,
+}: SearchInputProps) => {
   // État local libre pendant la frappe, resynchronisé dès que la valeur change
   // à l'extérieur (retour sur l'onglet, réinitialisation via le logo…).
   const [value, setValue] = useState(current);
@@ -47,10 +53,11 @@ const SearchInput = ({ value: current = "", onSearch }: SearchInputProps) => {
       </button>
       <input
         type="search"
+        autoFocus={autoFocus}
         placeholder="Chercher un restaurant..."
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        className="block h-10 w-full rounded-full border border-border bg-muted pl-9 pr-9 text-sm text-foreground outline-none transition placeholder:text-foreground/40 focus-visible:border-primary focus-visible:bg-background focus-visible:ring-2 focus-visible:ring-primary/25 [&::-webkit-search-cancel-button]:hidden"
+        className="block h-9 w-full rounded-full sm:h-10 border border-border bg-muted pl-9 pr-9 text-sm text-foreground outline-none transition placeholder:text-foreground/40 focus-visible:border-primary focus-visible:bg-background focus-visible:ring-2 focus-visible:ring-primary/25 [&::-webkit-search-cancel-button]:hidden"
       />
       {value && (
         <button

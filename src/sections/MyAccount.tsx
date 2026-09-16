@@ -140,7 +140,7 @@ const MyAccount = () => {
   return (
     <div className="tw-scope w-full">
       {/* Sous-sections (pills) collées sous la navbar, comme la section Admin. */}
-      <div className="mb-6 flex flex-wrap justify-center gap-2">
+      <div className="mb-3 sm:mb-6 flex flex-wrap justify-center gap-2">
         {visibleTabs.map((t) => {
           const isActive = active === t.key;
           return (
@@ -172,7 +172,7 @@ const MyAccount = () => {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="mx-auto w-full max-w-2xl space-y-6"
+        className="mx-auto w-full max-w-2xl space-y-3 sm:space-y-6"
       >
       {/* Profil : la même page que celle qu'un collègue voit de moi. */}
       {active === "profil" && sessionData?.user?.id && (
@@ -181,7 +181,7 @@ const MyAccount = () => {
 
       {/* Compte */}
       {active === "compte" && (
-      <Card className="relative overflow-hidden p-8">
+      <Card className="relative overflow-hidden p-4 sm:p-8">
         {/* Easter egg : le GIF recouvre la carte en fondu, sans en changer la
             taille, et absorbe les clics tant qu'on reste sur ce sous-onglet. */}
         {jourNuit && (
@@ -267,11 +267,11 @@ const MyAccount = () => {
 
       {/* Avis */}
       {active === "avis" && (
-      <Card className="p-6">
+      <Card className="p-4 sm:p-6">
         <div
           role="heading"
           aria-level={2}
-          className="mb-4 font-display text-lg font-bold text-card-foreground"
+          className="mb-4 font-display text-base font-bold sm:text-lg text-card-foreground"
         >
           Avis
           {reviews.length > 0 && (
@@ -282,7 +282,7 @@ const MyAccount = () => {
         </div>
 
         {reviewsLoading ? (
-          <div className="flex justify-center py-8">
+          <div className="flex justify-center py-5 sm:py-8">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
           </div>
         ) : reviews.length === 0 ? (

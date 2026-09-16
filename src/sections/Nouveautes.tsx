@@ -52,7 +52,7 @@ const Nouveautes = () => {
       <div className="relative">
         <span className="absolute bottom-4 left-3 top-[11px] w-px -translate-x-1/2 bg-border" />
 
-        <div className="space-y-8">
+        <div className="space-y-4 sm:space-y-8">
           {groups.map((group) => (
             <div key={group.key} className="space-y-4">
               {/* Étape : libellé du mois (sans nœud). */}
@@ -71,7 +71,7 @@ const Nouveautes = () => {
                 <div key={`${entry.date}-${i}`} className="relative pl-8">
                   <span className="absolute left-3 top-6 h-2.5 w-2.5 -translate-x-1/2 rounded-full bg-primary ring-4 ring-background" />
 
-                  <Card className="px-5 py-4">
+                  <Card className="px-3 py-3 sm:px-5 sm:py-4">
                     <div
                       role="heading"
                       aria-level={3}

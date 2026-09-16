@@ -10,16 +10,16 @@ const About = () => {
       transition={{ duration: 0.35 }}
       className="tw-scope flex w-full items-center justify-center px-4"
     >
-      <Card className="w-full max-w-2xl p-8">
+      <Card className="w-full max-w-2xl p-4 sm:p-8">
         <div
           role="heading"
           aria-level={1}
-          className="text-center font-display text-2xl font-extrabold text-card-foreground"
+          className="text-center font-display text-xl sm:text-2xl font-extrabold text-card-foreground"
         >
           À propos d'INFFLUNCH
         </div>
 
-        <div className="mt-6 space-y-4 text-[15px] leading-relaxed text-foreground/80">
+        <div className="mt-3 sm:mt-6 space-y-4 text-[15px] leading-relaxed text-foreground/80">
           <p>
             <span className="font-semibold text-foreground">INFFLUNCH</span> est
             un projet personnel visant à offrir aux collaborateurs d'

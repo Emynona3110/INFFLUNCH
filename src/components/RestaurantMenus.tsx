@@ -116,12 +116,12 @@ const RestaurantMenus = ({
   if (!canContribute && !isPending && menus.length === 0) return null;
 
   return (
-    <section className="rounded-card border border-border bg-card p-5">
+    <section className="rounded-card border border-border bg-card p-3 sm:p-5">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div
           role="heading"
           aria-level={2}
-          className="font-display text-lg font-bold text-card-foreground"
+          className="font-display text-base font-bold sm:text-lg text-card-foreground"
         >
           Menu
           {menus.length > 0 && (
@@ -144,11 +144,11 @@ const RestaurantMenus = ({
       </div>
 
       {isPending ? (
-        <div className="flex justify-center py-8">
+        <div className="flex justify-center py-5 sm:py-8">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
         </div>
       ) : menus.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 py-8 text-center text-foreground/50">
+        <div className="flex flex-col items-center gap-2 py-5 sm:py-8 text-center text-foreground/50">
           <FiBookOpen className="h-8 w-8 text-foreground opacity-50" />
           <p className="text-sm">
             Aucun menu pour le moment. Partage-en un (lien, PDF ou photo) !

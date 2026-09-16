@@ -5,10 +5,10 @@ import { HiOutlineLocationMarker } from "react-icons/hi";
 import { Restaurant } from "@/hooks/useRestaurants";
 import noImage from "@/assets/no-image.jpg";
 import badgeMap, { orderBadges } from "@/services/badgeMap";
-import { Badge } from "@/components/ui/badge";
 import { Tooltip } from "@/components/ui/tooltip";
 import LikeButton from "@/components/LikeButton";
 import useSortedTags from "@/hooks/useSortedTags";
+import TagsOneLine from "@/components/TagsOneLine";
 import LunchAvatars from "@/components/LunchAvatars";
 import ClosedBadge from "@/components/ClosedBadge";
 import TopBadge, { topRankOf } from "@/components/TopBadge";
@@ -35,7 +35,7 @@ export function Stars({ rating }: { rating: number }) {
     <span className="relative inline-flex">
       <span className="flex gap-px text-black/15 dark:text-white/15">
         {Array.from({ length: 5 }, (_, i) => (
-          <FaStar key={i} className="h-[18px] w-[18px]" />
+          <FaStar key={i} className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
         ))}
       </span>
       <span
@@ -43,7 +43,7 @@ export function Stars({ rating }: { rating: number }) {
         style={{ clipPath: `inset(0 ${100 - pct}% 0 0)` }}
       >
         {Array.from({ length: 5 }, (_, i) => (
-          <FaStar key={i} className="h-[18px] w-[18px]" />
+          <FaStar key={i} className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
         ))}
       </span>
     </span>
@@ -66,7 +66,6 @@ const RestaurantCardTW = ({
   // plus 3 sur la card, le reste résumé en "+N".
   const tags = useSortedTags(restaurant.tags);
   const MAX_TAGS = 3;
-  const extraTags = tags.length - MAX_TAGS;
 
   return (
     <article
@@ -74,7 +73,7 @@ const RestaurantCardTW = ({
       className="group flex h-full cursor-pointer select-none flex-col overflow-hidden rounded-card border border-border bg-card shadow-[0_10px_30px_-12px_rgba(2,8,40,0.22)] transition duration-200 transform-gpu [backface-visibility:hidden] hover:-translate-y-1 hover:shadow-[0_18px_44px_-14px_rgba(2,8,40,0.30)]"
     >
       {/* Image */}
-      <div className="relative h-48 overflow-hidden">
+      <div className="relative h-32 overflow-hidden sm:h-48">
         <img
           src={restaurant.image ?? noImage}
           alt={restaurant.name}
@@ -84,24 +83,24 @@ const RestaurantCardTW = ({
           )}
         />
 
-        {restaurant.closed && <ClosedBadge className="absolute left-3 top-3" />}
+        {restaurant.closed && <ClosedBadge className="absolute left-2 top-2 sm:left-3 sm:top-3" />}
 
-        <TopBadge rank={topRank} className="absolute left-3 top-3" />
+        <TopBadge rank={topRank} className="absolute left-2 top-2 sm:left-3 sm:top-3" />
 
         {visibleBadges.length > 0 && (
-          <div className="absolute right-3 top-3 flex gap-1.5">
+          <div className="absolute right-2 top-2 flex gap-1 sm:right-3 sm:top-3 sm:gap-1.5">
             {visibleBadges.map((b) => (
               <Tooltip key={b} label={b}>
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-card/85 shadow-sm backdrop-blur">
-                  <img src={badgeMap[b]} alt={b} className="h-5 w-5 object-contain" />
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-card/85 shadow-sm backdrop-blur sm:h-7 sm:w-7">
+                  <img src={badgeMap[b]} alt={b} className="h-4 w-4 object-contain sm:h-5 sm:w-5" />
                 </span>
               </Tooltip>
             ))}
           </div>
         )}
 
-        <span className="absolute bottom-3 left-3 inline-flex items-center gap-1 rounded-full bg-white/55 px-2.5 py-1 text-xs font-medium text-foreground backdrop-blur-sm dark:bg-black/45 dark:text-white">
-          <HiOutlineLocationMarker className="h-3.5 w-3.5" />
+        <span className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3 inline-flex items-center gap-1 rounded-full bg-white/55 px-2.5 py-0.5 text-xs font-medium sm:py-1 text-foreground backdrop-blur-sm dark:bg-black/45 dark:text-white">
+          <HiOutlineLocationMarker className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
           {restaurant.distanceLabel}
           {restaurant.walk_minutes != null && (
             <span className="opacity-60">· {restaurant.walk_minutes} min</span>
@@ -111,17 +110,17 @@ const RestaurantCardTW = ({
         {/* Collègues qui déjeunent ici aujourd'hui (rien s'il n'y en a pas). */}
         <LunchAvatars
           restaurantId={restaurant.id}
-          className="absolute bottom-3 right-3"
+          className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3"
         />
       </div>
 
       {/* Corps */}
-      <div className="flex grow flex-col gap-2 px-5 py-4">
+      <div className="flex grow flex-col gap-1 px-3 py-2 sm:gap-2 sm:px-5 sm:py-4">
         <div className="flex items-center gap-2">
           <div
             role="heading"
             aria-level={3}
-            className="min-w-0 flex-1 truncate font-display text-[1.4rem] font-bold text-card-foreground"
+            className="min-w-0 flex-1 truncate font-display text-lg font-bold sm:text-[1.4rem] text-card-foreground"
           >
             {restaurant.name}
           </div>
@@ -134,7 +133,7 @@ const RestaurantCardTW = ({
                   onEdit();
                 }}
                 aria-label="Modifier le restaurant"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-primary"
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-primary sm:h-8 sm:w-8"
               >
                 <FiEdit2 className="h-4 w-4" />
               </button>
@@ -142,7 +141,7 @@ const RestaurantCardTW = ({
           )}
         </div>
 
-        <div className="flex min-h-6 items-center gap-2 text-sm text-foreground/60">
+        <div className="flex min-h-5 items-center gap-1.5 text-xs text-foreground/60 sm:min-h-6 sm:gap-2 sm:text-sm">
           <Stars rating={restaurant.rating ?? 0} />
           {restaurant.reviews > 0 && (
             <span className="flex items-center gap-2">
@@ -154,24 +153,15 @@ const RestaurantCardTW = ({
         </div>
 
         <div className="flex items-center justify-between gap-2">
-          <div className="flex flex-wrap gap-1.5">
-            {tags.slice(0, MAX_TAGS).map((tag) => (
-              <Badge key={tag} variant="primary">
-                {tag}
-              </Badge>
-            ))}
-            {extraTags > 0 && (
-              <Tooltip label={tags.slice(MAX_TAGS).join(", ")}>
-                <Badge variant="muted">+{extraTags}</Badge>
-              </Tooltip>
-            )}
-          </div>
+          {/* Une seule ligne : le surplus passe en « +N » selon la largeur. */}
+          <TagsOneLine tags={tags} max={MAX_TAGS} className="flex-1" />
 
           <LikeButton
             liked={liked}
             onToggle={onLikeToggle}
             stopPropagation
-            className="h-8 w-8 shrink-0"
+            iconClassName="h-4 w-4 sm:h-5 sm:w-5"
+            className="h-7 w-7 shrink-0 sm:h-8 sm:w-8"
           />
         </div>
       </div>

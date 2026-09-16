@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
-import { FiMessageSquare, FiMoreVertical } from "react-icons/fi";
+import { useEffect, useRef, useState } from "react";
+import { FiMessageSquare, FiChevronDown } from "react-icons/fi";
+import { AnimatePresence, motion } from "framer-motion";
 import darkLogo from "../assets/infflux.svg";
 import lightLogo from "../assets/w-infflux.svg";
 import FeedbackDialog from "./FeedbackDialog";
@@ -59,16 +60,44 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
   // Report des puces sur l'icône d'onglet du navigateur (et sur l'icône
   // d'application en PWA installée) : une seule pastille, dès qu'au moins une
   // puce est allumée dans la navbar.
-  const hasDot =
-    adminPending > 0 || hasUnseen || myAccountDot || lunchPending;
+  const hasDot = adminPending > 0 || hasUnseen || myAccountDot || lunchPending;
   useEffect(() => {
     setFaviconBadge(hasDot);
   }, [hasDot]);
   // Navbar démontée (déconnexion, pages publiques) : on retire la pastille.
   useEffect(() => () => setFaviconBadge(false), []);
 
+  // Couleur de la puce d'un onglet (null si rien à signaler).
+  const dotFor = (path: string): string | null => {
+    if (path === "admin" && adminPending > 0) return "bg-[#f79220]";
+    if (path === "nouveautes" && hasUnseen) return "bg-primary";
+    if (path === "dejeuner" && lunchPending) return "bg-primary";
+    if (path === "mon-compte" && myAccountDot) return "bg-primary";
+    return null;
+  };
+  // Mobile : libellé de l'onglet courant (fiche resto = Restaurants ; profil
+  // d'un collègue = pas d'onglet) et puce si un AUTRE onglet a quelque chose.
+  const currentLabel =
+    sections.find((item) => item.path === page)?.label ?? "Profil";
+  const othersDot =
+    sections
+      .filter((item) => item.path !== page)
+      .map((item) => dotFor(item.path))
+      .find(Boolean) ?? null;
+
+  // Fermeture du menu mobile au tap ailleurs.
+  const menuRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (!menuRef.current?.contains(e.target as Node)) setMenuOpen(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [menuOpen]);
+
   return (
-    <div className="flex h-full w-full select-none items-center justify-between gap-1">
+    <div className="relative flex h-full w-full select-none items-center justify-between gap-1">
       <div className="flex h-full items-center gap-1">
         <div
           className="flex cursor-pointer items-center"
@@ -77,8 +106,16 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
             setPage("restaurants");
           }}
         >
-          <img src={darkLogo} alt="" className="block h-7 w-7 dark:hidden" />
-          <img src={lightLogo} alt="" className="hidden h-7 w-7 dark:block" />
+          <img
+            src={darkLogo}
+            alt=""
+            className="block h-6 w-6 dark:hidden sm:h-7 sm:w-7"
+          />
+          <img
+            src={lightLogo}
+            alt=""
+            className="hidden h-6 w-6 dark:block sm:h-7 sm:w-7"
+          />
           <span className="ml-1 mr-4 hidden font-display text-lg font-extrabold text-[#113894] dark:text-white xl:block">
             {isAdmin ? "ADMINFFLUNCH" : "INFFLUNCH"}
           </span>
@@ -97,7 +134,7 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
                     "relative flex h-full cursor-pointer items-center border-b-2 text-lg transition",
                     isActive
                       ? "border-primary text-primary"
-                      : "border-transparent text-foreground/50 hover:text-foreground"
+                      : "border-transparent text-foreground/50 hover:text-foreground",
                   )}
                 >
                   {/* Calque fantôme gras : réserve la largeur → pas de saut d'1px */}
@@ -105,7 +142,7 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
                     <span
                       className={cn(
                         "col-start-1 row-start-1",
-                        isActive && "font-semibold"
+                        isActive && "font-semibold",
                       )}
                     >
                       {item.label}
@@ -134,58 +171,81 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
             );
           })}
         </nav>
+      </div>
 
-        {/* Menu mobile (< md) */}
-        <div className="relative md:hidden">
-          <button
-            type="button"
-            aria-label="Menu"
-            onClick={() => setMenuOpen((o) => !o)}
-            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-md text-foreground/70 transition hover:bg-muted"
-          >
-            <FiMoreVertical className="h-6 w-6" />
-          </button>
-          {menuOpen && (
-            <>
-              <div
-                className="fixed inset-0 z-10"
-                onClick={() => setMenuOpen(false)}
-              />
-              <div className="absolute left-0 top-full z-20 mt-1 min-w-40 rounded-lg border border-border bg-card py-1 shadow-lg">
-                {sections.map((item) => (
-                  <button
-                    key={item.path}
-                    type="button"
-                    onClick={() => {
-                      setPage(item.path);
-                      setMenuOpen(false);
-                    }}
-                    className={cn(
-                      "relative block w-full cursor-pointer px-4 py-2 text-left text-base transition hover:bg-muted",
-                      page === item.path
-                        ? "font-semibold text-primary"
-                        : "text-foreground"
-                    )}
-                  >
-                    {item.label}
-                    {item.path === "admin" && adminPending > 0 && (
-                      <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-[#f79220] ring-2 ring-card" />
-                    )}
-                    {item.path === "nouveautes" && hasUnseen && (
-                      <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />
-                    )}
-                    {item.path === "dejeuner" && lunchPending && (
-                      <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />
-                    )}
-                    {item.path === "mon-compte" && myAccountDot && (
-                      <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />
-                    )}
-                  </button>
-                ))}
-              </div>
-            </>
+      {/* Mobile (< md) : nom de l'onglet courant centré ; au tap, les autres
+          onglets se déroulent dessous (même animation que le sélecteur de vue). */}
+      <div
+        ref={menuRef}
+        className="absolute left-1/2 top-0 flex h-full -translate-x-1/2 items-center md:hidden"
+      >
+        <button
+          type="button"
+          aria-haspopup="menu"
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((o) => !o)}
+          className="relative flex h-8 items-center gap-1 rounded-full bg-muted px-3 font-display text-sm font-bold text-primary"
+        >
+          {currentLabel}
+          <FiChevronDown
+            className={cn(
+              "h-4 w-4 text-foreground/50 transition-transform",
+              menuOpen && "rotate-180",
+            )}
+          />
+          {othersDot && !menuOpen && (
+            <span
+              className={cn(
+                "absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-card",
+                othersDot,
+              )}
+            />
           )}
-        </div>
+        </button>
+        <AnimatePresence>
+          {menuOpen && (
+            <motion.div
+              role="menu"
+              initial={{ opacity: 0, scaleY: 0.6 }}
+              animate={{ opacity: 1, scaleY: 1 }}
+              exit={{ opacity: 0, scaleY: 0.6 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+              style={{ originY: 0 }}
+              className="absolute left-1/2 top-full z-20 flex -translate-x-1/2 flex-col gap-1 rounded-2xl bg-muted p-1 shadow-md"
+            >
+              {sections
+                .filter((item) => item.path !== page)
+                .map((item, i) => {
+                  const dot = dotFor(item.path);
+                  return (
+                    <motion.button
+                      key={item.path}
+                      type="button"
+                      role="menuitem"
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.04 * i, duration: 0.15 }}
+                      onClick={() => {
+                        setPage(item.path);
+                        setMenuOpen(false);
+                      }}
+                      className="relative flex h-8 items-center justify-center whitespace-nowrap rounded-full bg-card px-3 text-sm font-medium text-foreground/80 shadow-sm"
+                    >
+                      {item.label}
+                      {dot && (
+                        <span
+                          className={cn(
+                            "absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-card",
+                            dot,
+                          )}
+                        />
+                      )}
+                    </motion.button>
+                  );
+                })}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <div className="flex shrink-0 items-center gap-1">
@@ -194,7 +254,7 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
             type="button"
             onClick={() => setFeedbackOpen(true)}
             aria-label="Un souci, une idée ?"
-            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-primary"
+            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted sm:h-9 sm:w-9 hover:text-primary"
           >
             <FiMessageSquare className="h-5 w-5" />
           </button>

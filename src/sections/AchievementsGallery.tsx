@@ -73,11 +73,11 @@ const AchievementsGallery = () => {
   };
 
   return (
-    <Card className="p-6">
+    <Card className="p-4 sm:p-6">
       <div
         role="heading"
         aria-level={2}
-        className="mb-4 font-display text-lg font-bold text-card-foreground"
+        className="mb-4 font-display text-base font-bold sm:text-lg text-card-foreground"
       >
         Succès
         <span className="ml-2 text-sm font-medium text-foreground/45">
@@ -86,7 +86,7 @@ const AchievementsGallery = () => {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-8">
+        <div className="flex justify-center py-5 sm:py-8">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
         </div>
       ) : (
@@ -113,7 +113,7 @@ const AchievementsGallery = () => {
                 >
                   <div
                     className={cn(
-                      "flex h-14 w-14 shrink-0 items-center justify-center rounded-lg text-3xl",
+                      "flex h-14 w-14 shrink-0 items-center justify-center rounded-lg text-2xl sm:text-3xl",
                       // Cadre coloré uniquement pour les emojis ; les images
                       // occupent tout l'espace sans fond.
                       unlocked && !a.image && "bg-primary/10",

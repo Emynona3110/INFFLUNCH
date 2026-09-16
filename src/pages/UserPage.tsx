@@ -148,6 +148,8 @@ const UserPage = () => {
       withNavbar
       centerContent={centerContent}
       fillContent={fillContent}
+      // Liste/grille des restos et fiche resto : tirer vers le bas = refetch.
+      pullToRefresh={currentPage === "restaurants" || isRestaurantDetail}
       navbarProps={{
         page: activeTab,
         setPage: (page) => navigate("/" + page),

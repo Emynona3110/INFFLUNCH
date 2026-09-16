@@ -61,7 +61,7 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
 
   if (profile.error || !data) {
     return (
-      <Card className="p-8 text-center text-sm text-foreground/55">
+      <Card className="p-4 sm:p-8 text-center text-sm text-foreground/55">
         Profil introuvable.
       </Card>
     );
@@ -70,7 +70,7 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
   return (
     <>
       {/* Identité : avatar, nom, ancienneté, compteurs. */}
-      <Card className="p-6 sm:p-8">
+      <Card className="p-4 sm:p-8">
         <div className="flex items-center gap-4 text-left">
           <Avatar
             email={data.email}
@@ -82,7 +82,7 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
             <div
               role="heading"
               aria-level={2}
-              className="truncate font-display text-2xl font-bold text-card-foreground"
+              className="truncate font-display text-xl sm:text-2xl font-bold text-card-foreground"
             >
               {formatAuthorName(data.email)}
             </div>
@@ -109,11 +109,11 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
 
       {/* Succès obtenus par la personne. Ce qu'on en voit dépend du visiteur :
           le contenu d'un succès ne se dévoile qu'à qui l'a lui-même décroché. */}
-      <Card className="p-6">
+      <Card className="p-4 sm:p-6">
         <div
           role="heading"
           aria-level={2}
-          className="mb-4 font-display text-lg font-bold text-card-foreground"
+          className="mb-4 font-display text-base font-bold sm:text-lg text-card-foreground"
         >
           Succès
           <span className="ml-2 text-sm font-medium text-foreground/45">
@@ -148,7 +148,7 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
                       tabIndex={0}
                       aria-label={`${def.title}, obtenu le ${formatDate(unlocked_at)}`}
                       className={cn(
-                        "flex h-14 w-14 items-center justify-center rounded-xl border border-border p-2 text-3xl outline-none transition focus-visible:ring-2 focus-visible:ring-primary/40",
+                        "flex h-14 w-14 items-center justify-center rounded-xl border border-border p-2 text-2xl sm:text-3xl outline-none transition focus-visible:ring-2 focus-visible:ring-primary/40",
                         known
                           ? cn("bg-background", !def.image && "bg-primary/10")
                           : "bg-muted/40 text-muted-foreground"
@@ -173,11 +173,11 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
       {/* Photos : les mêmes vignettes et la même visionneuse que sur une fiche
           resto, en grille 3 par ligne façon Instagram, le nom du restaurant à
           la place de celui de l'auteur. */}
-      <Card className="p-6">
+      <Card className="p-4 sm:p-6">
         <div
           role="heading"
           aria-level={2}
-          className="mb-4 font-display text-lg font-bold text-card-foreground"
+          className="mb-4 font-display text-base font-bold sm:text-lg text-card-foreground"
         >
           Photos
           {(photos.data ?? []).length > 0 && (

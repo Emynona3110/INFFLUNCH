@@ -157,7 +157,7 @@ const RestaurantGrid = ({
     // --- Liste ---
     if (viewMode === "list") {
       return (
-        <div key={listKey} className="flex flex-col gap-3">
+        <div key={listKey} className="flex flex-col gap-2.5 sm:gap-3">
           {isLoading
             ? Array.from({ length: 6 }, (_, i) => <RowSkeleton key={`s-${i}`} />)
             : filteredData.map((restaurant, i) => (
@@ -178,7 +178,7 @@ const RestaurantGrid = ({
     return (
       <div
         key={listKey}
-        className="grid grid-flow-dense grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-3"
+        className="grid grid-flow-dense grid-cols-1 gap-2.5 sm:gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-3"
       >
         {isLoading
           ? Array.from({ length: 6 }, (_, i) => (

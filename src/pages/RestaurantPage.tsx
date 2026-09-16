@@ -204,7 +204,7 @@ const RestaurantPage = () => {
       </button>
 
       {/* Hero */}
-      <div className="relative h-[300px] overflow-hidden rounded-card border border-border md:h-[380px]">
+      <div className="relative h-[220px] overflow-hidden rounded-card border border-border sm:h-[300px] md:h-[380px]">
         <img
           src={restaurant.image ?? noImage}
           alt={restaurant.name}
@@ -231,7 +231,7 @@ const RestaurantPage = () => {
         />
 
         {/* Bandeau bas */}
-        <div className="absolute inset-x-0 bottom-0 p-5 md:p-7">
+        <div className="absolute inset-x-0 bottom-0 p-3 sm:p-5 md:p-7">
           {tags.length > 0 && (
             <div className="mb-3 flex max-w-[16rem] flex-wrap gap-1.5">
               {tags.map((tag) => (
@@ -248,7 +248,7 @@ const RestaurantPage = () => {
             <div
               role="heading"
               aria-level={1}
-              className="font-display text-3xl font-extrabold leading-tight text-white drop-shadow md:text-4xl"
+              className="font-display text-2xl font-extrabold leading-tight text-white drop-shadow sm:text-3xl md:text-4xl"
             >
               {restaurant.name}
             </div>
@@ -303,7 +303,7 @@ const RestaurantPage = () => {
           Sur mobile l'ordre est coordonnées → carte → photos → avis (order-2..4) ;
           à partir de lg, colonne gauche (photos + avis) et sidebar à droite
           (placement explicite col-start/row-start). */}
-      <div className="mt-6 grid gap-6 lg:grid-cols-3">
+      <div className="mt-3 sm:mt-6 grid gap-3 sm:gap-6 lg:grid-cols-3">
         {/* Colonne gauche (photos + avis). Desktop : flex col occupant 2/3.
             Mobile : display:contents pour que la sidebar (coordonnées + carte,
             order-2) s'intercale → infos → photos → avis. */}
@@ -319,12 +319,12 @@ const RestaurantPage = () => {
           />
 
           {/* Avis */}
-          <section className="order-4 rounded-card border border-border bg-card p-5">
+          <section className="order-4 rounded-card border border-border bg-card p-3 sm:p-5">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div
                 role="heading"
                 aria-level={2}
-                className="font-display text-lg font-bold text-card-foreground"
+                className="font-display text-base font-bold sm:text-lg text-card-foreground"
               >
                 Avis des collaborateurs
               </div>
@@ -351,7 +351,7 @@ const RestaurantPage = () => {
             {totalReviews > 0 && (
             <div className="mb-5 space-y-1.5 rounded-xl bg-muted/40 p-4">
               <div className="mb-3 flex flex-wrap items-center gap-3">
-                <span className="font-display text-3xl font-bold leading-none tabular-nums text-card-foreground">
+                <span className="font-display text-2xl sm:text-3xl font-bold leading-none tabular-nums text-card-foreground">
                   {averageRating.toFixed(1)}
                 </span>
                 <Stars rating={averageRating} size={22} />
@@ -385,7 +385,7 @@ const RestaurantPage = () => {
 
             {/* Liste */}
             {reviewsLoading ? (
-              <div className="flex justify-center py-8">
+              <div className="flex justify-center py-5 sm:py-8">
                 <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
               </div>
             ) : totalReviews === 0 ? (
@@ -469,13 +469,13 @@ const RestaurantPage = () => {
         </div>
 
         {/* Sidebar : coordonnées + carte. Indépendante (pas de row-span). */}
-        <aside className="order-2 space-y-6 self-start lg:col-start-3 lg:row-start-1">
+        <aside className="order-2 space-y-3 sm:space-y-6 self-start lg:col-start-3 lg:row-start-1">
           {/* Coordonnées */}
-          <section className="rounded-card border border-border bg-card p-5">
+          <section className="rounded-card border border-border bg-card p-3 sm:p-5">
             <div
               role="heading"
               aria-level={2}
-              className="mb-3 font-display text-lg font-bold text-card-foreground"
+              className="mb-3 font-display text-base font-bold sm:text-lg text-card-foreground"
             >
               Coordonnées
             </div>
@@ -524,11 +524,11 @@ const RestaurantPage = () => {
 
           {/* Carte */}
           <section className="overflow-hidden rounded-card border border-border bg-card">
-            <div className="flex items-center justify-between gap-2 border-b border-border px-5 py-3">
+            <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-2.5 sm:px-5 sm:py-3">
               <div
                 role="heading"
                 aria-level={2}
-                className="font-display text-lg font-bold text-card-foreground"
+                className="font-display text-base font-bold sm:text-lg text-card-foreground"
               >
                 Carte
               </div>

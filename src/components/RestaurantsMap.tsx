@@ -5,6 +5,7 @@ import {
   Marker,
   Tooltip,
   useMap,
+  useMapEvents,
 } from "react-leaflet";
 import { useNavigate } from "react-router-dom";
 import L from "leaflet";
@@ -46,6 +47,18 @@ const MapReady = ({ onReady }: { onReady: (m: L.Map) => void }) => {
   return null;
 };
 
+/** Tap sur la carte (hors pin) : referme la bulle ouverte sur mobile. */
+const MapTap = ({ onTap }: { onTap: () => void }) => {
+  useMapEvents({ click: onTap });
+  return null;
+};
+
+/** Écran tactile sans survol (téléphone/tablette) : la bulle ne peut pas
+ *  s'ouvrir au survol, on la montre au 1er tap et on navigue au 2e. */
+const isTouch =
+  typeof window !== "undefined" &&
+  !!window.matchMedia?.("(hover: none)").matches;
+
 interface Props {
   restaurants: Restaurant[];
 }
@@ -55,6 +68,8 @@ const RestaurantsMap = ({ restaurants }: Props) => {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const [map, setMap] = useState<L.Map | null>(null);
+  // Mobile : pin dont la bulle est ouverte (1er tap) ; le 2e tap ouvre la fiche.
+  const [activeId, setActiveId] = useState<number | null>(null);
 
   const located = useMemo(
     () => restaurants.filter((r) => r.lat != null && r.lng != null),
@@ -96,43 +111,63 @@ const RestaurantsMap = ({ restaurants }: Props) => {
           attribution="&copy; OpenStreetMap"
         />
         <MapReady onReady={setMap} />
+        <MapTap onTap={() => setActiveId(null)} />
 
         <Marker
           position={[INFFLUX_COORDS.lat, INFFLUX_COORDS.lng]}
           icon={inffluxIcon}
         />
 
-        {located.map((r) => (
-          <Marker
-            key={r.id}
-            position={[r.lat as number, r.lng as number]}
-            icon={pinIcon("#f79220")}
-            eventHandlers={{ click: () => navigate(`/restaurant/${r.slug}`) }}
-          >
-            {/* Infos au survol ; le clic sur le pin ouvre la fiche. */}
-            <Tooltip direction="top" offset={[0, -18]} opacity={1}>
-              <div className="min-w-[150px]">
-                <div className="font-display text-sm font-bold text-card-foreground">
-                  {r.name}
-                </div>
-                {r.rating != null && r.rating > 0 && (
-                  <div className="mt-0.5 flex items-center gap-1 text-xs text-foreground/70">
-                    <FaStar className="h-3 w-3 text-amber-500" />
-                    {r.rating}
-                    {r.reviews > 0 && <span>· {r.reviews} avis</span>}
+        {located.map((r) => {
+          const open = () => navigate(`/restaurant/${r.slug}`);
+          const active = isTouch && activeId === r.id;
+          return (
+            <Marker
+              key={r.id}
+              position={[r.lat as number, r.lng as number]}
+              icon={pinIcon("#f79220")}
+              eventHandlers={{
+                click: () => {
+                  if (isTouch && !active) setActiveId(r.id);
+                  else open();
+                },
+              }}
+            >
+              {/* Desktop : infos au survol, clic = fiche. Mobile : 1er tap =
+                  bulle épinglée (tap dessus ou sur le pin = fiche). La clé
+                  force le remontage : Leaflet ne change pas `permanent` à chaud. */}
+              <Tooltip
+                key={active ? "pinned" : "hover"}
+                direction="top"
+                offset={[0, -18]}
+                opacity={1}
+                permanent={active}
+                interactive={active}
+                eventHandlers={active ? { click: open } : undefined}
+              >
+                <div className="min-w-[150px]">
+                  <div className="font-display text-sm font-bold text-card-foreground">
+                    {r.name}
                   </div>
-                )}
-                <div className="mt-0.5 text-xs text-foreground/55">
-                  {r.distanceLabel}
-                  {r.walk_minutes != null && ` · ${r.walk_minutes} min`}
+                  {r.rating != null && r.rating > 0 && (
+                    <div className="mt-0.5 flex items-center gap-1 text-xs text-foreground/70">
+                      <FaStar className="h-3 w-3 text-amber-500" />
+                      {r.rating}
+                      {r.reviews > 0 && <span>· {r.reviews} avis</span>}
+                    </div>
+                  )}
+                  <div className="mt-0.5 text-xs text-foreground/55">
+                    {r.distanceLabel}
+                    {r.walk_minutes != null && ` · ${r.walk_minutes} min`}
+                  </div>
+                  <div className="mt-1 text-[11px] font-medium text-primary">
+                    {isTouch ? "Toucher pour voir la fiche" : "Cliquer pour voir la fiche"}
+                  </div>
                 </div>
-                <div className="mt-1 text-[11px] font-medium text-primary">
-                  Cliquer pour voir la fiche
-                </div>
-              </div>
-            </Tooltip>
-          </Marker>
-        ))}
+              </Tooltip>
+            </Marker>
+          );
+        })}
       </MapContainer>
 
       <MapZoomControl map={map} />

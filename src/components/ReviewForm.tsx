@@ -98,7 +98,7 @@ const ReviewForm = ({ restaurantId, existing, onDone }: Props) => {
         {comment.length}/{MAX_COMMENT}
       </div>
 
-      <div className="mt-6 flex justify-end gap-2">
+      <div className="mt-3 sm:mt-6 flex justify-end gap-2">
         <Button variant="outline" onClick={onDone}>
           Annuler
         </Button>
