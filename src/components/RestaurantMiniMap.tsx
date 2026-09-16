@@ -1,10 +1,21 @@
 import { useCallback, useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Polyline, useMap } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Polyline,
+  useMap,
+} from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { FiNavigation } from "react-icons/fi";
 import MapZoomControl from "@/components/MapZoomControl";
-import { geocodeAddress, INFFLUX_COORDS, Coords } from "@/services/geocode";
+import {
+  geocodeAddress,
+  INFFLUX_COORDS,
+  Coords,
+  directionsUrl as buildDirectionsUrl,
+} from "@/services/geocode";
 import { useTheme } from "@/lib/theme";
 import inffluxLogo from "@/assets/infflux.svg";
 import inffluxLogoWhite from "@/assets/w-infflux.svg";
@@ -80,10 +91,10 @@ const RestaurantMiniMap = ({
   const hasStored = lat != null && lng != null;
 
   const [coords, setCoords] = useState<Coords | null>(
-    hasStored ? { lat: lat as number, lng: lng as number } : null
+    hasStored ? { lat: lat as number, lng: lng as number } : null,
   );
   const [status, setStatus] = useState<"loading" | "ok" | "error">(
-    hasStored ? "ok" : "loading"
+    hasStored ? "ok" : "loading",
   );
 
   useEffect(() => {
@@ -130,7 +141,7 @@ const RestaurantMiniMap = ({
   const isDark = theme === "dark";
 
   // Itinéraire Google Maps depuis INFFLUX vers le resto.
-  const directionsUrl = `https://www.google.com/maps/dir/?api=1&origin=${INFFLUX_COORDS.lat},${INFFLUX_COORDS.lng}&destination=${coords.lat},${coords.lng}`;
+  const directionsUrl = buildDirectionsUrl(coords);
 
   return (
     <div className={`osm-map relative h-60${isDark ? " is-dark" : ""}`}>
@@ -156,7 +167,10 @@ const RestaurantMiniMap = ({
             opacity: 0.75,
           }}
         />
-        <Marker position={[INFFLUX_COORDS.lat, INFFLUX_COORDS.lng]} icon={inffluxIcon} />
+        <Marker
+          position={[INFFLUX_COORDS.lat, INFFLUX_COORDS.lng]}
+          icon={inffluxIcon}
+        />
         <Marker position={[coords.lat, coords.lng]} icon={pinIcon("#EA580C")} />
       </MapContainer>
 

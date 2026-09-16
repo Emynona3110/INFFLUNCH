@@ -61,3 +61,22 @@ export const reverseGeocode = async (
   if (error) throw new Error("Géocodage inverse impossible");
   return ((data as { address?: string })?.address ?? "").trim();
 };
+
+/** iPhone / iPad (y compris iPadOS qui se présente en Mac tactile). */
+const isIOS = (): boolean =>
+  typeof navigator !== "undefined" &&
+  (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1));
+
+/** URL de l'itinéraire à pied depuis INFFLUX vers un point (coords) ou une
+ *  adresse (repli quand le resto n'est pas encore géolocalisé). Sur iOS le
+ *  lien universel maps.apple.com ouvre directement Plans ; ailleurs Google Maps. */
+export function directionsUrl(dest: { lat: number; lng: number } | string): string {
+  const origin = `${INFFLUX_COORDS.lat},${INFFLUX_COORDS.lng}`;
+  const destination =
+    typeof dest === "string" ? encodeURIComponent(dest) : `${dest.lat},${dest.lng}`;
+  if (isIOS()) {
+    return `https://maps.apple.com/?saddr=${origin}&daddr=${destination}&dirflg=w`;
+  }
+  return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=walking`;
+}

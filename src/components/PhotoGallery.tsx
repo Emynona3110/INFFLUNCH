@@ -16,6 +16,7 @@ import ZoomableImage from "@/components/ZoomableImage";
 import { PHOTO_CAPTION_MAX } from "@/services/textLimits";
 import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
+import useMediaQuery from "@/hooks/useMediaQuery";
 import { HOVER_ZOOM_IMG } from "@/lib/imageClasses";
 
 interface Props {
@@ -58,7 +59,7 @@ const PhotoGallery = ({
   onLabelClick,
   onDelete,
   onSetCaption,
-  layout = "carousel",
+  layout: layoutProp = "carousel",
 }: Props) => {
   const [lightbox, setLightbox] = useState<RestaurantPhoto | null>(null);
   // Édition du descriptif dans la lightbox : null = lecture.
@@ -125,8 +126,13 @@ const PhotoGallery = ({
   const { unlock } = useAchievements();
   const photoReactions = useReactions(
     "photo",
-    photos.map((p) => p.id)
+    photos.map((p) => p.id),
   );
+
+  // Mobile : toujours une grille façon Instagram (3 colonnes, carrés collés,
+  // sans arrondi) ; le carrousel n'a de sens qu'avec de la largeur.
+  const isDesktop = useMediaQuery("(min-width: 640px)");
+  const layout = isDesktop ? layoutProp : "grid";
 
   // Carrousel : fenêtre de 3 photos, sauts de 3 (clampés pour rester pleine et
   // atteindre le bord). Flèches masquées aux extrémités.
@@ -151,7 +157,8 @@ const PhotoGallery = ({
     } catch (e) {
       toast({
         title: "Erreur",
-        description: e instanceof Error ? e.message : "Descriptif non enregistré",
+        description:
+          e instanceof Error ? e.message : "Descriptif non enregistré",
         status: "error",
         duration: 5000,
       });
@@ -176,126 +183,126 @@ const PhotoGallery = ({
 
   // Les vignettes, identiques quel que soit l'agencement.
   const thumbnails = photos.map((photo) => {
-      const canDelete = !!onDelete && (isAdmin || photo.user_id === userId);
-      const reactCounts = photoReactions.summaryFor(photo.id).counts;
-      // Emojis uniques présents sur la photo, du plus fréquent au moins fréquent.
-      const reactEntries = Object.entries(reactCounts)
-        .filter(([, n]) => n > 0)
-        .sort((a, b) => b[1] - a[1]);
-      const reactTotal = reactEntries.reduce((sum, [, n]) => sum + n, 0);
-      return (
-        <div
-          key={photo.id}
-          style={
-            layout === "carousel"
-              ? { flexBasis: "calc((100% - 16px) / 3)" }
-              : undefined
-          }
-          className="group relative aspect-square shrink-0 overflow-hidden rounded-xl border border-border bg-muted"
+    const canDelete = !!onDelete && (isAdmin || photo.user_id === userId);
+    const reactCounts = photoReactions.summaryFor(photo.id).counts;
+    // Emojis uniques présents sur la photo, du plus fréquent au moins fréquent.
+    const reactEntries = Object.entries(reactCounts)
+      .filter(([, n]) => n > 0)
+      .sort((a, b) => b[1] - a[1]);
+    const reactTotal = reactEntries.reduce((sum, [, n]) => sum + n, 0);
+    return (
+      <div
+        key={photo.id}
+        style={
+          layout === "carousel"
+            ? { flexBasis: "calc((100% - 16px) / 3)" }
+            : undefined
+        }
+        className="group relative aspect-square shrink-0 overflow-hidden bg-muted sm:rounded-xl sm:border sm:border-border"
+      >
+        <button
+          type="button"
+          onClick={() => setLightbox(photo)}
+          className="absolute inset-0 h-full w-full"
         >
-          <button
-            type="button"
-            onClick={() => setLightbox(photo)}
-            className="absolute inset-0 h-full w-full"
-          >
-            <img
-              src={photo.url}
-              alt=""
-              loading="lazy"
-              className={HOVER_ZOOM_IMG}
-            />
-          </button>
-          {/* Éventail des emojis présents (plus fréquent en avant) + total */}
-          {reactTotal > 0 && (
-            <span className="pointer-events-none absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded-full bg-black/55 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm">
-              <span className="flex items-center">
-                {reactEntries.map(([emoji], i) => (
-                  <span
-                    key={emoji}
-                    className="relative inline-block text-base leading-none"
-                    style={{
-                      marginLeft: i === 0 ? 0 : "-4px",
-                      zIndex: reactEntries.length - i,
-                    }}
-                  >
-                    {emoji}
-                  </span>
-                ))}
-              </span>
-              {reactTotal}
+          <img
+            src={photo.url}
+            alt=""
+            loading="lazy"
+            className={HOVER_ZOOM_IMG}
+          />
+        </button>
+        {/* Éventail des emojis présents (plus fréquent en avant) + total */}
+        {reactTotal > 0 && (
+          <span className="pointer-events-none absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded-full bg-black/55 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm">
+            <span className="flex items-center">
+              {reactEntries.map(([emoji], i) => (
+                <span
+                  key={emoji}
+                  className="relative inline-block text-base leading-none"
+                  style={{
+                    marginLeft: i === 0 ? 0 : "-4px",
+                    zIndex: reactEntries.length - i,
+                  }}
+                >
+                  {emoji}
+                </span>
+              ))}
             </span>
-          )}
-          {/* Voile, libellé (auteur ou resto) et descriptif : rien au
+            {reactTotal}
+          </span>
+        )}
+        {/* Voile, libellé (auteur ou resto) et descriptif : rien au
               repos, tout monte en fondu au survol — la photo reste
               seule à l'écran tant qu'on ne s'y intéresse pas. */}
-          {(photo.caption || labelOf(photo)) && (
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 flex translate-y-3 flex-col gap-0.5 bg-gradient-to-t from-black/80 via-black/45 to-transparent px-2.5 pb-2 pt-8 opacity-0 transition-all duration-300 ease-out group-hover:translate-y-0 group-hover:opacity-100">
-              {labelOf(photo) && (
-                <span className="truncate text-[11px] text-white/80 drop-shadow">
-                  {labelOf(photo)}
-                </span>
-              )}
-              {photo.caption && (
-                <span className="truncate text-xs font-medium text-white drop-shadow">
-                  {photo.caption}
-                </span>
-              )}
-            </div>
-          )}
-          {canDelete && (
-            <HoldToDeleteButton
-              onConfirm={() => deletePhoto(photo)}
-              className="absolute right-1.5 top-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-black/55 text-white opacity-0 backdrop-blur-sm transition group-hover:opacity-100"
-              progressClassName="bg-destructive/70"
-            >
-              <FiTrash2 className="h-4 w-4" />
-            </HoldToDeleteButton>
-          )}
-        </div>
-      );
+        {(photo.caption || labelOf(photo)) && (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 flex translate-y-3 flex-col gap-0.5 bg-gradient-to-t from-black/80 via-black/45 to-transparent px-2.5 pb-2 pt-8 opacity-0 transition-all duration-300 ease-out group-hover:translate-y-0 group-hover:opacity-100">
+            {labelOf(photo) && (
+              <span className="truncate text-[11px] text-white/80 drop-shadow">
+                {labelOf(photo)}
+              </span>
+            )}
+            {photo.caption && (
+              <span className="truncate text-xs font-medium text-white drop-shadow">
+                {photo.caption}
+              </span>
+            )}
+          </div>
+        )}
+        {canDelete && (
+          <HoldToDeleteButton
+            onConfirm={() => deletePhoto(photo)}
+            className="absolute right-1.5 top-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-black/55 text-white opacity-0 backdrop-blur-sm transition group-hover:opacity-100"
+            progressClassName="bg-destructive/70"
+          >
+            <FiTrash2 className="h-4 w-4" />
+          </HoldToDeleteButton>
+        )}
+      </div>
+    );
   });
 
   return (
     <>
       {layout === "grid" ? (
-        <div className="grid grid-cols-3 gap-2">{thumbnails}</div>
+        <div className="grid grid-cols-3 gap-px sm:gap-2">{thumbnails}</div>
       ) : (
-      <div className="relative">
-        {showLeft && (
-          <button
-            type="button"
-            aria-label="Photos précédentes"
-            onClick={() => setStart(Math.max(0, safeStart - PAGE))}
-            className="absolute left-0 top-1/2 z-10 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-card text-foreground/70 shadow-md transition hover:text-primary"
-          >
-            <FiChevronLeft className="h-5 w-5" />
-          </button>
-        )}
-        {showRight && (
-          <button
-            type="button"
-            aria-label="Photos suivantes"
-            onClick={() => setStart(Math.min(maxStart, safeStart + PAGE))}
-            className="absolute right-0 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full border border-border bg-card text-foreground/70 shadow-md transition hover:text-primary"
-          >
-            <FiChevronRight className="h-5 w-5" />
-          </button>
-        )}
-        {/* Piste glissante : toutes les photos sont rendues côte à côte ;
+        <div className="relative">
+          {showLeft && (
+            <button
+              type="button"
+              aria-label="Photos précédentes"
+              onClick={() => setStart(Math.max(0, safeStart - PAGE))}
+              className="absolute left-0 top-1/2 z-10 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-card text-foreground/70 shadow-md transition hover:text-primary"
+            >
+              <FiChevronLeft className="h-5 w-5" />
+            </button>
+          )}
+          {showRight && (
+            <button
+              type="button"
+              aria-label="Photos suivantes"
+              onClick={() => setStart(Math.min(maxStart, safeStart + PAGE))}
+              className="absolute right-0 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full border border-border bg-card text-foreground/70 shadow-md transition hover:text-primary"
+            >
+              <FiChevronRight className="h-5 w-5" />
+            </button>
+          )}
+          {/* Piste glissante : toutes les photos sont rendues côte à côte ;
             on translate la bande (transition CSS) d'une fenêtre de 3. Chaque
             item fait 1/3 de la largeur visible (2 gaps de 8px). */}
-        <div className="overflow-hidden">
-        <div
-          className="flex gap-2 will-change-transform"
-          style={{
-            transform: `translateX(calc(${safeStart} * ((16px - 100%) / 3 - 8px)))`,
-            transition: "transform 450ms cubic-bezier(0.22, 1, 0.36, 1)",
-          }}
-        >
-        {thumbnails}
+          <div className="overflow-hidden">
+            <div
+              className="flex gap-2 will-change-transform"
+              style={{
+                transform: `translateX(calc(${safeStart} * ((16px - 100%) / 3 - 8px)))`,
+                transition: "transform 450ms cubic-bezier(0.22, 1, 0.36, 1)",
+              }}
+            >
+              {thumbnails}
+            </div>
+          </div>
         </div>
-        </div>
-      </div>
       )}
 
       {/* Visionneuse : l'image au centre, tout le reste dans une barre en
@@ -309,7 +316,7 @@ const PhotoGallery = ({
           <div
             className={cn(
               "flex shrink-0 items-center justify-between px-4 py-3 transition-opacity duration-200",
-              zoomed && "pointer-events-none opacity-0"
+              zoomed && "pointer-events-none opacity-0",
             )}
           >
             <span className="text-sm font-medium tabular-nums text-white/70">
@@ -337,7 +344,7 @@ const PhotoGallery = ({
                 }}
                 className={cn(
                   "absolute left-1 z-[1] flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/30 sm:left-4",
-                  zoomed && "pointer-events-none opacity-0"
+                  zoomed && "pointer-events-none opacity-0",
                 )}
               >
                 <FiChevronLeft className="h-6 w-6" />
@@ -361,7 +368,7 @@ const PhotoGallery = ({
                 }}
                 className={cn(
                   "absolute right-1 z-[1] flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/30 sm:right-4",
-                  zoomed && "pointer-events-none opacity-0"
+                  zoomed && "pointer-events-none opacity-0",
                 )}
               >
                 <FiChevronRight className="h-6 w-6" />
@@ -374,7 +381,7 @@ const PhotoGallery = ({
           <div
             className={cn(
               "shrink-0 px-4 pb-4 pt-2 transition-opacity duration-200 sm:px-6",
-              zoomed && "pointer-events-none opacity-0"
+              zoomed && "pointer-events-none opacity-0",
             )}
             onClick={(e) => e.stopPropagation()}
           >

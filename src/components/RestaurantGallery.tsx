@@ -7,6 +7,13 @@ import PhotoGallery from "@/components/PhotoGallery";
 import { formatAuthorName } from "@/utils/authorName";
 import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
+import {
+  SECTION,
+  SECTION_HEAD,
+  SECTION_TITLE,
+  SECTION_BODY,
+  ADD_BUTTON,
+} from "@/lib/sectionClasses";
 
 interface Props {
   restaurantId: number;
@@ -37,8 +44,13 @@ const RestaurantGallery = ({
   canContribute = true,
   className,
 }: Props) => {
-  const { data: photos = [], isPending, upload, remove, setCaption } =
-    useRestaurantPhotos(restaurantId, slug);
+  const {
+    data: photos = [],
+    isPending,
+    upload,
+    remove,
+    setCaption,
+  } = useRestaurantPhotos(restaurantId, slug);
   const [uploadOpen, setUploadOpen] = useState(false);
   const navigate = useNavigate();
   // MAX_PHOTOS_PER_USER photos par personne et par restaurant, sauf les admins
@@ -76,18 +88,12 @@ const RestaurantGallery = ({
   if (!canContribute && !isPending && photos.length === 0) return null;
 
   return (
-    <section
-      className={cn("rounded-card border border-border bg-card p-5", className)}
-    >
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div
-          role="heading"
-          aria-level={2}
-          className="font-display text-lg font-bold text-card-foreground"
-        >
+    <section className={cn(SECTION, className)}>
+      <div className={SECTION_HEAD}>
+        <div role="heading" aria-level={2} className={SECTION_TITLE}>
           Photos
           {photos.length > 0 && (
-            <span className="ml-2 text-sm font-medium text-foreground/45">
+            <span className="ml-2 hidden text-sm font-medium text-foreground/45 sm:inline">
               ({photos.length})
             </span>
           )}
@@ -97,10 +103,12 @@ const RestaurantGallery = ({
           <button
             type="button"
             onClick={() => setUploadOpen(true)}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-1.5 text-sm font-medium text-primary-foreground transition hover:bg-primary/90 disabled:opacity-60"
+            aria-label="Ajouter une photo"
+            className={cn(ADD_BUTTON, "disabled:opacity-60")}
           >
             <FiPlus className="h-4 w-4" />
-            Ajouter une photo
+            {/* Mobile : icône seule. */}
+            <span className="hidden sm:inline">Ajouter une photo</span>
           </button>
         ) : canContribute ? (
           <span className="text-xs text-foreground/45">
@@ -110,29 +118,33 @@ const RestaurantGallery = ({
       </div>
 
       {isPending ? (
-        <div className="flex justify-center py-8">
+        <div className={cn(SECTION_BODY, "flex justify-center py-8")}>
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
         </div>
       ) : photos.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 py-8 text-center text-foreground/50">
+        <div className="hidden flex-col items-center gap-2 py-8 text-center text-foreground/50 sm:flex">
           <FiImage className="h-8 w-8 text-foreground opacity-50" />
           <p className="text-sm">
             Aucune photo pour le moment. Partage la première !
           </p>
         </div>
       ) : (
-        <PhotoGallery
-          photos={photos}
-          userId={userId}
-          isAdmin={isAdmin}
-          // Sous chaque photo : qui l'a prise, et un clic mène à son profil.
-          labelOf={(photo) => (photo.email ? formatAuthorName(photo.email) : null)}
-          onLabelClick={(photo) => navigate(`/profil/${photo.user_id}`)}
-          onDelete={(photo) => remove.mutateAsync(photo)}
-          onSetCaption={(photo, caption) =>
-            setCaption.mutateAsync({ id: photo.id, caption })
-          }
-        />
+        <div className={SECTION_BODY}>
+          <PhotoGallery
+            photos={photos}
+            userId={userId}
+            isAdmin={isAdmin}
+            // Sous chaque photo : qui l'a prise, et un clic mène à son profil.
+            labelOf={(photo) =>
+              photo.email ? formatAuthorName(photo.email) : null
+            }
+            onLabelClick={(photo) => navigate(`/profil/${photo.user_id}`)}
+            onDelete={(photo) => remove.mutateAsync(photo)}
+            onSetCaption={(photo, caption) =>
+              setCaption.mutateAsync({ id: photo.id, caption })
+            }
+          />
+        </div>
       )}
 
       <PhotoUploadDialog

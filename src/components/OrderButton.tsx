@@ -16,13 +16,14 @@ const OrderButton = ({ url, className }: Props) => (
     href={url}
     target="_blank"
     rel="noopener noreferrer"
+    aria-label="Commander"
     className={cn(
-      "inline-flex cursor-pointer items-center gap-2 rounded-full border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground no-underline transition hover:bg-muted hover:no-underline",
+      "inline-flex cursor-pointer items-center gap-2 rounded-full border border-border bg-card p-2.5 text-sm font-medium text-foreground no-underline sm:px-4 transition hover:bg-muted hover:no-underline",
       className
     )}
   >
     <LuShoppingBag className="h-4 w-4" />
-    Commander
+    <span className="hidden sm:inline">Commander</span>
   </a>
 );
 

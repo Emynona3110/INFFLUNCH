@@ -11,6 +11,12 @@ import useAchievements from "@/hooks/useAchievements";
 import { ACHIEVEMENTS, ACHIEVEMENTS_BY_ID } from "@/data/achievements";
 import { formatAuthorName } from "@/utils/authorName";
 import { cn } from "@/lib/utils";
+import {
+  SECTION,
+  SECTION_HEAD,
+  SECTION_TITLE,
+  SECTION_BODY,
+} from "@/lib/sectionClasses";
 
 interface Props {
   userId: string;
@@ -72,11 +78,18 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
       {/* Identité : avatar, nom, ancienneté, compteurs. */}
       <Card className="p-4 sm:p-8">
         <div className="flex items-center gap-4 text-left">
+          {/* Mobile : pp plus petite. */}
+          <Avatar
+            email={data.email}
+            avatarPath={data.avatar_path}
+            size={64}
+            className="ring-2 ring-border sm:hidden"
+          />
           <Avatar
             email={data.email}
             avatarPath={data.avatar_path}
             size={96}
-            className="ring-2 ring-border"
+            className="hidden ring-2 ring-border sm:flex"
           />
           <div className="min-w-0 flex-1">
             <div
@@ -86,21 +99,26 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
             >
               {formatAuthorName(data.email)}
             </div>
-            <p className="mb-0 mt-0.5 text-sm text-foreground/55">
+            <p className="mb-0 mt-0.5 text-[13px] text-foreground/55 sm:text-sm">
               Membre depuis {formatMonth(data.member_since)}
             </p>
-            <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm text-foreground/70">
+            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-foreground/70 sm:mt-3 sm:gap-x-5">
               <span className="inline-flex items-center gap-1.5">
                 <FiStar className="h-4 w-4 text-primary" />
-                {data.reviews_count} avis
+                {data.reviews_count}
+                <span className="hidden sm:inline">avis</span>
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <FiCamera className="h-4 w-4 text-primary" />
-                {data.photos_count} photo{data.photos_count > 1 ? "s" : ""}
+                {data.photos_count}
+                <span className="hidden sm:inline">
+                  photo{data.photos_count > 1 ? "s" : ""}
+                </span>
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <FiAward className="h-4 w-4 text-primary" />
-                {unlocked.length}/{ACHIEVEMENTS.length} succès
+                {unlocked.length}/{ACHIEVEMENTS.length}
+                <span className="hidden sm:inline">succès</span>
               </span>
             </div>
           </div>
@@ -109,109 +127,143 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
 
       {/* Succès obtenus par la personne. Ce qu'on en voit dépend du visiteur :
           le contenu d'un succès ne se dévoile qu'à qui l'a lui-même décroché. */}
-      <Card className="p-4 sm:p-6">
-        <div
-          role="heading"
-          aria-level={2}
-          className="mb-4 font-display text-base font-bold sm:text-lg text-card-foreground"
+      {unlocked.length > 0 && (
+        <section
+          className={cn(
+            SECTION,
+            "sm:p-6 sm:shadow-[0_10px_30px_-12px_rgba(2,8,40,0.18)]",
+          )}
         >
-          Succès
-          <span className="ml-2 text-sm font-medium text-foreground/45">
-            {unlocked.length}/{ACHIEVEMENTS.length}
-          </span>
-        </div>
-        {unlocked.length === 0 ? (
-          <p className="mb-0 text-sm text-foreground/50">
-            Aucun succès débloqué pour le moment.
-          </p>
-        ) : (
-          <ul className="m-0 flex list-none flex-wrap justify-center gap-2 p-0">
-            {unlocked.map(({ def, unlocked_at }) => {
-              // Même règle que la galerie : l'image seulement si le visiteur
-              // l'a aussi, sinon cadenas. Le reste tient dans l'infobulle —
-              // titre et date d'obtention — pour une rangée légère.
-              const known = isMe || mine.includes(def.id);
-              return (
-                <li key={def.id}>
-                  <Tooltip
-                    keepOnClick
-                    label={
-                      <span className="block text-center">
-                        <span className="block font-semibold">{def.title}</span>
-                        <span className="block text-[11px] opacity-70">
-                          {formatDate(unlocked_at)}
-                        </span>
-                      </span>
-                    }
-                  >
-                    <div
-                      tabIndex={0}
-                      aria-label={`${def.title}, obtenu le ${formatDate(unlocked_at)}`}
-                      className={cn(
-                        "flex h-14 w-14 items-center justify-center rounded-xl border border-border p-2 text-2xl sm:text-3xl outline-none transition focus-visible:ring-2 focus-visible:ring-primary/40",
-                        known
-                          ? cn("bg-background", !def.image && "bg-primary/10")
-                          : "bg-muted/40 text-muted-foreground"
-                      )}
-                    >
-                      {!known ? (
-                        <FiLock className="h-7 w-7" />
-                      ) : def.image ? (
-                        <img src={def.image} alt="" className="h-full w-full object-contain" />
-                      ) : (
-                        def.icon
-                      )}
-                    </div>
-                  </Tooltip>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </Card>
+          <div className={SECTION_HEAD}>
+            <div role="heading" aria-level={2} className={SECTION_TITLE}>
+              Succès
+              <span className="ml-2 hidden text-sm font-medium text-foreground/45 sm:inline">
+                {unlocked.length}/{ACHIEVEMENTS.length}
+              </span>
+            </div>
+          </div>
+          <div className={SECTION_BODY}>
+            {unlocked.length === 0 ? (
+              <p className="mb-0 text-sm text-foreground/50">
+                Aucun succès débloqué pour le moment.
+              </p>
+            ) : (
+              /* Mobile : bandeau horizontal à défilement libre.
+               Desktop : rangée centrée, titre en infobulle. */
+              <ul
+                // Le défilement du bandeau ne doit pas passer pour un balayage
+                // de changement d'onglet (Mon compte).
+                onTouchStart={(e) => e.stopPropagation()}
+                onTouchEnd={(e) => e.stopPropagation()}
+                className="m-0 flex list-none gap-2 overflow-x-auto p-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap sm:justify-center sm:gap-2 sm:overflow-visible sm:p-0"
+              >
+                {unlocked.map(({ def, unlocked_at }) => {
+                  // Même règle que la galerie : l'image seulement si le visiteur
+                  // l'a aussi, sinon cadenas. Le reste tient dans l'infobulle —
+                  // titre et date d'obtention — pour une rangée légère.
+                  const known = isMe || mine.includes(def.id);
+                  return (
+                    <li key={def.id} className="shrink-0">
+                      <Tooltip
+                        keepOnClick
+                        label={
+                          <span className="block text-center">
+                            <span className="block font-semibold">
+                              {def.title}
+                            </span>
+                            <span className="block text-[11px] opacity-70">
+                              {formatDate(unlocked_at)}
+                            </span>
+                          </span>
+                        }
+                      >
+                        <div
+                          tabIndex={0}
+                          aria-label={`${def.title}, obtenu le ${formatDate(unlocked_at)}`}
+                          className={cn(
+                            "flex h-12 w-12 items-center justify-center rounded-xl border border-border p-1.5 text-2xl outline-none transition focus-visible:ring-2 focus-visible:ring-primary/40 sm:h-14 sm:w-14 sm:p-2 sm:text-3xl",
+                            known
+                              ? cn(
+                                  "bg-background",
+                                  !def.image && "bg-primary/10",
+                                )
+                              : "bg-muted/40 text-muted-foreground",
+                          )}
+                        >
+                          {!known ? (
+                            <FiLock className="h-7 w-7" />
+                          ) : def.image ? (
+                            <img
+                              src={def.image}
+                              alt=""
+                              className="h-full w-full object-contain"
+                            />
+                          ) : (
+                            def.icon
+                          )}
+                        </div>
+                      </Tooltip>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* Photos : les mêmes vignettes et la même visionneuse que sur une fiche
           resto, en grille 3 par ligne façon Instagram, le nom du restaurant à
-          la place de celui de l'auteur. */}
-      <Card className="p-4 sm:p-6">
-        <div
-          role="heading"
-          aria-level={2}
-          className="mb-4 font-display text-base font-bold sm:text-lg text-card-foreground"
-        >
-          Photos
-          {(photos.data ?? []).length > 0 && (
-            <span className="ml-2 text-sm font-medium text-foreground/45">
-              ({photos.data?.length})
-            </span>
+          la place de celui de l'auteur. Sans photo, la section est omise. */}
+      {(photos.isPending || (photos.data ?? []).length > 0) && (
+        <section
+          className={cn(
+            SECTION,
+            "sm:p-6 sm:shadow-[0_10px_30px_-12px_rgba(2,8,40,0.18)]",
           )}
-        </div>
-        {photos.isPending ? (
-          <div className="flex justify-center py-6">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-border border-t-primary" />
+        >
+          <div className={SECTION_HEAD}>
+            <div role="heading" aria-level={2} className={SECTION_TITLE}>
+              Photos
+              {(photos.data ?? []).length > 0 && (
+                <span className="ml-2 hidden text-sm font-medium text-foreground/45 sm:inline">
+                  ({photos.data?.length})
+                </span>
+              )}
+            </div>
           </div>
-        ) : (photos.data ?? []).length === 0 ? (
-          <p className="mb-0 text-sm text-foreground/50">Aucune photo publiée.</p>
-        ) : (
-          <PhotoGallery
-            photos={photos.data ?? []}
-            userId={sessionData?.user?.id}
-            isAdmin={isAdmin}
-            labelOf={(photo) =>
-              (photo as PublicPhoto).restaurant?.name ?? "Restaurant indisponible"
-            }
-            onLabelClick={(photo) => {
-              const slug = (photo as PublicPhoto).restaurant?.slug;
-              if (slug) navigate(`/restaurant/${slug}`);
-            }}
-            layout="grid"
-            onDelete={(photo) => remove.mutateAsync(photo)}
-            onSetCaption={(photo, caption) =>
-              setCaption.mutateAsync({ id: photo.id, caption })
-            }
-          />
-        )}
-      </Card>
+          <div className={SECTION_BODY}>
+            {photos.isPending ? (
+              <div className="flex justify-center py-6">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-border border-t-primary" />
+              </div>
+            ) : (photos.data ?? []).length === 0 ? (
+              <p className="mb-0 text-sm text-foreground/50">
+                Aucune photo publiée.
+              </p>
+            ) : (
+              <PhotoGallery
+                photos={photos.data ?? []}
+                userId={sessionData?.user?.id}
+                isAdmin={isAdmin}
+                labelOf={(photo) =>
+                  (photo as PublicPhoto).restaurant?.name ??
+                  "Restaurant indisponible"
+                }
+                onLabelClick={(photo) => {
+                  const slug = (photo as PublicPhoto).restaurant?.slug;
+                  if (slug) navigate(`/restaurant/${slug}`);
+                }}
+                layout="grid"
+                onDelete={(photo) => remove.mutateAsync(photo)}
+                onSetCaption={(photo, caption) =>
+                  setCaption.mutateAsync({ id: photo.id, caption })
+                }
+              />
+            )}
+          </div>
+        </section>
+      )}
     </>
   );
 };

@@ -130,33 +130,37 @@ body {
 }
 
 /* Fallback natif minimaliste (zones Tailwind sans OverlayScrollbars).
-   NB : pas de scrollbar-color/width — sinon Chrome ignore les ::-webkit-scrollbar. */
-.tw-scope::-webkit-scrollbar,
-.tw-scope *::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-  background: transparent;
-}
-.tw-scope::-webkit-scrollbar-track,
-.tw-scope *::-webkit-scrollbar-track,
-.tw-scope::-webkit-scrollbar-track-piece,
-.tw-scope *::-webkit-scrollbar-track-piece,
-.tw-scope::-webkit-scrollbar-corner,
-.tw-scope *::-webkit-scrollbar-corner {
-  background: transparent;
-}
-.tw-scope::-webkit-scrollbar-button,
-.tw-scope *::-webkit-scrollbar-button {
-  display: none;
-  width: 0;
-  height: 0;
-}
-.tw-scope::-webkit-scrollbar-thumb,
-.tw-scope *::-webkit-scrollbar-thumb {
-  background-color: var(--primary);
-  border-radius: 9999px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
+   NB : pas de scrollbar-color/width — sinon Chrome ignore les ::-webkit-scrollbar.
+   Réservé aux appareils à pointeur : sur mobile on laisse la barre de l'OS
+   (flottante, auto-masquée), plus naturelle au doigt. */
+@media (hover: hover) {
+  .tw-scope::-webkit-scrollbar,
+  .tw-scope *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+    background: transparent;
+  }
+  .tw-scope::-webkit-scrollbar-track,
+  .tw-scope *::-webkit-scrollbar-track,
+  .tw-scope::-webkit-scrollbar-track-piece,
+  .tw-scope *::-webkit-scrollbar-track-piece,
+  .tw-scope::-webkit-scrollbar-corner,
+  .tw-scope *::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  .tw-scope::-webkit-scrollbar-button,
+  .tw-scope *::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+  .tw-scope::-webkit-scrollbar-thumb,
+  .tw-scope *::-webkit-scrollbar-thumb {
+    background-color: var(--primary);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
 }
 
 /* Autofill Chrome/WebKit : par défaut il force un fond clair + texte sombre,

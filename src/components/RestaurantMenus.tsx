@@ -9,15 +9,20 @@ import {
   FiBookOpen,
   FiExternalLink,
 } from "react-icons/fi";
-import useRestaurantMenus, {
-  RestaurantMenu,
-} from "@/hooks/useRestaurantMenus";
+import useRestaurantMenus, { RestaurantMenu } from "@/hooks/useRestaurantMenus";
 import MenuAddDialog from "@/components/MenuAddDialog";
 import ZoomableImage from "@/components/ZoomableImage";
 import HoldToDeleteButton from "@/components/HoldToDeleteButton";
 import { toast } from "@/lib/toast";
 import { formatAuthorName } from "@/utils/authorName";
 import { cn } from "@/lib/utils";
+import {
+  SECTION,
+  SECTION_HEAD,
+  SECTION_TITLE,
+  SECTION_BODY,
+  ADD_BUTTON,
+} from "@/lib/sectionClasses";
 
 interface Props {
   restaurantId: number;
@@ -26,6 +31,7 @@ interface Props {
   isAdmin: boolean;
   /** false = restaurant verrouillé : plus de nouveau menu (l'existant reste). */
   canContribute?: boolean;
+  className?: string;
 }
 
 const KIND_LABEL: Record<RestaurantMenu["kind"], string> = {
@@ -52,11 +58,14 @@ const RestaurantMenus = ({
   userId,
   isAdmin,
   canContribute = true,
+  className,
 }: Props) => {
-  const { data: menus = [], isPending, add, remove } = useRestaurantMenus(
-    restaurantId,
-    slug
-  );
+  const {
+    data: menus = [],
+    isPending,
+    add,
+    remove,
+  } = useRestaurantMenus(restaurantId, slug);
   const [addOpen, setAddOpen] = useState(false);
   const [lightbox, setLightbox] = useState<RestaurantMenu | null>(null);
   // Même visionneuse que la galerie : zoom molette / pincement / boutons, et
@@ -116,16 +125,12 @@ const RestaurantMenus = ({
   if (!canContribute && !isPending && menus.length === 0) return null;
 
   return (
-    <section className="rounded-card border border-border bg-card p-3 sm:p-5">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div
-          role="heading"
-          aria-level={2}
-          className="font-display text-base font-bold sm:text-lg text-card-foreground"
-        >
+    <section className={cn(SECTION, className)}>
+      <div className={SECTION_HEAD}>
+        <div role="heading" aria-level={2} className={SECTION_TITLE}>
           Menu
           {menus.length > 0 && (
-            <span className="ml-2 text-sm font-medium text-foreground/45">
+            <span className="ml-2 hidden text-sm font-medium text-foreground/45 sm:inline">
               ({menus.length})
             </span>
           )}
@@ -135,27 +140,36 @@ const RestaurantMenus = ({
           <button
             type="button"
             onClick={() => setAddOpen(true)}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-1.5 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
+            aria-label="Ajouter un menu"
+            className={ADD_BUTTON}
           >
             <FiPlus className="h-4 w-4" />
-            Ajouter un menu
+            {/* Mobile : icône seule. */}
+            <span className="hidden sm:inline">Ajouter un menu</span>
           </button>
         )}
       </div>
 
       {isPending ? (
-        <div className="flex justify-center py-5 sm:py-8">
+        <div className={cn(SECTION_BODY, "flex justify-center py-5 sm:py-8")}>
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
         </div>
       ) : menus.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 py-5 sm:py-8 text-center text-foreground/50">
+        <div className="hidden flex-col items-center gap-2 py-8 text-center text-foreground/50 sm:flex">
           <FiBookOpen className="h-8 w-8 text-foreground opacity-50" />
           <p className="text-sm">
             Aucun menu pour le moment. Partage-en un (lien, PDF ou photo) !
           </p>
         </div>
       ) : (
-        <ul className="m-0 list-none space-y-2 p-0">
+        /* Mobile : liste bord à bord, tuiles empilées sans marge, séparées par un
+           filet (comme la galerie) ; desktop : tuiles arrondies espacées. */
+        <ul
+          className={cn(
+            SECTION_BODY,
+            "m-0 list-none divide-y divide-border p-0 sm:divide-y-0 sm:space-y-2",
+          )}
+        >
           {menus.map((menu) => {
             const canDelete = isAdmin || menu.user_id === userId;
             const label = menu.title?.trim() || KIND_LABEL[menu.kind];
@@ -201,7 +215,7 @@ const RestaurantMenus = ({
 
             return (
               <li key={menu.id}>
-                <div className="group flex items-center gap-3 rounded-xl border border-border bg-background p-2.5 pr-2 transition hover:border-primary/40">
+                <div className="group flex items-center gap-3 px-3 py-2.5 transition sm:rounded-xl sm:border sm:border-border sm:bg-background sm:p-2.5 sm:pr-2 sm:hover:border-primary/40">
                   {isImage ? (
                     <button
                       type="button"
@@ -249,7 +263,7 @@ const RestaurantMenus = ({
             aria-label="Fermer"
             className={cn(
               "absolute right-4 top-4 z-[1] flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/30",
-              zoomed && "pointer-events-none opacity-0"
+              zoomed && "pointer-events-none opacity-0",
             )}
             onClick={closeLightbox}
           >

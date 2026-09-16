@@ -12,6 +12,8 @@ import {
   FiEdit2,
   FiTrash2,
   FiSlash,
+  FiMap,
+  FiPlus,
 } from "react-icons/fi";
 import useRestaurants from "@/hooks/useRestaurants";
 import useTopRated from "@/hooks/useTopRated";
@@ -34,6 +36,7 @@ import ReviewForm from "@/components/ReviewForm";
 import HoldToDeleteButton from "@/components/HoldToDeleteButton";
 import RestaurantDialog from "@/admin/Dialogs/RestaurantDialog";
 import LocationEditDialog from "@/components/LocationEditDialog";
+import { directionsUrl } from "@/services/geocode";
 import RestaurantGallery from "@/components/RestaurantGallery";
 import RestaurantMenus from "@/components/RestaurantMenus";
 import { Tooltip } from "@/components/ui/tooltip";
@@ -42,6 +45,13 @@ import AuthorButton from "@/components/AuthorButton";
 import { toast } from "@/lib/toast";
 import noImage from "@/assets/no-image.jpg";
 import { cn } from "@/lib/utils";
+import {
+  SECTION,
+  SECTION_HEAD,
+  SECTION_TITLE,
+  SECTION_BODY_PAD,
+  ADD_BUTTON,
+} from "@/lib/sectionClasses";
 import Beeeh from "@/sections/Beeeh";
 
 /* ------------------------------ helpers UI ------------------------------ */
@@ -105,7 +115,7 @@ const RestaurantPage = () => {
   const isAdmin = useIsAdmin();
   const queryClient = useQueryClient();
   const { data: reviews = [], isPending: reviewsLoading } = useReviews(
-    restaurant?.id
+    restaurant?.id,
   );
   // Ordre des tags : origines, puis caractéristiques, puis plats. Appelé ici
   // (avant les retours anticipés de chargement) pour respecter l'ordre des hooks.
@@ -177,9 +187,17 @@ const RestaurantPage = () => {
     : 0;
 
   const deleteReview = async (id: number) => {
-    const { error } = await supabaseClient.from("reviews").delete().eq("id", id);
+    const { error } = await supabaseClient
+      .from("reviews")
+      .delete()
+      .eq("id", id);
     if (error) {
-      toast({ title: "Erreur", description: error.message, status: "error", duration: 5000 });
+      toast({
+        title: "Erreur",
+        description: error.message,
+        status: "error",
+        duration: 5000,
+      });
       return;
     }
     queryClient.invalidateQueries({ queryKey: ["reviews", restaurant.id] });
@@ -198,7 +216,7 @@ const RestaurantPage = () => {
       <button
         type="button"
         onClick={() => navigate("/restaurants")}
-        className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition hover:text-primary"
+        className="mb-3 inline-flex sm:mb-4 items-center gap-2 text-sm font-medium text-muted-foreground transition hover:text-primary"
       >
         <FiArrowLeft className="h-4 w-4" /> Tous les restaurants
       </button>
@@ -210,14 +228,20 @@ const RestaurantPage = () => {
           alt={restaurant.name}
           className={cn(
             "h-full w-full object-cover",
-            restaurant.closed && "grayscale"
+            restaurant.closed && "grayscale",
           )}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
 
-        {restaurant.closed && <ClosedBadge className="absolute left-4 top-4" />}
+        {restaurant.closed && (
+          <ClosedBadge className="absolute left-2.5 top-2.5 sm:left-4 sm:top-4" />
+        )}
 
-        <TopBadge rank={topRank} size="lg" className="absolute left-4 top-4" />
+        <TopBadge
+          rank={topRank}
+          size="lg"
+          className="absolute left-2.5 top-2.5 sm:left-4 sm:top-4"
+        />
 
         <LikeButton
           liked={liked}
@@ -225,19 +249,19 @@ const RestaurantPage = () => {
             if (next) await addFavorite(restaurant.id);
             else await removeFavorite(restaurant.id);
           }}
-          iconClassName="h-5 w-5"
+          iconClassName="h-4 w-4 sm:h-5 sm:w-5"
           emptyClassName="text-foreground/60"
-          className="absolute bottom-5 right-5 z-10 h-11 w-11 bg-card/85 shadow-md backdrop-blur hover:bg-card md:bottom-7 md:right-7"
+          className="absolute bottom-3 right-3 z-10 h-9 w-9 bg-card/85 shadow-md backdrop-blur hover:bg-card sm:bottom-5 sm:right-5 sm:h-11 sm:w-11 md:bottom-7 md:right-7"
         />
 
         {/* Bandeau bas */}
         <div className="absolute inset-x-0 bottom-0 p-3 sm:p-5 md:p-7">
           {tags.length > 0 && (
-            <div className="mb-3 flex max-w-[16rem] flex-wrap gap-1.5">
+            <div className="mb-2 flex max-w-[16rem] flex-wrap gap-1 sm:mb-3 sm:gap-1.5">
               {tags.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-medium text-white backdrop-blur-sm"
+                  className="rounded-full bg-white/20 px-2 py-0.5 text-[11px] font-medium text-white backdrop-blur-sm sm:px-2.5 sm:text-xs"
                 >
                   {tag}
                 </span>
@@ -248,7 +272,7 @@ const RestaurantPage = () => {
             <div
               role="heading"
               aria-level={1}
-              className="font-display text-2xl font-extrabold leading-tight text-white drop-shadow sm:text-3xl md:text-4xl"
+              className="font-display text-xl font-extrabold leading-tight text-white drop-shadow sm:text-3xl md:text-4xl"
             >
               {restaurant.name}
             </div>
@@ -258,7 +282,7 @@ const RestaurantPage = () => {
                   type="button"
                   onClick={() => setEditOpen(true)}
                   aria-label="Modifier le restaurant"
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-sm transition hover:bg-white/30"
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-sm transition hover:bg-white/30 sm:h-9 sm:w-9"
                 >
                   <FiEdit2 className="h-4 w-4" />
                 </button>
@@ -269,11 +293,15 @@ const RestaurantPage = () => {
 
         {/* Atouts : petites icônes (sans texte, infobulles) en haut à droite. */}
         {visibleBadges.length > 0 && (
-          <div className="absolute right-4 top-4 flex flex-wrap justify-end gap-1.5">
+          <div className="absolute right-2.5 top-2.5 flex flex-wrap justify-end gap-1 sm:right-4 sm:top-4 sm:gap-1.5">
             {visibleBadges.map((b) => (
               <Tooltip key={b} label={b}>
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-card/85 shadow-sm backdrop-blur">
-                  <img src={badgeMap[b]} alt={b} className="h-6 w-6 object-contain" />
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-card/85 shadow-sm backdrop-blur sm:h-9 sm:w-9">
+                  <img
+                    src={badgeMap[b]}
+                    alt={b}
+                    className="h-[18px] w-[18px] object-contain sm:h-6 sm:w-6"
+                  />
                 </span>
               </Tooltip>
             ))}
@@ -285,25 +313,64 @@ const RestaurantPage = () => {
           collègues déjà inscrits s'affichent en éventail à gauche du bouton, à
           la même hauteur que lui. */}
       {restaurant.closed ? (
-        <div className="mt-4 flex items-center gap-2.5 rounded-card border border-border bg-muted/40 px-4 py-3 text-sm text-foreground/70">
+        <div className="mt-2.5 flex items-center gap-2.5 rounded-card border border-border bg-muted/40 px-3 py-2.5 text-sm text-foreground/70 sm:mt-4 sm:px-4 sm:py-3">
           <FiSlash className="h-4 w-4 shrink-0 text-foreground/45" />
-          Ce restaurant a définitivement fermé. Sa fiche reste consultable, mais
-          on ne peut plus y déjeuner.
+          {/* Mobile : version courte. */}
+          <span className="sm:hidden">Restaurant fermé</span>
+          <span className="hidden sm:inline">
+            Ce restaurant a définitivement fermé. Sa fiche reste consultable,
+            mais on ne peut plus y déjeuner.
+          </span>
         </div>
-      ) : (
-        <div className="mt-4 flex flex-wrap items-center justify-end gap-3">
-          <LunchAvatars restaurantId={restaurant.id} size={42} max={5} interactive />
-          <LunchButton restaurantId={restaurant.id} />
-          {/* Click & collect : la page de commande, dans un nouvel onglet. */}
-          {restaurant.order_url && <OrderButton url={restaurant.order_url} />}
-        </div>
-      )}
+      ) : null}
+      <div className="mt-2.5 flex flex-wrap items-center justify-end gap-2.5 sm:mt-4 sm:gap-3">
+        {!restaurant.closed && (
+          <>
+            {/* Mobile : avatars à la taille des boutons ronds (36 px). */}
+            <div className="sm:hidden">
+              <LunchAvatars
+                restaurantId={restaurant.id}
+                size={36}
+                max={5}
+                interactive
+              />
+            </div>
+            <div className="hidden sm:block">
+              <LunchAvatars
+                restaurantId={restaurant.id}
+                size={42}
+                max={5}
+                interactive
+              />
+            </div>
+            <LunchButton restaurantId={restaurant.id} />
+          </>
+        )}
+        {/* Click & collect : la page de commande, dans un nouvel onglet. */}
+        {!restaurant.closed && restaurant.order_url && (
+          <OrderButton url={restaurant.order_url} />
+        )}
+        {/* Mobile : la section Carte est masquée → itinéraire direct. */}
+        <a
+          href={directionsUrl(
+            restaurant.lat != null && restaurant.lng != null
+              ? { lat: restaurant.lat, lng: restaurant.lng }
+              : (restaurant.address ?? ""),
+          )}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Itinéraire"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-foreground no-underline sm:hidden"
+        >
+          <FiMap className="h-4 w-4" />
+        </a>
+      </div>
 
       {/* Corps : 2 colonnes (les atouts sont dans le hero, en bas à droite).
           Sur mobile l'ordre est coordonnées → carte → photos → avis (order-2..4) ;
           à partir de lg, colonne gauche (photos + avis) et sidebar à droite
           (placement explicite col-start/row-start). */}
-      <div className="mt-3 sm:mt-6 grid gap-3 sm:gap-6 lg:grid-cols-3">
+      <div className="mt-2.5 grid gap-3 sm:mt-6 sm:gap-6 lg:grid-cols-3">
         {/* Colonne gauche (photos + avis). Desktop : flex col occupant 2/3.
             Mobile : display:contents pour que la sidebar (coordonnées + carte,
             order-2) s'intercale → infos → photos → avis. */}
@@ -319,195 +386,234 @@ const RestaurantPage = () => {
           />
 
           {/* Avis */}
-          <section className="order-4 rounded-card border border-border bg-card p-3 sm:p-5">
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-              <div
-                role="heading"
-                aria-level={2}
-                className="font-display text-base font-bold sm:text-lg text-card-foreground"
-              >
+          <section className={cn("order-4", SECTION)}>
+            <div className={SECTION_HEAD}>
+              <div role="heading" aria-level={2} className={SECTION_TITLE}>
                 Avis des collaborateurs
               </div>
               {canContribute && !myReview && !showForm && (
                 <button
                   type="button"
                   onClick={() => setShowForm(true)}
-                  className="rounded-lg bg-primary px-3.5 py-1.5 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
+                  aria-label="Écrire un avis"
+                  className={ADD_BUTTON}
                 >
-                  Écrire un avis
+                  <FiPlus className="h-4 w-4" />
+                  <span className="hidden sm:inline">Écrire un avis</span>
                 </button>
               )}
             </div>
+            <div className={SECTION_BODY_PAD}>
+              {canContribute && showForm && (
+                <ReviewForm
+                  restaurantId={restaurant.id}
+                  existing={myReview}
+                  onDone={() => setShowForm(false)}
+                />
+              )}
 
-            {canContribute && showForm && (
-              <ReviewForm
-                restaurantId={restaurant.id}
-                existing={myReview}
-                onDone={() => setShowForm(false)}
-              />
-            )}
-
-            {/* Moyenne en étoiles, puis répartition par note (type Amazon). */}
-            {totalReviews > 0 && (
-            <div className="mb-5 space-y-1.5 rounded-xl bg-muted/40 p-4">
-              <div className="mb-3 flex flex-wrap items-center gap-3">
-                <span className="font-display text-2xl sm:text-3xl font-bold leading-none tabular-nums text-card-foreground">
-                  {averageRating.toFixed(1)}
-                </span>
-                <Stars rating={averageRating} size={22} />
-                <span className="text-sm text-foreground/55">
-                  {totalReviews} avis
-                </span>
-              </div>
-              {[5, 4, 3, 2, 1].map((star) => {
-                const count = ratingCounts(star);
-                const pct = totalReviews ? (count / totalReviews) * 100 : 0;
-                return (
-                  <div key={star} className="flex items-center gap-2 text-xs">
-                    <span className="flex w-6 shrink-0 items-center justify-end gap-0.5 font-medium text-foreground/70">
-                      {star}
-                      <FaStar className="h-3 w-3 text-amber-500" />
+              {/* Moyenne en étoiles, puis répartition par note (type Amazon). */}
+              {totalReviews > 0 && (
+                <div className="mb-2.5 sm:mb-5 sm:rounded-xl sm:bg-muted/40 sm:p-4">
+                  <div className="flex flex-wrap items-center gap-3 sm:mb-3">
+                    <span className="font-display text-2xl sm:text-3xl font-bold leading-none tabular-nums text-card-foreground">
+                      {averageRating.toFixed(1)}
                     </span>
-                    <span className="w-7 shrink-0 text-right tabular-nums text-foreground/45">
-                      ({count})
+                    <Stars rating={averageRating} size={22} />
+                    <span className="text-sm text-foreground/55">
+                      {totalReviews} avis
                     </span>
-                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-foreground/10">
-                      <div
-                        className="h-full rounded-full bg-amber-500 transition-all"
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
                   </div>
-                );
-              })}
-            </div>
-            )}
-
-            {/* Liste */}
-            {reviewsLoading ? (
-              <div className="flex justify-center py-5 sm:py-8">
-                <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
-              </div>
-            ) : totalReviews === 0 ? (
-              <p className="py-6 text-center text-sm text-foreground/55">
-                Aucun avis pour le moment.
-                {canContribute && " Sois le premier à en laisser un !"}
-              </p>
-            ) : visibleReviews.length === 0 ? null : (
-              <ul className="m-0 list-none space-y-4 p-0">
-                {visibleReviews.map((r) => {
-                  const mine = r.user_id === userId;
-                  return (
-                    <li
-                      key={r.id}
-                      className="border-t border-border/60 pt-4"
-                    >
-                      <div className="flex items-start gap-3">
-                        {/* La photo aussi mène au profil. */}
-                        <AuthorButton
-                          userId={r.user_id}
-                          email={r.email}
-                          className="flex shrink-0 rounded-full leading-none transition-transform duration-150 hover:scale-105 hover:no-underline"
+                  {/* Répartition par note : desktop seulement. */}
+                  <div className="hidden space-y-1.5 sm:block">
+                    {[5, 4, 3, 2, 1].map((star) => {
+                      const count = ratingCounts(star);
+                      const pct = totalReviews
+                        ? (count / totalReviews) * 100
+                        : 0;
+                      return (
+                        <div
+                          key={star}
+                          className="flex items-center gap-2 text-xs"
                         >
-                          <Avatar
-                            email={r.email}
-                            avatarPath={r.avatar_path}
-                            size={44}
-                          />
-                        </AuthorButton>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5">
+                          <span className="flex w-6 shrink-0 items-center justify-end gap-0.5 font-medium text-foreground/70">
+                            {star}
+                            <FaStar className="h-3 w-3 text-amber-500" />
+                          </span>
+                          <span className="w-7 shrink-0 text-right tabular-nums text-foreground/45">
+                            ({count})
+                          </span>
+                          <div className="h-2 flex-1 overflow-hidden rounded-full bg-foreground/10">
+                            <div
+                              className="h-full rounded-full bg-amber-500 transition-all"
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Liste */}
+              {reviewsLoading ? (
+                <div className="flex justify-center py-5 sm:py-8">
+                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
+                </div>
+              ) : totalReviews === 0 ? (
+                <p className="py-3 text-center text-sm text-foreground/55 sm:py-6">
+                  Aucun avis pour le moment.
+                  {canContribute && " Sois le premier à en laisser un !"}
+                </p>
+              ) : visibleReviews.length === 0 ? null : (
+                <ul className="m-0 list-none space-y-3 p-0 sm:space-y-4">
+                  {visibleReviews.map((r) => {
+                    const mine = r.user_id === userId;
+                    return (
+                      <li
+                        key={r.id}
+                        className="border-t border-border/60 pt-3 sm:pt-4"
+                      >
+                        <div className="flex items-stretch gap-2 sm:items-start sm:gap-3">
+                          {/* Colonne pp : mobile = petite pp (alignée sur le
+                              nom) prolongée d'un filet vertical ; desktop = 44 px. */}
+                          <div className="flex shrink-0 flex-col items-center">
+                            {/* La photo aussi mène au profil. */}
                             <AuthorButton
                               userId={r.user_id}
                               email={r.email}
-                              className={cn(
-                                "font-semibold",
-                                mine ? "text-primary" : "text-card-foreground"
-                              )}
+                              className="flex rounded-full leading-none transition-transform duration-150 hover:scale-105 hover:no-underline sm:hidden"
+                            >
+                              <Avatar
+                                email={r.email}
+                                avatarPath={r.avatar_path}
+                                size={28}
+                              />
+                            </AuthorButton>
+                            <AuthorButton
+                              userId={r.user_id}
+                              email={r.email}
+                              className="hidden rounded-full leading-none transition-transform duration-150 hover:scale-105 hover:no-underline sm:flex"
+                            >
+                              <Avatar
+                                email={r.email}
+                                avatarPath={r.avatar_path}
+                                size={44}
+                              />
+                            </AuthorButton>
+                            <span
+                              aria-hidden
+                              className="mt-1.5 w-px flex-1 rounded-full bg-border sm:hidden"
                             />
-                            {(mine || isAdmin) && (
-                              <div className="flex items-center gap-1">
-                                {mine && canContribute && (
-                                  <button
-                                    type="button"
-                                    onClick={() => setShowForm(true)}
-                                    aria-label="Modifier"
-                                    className="flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-primary"
-                                  >
-                                    <FiEdit2 className="h-3.5 w-3.5" />
-                                  </button>
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex min-h-7 flex-wrap items-center justify-between gap-x-3 gap-y-0.5">
+                              <AuthorButton
+                                userId={r.user_id}
+                                email={r.email}
+                                className={cn(
+                                  "font-semibold",
+                                  mine
+                                    ? "text-primary"
+                                    : "text-card-foreground",
                                 )}
-                                <HoldToDeleteButton
-                                  onConfirm={() => deleteReview(r.id)}
-                                  className="flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground hover:text-destructive"
-                                  progressClassName="bg-destructive/15"
-                                >
-                                  <FiTrash2 className="h-3.5 w-3.5" />
-                                </HoldToDeleteButton>
-                              </div>
+                              />
+                              {(mine || isAdmin) && (
+                                <div className="flex items-center gap-1">
+                                  {mine && canContribute && (
+                                    <button
+                                      type="button"
+                                      onClick={() => setShowForm(true)}
+                                      aria-label="Modifier"
+                                      className="flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-primary"
+                                    >
+                                      <FiEdit2 className="h-3.5 w-3.5" />
+                                    </button>
+                                  )}
+                                  <HoldToDeleteButton
+                                    onConfirm={() => deleteReview(r.id)}
+                                    className="flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground hover:text-destructive"
+                                    progressClassName="bg-destructive/15"
+                                  >
+                                    <FiTrash2 className="h-3.5 w-3.5" />
+                                  </HoldToDeleteButton>
+                                </div>
+                              )}
+                            </div>
+                            <div className="mt-1 flex items-center gap-2">
+                              <Stars rating={r.rating} size={16} />
+                              <span className="text-xs text-foreground/45">
+                                {formatDate(r.created_at)}
+                              </span>
+                            </div>
+                            {r.comment && (
+                              <p className="mb-0 mt-1.5 text-[13px] leading-normal text-foreground/75 sm:text-sm sm:leading-relaxed">
+                                {r.comment}
+                              </p>
                             )}
                           </div>
-                          <div className="mt-1 flex items-center gap-2">
-                            <Stars rating={r.rating} size={16} />
-                            <span className="text-xs text-foreground/45">
-                              {formatDate(r.created_at)}
-                            </span>
-                          </div>
-                          {r.comment && (
-                            <p className="mb-0 mt-1.5 text-sm leading-relaxed text-foreground/75">
-                              {r.comment}
-                            </p>
-                          )}
                         </div>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
           </section>
         </div>
 
         {/* Sidebar : coordonnées + carte. Indépendante (pas de row-span). */}
-        <aside className="order-2 space-y-3 sm:space-y-6 self-start lg:col-start-3 lg:row-start-1">
+        {/* gap plutôt que space-y : la Carte masquée sur mobile n'ajoute pas de marge. */}
+        <aside className="order-2 flex flex-col gap-3 self-start sm:gap-6 lg:col-start-3 lg:row-start-1">
           {/* Coordonnées */}
-          <section className="rounded-card border border-border bg-card p-3 sm:p-5">
-            <div
-              role="heading"
-              aria-level={2}
-              className="mb-3 font-display text-base font-bold sm:text-lg text-card-foreground"
-            >
-              Coordonnées
+          <section className={SECTION}>
+            <div className={SECTION_HEAD}>
+              <div role="heading" aria-level={2} className={SECTION_TITLE}>
+                Coordonnées
+              </div>
             </div>
-            <ul className="m-0 list-none space-y-3 p-0 text-sm">
+            <ul
+              className={cn(
+                SECTION_BODY_PAD,
+                "m-0 list-none space-y-3 text-sm",
+              )}
+            >
               {restaurant.address && (
                 <li className="flex items-start gap-3">
                   <FiMapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  <span className="text-foreground/80">{restaurant.address}</span>
+                  <span className="text-foreground/80">
+                    {restaurant.address}
+                  </span>
                 </li>
               )}
-              {restaurant.phone && (
-                <li className="flex items-center gap-3">
-                  <FiPhone className="h-4 w-4 shrink-0 text-primary" />
-                  <a
-                    href={`tel:${restaurant.phone}`}
-                    className="text-foreground/80 transition hover:text-primary"
-                  >
-                    {restaurant.phone}
-                  </a>
-                </li>
-              )}
-              {restaurant.website && (
-                <li className="flex items-center gap-3">
-                  <FiGlobe className="h-4 w-4 shrink-0 text-primary" />
-                  <a
-                    href={restaurant.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 truncate text-foreground/80 transition hover:text-primary"
-                  >
-                    Site web <FiExternalLink className="h-3.5 w-3.5" />
-                  </a>
+              {(restaurant.phone || restaurant.website) && (
+                /* Téléphone et site web côte à côte (retour à la ligne si trop étroit). */
+                <li className="flex flex-wrap items-center gap-x-5 gap-y-3">
+                  {restaurant.phone && (
+                    <span className="flex items-center gap-3">
+                      <FiPhone className="h-4 w-4 shrink-0 text-primary" />
+                      <a
+                        href={`tel:${restaurant.phone}`}
+                        className="text-foreground/80 transition hover:text-primary"
+                      >
+                        {restaurant.phone}
+                      </a>
+                    </span>
+                  )}
+                  {restaurant.website && (
+                    <span className="flex min-w-0 items-center gap-3">
+                      <FiGlobe className="h-4 w-4 shrink-0 text-primary" />
+                      <a
+                        href={restaurant.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 truncate text-foreground/80 transition hover:text-primary"
+                      >
+                        Site web <FiExternalLink className="h-3.5 w-3.5" />
+                      </a>
+                    </span>
+                  )}
                 </li>
               )}
             </ul>
@@ -522,8 +628,8 @@ const RestaurantPage = () => {
             canContribute={canContribute}
           />
 
-          {/* Carte */}
-          <section className="overflow-hidden rounded-card border border-border bg-card">
+          {/* Carte (mobile : masquée, bouton Itinéraire sous le hero) */}
+          <section className="hidden overflow-hidden rounded-card border border-border bg-card sm:block">
             <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-2.5 sm:px-5 sm:py-3">
               <div
                 role="heading"

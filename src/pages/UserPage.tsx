@@ -6,6 +6,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import RestaurantGrid from "../sections/RestaurantGrid";
+import useMediaQuery from "@/hooks/useMediaQuery";
 import RestaurantsToolbar from "../components/RestaurantsToolbar";
 import RestaurantPage from "./RestaurantPage";
 import PageNotFound from "./PageNotFound";
@@ -138,8 +139,11 @@ const UserPage = () => {
   // interne (pas de scroll de page) ; restaurants/fiche = scroll de page.
   const centerContent = currentPage === "a-propos";
   // La carte globale et la roue occupent toute la hauteur (pas de scroll de page).
+  const isDesktop = useMediaQuery("(min-width: 640px)");
   const fillContent =
     currentPage === "admin" ||
+    // Mobile : Mon compte = pager plein écran (chaque onglet a son scroll).
+    (currentPage === "mon-compte" && !isDesktop) ||
     (currentPage === "restaurants" &&
       (viewMode === "map" || viewMode === "roulette"));
 
@@ -150,6 +154,8 @@ const UserPage = () => {
       fillContent={fillContent}
       // Liste/grille des restos et fiche resto : tirer vers le bas = refetch.
       pullToRefresh={currentPage === "restaurants" || isRestaurantDetail}
+      // Mobile : la roue des sous-onglets de Mon compte vit dans le bandeau.
+      toolbarPortal={currentPage === "mon-compte" && !isDesktop}
       navbarProps={{
         page: activeTab,
         setPage: (page) => navigate("/" + page),

@@ -42,8 +42,9 @@ const LunchButton = ({ restaurantId, className }: Props) => {
       onClick={onClick}
       disabled={saving}
       aria-pressed={active}
+      aria-label={active ? "J'y déjeune" : "Je déjeune ici"}
       className={cn(
-        "inline-flex cursor-pointer items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition disabled:opacity-60",
+        "inline-flex cursor-pointer items-center gap-2 rounded-full p-2.5 text-sm font-medium transition disabled:opacity-60 sm:px-4",
         active
           ? "bg-primary text-primary-foreground shadow-md hover:bg-primary/90"
           : "border border-border bg-card text-foreground hover:bg-muted",
@@ -51,7 +52,10 @@ const LunchButton = ({ restaurantId, className }: Props) => {
       )}
     >
       <LuUtensils className="h-4 w-4" />
-      {active ? "J'y déjeune" : "Je déjeune ici"}
+      {/* Mobile : icône seule. */}
+      <span className="hidden sm:inline">
+        {active ? "J'y déjeune" : "Je déjeune ici"}
+      </span>
     </button>
   );
 };

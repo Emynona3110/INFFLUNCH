@@ -24,6 +24,11 @@ interface LayoutProps {
    * bandeau sticky sous la navbar. La navbar reste dédiée à la navigation.
    */
   toolbar?: React.ReactNode;
+  /**
+   * Bandeau d'outils vide, à remplir par la page via un portail sur
+   * `#page-toolbar` (ex. roue des sous-onglets de Mon compte sur mobile).
+   */
+  toolbarPortal?: boolean;
   /** Mobile : tirer vers le bas en haut de page rafraîchit les données. */
   pullToRefresh?: boolean;
 }
@@ -36,6 +41,7 @@ const Layout = ({
   navbarProps,
   toolbar,
   pullToRefresh = false,
+  toolbarPortal = false,
 }: LayoutProps) => {
   const mainRef = useRef<HTMLElement>(null);
   const content = pullToRefresh ? (
@@ -51,10 +57,11 @@ const Layout = ({
         </header>
       )}
 
-      {toolbar && (
+      {(toolbar || toolbarPortal) && (
         <div className="sticky top-12 z-[999] shrink-0 border-b border-border bg-card px-3 shadow-sm sm:top-[60px] sm:px-4">
           <div className="mx-auto flex h-11 w-full max-w-[1200px] items-center sm:h-[56px]">
             {toolbar}
+            {toolbarPortal && <div id="page-toolbar" className="w-full" />}
           </div>
         </div>
       )}
