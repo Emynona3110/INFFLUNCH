@@ -75,7 +75,7 @@ const RouletteSelectionDialog = ({
               >
                 <span
                   className={cn(
-                    "grid h-5 w-5 shrink-0 place-items-center rounded border transition",
+                    "flex h-5 w-5 shrink-0 items-center justify-center rounded border transition",
                     checked
                       ? "border-primary bg-primary text-primary-foreground"
                       : "border-border text-transparent"

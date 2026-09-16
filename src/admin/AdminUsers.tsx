@@ -164,7 +164,7 @@ const AdminUsers = () => {
                               onConfirm={() => handleReset(u)}
                               disabled={isMe}
                               aria-label="Maintenir pour réinitialiser le mot de passe"
-                              className="grid h-8 w-8 place-items-center rounded-full text-primary hover:bg-primary/10"
+                              className="flex h-8 w-8 items-center justify-center rounded-full text-primary hover:bg-primary/10"
                               progressClassName="bg-primary/20"
                             >
                               <FiKey className="h-4 w-4" />
@@ -181,7 +181,7 @@ const AdminUsers = () => {
                               onConfirm={() => handleDelete(u)}
                               disabled={isMe}
                               aria-label="Maintenir pour supprimer l'utilisateur"
-                              className="grid h-8 w-8 place-items-center rounded-full text-destructive hover:bg-destructive/10"
+                              className="flex h-8 w-8 items-center justify-center rounded-full text-destructive hover:bg-destructive/10"
                               progressClassName="bg-destructive/20"
                             >
                               <FiTrash2 className="h-4 w-4" />
@@ -231,7 +231,7 @@ const AdminUsers = () => {
                   type="button"
                   onClick={() => copy(credentials.tempPassword)}
                   aria-label="Copier"
-                  className="grid h-9 w-9 cursor-pointer place-items-center rounded-lg border border-border text-foreground/70 transition hover:bg-muted"
+                  className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-border text-foreground/70 transition hover:bg-muted"
                 >
                   <FiCopy />
                 </button>

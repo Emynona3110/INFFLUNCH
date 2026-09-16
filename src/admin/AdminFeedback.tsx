@@ -254,7 +254,7 @@ const AdminFeedback = () => {
                               disabled={done}
                               aria-label={frozen ?? acceptLabel}
                               className={cn(
-                                "grid h-8 w-8 place-items-center rounded-full transition",
+                                "flex h-8 w-8 items-center justify-center rounded-full transition",
                                 done
                                   ? "cursor-default"
                                   : "cursor-pointer hover:bg-muted hover:text-emerald-600",
@@ -274,7 +274,7 @@ const AdminFeedback = () => {
                               disabled={done}
                               aria-label={frozen ?? refuseLabel}
                               className={cn(
-                                "grid h-8 w-8 place-items-center rounded-full transition",
+                                "flex h-8 w-8 items-center justify-center rounded-full transition",
                                 done
                                   ? "cursor-default"
                                   : "cursor-pointer hover:bg-muted hover:text-destructive",

@@ -63,26 +63,26 @@ const LikeButton = ({
       aria-label={isLiked ? "Retirer des favoris" : "Ajouter aux favoris"}
       aria-pressed={isLiked}
       className={cn(
-        "relative grid place-items-center rounded-full transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+        "relative flex items-center justify-center rounded-full transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
         className
       )}
     >
-      {/* Les deux cœurs sont empilés dans la MÊME cellule de grille
-          (col-start-1/row-start-1) → centrage identique, donc parfaitement
-          superposés (pas de décalage entre vide et plein). Léger translate-y
+      {/* Le cœur plein est superposé en absolu (inset-0 + flex) au cœur vide
+          → même centrage, donc parfaitement superposés. Pas de display:grid
+          sur le <button> : iOS Safari décale son contenu. Léger translate-y
           pour optiquement centrer la forme (haute dans son viewBox). */}
       <FaRegHeart
         className={cn(
           iconClassName,
           emptyClassName,
-          "col-start-1 row-start-1 translate-y-[1.5%]"
+          "translate-y-[1.5%]"
         )}
       />
       <AnimatePresence initial={false}>
         {isLiked && (
           <motion.span
             key="full"
-            className="col-start-1 row-start-1 grid place-items-center"
+            className="absolute inset-0 flex items-center justify-center"
             initial={{ scale: 0 }}
             // Légèrement plus grand que le cœur vide pour recouvrir son liseré.
             animate={{ scale: 1.12 }}

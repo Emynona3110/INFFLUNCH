@@ -176,7 +176,7 @@ const LunchToday = () => {
         <div className="flex min-w-0 items-center gap-3">
           <span
             className={cn(
-              "grid h-10 w-10 shrink-0 place-items-center rounded-full",
+              "flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
               hasPlan
                 ? "bg-primary text-primary-foreground"
                 : "bg-primary/10 text-primary"
@@ -295,7 +295,7 @@ const LunchToday = () => {
                       initial={{ scale: 0.5, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       transition={spring}
-                      className="absolute bottom-1 right-1 grid h-6 min-w-6 place-items-center rounded-full bg-primary px-1.5 text-xs font-bold text-primary-foreground shadow"
+                      className="absolute bottom-1 right-1 flex h-6 min-w-6 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-bold text-primary-foreground shadow"
                     >
                       {people.length}
                     </motion.span>

@@ -67,7 +67,7 @@ const FilterDialog = ({ restaurantFilters, onFilterChange }: FilterDialogProps) 
         type="button"
         aria-label="Filtres"
         onClick={handleOpen}
-        className="relative grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-full text-foreground/60 transition hover:bg-muted"
+        className="relative flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full text-foreground/60 transition hover:bg-muted"
       >
         <BsFilter className="h-6 w-6" />
         {hasActiveFilters(restaurantFilters) && (

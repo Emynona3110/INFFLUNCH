@@ -148,7 +148,7 @@ const RestaurantsMap = ({ restaurants }: Props) => {
           type="button"
           onClick={fit}
           aria-label="Recentrer la carte"
-          className="grid h-7 w-7 place-items-center rounded-full bg-card shadow transition hover:bg-muted"
+          className="flex h-7 w-7 items-center justify-center rounded-full bg-card shadow transition hover:bg-muted"
         >
           <img src={isDark ? inffluxLogoWhite : inffluxLogo} alt="" className="h-4 w-4" />
         </button>

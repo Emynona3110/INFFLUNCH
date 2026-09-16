@@ -238,7 +238,7 @@ const PhotoUploadDialog = ({
                     type="button"
                     onClick={() => removeAt(i)}
                     aria-label="Retirer"
-                    className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-black/55 text-white opacity-0 transition group-hover:opacity-100"
+                    className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/55 text-white opacity-0 transition group-hover:opacity-100"
                   >
                     <FiX className="h-3.5 w-3.5" />
                   </button>

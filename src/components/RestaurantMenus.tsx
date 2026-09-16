@@ -170,7 +170,7 @@ const RestaurantMenus = ({
                 className="h-12 w-12 shrink-0 rounded-lg object-cover ring-1 ring-border"
               />
             ) : (
-              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-muted text-primary ring-1 ring-border">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-muted text-primary ring-1 ring-border">
                 <KindIcon kind={menu.kind} />
               </span>
             );
@@ -225,7 +225,7 @@ const RestaurantMenus = ({
                     <HoldToDeleteButton
                       onConfirm={() => handleDelete(menu)}
                       aria-label="Maintenir pour supprimer"
-                      className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
                       progressClassName="bg-destructive/70"
                     >
                       <FiTrash2 className="h-4 w-4" />
@@ -248,7 +248,7 @@ const RestaurantMenus = ({
             type="button"
             aria-label="Fermer"
             className={cn(
-              "absolute right-4 top-4 z-[1] grid h-10 w-10 cursor-pointer place-items-center rounded-full bg-white/15 text-white transition hover:bg-white/30",
+              "absolute right-4 top-4 z-[1] flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/30",
               zoomed && "pointer-events-none opacity-0"
             )}
             onClick={closeLightbox}

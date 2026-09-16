@@ -54,7 +54,7 @@ const Avatar = ({ email, avatarPath, size = 40, className }: Props) => {
     <div
       style={{ ...dim, fontSize: Math.round(size * 0.4) }}
       className={cn(
-        "grid shrink-0 place-items-center rounded-full font-bold",
+        "flex shrink-0 items-center justify-center rounded-full font-bold",
         avatarColor(email ?? "?"),
         className
       )}

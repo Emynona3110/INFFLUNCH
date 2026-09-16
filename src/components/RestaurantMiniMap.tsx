@@ -175,7 +175,7 @@ const RestaurantMiniMap = ({
           type="button"
           onClick={recenter}
           aria-label="Recentrer sur INFFLUX"
-          className="grid h-7 w-7 place-items-center rounded-full bg-card shadow transition hover:bg-muted"
+          className="flex h-7 w-7 items-center justify-center rounded-full bg-card shadow transition hover:bg-muted"
         >
           <img
             src={isDark ? inffluxLogoWhite : inffluxLogo}

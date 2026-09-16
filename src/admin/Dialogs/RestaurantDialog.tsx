@@ -623,7 +623,7 @@ const RestaurantDialog = ({
                   type="button"
                   aria-label="Créer un tag"
                   onClick={() => setCreatingTag(true)}
-                  className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-lg border border-border text-foreground/70 transition hover:bg-muted hover:text-primary"
+                  className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-border text-foreground/70 transition hover:bg-muted hover:text-primary"
                 >
                   <FiPlus className="h-5 w-5" />
                 </button>
@@ -666,7 +666,7 @@ const RestaurantDialog = ({
                   aria-label="Valider le tag"
                   onClick={handleCreateTag}
                   disabled={tagSubmitting || !newTag.trim()}
-                  className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-lg bg-primary/10 text-primary transition hover:bg-primary/20 disabled:pointer-events-none disabled:opacity-50"
+                  className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg bg-primary/10 text-primary transition hover:bg-primary/20 disabled:pointer-events-none disabled:opacity-50"
                 >
                   {tagSubmitting ? <Spinner /> : <FiCheck className="h-5 w-5" />}
                 </button>
@@ -678,7 +678,7 @@ const RestaurantDialog = ({
                     setNewTag("");
                     setNewTagCategory(DEFAULT_TAG_CATEGORY);
                   }}
-                  className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-lg border border-border text-foreground/70 transition hover:bg-muted"
+                  className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-border text-foreground/70 transition hover:bg-muted"
                 >
                   <FiX className="h-5 w-5" />
                 </button>

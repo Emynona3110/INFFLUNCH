@@ -245,7 +245,7 @@ const PhotoGallery = ({
           {canDelete && (
             <HoldToDeleteButton
               onConfirm={() => deletePhoto(photo)}
-              className="absolute right-1.5 top-1.5 grid h-8 w-8 place-items-center rounded-full bg-black/55 text-white opacity-0 backdrop-blur-sm transition group-hover:opacity-100"
+              className="absolute right-1.5 top-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-black/55 text-white opacity-0 backdrop-blur-sm transition group-hover:opacity-100"
               progressClassName="bg-destructive/70"
             >
               <FiTrash2 className="h-4 w-4" />
@@ -266,7 +266,7 @@ const PhotoGallery = ({
             type="button"
             aria-label="Photos précédentes"
             onClick={() => setStart(Math.max(0, safeStart - PAGE))}
-            className="absolute left-0 top-1/2 z-10 grid h-9 w-9 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-border bg-card text-foreground/70 shadow-md transition hover:text-primary"
+            className="absolute left-0 top-1/2 z-10 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-card text-foreground/70 shadow-md transition hover:text-primary"
           >
             <FiChevronLeft className="h-5 w-5" />
           </button>
@@ -276,7 +276,7 @@ const PhotoGallery = ({
             type="button"
             aria-label="Photos suivantes"
             onClick={() => setStart(Math.min(maxStart, safeStart + PAGE))}
-            className="absolute right-0 top-1/2 z-10 grid h-9 w-9 -translate-y-1/2 translate-x-1/2 place-items-center rounded-full border border-border bg-card text-foreground/70 shadow-md transition hover:text-primary"
+            className="absolute right-0 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full border border-border bg-card text-foreground/70 shadow-md transition hover:text-primary"
           >
             <FiChevronRight className="h-5 w-5" />
           </button>
@@ -318,7 +318,7 @@ const PhotoGallery = ({
             <button
               type="button"
               aria-label="Fermer"
-              className="grid h-10 w-10 cursor-pointer place-items-center rounded-full bg-white/15 text-white transition hover:bg-white/30"
+              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/30"
               onClick={closeLightbox}
             >
               <FiX className="h-5 w-5" />
@@ -336,7 +336,7 @@ const PhotoGallery = ({
                   step(-1);
                 }}
                 className={cn(
-                  "absolute left-1 z-[1] grid h-11 w-11 cursor-pointer place-items-center rounded-full bg-white/15 text-white transition hover:bg-white/30 sm:left-4",
+                  "absolute left-1 z-[1] flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/30 sm:left-4",
                   zoomed && "pointer-events-none opacity-0"
                 )}
               >
@@ -360,7 +360,7 @@ const PhotoGallery = ({
                   step(1);
                 }}
                 className={cn(
-                  "absolute right-1 z-[1] grid h-11 w-11 cursor-pointer place-items-center rounded-full bg-white/15 text-white transition hover:bg-white/30 sm:right-4",
+                  "absolute right-1 z-[1] flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/30 sm:right-4",
                   zoomed && "pointer-events-none opacity-0"
                 )}
               >
@@ -424,7 +424,7 @@ const PhotoGallery = ({
                         type="button"
                         aria-label="Enregistrer"
                         onClick={() => saveCaption(lightbox)}
-                        className="grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-full bg-primary text-primary-foreground transition hover:opacity-90"
+                        className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground transition hover:opacity-90"
                       >
                         <FiCheck className="h-4 w-4" />
                       </button>
@@ -450,7 +450,7 @@ const PhotoGallery = ({
                             : "Ajouter un descriptif"
                         }
                         onClick={() => setCaptionDraft(lightbox.caption ?? "")}
-                        className="grid h-7 w-7 shrink-0 cursor-pointer place-items-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                        className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
                       >
                         <FiEdit2 className="h-3.5 w-3.5" />
                       </button>

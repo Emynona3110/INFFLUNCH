@@ -220,7 +220,7 @@ const MenuAddDialog = ({ isOpen, onClose, isAdmin, onSubmit }: Props) => {
                 className="h-16 w-16 shrink-0 rounded-lg object-cover ring-1 ring-border"
               />
             ) : (
-              <span className="grid h-16 w-16 shrink-0 place-items-center rounded-lg bg-background ring-1 ring-border">
+              <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-background ring-1 ring-border">
                 <FiFileText className="h-7 w-7 text-primary" />
               </span>
             )}
@@ -231,7 +231,7 @@ const MenuAddDialog = ({ isOpen, onClose, isAdmin, onSubmit }: Props) => {
               type="button"
               onClick={clearFile}
               aria-label="Retirer le fichier"
-              className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-foreground/60 transition hover:bg-muted hover:text-foreground"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-foreground/60 transition hover:bg-muted hover:text-foreground"
             >
               <FiX className="h-4 w-4" />
             </button>

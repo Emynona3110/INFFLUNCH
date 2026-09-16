@@ -258,7 +258,7 @@ const RestaurantPage = () => {
                   type="button"
                   onClick={() => setEditOpen(true)}
                   aria-label="Modifier le restaurant"
-                  className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white/15 text-white backdrop-blur-sm transition hover:bg-white/30"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-sm transition hover:bg-white/30"
                 >
                   <FiEdit2 className="h-4 w-4" />
                 </button>
@@ -432,14 +432,14 @@ const RestaurantPage = () => {
                                     type="button"
                                     onClick={() => setShowForm(true)}
                                     aria-label="Modifier"
-                                    className="grid h-7 w-7 place-items-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-primary"
+                                    className="flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-primary"
                                   >
                                     <FiEdit2 className="h-3.5 w-3.5" />
                                   </button>
                                 )}
                                 <HoldToDeleteButton
                                   onConfirm={() => deleteReview(r.id)}
-                                  className="grid h-7 w-7 place-items-center rounded-full text-muted-foreground hover:text-destructive"
+                                  className="flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground hover:text-destructive"
                                   progressClassName="bg-destructive/15"
                                 >
                                   <FiTrash2 className="h-3.5 w-3.5" />
@@ -538,7 +538,7 @@ const RestaurantPage = () => {
                     type="button"
                     onClick={() => setMapEditOpen(true)}
                     aria-label="Modifier la position"
-                    className="grid h-8 w-8 place-items-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-primary"
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-primary"
                   >
                     <FiEdit2 className="h-4 w-4" />
                   </button>

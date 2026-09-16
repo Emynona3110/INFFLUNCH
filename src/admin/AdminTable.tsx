@@ -174,7 +174,7 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
                         type="button"
                         onClick={() => onEdit?.(row)}
                         aria-label="Modifier"
-                        className="grid h-8 w-8 cursor-pointer place-items-center rounded-full text-primary transition hover:bg-primary/10"
+                        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-primary transition hover:bg-primary/10"
                       >
                         <FiEdit2 className="h-4 w-4" />
                       </button>
@@ -184,7 +184,7 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
                         type="button"
                         onClick={() => onDelete?.(row)}
                         aria-label="Supprimer"
-                        className="grid h-8 w-8 cursor-pointer place-items-center rounded-full text-destructive transition hover:bg-destructive/10"
+                        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-destructive transition hover:bg-destructive/10"
                       >
                         <FiTrash2 className="h-4 w-4" />
                       </button>

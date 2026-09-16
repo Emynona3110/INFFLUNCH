@@ -35,7 +35,7 @@ const VoteControl = ({ score, myVote, onVote, disabled }: Props) => (
         onVote(1);
       }}
       className={cn(
-        "group grid h-5 w-5 place-items-center rounded-full p-0 transition",
+        "group flex h-5 w-5 items-center justify-center rounded-full p-0 transition",
         myVote === 1 ? "text-[#f79220]" : "text-foreground",
         !disabled && "cursor-pointer hover:bg-muted hover:text-[#f79220]"
       )}
@@ -71,7 +71,7 @@ const VoteControl = ({ score, myVote, onVote, disabled }: Props) => (
         onVote(-1);
       }}
       className={cn(
-        "group grid h-5 w-5 place-items-center rounded-full p-0 transition",
+        "group flex h-5 w-5 items-center justify-center rounded-full p-0 transition",
         myVote === -1 ? "text-primary" : "text-foreground",
         !disabled && "cursor-pointer hover:bg-muted hover:text-primary"
       )}

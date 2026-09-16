@@ -141,7 +141,7 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
             type="button"
             aria-label="Menu"
             onClick={() => setMenuOpen((o) => !o)}
-            className="grid h-10 w-10 cursor-pointer place-items-center rounded-md text-foreground/70 transition hover:bg-muted"
+            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-md text-foreground/70 transition hover:bg-muted"
           >
             <FiMoreVertical className="h-6 w-6" />
           </button>
@@ -194,7 +194,7 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
             type="button"
             onClick={() => setFeedbackOpen(true)}
             aria-label="Un souci, une idée ?"
-            className="grid h-9 w-9 cursor-pointer place-items-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-primary"
+            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-primary"
           >
             <FiMessageSquare className="h-5 w-5" />
           </button>

@@ -203,7 +203,7 @@ export default function LocationEditDialog({
                     setAddress(detected as string);
                     setDetected(null);
                   }}
-                  className="grid h-7 w-7 place-items-center rounded-full bg-primary/10 text-primary transition hover:bg-primary/20"
+                  className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary transition hover:bg-primary/20"
                 >
                   <FiCheck className="h-4 w-4" />
                 </button>
@@ -211,7 +211,7 @@ export default function LocationEditDialog({
                   type="button"
                   aria-label="Ignorer la suggestion"
                   onClick={() => setDetected(null)}
-                  className="grid h-7 w-7 place-items-center rounded-full text-foreground/50 transition hover:bg-muted hover:text-foreground"
+                  className="flex h-7 w-7 items-center justify-center rounded-full text-foreground/50 transition hover:bg-muted hover:text-foreground"
                 >
                   <FiX className="h-4 w-4" />
                 </button>

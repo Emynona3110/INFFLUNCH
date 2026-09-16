@@ -148,7 +148,7 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
                       tabIndex={0}
                       aria-label={`${def.title}, obtenu le ${formatDate(unlocked_at)}`}
                       className={cn(
-                        "grid h-14 w-14 place-items-center rounded-xl border border-border p-2 text-3xl outline-none transition focus-visible:ring-2 focus-visible:ring-primary/40",
+                        "flex h-14 w-14 items-center justify-center rounded-xl border border-border p-2 text-3xl outline-none transition focus-visible:ring-2 focus-visible:ring-primary/40",
                         known
                           ? cn("bg-background", !def.image && "bg-primary/10")
                           : "bg-muted/40 text-muted-foreground"

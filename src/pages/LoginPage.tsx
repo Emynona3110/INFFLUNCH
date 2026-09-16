@@ -101,7 +101,7 @@ const LoginPage = () => {
                       ? "Masquer le mot de passe"
                       : "Afficher le mot de passe"
                   }
-                  className="absolute inset-y-0 right-0 grid w-10 cursor-pointer place-items-center text-foreground/50 transition hover:text-foreground"
+                  className="absolute inset-y-0 right-0 flex w-10 cursor-pointer items-center justify-center text-foreground/50 transition hover:text-foreground"
                 >
                   {showPassword ? <VscEye /> : <VscEyeClosed />}
                 </button>

@@ -55,7 +55,7 @@ const LunchAvatars = ({
         {extra > 0 && (
           <span
             style={{ height: size, width: size, fontSize: Math.round(size * 0.38) }}
-            className="grid shrink-0 place-items-center rounded-full bg-muted font-bold text-foreground/70"
+            className="flex shrink-0 items-center justify-center rounded-full bg-muted font-bold text-foreground/70"
           >
             +{extra}
           </span>
@@ -78,7 +78,7 @@ const LunchAvatars = ({
         {extra > 0 && (
           <span
             style={{ height: size, width: size, fontSize: Math.round(size * 0.38) }}
-            className="grid shrink-0 place-items-center rounded-full bg-card font-bold text-foreground/70"
+            className="flex shrink-0 items-center justify-center rounded-full bg-card font-bold text-foreground/70"
           >
             +{extra}
           </span>

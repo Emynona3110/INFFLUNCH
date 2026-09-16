@@ -113,7 +113,7 @@ const AchievementsGallery = () => {
                 >
                   <div
                     className={cn(
-                      "grid h-14 w-14 shrink-0 place-items-center rounded-lg text-3xl",
+                      "flex h-14 w-14 shrink-0 items-center justify-center rounded-lg text-3xl",
                       // Cadre coloré uniquement pour les emojis ; les images
                       // occupent tout l'espace sans fond.
                       unlocked && !a.image && "bg-primary/10",
@@ -189,7 +189,7 @@ const AchievementsGallery = () => {
                     <HoldToDeleteButton
                       onConfirm={() => handleReset(a.id)}
                       aria-label="Maintenir pour reverrouiller ce succès"
-                      className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-muted-foreground hover:text-destructive"
+                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:text-destructive"
                       progressClassName="bg-destructive/15"
                     >
                       <FiTrash2 className="h-3.5 w-3.5" />

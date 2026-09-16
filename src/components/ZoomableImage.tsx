@@ -210,7 +210,7 @@ const ZoomableImage = ({ src, className, onScaleChange, resetToken }: Props) => 
           aria-label="Dézoomer"
           disabled={!zoomed}
           onClick={() => zoomBy(-STEP)}
-          className="grid h-7 w-7 cursor-pointer place-items-center rounded-full transition hover:bg-white/20 disabled:cursor-default disabled:opacity-35 disabled:hover:bg-transparent"
+          className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full transition hover:bg-white/20 disabled:cursor-default disabled:opacity-35 disabled:hover:bg-transparent"
         >
           <FiMinus className="h-4 w-4" />
         </button>
@@ -222,7 +222,7 @@ const ZoomableImage = ({ src, className, onScaleChange, resetToken }: Props) => 
           aria-label="Zoomer"
           disabled={scale >= MAX - 0.001}
           onClick={() => zoomBy(STEP)}
-          className="grid h-7 w-7 cursor-pointer place-items-center rounded-full transition hover:bg-white/20 disabled:cursor-default disabled:opacity-35 disabled:hover:bg-transparent"
+          className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full transition hover:bg-white/20 disabled:cursor-default disabled:opacity-35 disabled:hover:bg-transparent"
         >
           <FiPlus className="h-4 w-4" />
         </button>
@@ -231,7 +231,7 @@ const ZoomableImage = ({ src, className, onScaleChange, resetToken }: Props) => 
           aria-label="Taille d'origine"
           disabled={!zoomed}
           onClick={() => zoomAt(1, 0, 0)}
-          className="grid h-7 w-7 cursor-pointer place-items-center rounded-full transition hover:bg-white/20 disabled:cursor-default disabled:opacity-35 disabled:hover:bg-transparent"
+          className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full transition hover:bg-white/20 disabled:cursor-default disabled:opacity-35 disabled:hover:bg-transparent"
         >
           <FiRotateCcw className="h-3.5 w-3.5" />
         </button>

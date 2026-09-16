@@ -259,7 +259,7 @@ const AdminNotes = () => {
               className={cn(
                 // Fond au survol seulement : la pastille permanente alourdissait
                 // les tuiles terminées.
-                "grid h-8 w-8 cursor-pointer place-items-center rounded-full transition",
+                "flex h-8 w-8 cursor-pointer items-center justify-center rounded-full transition",
                 note.done
                   ? "text-primary hover:bg-primary/10"
                   : "text-foreground/35 hover:bg-muted hover:text-primary"
@@ -275,7 +275,7 @@ const AdminNotes = () => {
             <HoldToDeleteButton
               onConfirm={() => remove.mutate(note.id, { onError: fail })}
               aria-label="Maintenir pour supprimer"
-              className="grid h-8 w-8 place-items-center rounded-full text-foreground/35 transition hover:bg-muted hover:text-destructive"
+              className="flex h-8 w-8 items-center justify-center rounded-full text-foreground/35 transition hover:bg-muted hover:text-destructive"
               progressClassName="bg-destructive/25"
             >
               <FiTrash2 className="h-4 w-4" />
@@ -294,7 +294,7 @@ const AdminNotes = () => {
           aria-label={note.done ? undefined : "Glisser pour réordonner"}
           aria-hidden
           className={cn(
-            "grid h-8 w-4 shrink-0 touch-none place-items-center rounded text-foreground/25 transition-colors",
+            "flex h-8 w-4 shrink-0 touch-none items-center justify-center rounded text-foreground/25 transition-colors",
             note.done
               ? "invisible"
               : "cursor-grab hover:text-foreground/60 active:cursor-grabbing"

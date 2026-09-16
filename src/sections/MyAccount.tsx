@@ -219,7 +219,7 @@ const MyAccount = () => {
               onClick={() => fileRef.current?.click()}
               disabled={uploadAvatar.isPending}
               aria-label="Changer la photo de profil"
-              className="absolute -bottom-1 -right-1 grid h-8 w-8 place-items-center rounded-full bg-primary text-primary-foreground shadow-md transition hover:bg-primary/90 disabled:opacity-60"
+              className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md transition hover:bg-primary/90 disabled:opacity-60"
             >
               <FiCamera className="h-4 w-4" />
             </button>
@@ -229,7 +229,7 @@ const MyAccount = () => {
               <HoldToDeleteButton
                 onConfirm={handleRemove}
                 title="Maintenir pour retirer la photo"
-                className="absolute -right-1 -top-1 grid h-8 w-8 place-items-center rounded-full bg-destructive text-white shadow-md"
+                className="absolute -right-1 -top-1 flex h-8 w-8 items-center justify-center rounded-full bg-destructive text-white shadow-md"
                 progressClassName="bg-white/40"
               >
                 <FiTrash2 className="h-4 w-4" />

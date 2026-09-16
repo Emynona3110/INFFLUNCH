@@ -38,7 +38,7 @@ const ColorModeSwitch = ({ className, onJourNuit }: Props) => {
       onClick={onToggle}
       aria-label="Changer le thème"
       className={cn(
-        "grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-primary",
+        "flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-primary",
         className
       )}
     >

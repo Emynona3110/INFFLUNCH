@@ -14,7 +14,7 @@ const FavoritesToggle = ({ isChecked, onChange }: FavoritesToggleProps) => {
       aria-pressed={isChecked}
       onClick={() => onChange(!isChecked)}
       className={cn(
-        "grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-full transition hover:bg-muted",
+        "flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full transition hover:bg-muted",
         isChecked ? "text-[#ff6b81]" : "text-foreground/60 hover:text-[#ff6b81]"
       )}
     >

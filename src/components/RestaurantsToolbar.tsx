@@ -63,7 +63,7 @@ const RestaurantsToolbar = ({
                 aria-pressed={active}
                 onClick={() => onViewModeChange(mode)}
                 className={cn(
-                  "grid h-8 w-8 cursor-pointer place-items-center rounded-full transition",
+                  "flex h-8 w-8 cursor-pointer items-center justify-center rounded-full transition",
                   active
                     ? "bg-card text-primary shadow-sm"
                     : "text-foreground/55 hover:text-foreground"
@@ -94,7 +94,7 @@ const RestaurantsToolbar = ({
               type="button"
               aria-label="Ajouter un restaurant"
               onClick={() => setAddOpen(true)}
-              className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-primary"
+              className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-primary"
             >
               <FiPlus className="h-6 w-6" />
             </button>

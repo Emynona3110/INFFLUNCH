@@ -50,7 +50,7 @@ const PasswordField = ({
           type="button"
           onClick={() => setShow((p) => !p)}
           aria-label={show ? "Masquer le mot de passe" : "Afficher le mot de passe"}
-          className="absolute right-0 top-0 grid h-10 w-10 cursor-pointer place-items-center text-foreground/50 transition hover:text-foreground"
+          className="absolute right-0 top-0 flex h-10 w-10 cursor-pointer items-center justify-center text-foreground/50 transition hover:text-foreground"
         >
           {show ? <VscEye /> : <VscEyeClosed />}
         </button>

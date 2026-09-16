@@ -14,7 +14,7 @@ const BadgeButton = ({ label, src, isActive, onToggle }: BadgeButtonProps) => (
     aria-label={label}
     aria-pressed={isActive}
     className={cn(
-      "grid h-12 w-12 cursor-pointer place-items-center rounded-xl border transition duration-200",
+      "flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl border transition duration-200",
       isActive
         ? "border-primary/40 bg-primary/10"
         : "border-transparent opacity-45 grayscale hover:opacity-75"

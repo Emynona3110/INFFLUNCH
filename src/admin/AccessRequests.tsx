@@ -193,7 +193,7 @@ const AccessRequests = ({ activeType }: { activeType: RequestType }) => {
                                 aria-label="Accepter"
                                 disabled={processingId === req.id}
                                 onClick={() => handleAccept(req)}
-                                className="grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-full text-emerald-600 transition hover:bg-emerald-500/10 disabled:pointer-events-none disabled:opacity-50"
+                                className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-emerald-600 transition hover:bg-emerald-500/10 disabled:pointer-events-none disabled:opacity-50"
                               >
                                 {processingId === req.id &&
                                 processingAction === "accept" ? (
@@ -209,7 +209,7 @@ const AccessRequests = ({ activeType }: { activeType: RequestType }) => {
                                 aria-label="Refuser"
                                 disabled={processingId === req.id}
                                 onClick={() => handleReject(req)}
-                                className="grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-full text-destructive transition hover:bg-destructive/10 disabled:pointer-events-none disabled:opacity-50"
+                                className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-destructive transition hover:bg-destructive/10 disabled:pointer-events-none disabled:opacity-50"
                               >
                                 {processingId === req.id &&
                                 processingAction === "reject" ? (
@@ -225,7 +225,7 @@ const AccessRequests = ({ activeType }: { activeType: RequestType }) => {
                             <HoldToDeleteButton
                               onConfirm={() => handleDelete(req)}
                               aria-label="Maintenir pour supprimer la demande"
-                              className="grid h-8 w-8 place-items-center rounded-full text-destructive hover:bg-destructive/10"
+                              className="flex h-8 w-8 items-center justify-center rounded-full text-destructive hover:bg-destructive/10"
                               progressClassName="bg-destructive/20"
                             >
                               <FiTrash2 className="h-4 w-4" />
@@ -276,7 +276,7 @@ const AccessRequests = ({ activeType }: { activeType: RequestType }) => {
                   type="button"
                   onClick={() => copy(credentials.tempPassword)}
                   aria-label="Copier"
-                  className="grid h-9 w-9 cursor-pointer place-items-center rounded-lg border border-border text-foreground/70 transition hover:bg-muted"
+                  className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-border text-foreground/70 transition hover:bg-muted"
                 >
                   <FiCopy />
                 </button>
