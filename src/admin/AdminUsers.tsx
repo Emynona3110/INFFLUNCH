@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { FiCopy, FiKey, FiTrash2 } from "react-icons/fi";
 import { toast } from "@/lib/toast";
@@ -27,6 +28,7 @@ const fnError = async (error: any, data: any): Promise<string> => {
 const AdminUsers = () => {
   const queryClient = useQueryClient();
   const { data: users = [], isPending, error } = useUsers();
+  const navigate = useNavigate();
   const { sessionData } = useSession();
   const myId = sessionData?.user?.id;
 
@@ -121,7 +123,11 @@ const AdminUsers = () => {
                   return (
                     <tr
                       key={u.id}
-                      className="transition hover:bg-muted/40 [&>td]:border-t [&>td]:border-border/60"
+                      // La ligne mène au profil ; les boutons d'action stoppent
+                      // la propagation pour ne pas naviguer en même temps.
+                      onClick={() => navigate(`/profil/${u.id}`)}
+                      title="Voir le profil"
+                      className="cursor-pointer transition hover:bg-muted/40 [&>td]:border-t [&>td]:border-border/60"
                     >
                       <td className="px-4 py-1.5 text-foreground/90">
                         {u.email}
@@ -142,7 +148,10 @@ const AdminUsers = () => {
                         </span>
                       </td>
                       <td className="sticky right-0 z-[1] w-[120px] bg-card px-4 py-1.5 text-center shadow-[inset_1px_0_0_0_var(--border)]">
-                        <div className="flex justify-center gap-2">
+                        <div
+                          className="flex justify-center gap-2"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <Tooltip
                             label={
                               isMe
