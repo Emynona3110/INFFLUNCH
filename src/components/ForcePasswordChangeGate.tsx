@@ -62,12 +62,12 @@ const ForcePasswordChangeGate = ({ children }: Props) => {
   return (
     <Layout centerContent>
       <div className="tw-scope w-full max-w-md">
-        <Card className="p-8">
+        <Card className="p-5 sm:p-8">
           <div className="text-center">
             <div
               role="heading"
               aria-level={1}
-              className="font-display text-2xl font-extrabold text-card-foreground"
+              className="font-display text-xl font-extrabold text-card-foreground sm:text-2xl"
             >
               Choisis ton mot de passe
             </div>
@@ -77,13 +77,13 @@ const ForcePasswordChangeGate = ({ children }: Props) => {
           </div>
 
           {error && (
-            <div className="mt-5 rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            <div className="mt-4 rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive sm:mt-5">
               {error}
             </div>
           )}
 
           <form
-            className="mt-6 flex flex-col gap-4"
+            className="mt-4 flex flex-col gap-3 sm:mt-6 sm:gap-4"
             onSubmit={(e) => {
               e.preventDefault();
               handleSubmit();
@@ -95,6 +95,9 @@ const ForcePasswordChangeGate = ({ children }: Props) => {
               <span className="text-sm font-medium text-foreground">Compte</span>
               <Input
                 type="email"
+                inputMode="email"
+                autoCapitalize="none"
+                spellCheck={false}
                 id="username"
                 name="username"
                 autoComplete="username"

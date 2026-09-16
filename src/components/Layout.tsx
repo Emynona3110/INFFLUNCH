@@ -50,7 +50,7 @@ const Layout = ({
     children
   );
   return (
-    <div className="tw-scope flex h-screen flex-col bg-background text-foreground">
+    <div className="tw-scope flex h-dvh flex-col bg-background text-foreground">
       {withNavbar && navbarProps && (
         <header className="sticky top-0 z-[1000] flex h-12 shrink-0 items-center border-b border-border bg-card px-3 shadow-sm sm:h-[60px] sm:px-4">
           <Navbar {...navbarProps} />
@@ -78,7 +78,9 @@ const Layout = ({
           ref={mainRef}
           className="flex-1 overflow-y-auto overscroll-y-contain"
         >
-          <div className="flex min-h-full flex-col">
+          {/* Contenu centré (login…) : sur mobile le footer est posé en bas
+              sans prendre de place, pour un vrai centrage dans l'écran. */}
+          <div className={cn("flex min-h-full flex-col", centerContent && "relative")}>
             <div
               className={cn(
                 "mx-auto flex w-full max-w-[1200px] flex-1 flex-col px-2.5 py-3 sm:px-4 sm:py-6",
@@ -87,7 +89,9 @@ const Layout = ({
             >
               {content}
             </div>
-            <Footer />
+            <div className={cn(centerContent && "absolute inset-x-0 bottom-0 sm:static")}>
+              <Footer />
+            </div>
           </div>
         </main>
       )}

@@ -42,24 +42,24 @@ const LoginPage = () => {
   return (
     <Layout centerContent>
       <div className="tw-scope w-full max-w-md">
-        <Card className="p-8">
+        <Card className="p-5 sm:p-8">
           <div className="text-center">
             <div
               role="heading"
               aria-level={1}
-              className="font-display text-2xl font-extrabold text-card-foreground"
+              className="font-display text-xl font-extrabold text-card-foreground sm:text-2xl"
             >
-              Connexion à votre compte
+              Connexion
             </div>
           </div>
 
           {message && (
-            <div className="mt-5 rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            <div className="mt-4 rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive sm:mt-5">
               {message}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
+          <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3 sm:mt-6 sm:gap-4">
             <label className="flex flex-col gap-1.5">
               <span className="text-sm font-medium text-foreground">
                 Adresse e-mail
@@ -69,6 +69,9 @@ const LoginPage = () => {
                 id="username"
                 name="username"
                 autoComplete="username"
+                inputMode="email"
+                autoCapitalize="none"
+                spellCheck={false}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -123,7 +126,7 @@ const LoginPage = () => {
             </Button>
           </form>
 
-          <div className="my-6 h-px bg-border" />
+          <div className="my-4 h-px bg-border sm:my-6" />
 
           <p className="text-center text-sm text-foreground/60">
             Nouveau sur Infflunch ?{" "}

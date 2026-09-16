@@ -33,12 +33,12 @@ const ForgotPassword = () => {
   return (
     <Layout centerContent>
       <div className="tw-scope w-full max-w-md">
-        <Card className="p-8">
+        <Card className="p-5 sm:p-8">
           <div className="text-center">
             <div
               role="heading"
               aria-level={1}
-              className="font-display text-2xl font-extrabold text-card-foreground"
+              className="font-display text-xl font-extrabold text-card-foreground sm:text-2xl"
             >
               Mot de passe oublié
             </div>
@@ -48,18 +48,21 @@ const ForgotPassword = () => {
           </div>
 
           {done ? (
-            <div className="mt-6 rounded-lg bg-primary/10 px-4 py-5 text-center text-sm text-foreground">
+            <div className="mt-4 rounded-lg bg-primary/10 px-4 py-4 text-center text-sm text-foreground sm:mt-6 sm:py-5">
               Demande envoyée ! Si un compte correspond, un administrateur te
               transmettra un nouveau mot de passe temporaire.
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
+            <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3 sm:mt-6 sm:gap-4">
               <label className="flex flex-col gap-1.5">
                 <span className="text-sm font-medium text-foreground">
                   Adresse e-mail
                 </span>
                 <Input
                   type="email"
+                  inputMode="email"
+                  autoCapitalize="none"
+                  spellCheck={false}
                   id="username"
                   name="username"
                   autoComplete="username"
@@ -79,7 +82,7 @@ const ForgotPassword = () => {
             </form>
           )}
 
-          <div className="my-6 h-px bg-border" />
+          <div className="my-4 h-px bg-border sm:my-6" />
 
           <p className="text-center">
             <button

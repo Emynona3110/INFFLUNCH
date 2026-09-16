@@ -59,6 +59,9 @@ const Turnstile = ({ siteKey, onToken, onExpire }: TurnstileProps) => {
         if (cancelled || !containerRef.current || !window.turnstile) return;
         widgetId.current = window.turnstile.render(containerRef.current, {
           sitekey: siteKey,
+          // Largeur du conteneur (min 300 px) au lieu des 300 px fixes qui
+          // débordaient du champ sur mobile.
+          size: "flexible",
           callback: (token: string) => onTokenRef.current(token),
           "expired-callback": () => onExpireRef.current?.(),
           "error-callback": () => onExpireRef.current?.(),
@@ -75,7 +78,7 @@ const Turnstile = ({ siteKey, onToken, onExpire }: TurnstileProps) => {
     };
   }, [siteKey]);
 
-  return <div ref={containerRef} />;
+  return <div ref={containerRef} className="w-full" />;
 };
 
 export default Turnstile;
