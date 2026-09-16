@@ -24,8 +24,16 @@ import {
   SECTION,
   SECTION_HEAD,
   SECTION_TITLE,
-  SECTION_BODY_PAD,
+  SECTION_BODY,
 } from "@/lib/sectionClasses";
+
+/** Mobile : date courte JJ/MM/AA. */
+const formatShortDate = (iso: string) =>
+  new Date(iso).toLocaleDateString("fr-FR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
+  });
 
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString("fr-FR", {
@@ -144,7 +152,7 @@ const MyAccount = () => {
               )}
             </div>
           </div>
-          <div className={SECTION_BODY_PAD}>
+          <div className={SECTION_BODY}>
             {reviewsLoading ? (
               <div className="flex justify-center py-5 sm:py-8">
                 <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
@@ -154,7 +162,7 @@ const MyAccount = () => {
                 Tu n'as encore laissé aucun avis.
               </p>
             ) : (
-              <ul className="m-0 list-none space-y-2 p-0">
+              <ul className="m-0 list-none divide-y divide-border p-0 sm:divide-y-0 sm:space-y-2">
                 {reviews.map((r) => (
                   <li key={r.id}>
                     <button
@@ -163,25 +171,28 @@ const MyAccount = () => {
                         r.restaurant &&
                         navigate(`/restaurant/${r.restaurant.slug}`)
                       }
-                      className="flex w-full items-center gap-3 rounded-xl border border-border bg-background p-3 text-left transition hover:border-primary/40 hover:bg-muted/40"
+                      className="flex min-h-[60px] w-full items-center gap-3 px-3 py-2.5 text-left transition hover:bg-muted/40 sm:min-h-0 sm:rounded-xl sm:border sm:border-border sm:bg-background sm:p-3 sm:hover:border-primary/40"
                     >
                       <div className="min-w-0 flex-1">
+                        {/* Mobile : resto à gauche, étoiles à droite ; dessous
+                            date courte + commentaire sur une ligne (…). */}
                         <div className="flex items-center gap-2">
-                          <span className="truncate font-semibold text-card-foreground">
+                          <span className="min-w-0 flex-1 truncate text-sm font-semibold text-card-foreground sm:flex-none sm:text-base">
                             {r.restaurant?.name ?? "Restaurant supprimé"}
                           </span>
                           <Stars n={r.rating} />
-                          <span className="text-xs text-foreground/45">
+                          <span className="hidden text-xs text-foreground/45 sm:inline">
                             · {formatDate(r.created_at)}
                           </span>
                         </div>
-                        {r.comment && (
-                          <p className="mb-0 mt-0.5 truncate text-sm text-foreground/70">
-                            {r.comment}
-                          </p>
-                        )}
+                        <p className="mb-0 mt-0.5 flex min-w-0 items-baseline gap-2 text-[13px] text-foreground/70 sm:text-sm">
+                          <span className="shrink-0 text-xs tabular-nums text-foreground/45 sm:hidden">
+                            {formatShortDate(r.created_at)}
+                          </span>
+                          {r.comment && <span className="truncate">{r.comment}</span>}
+                        </p>
                       </div>
-                      <FiChevronRight className="h-5 w-5 shrink-0 text-foreground opacity-30" />
+                      <FiChevronRight className="hidden h-5 w-5 shrink-0 text-foreground opacity-30 sm:block" />
                     </button>
                   </li>
                 ))}

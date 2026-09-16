@@ -13,8 +13,16 @@ import {
   SECTION,
   SECTION_HEAD,
   SECTION_TITLE,
-  SECTION_BODY_PAD,
+  SECTION_BODY,
 } from "@/lib/sectionClasses";
+
+/** Mobile : date courte JJ/MM/AA. */
+const formatShortDate = (iso: string) =>
+  new Date(iso).toLocaleDateString("fr-FR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
+  });
 
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString("fr-FR", {
@@ -95,13 +103,15 @@ const AchievementsGallery = () => {
           </span>
         </div>
       </div>
-      <div className={SECTION_BODY_PAD}>
+      <div className={SECTION_BODY}>
         {loading ? (
           <div className="flex justify-center py-5 sm:py-8">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
           </div>
         ) : (
-          <ul className="m-0 list-none space-y-2 p-0">
+          /* Mobile : lignes empilées séparées d'un filet, directement dans le cadre
+             de la section ; desktop : tuiles arrondies espacées. */
+          <ul className="m-0 list-none divide-y divide-border p-0 sm:divide-y-0 sm:space-y-2">
             {sorted.map((a) => {
               const unlocked = unlockedIds.includes(a.id);
               const date = unlockedAt[a.id];
@@ -118,13 +128,13 @@ const AchievementsGallery = () => {
                   )}
                   <div
                     className={cn(
-                      "flex h-full items-center gap-3 rounded-xl border border-border p-3",
-                      unlocked ? "bg-background" : "bg-muted/40",
+                      "flex h-full min-h-[60px] items-center gap-3 px-3 py-2.5 sm:min-h-0 sm:rounded-xl sm:border sm:border-border sm:p-3",
+                      unlocked ? "sm:bg-background" : "bg-muted/40",
                     )}
                   >
                     <div
                       className={cn(
-                        "flex h-14 w-14 shrink-0 items-center justify-center rounded-lg text-2xl sm:text-3xl",
+                        "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-xl sm:h-14 sm:w-14 sm:text-3xl",
                         // Cadre coloré uniquement pour les emojis ; les images
                         // occupent tout l'espace sans fond.
                         unlocked && !a.image && "bg-primary/10",
@@ -144,7 +154,7 @@ const AchievementsGallery = () => {
                           a.icon
                         )
                       ) : (
-                        <FiLock className="h-7 w-7" />
+                        <FiLock className="h-5 w-5 sm:h-7 sm:w-7" />
                       )}
                     </div>
 
@@ -162,29 +172,50 @@ const AchievementsGallery = () => {
                             {a.title}
                           </p>
                           {date && (
-                            <span className="shrink-0 whitespace-nowrap text-[11px] leading-none text-foreground/40">
+                            <span className="hidden shrink-0 whitespace-nowrap text-[11px] leading-none text-foreground/40 sm:inline">
                               {formatDate(date)}
+                            </span>
+                          )}
+                          {/* Mobile : % à droite du titre. */}
+                          {statsReady && (
+                            <span className="ml-auto shrink-0 text-xs font-semibold text-foreground/45 sm:hidden">
+                              {percent.toFixed(1)}%
                             </span>
                           )}
                         </div>
                         <p
                           className={cn(
-                            "m-0 mt-0.5 text-xs leading-snug",
+                            "m-0 mt-0.5 flex min-w-0 items-baseline gap-2 text-xs leading-snug",
                             unlocked
                               ? "text-foreground/55"
                               : "text-foreground/40",
                           )}
                         >
-                          {a.condition ?? secretConditions[a.id]}
+                          {/* Mobile : date courte puis condition sur une ligne. */}
+                          {date && (
+                            <span className="shrink-0 tabular-nums text-foreground/40 sm:hidden">
+                              {formatShortDate(date)}
+                            </span>
+                          )}
+                          <span className="truncate sm:whitespace-normal">
+                            {a.condition ?? secretConditions[a.id]}
+                          </span>
                         </p>
                       </div>
                     ) : (
                       // Secret : le titre se montre, seule la condition reste à
                       // deviner — un nom qui intrigue vaut mieux qu'un blanc.
                       <div className="min-w-0 flex-1">
-                        <p className="m-0 truncate text-sm font-bold leading-tight text-foreground/50">
-                          {a.title}
-                        </p>
+                        <div className="flex items-baseline gap-2">
+                          <p className="m-0 truncate text-sm font-bold leading-tight text-foreground/50">
+                            {a.title}
+                          </p>
+                          {statsReady && (
+                            <span className="ml-auto shrink-0 text-xs font-semibold text-foreground/45 sm:hidden">
+                              {percent.toFixed(1)}%
+                            </span>
+                          )}
+                        </div>
                         <p className="m-0 mt-0.5 text-xs leading-snug text-foreground/40">
                           Succès secret
                         </p>
@@ -194,7 +225,7 @@ const AchievementsGallery = () => {
                     {/* Pourcentage d'obtention affiché pour TOUS les succès (y
                       compris 0 %, secrets et verrouillés), une fois chargé. */}
                     {statsReady && (
-                      <span className="shrink-0 whitespace-nowrap pl-2 text-xs font-semibold text-foreground/45">
+                      <span className="hidden shrink-0 whitespace-nowrap pl-2 text-xs font-semibold text-foreground/45 sm:inline">
                         {percent.toFixed(1)}%
                       </span>
                     )}
