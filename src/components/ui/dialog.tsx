@@ -32,14 +32,14 @@ export function Dialog({ open, onClose, children, className }: DialogProps) {
 
   return createPortal(
     <div
-      className="tw-scope fixed inset-0 z-[1100] flex justify-center overflow-y-auto bg-black/50 p-4"
+      className="tw-scope fixed inset-0 z-[1100] flex justify-center overflow-y-auto bg-black/50 p-2.5 sm:p-4"
       onClick={onClose}
     >
       <div
         role="dialog"
         aria-modal="true"
         className={cn(
-          "my-auto w-full max-w-md rounded-card border border-border bg-card p-6 shadow-xl",
+          "my-auto w-full max-w-md rounded-card border border-border bg-card p-4 shadow-xl sm:p-6",
           className
         )}
         onClick={(e) => e.stopPropagation()}
@@ -57,7 +57,7 @@ export function DialogTitle({ children }: { children: ReactNode }) {
     <div
       role="heading"
       aria-level={2}
-      className="font-display text-xl font-bold text-card-foreground"
+      className="font-display text-lg font-bold text-card-foreground sm:text-xl"
     >
       {children}
     </div>

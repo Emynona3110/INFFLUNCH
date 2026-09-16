@@ -137,7 +137,7 @@ const TagDialog = ({ isOpen, onClose, onSuccess, initialData }: TagDialogProps) 
       <DialogTitle>{initialData ? "Modifier un tag" : "Ajouter un tag"}</DialogTitle>
 
       <form
-        className="mt-5 flex flex-col gap-4"
+        className="mt-4 sm:mt-5 flex flex-col gap-3 sm:gap-4"
         onSubmit={(e) => {
           e.preventDefault();
           handleSubmit();

@@ -175,7 +175,7 @@ const MenuAddDialog = ({ isOpen, onClose, isAdmin, onSubmit }: Props) => {
     <Dialog open={isOpen} onClose={onClose} className="max-w-lg">
       <DialogTitle>Ajouter un menu</DialogTitle>
 
-      <div className="mt-5 space-y-4">
+      <div className="mt-4 sm:mt-5 space-y-3 sm:space-y-4">
         {/* Choix du format */}
         <div className="flex gap-2">
           {KINDS.map(({ value, label, icon: Icon }) => (
@@ -315,7 +315,7 @@ const MenuAddDialog = ({ isOpen, onClose, isAdmin, onSubmit }: Props) => {
         )}
       </div>
 
-      <div className="mt-6 flex justify-end gap-2">
+      <div className="mt-4 sm:mt-6 flex justify-end gap-2">
         <Button variant="outline" onClick={onClose} disabled={busy}>
           Annuler
         </Button>

@@ -177,7 +177,7 @@ const PhotoUploadDialog = ({
     <Dialog open={isOpen} onClose={onClose} className="max-w-lg">
       <DialogTitle>Ajouter une photo</DialogTitle>
 
-      <div className="mt-5 space-y-4">
+      <div className="mt-4 sm:mt-5 space-y-3 sm:space-y-4">
         {/* Zone de dépôt */}
         <div
           role="button"
@@ -290,7 +290,7 @@ const PhotoUploadDialog = ({
         )}
       </div>
 
-      <div className="mt-6 flex justify-end gap-2">
+      <div className="mt-4 sm:mt-6 flex justify-end gap-2">
         <Button variant="outline" onClick={onClose} disabled={busy}>
           Annuler
         </Button>

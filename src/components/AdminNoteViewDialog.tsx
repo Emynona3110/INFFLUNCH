@@ -53,7 +53,7 @@ const AdminNoteViewDialog = ({ isOpen, onClose, note, onEdit }: Props) => {
       </p>
 
       {/* Long texte : c'est lui qui défile, pas la popup. */}
-      <p className="mb-0 mt-5 max-h-[50dvh] overflow-y-auto whitespace-pre-wrap break-words text-sm text-foreground/85">
+      <p className="mb-0 mt-4 sm:mt-5 max-h-[50dvh] overflow-y-auto whitespace-pre-wrap break-words text-sm text-foreground/85">
         {note.description}
       </p>
 
@@ -62,7 +62,7 @@ const AdminNoteViewDialog = ({ isOpen, onClose, note, onEdit }: Props) => {
         count={origin?.edits ?? 0}
       />
 
-      <div className="mt-6 flex justify-end gap-2">
+      <div className="mt-4 sm:mt-6 flex justify-end gap-2">
         <Button variant="outline" onClick={onClose}>
           Fermer
         </Button>

@@ -53,7 +53,7 @@ const AdminNoteDialog = ({ isOpen, onClose, note, onSubmit }: Props) => {
     <Dialog open={isOpen} onClose={onClose} className="max-w-lg">
       <DialogTitle>{note ? "Modifier la note" : "Nouvelle note"}</DialogTitle>
 
-      <div className="mt-5 space-y-4">
+      <div className="mt-4 sm:mt-5 space-y-3 sm:space-y-4">
         <div className="flex flex-col gap-1.5">
           <span className="text-sm font-medium text-foreground">Catégorie</span>
           <div className="flex flex-wrap gap-2">
@@ -112,7 +112,7 @@ const AdminNoteDialog = ({ isOpen, onClose, note, onSubmit }: Props) => {
         </label>
       </div>
 
-      <div className="mt-6 flex justify-end gap-2">
+      <div className="mt-4 sm:mt-6 flex justify-end gap-2">
         <Button variant="outline" onClick={onClose} disabled={busy}>
           Annuler
         </Button>

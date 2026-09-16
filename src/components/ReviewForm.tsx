@@ -82,7 +82,7 @@ const ReviewForm = ({ restaurantId, existing, onDone }: Props) => {
     <Dialog open onClose={onDone} className="max-w-md">
       <DialogTitle>{existing ? "Modifier mon avis" : "Donner un avis"}</DialogTitle>
 
-      <div className="mt-5 flex flex-col gap-1.5">
+      <div className="mt-4 sm:mt-5 flex flex-col gap-1.5">
         <span className="text-sm font-medium text-foreground">Ta note</span>
         <StarRatingInput value={rating} onChange={setRating} />
       </div>

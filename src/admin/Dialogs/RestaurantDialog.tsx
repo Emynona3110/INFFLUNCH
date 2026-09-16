@@ -21,7 +21,7 @@ import {
 } from "../../services/uploadImage";
 import { coverPathBase } from "../../services/storagePaths";
 import { fetchWalkMinutes, estimateWalkMinutes } from "../../services/walkTime";
-import { FiChevronDown, FiPlus, FiCheck, FiX } from "react-icons/fi";
+import { FiChevronDown, FiPlus, FiCheck, FiX, FiTrash2 } from "react-icons/fi";
 import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -535,8 +535,8 @@ const RestaurantDialog = ({
         {initialData ? "Modifier un restaurant" : "Ajouter un restaurant"}
       </DialogTitle>
 
-      <div className="mt-5 space-y-6">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="mt-4 space-y-4 sm:mt-5 sm:space-y-6">
+        <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2">
           <label className="flex flex-col gap-1.5">
             <span className="text-sm font-medium text-foreground">Nom</span>
             <Input
@@ -590,7 +590,7 @@ const RestaurantDialog = ({
           </label>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
           {/* Tags */}
           <div>
             <span className="text-sm font-bold text-foreground">Tags</span>
@@ -701,7 +701,7 @@ const RestaurantDialog = ({
         </div>
 
         {/* Statut : fermeture et verrou des contributions (indépendants). */}
-        <div className="flex flex-wrap gap-x-8 gap-y-3 rounded-xl border border-border bg-muted/30 p-4">
+        <div className="flex flex-wrap gap-x-8 gap-y-2.5 rounded-xl border border-border bg-muted/30 p-3 sm:gap-y-3 sm:p-4">
           <label className="flex cursor-pointer items-center gap-2.5">
             <input
               type="checkbox"
@@ -728,7 +728,7 @@ const RestaurantDialog = ({
         </div>
       </div>
 
-      <div className="mt-6 flex items-center justify-between gap-2">
+      <div className="mt-4 flex items-center justify-between gap-2 sm:mt-6">
         <div>
           {initialData?.id && (
             <button
@@ -740,7 +740,7 @@ const RestaurantDialog = ({
               onPointerCancel={cancelHold}
               onContextMenu={(e) => e.preventDefault()}
               aria-label="Maintenir pour supprimer"
-              className="relative inline-flex h-10 cursor-pointer touch-none select-none items-center justify-center overflow-hidden rounded-lg bg-destructive px-4 text-sm font-medium text-white transition hover:bg-destructive/90 disabled:pointer-events-none disabled:opacity-50"
+              className="relative inline-flex h-10 cursor-pointer touch-none select-none items-center justify-center overflow-hidden rounded-lg bg-destructive px-3 text-sm sm:px-4 font-medium text-white transition hover:bg-destructive/90 disabled:pointer-events-none disabled:opacity-50"
             >
               {/* Barre de progression de l'appui long */}
               <span
@@ -754,7 +754,11 @@ const RestaurantDialog = ({
               />
               <span className="relative inline-flex items-center gap-2">
                 {isDeleting && <Spinner />}
-                {isDeleting ? "Suppression…" : "Supprimer"}
+                {/* Mobile : icône seule pour laisser la place à Annuler/Modifier. */}
+                <FiTrash2 className="h-4 w-4 sm:hidden" />
+                <span className="hidden sm:inline">
+                  {isDeleting ? "Suppression…" : "Supprimer"}
+                </span>
               </span>
             </button>
           )}

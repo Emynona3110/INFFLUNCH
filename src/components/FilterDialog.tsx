@@ -78,7 +78,7 @@ const FilterDialog = ({ restaurantFilters, onFilterChange }: FilterDialogProps) 
       <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
         <DialogTitle>Filtres</DialogTitle>
 
-        <div className="mt-5 space-y-5">
+        <div className="mt-4 sm:mt-5 space-y-4 sm:space-y-5">
           {/* Tri */}
           <div>
             <span className="text-sm font-bold text-foreground">Trier par</span>
@@ -174,7 +174,7 @@ const FilterDialog = ({ restaurantFilters, onFilterChange }: FilterDialogProps) 
           </div>
         </div>
 
-        <div className="mt-6 flex items-center justify-between">
+        <div className="mt-4 sm:mt-6 flex items-center justify-between">
           <Button
             variant="ghost"
             onClick={() => setLocalQuery(defaultRestaurantFilters)}

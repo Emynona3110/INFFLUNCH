@@ -83,7 +83,7 @@ const ChangePasswordDialog = ({ isOpen, onClose }: ChangePasswordDialogProps) =>
       <DialogTitle>Changer le mot de passe</DialogTitle>
 
       <form
-        className="mt-5 flex flex-col gap-4"
+        className="mt-4 sm:mt-5 flex flex-col gap-3 sm:gap-4"
         onSubmit={(e) => {
           e.preventDefault();
           handleSubmit();

@@ -139,7 +139,7 @@ const BadgeDialog = ({ isOpen, onClose, onSuccess, initialData }: BadgeDialogPro
       <DialogTitle>{initialData ? "Modifier un badge" : "Ajouter un badge"}</DialogTitle>
 
       <form
-        className="mt-5 flex flex-col gap-4"
+        className="mt-4 sm:mt-5 flex flex-col gap-3 sm:gap-4"
         onSubmit={(e) => {
           e.preventDefault();
           handleSubmit();

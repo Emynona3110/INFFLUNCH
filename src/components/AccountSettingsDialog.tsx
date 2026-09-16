@@ -167,7 +167,7 @@ dans la navbar où il occupait une position permanente. */}
           />
         </div>
 
-        <div className="my-6 h-px bg-border" />
+        <div className="my-4 sm:my-6 h-px bg-border" />
 
         <div className="flex flex-col gap-3">
           {isAdmin && <PushToggle />}

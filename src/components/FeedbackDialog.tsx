@@ -121,7 +121,7 @@ const FeedbackDialog = ({ isOpen, onClose, item }: Props) => {
             : "Nouvelle demande"}
       </DialogTitle>
 
-      <div className="mt-5 space-y-4">
+      <div className="mt-4 sm:mt-5 space-y-3 sm:space-y-4">
         {/* Les trois pastilles se suffisent : un intitulé « Nature » au-dessus
             n'apprendrait rien de plus. */}
         <div>
@@ -179,7 +179,7 @@ const FeedbackDialog = ({ isOpen, onClose, item }: Props) => {
 
       {/* Pas de suppression ici : elle vit dans la popup de lecture, d'où l'on
           arrive. */}
-      <div className="mt-6 flex justify-end">
+      <div className="mt-4 sm:mt-6 flex justify-end">
         <div className="flex gap-2">
           <Button variant="outline" onClick={onClose} disabled={busy}>
             Annuler

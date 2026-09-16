@@ -63,13 +63,13 @@ const FeedbackViewDialog = ({
       </p>
 
       {/* Long texte : c'est lui qui défile, pas la popup. */}
-      <p className="mb-0 mt-5 max-h-[50dvh] overflow-y-auto whitespace-pre-wrap break-words text-sm text-foreground/85">
+      <p className="mb-0 mt-4 sm:mt-5 max-h-[50dvh] overflow-y-auto whitespace-pre-wrap break-words text-sm text-foreground/85">
         {item.message}
       </p>
 
       <FeedbackVersions feedbackId={item.id} count={item.edits} />
 
-      <div className="mt-6 flex items-center justify-between gap-2">
+      <div className="mt-4 sm:mt-6 flex items-center justify-between gap-2">
         <div>
           {onDelete && (
             <HoldToDeleteButton
