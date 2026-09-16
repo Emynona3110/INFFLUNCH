@@ -31,13 +31,13 @@ export const buildUserSections = (isAdmin: boolean) =>
         { label: "Déjeuner", path: "dejeuner" },
         { label: "Admin", path: "admin" },
         { label: "Nouveautés", path: "nouveautes" },
-        { label: "Mon Profil", path: "mon-compte" },
+        { label: "Compte", path: "mon-compte" },
       ]
     : [
         { label: "Restaurants", path: "restaurants" },
         { label: "Déjeuner", path: "dejeuner" },
         { label: "Nouveautés", path: "nouveautes" },
-        { label: "Mon Profil", path: "mon-compte" },
+        { label: "Compte", path: "mon-compte" },
         { label: "À propos", path: "a-propos" },
       ];
 

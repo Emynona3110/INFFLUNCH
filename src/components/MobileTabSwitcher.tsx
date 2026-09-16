@@ -91,11 +91,12 @@ export function MobileTabSwitcher<K extends string>({
                 onClick={() => d !== 0 && onChange(t.key)}
                 className={cn(
                   "relative flex h-9 shrink-0 items-center whitespace-nowrap transition-all duration-300 ease-out",
+                  "font-display text-sm",
                   d === 0
-                    ? "font-display text-sm font-bold text-primary"
+                    ? "font-bold text-primary"
                     : d === 1
-                      ? "scale-90 text-xs text-foreground/45"
-                      : "scale-75 text-[11px] text-foreground/25",
+                      ? "font-medium text-foreground/45"
+                      : "font-medium text-foreground/25",
                   d > 2 && "opacity-0"
                 )}
               >

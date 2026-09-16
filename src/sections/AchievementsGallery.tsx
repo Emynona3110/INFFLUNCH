@@ -87,7 +87,7 @@ const AchievementsGallery = () => {
         "sm:p-6 sm:shadow-[0_10px_30px_-12px_rgba(2,8,40,0.18)]",
       )}
     >
-      <div className={SECTION_HEAD}>
+      <div className={cn(SECTION_HEAD, "hidden sm:flex")}>
         <div role="heading" aria-level={2} className={SECTION_TITLE}>
           Succès
           <span className="ml-2 hidden text-sm font-medium text-foreground/45 sm:inline">

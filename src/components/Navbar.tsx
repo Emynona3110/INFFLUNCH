@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { FiMessageSquare, FiChevronDown } from "react-icons/fi";
+import { FiMessageSquare, FiChevronDown, FiSettings } from "react-icons/fi";
+import AccountSettingsDialog from "./AccountSettingsDialog";
 import { AnimatePresence, motion } from "framer-motion";
 import darkLogo from "../assets/infflux.svg";
 import lightLogo from "../assets/w-infflux.svg";
@@ -27,6 +28,8 @@ interface NavbarProps {
 
 const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  // Réglages du compte (pp, thème, mdp, déconnexion) : popup via le rouage.
+  const [settingsOpen, setSettingsOpen] = useState(false);
   // Signaler un bug ou proposer une idée depuis n'importe quel écran : c'est au
   // moment où on le rencontre qu'on le dit, pas après être allé le chercher.
   const [feedbackOpen, setFeedbackOpen] = useState(false);
@@ -171,81 +174,81 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
             );
           })}
         </nav>
-      </div>
 
-      {/* Mobile (< md) : nom de l'onglet courant centré ; au tap, les autres
-          onglets se déroulent dessous (même animation que le sélecteur de vue). */}
-      <div
-        ref={menuRef}
-        className="absolute left-1/2 top-0 flex h-full -translate-x-1/2 items-center md:hidden"
-      >
-        <button
-          type="button"
-          aria-haspopup="menu"
-          aria-expanded={menuOpen}
-          onClick={() => setMenuOpen((o) => !o)}
-          className="relative flex h-8 items-center gap-1 rounded-full bg-muted px-3 font-display text-sm font-bold text-primary"
+        {/* Mobile (< md) : nom de l'onglet courant, à gauche ; au tap, les autres
+            onglets se déroulent dessous (même animation que le sélecteur de vue). */}
+        <div
+          ref={menuRef}
+          className="relative ml-1 flex h-full items-center md:hidden"
         >
-          {currentLabel}
-          <FiChevronDown
-            className={cn(
-              "h-4 w-4 text-foreground/50 transition-transform",
-              menuOpen && "rotate-180",
-            )}
-          />
-          {othersDot && !menuOpen && (
-            <span
+          <button
+            type="button"
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((o) => !o)}
+            className="relative flex h-8 items-center gap-1 rounded-full bg-muted px-3 font-display text-sm font-bold text-primary"
+          >
+            {currentLabel}
+            <FiChevronDown
               className={cn(
-                "absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-card",
-                othersDot,
+                "h-4 w-4 text-foreground/50 transition-transform",
+                menuOpen && "rotate-180",
               )}
             />
-          )}
-        </button>
-        <AnimatePresence>
-          {menuOpen && (
-            <motion.div
-              role="menu"
-              initial={{ opacity: 0, scaleY: 0.6 }}
-              animate={{ opacity: 1, scaleY: 1 }}
-              exit={{ opacity: 0, scaleY: 0.6 }}
-              transition={{ duration: 0.18, ease: "easeOut" }}
-              style={{ originY: 0 }}
-              className="absolute left-1/2 top-full z-20 flex -translate-x-1/2 flex-col gap-1 rounded-2xl bg-muted p-1 shadow-md"
-            >
-              {sections
-                .filter((item) => item.path !== page)
-                .map((item, i) => {
-                  const dot = dotFor(item.path);
-                  return (
-                    <motion.button
-                      key={item.path}
-                      type="button"
-                      role="menuitem"
-                      initial={{ opacity: 0, y: -6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.04 * i, duration: 0.15 }}
-                      onClick={() => {
-                        setPage(item.path);
-                        setMenuOpen(false);
-                      }}
-                      className="relative flex h-8 items-center justify-center whitespace-nowrap rounded-full bg-card px-3 text-sm font-medium text-foreground/80 shadow-sm"
-                    >
-                      {item.label}
-                      {dot && (
-                        <span
-                          className={cn(
-                            "absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-card",
-                            dot,
-                          )}
-                        />
-                      )}
-                    </motion.button>
-                  );
-                })}
-            </motion.div>
-          )}
-        </AnimatePresence>
+            {othersDot && !menuOpen && (
+              <span
+                className={cn(
+                  "absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-card",
+                  othersDot,
+                )}
+              />
+            )}
+          </button>
+          <AnimatePresence>
+            {menuOpen && (
+              <motion.div
+                role="menu"
+                initial={{ opacity: 0, scaleY: 0.6 }}
+                animate={{ opacity: 1, scaleY: 1 }}
+                exit={{ opacity: 0, scaleY: 0.6 }}
+                transition={{ duration: 0.18, ease: "easeOut" }}
+                style={{ originY: 0 }}
+                className="absolute left-0 top-full z-20 flex flex-col gap-1 rounded-2xl bg-muted p-1 shadow-md"
+              >
+                {sections
+                  .filter((item) => item.path !== page)
+                  .map((item, i) => {
+                    const dot = dotFor(item.path);
+                    return (
+                      <motion.button
+                        key={item.path}
+                        type="button"
+                        role="menuitem"
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.04 * i, duration: 0.15 }}
+                        onClick={() => {
+                          setPage(item.path);
+                          setMenuOpen(false);
+                        }}
+                        className="relative flex h-8 items-center justify-center whitespace-nowrap rounded-full bg-card px-3 text-sm font-medium text-foreground/80 shadow-sm"
+                      >
+                        {item.label}
+                        {dot && (
+                          <span
+                            className={cn(
+                              "absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-card",
+                              dot,
+                            )}
+                          />
+                        )}
+                      </motion.button>
+                    );
+                  })}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
       <div className="flex shrink-0 items-center gap-1">
@@ -259,11 +262,26 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
             <FiMessageSquare className="h-5 w-5" />
           </button>
         </Tooltip>
+        {/* Réglages du compte (avatar, mot de passe, déconnexion…). */}
+        <Tooltip label="Réglages">
+          <button
+            type="button"
+            onClick={() => setSettingsOpen(true)}
+            aria-label="Réglages"
+            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-primary sm:h-9 sm:w-9"
+          >
+            <FiSettings className="h-5 w-5" />
+          </button>
+        </Tooltip>
       </div>
 
       <FeedbackDialog
         isOpen={feedbackOpen}
         onClose={() => setFeedbackOpen(false)}
+      />
+      <AccountSettingsDialog
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
       />
     </div>
   );
