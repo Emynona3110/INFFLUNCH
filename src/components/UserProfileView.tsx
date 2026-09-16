@@ -134,6 +134,7 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
               return (
                 <li key={def.id}>
                   <Tooltip
+                    keepOnClick
                     label={
                       <span className="block text-center">
                         <span className="block font-semibold">{def.title}</span>

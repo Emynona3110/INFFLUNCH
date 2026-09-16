@@ -14,7 +14,9 @@ const ProfilePage = () => {
   const { sessionData } = useSession();
 
   if (!userId) return <Navigate to="/restaurants" replace />;
-  if (sessionData?.user?.id === userId) return <Navigate to="/mon-compte" replace />;
+  if (sessionData?.user?.id === userId)
+    // ?tab=profil : sinon on retomberait sur le sous-onglet mémorisé.
+    return <Navigate to="/mon-compte?tab=profil" replace />;
 
   return (
     <motion.div
