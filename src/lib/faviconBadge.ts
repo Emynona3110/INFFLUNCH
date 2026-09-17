@@ -13,8 +13,8 @@ import rawIcon from "@/assets/bg-infflux.svg?raw";
 // Même orange que la puce « demandes » de la navbar.
 const BADGE_COLOR = "#f79220";
 
-// `bg-infflux.svg` porte un `height="px"` invalide hérité de son export : on
-// retire width/height et on laisse le viewBox (0 0 100 100) dimensionner.
+// On retire d'éventuels width/height et on laisse le viewBox (0 0 100 100)
+// dimensionner.
 const plain = rawIcon
   .replace(/<\?xml[^>]*\?>/, "")
   .replace(/<svg([^>]*?)\s+width="[^"]*"/, "<svg$1")

@@ -15,8 +15,6 @@ import MapZoomControl from "@/components/MapZoomControl";
 import { INFFLUX_COORDS } from "@/services/geocode";
 import { useTheme } from "@/lib/theme";
 import { Restaurant } from "@/hooks/useRestaurants";
-import inffluxLogo from "@/assets/infflux.svg";
-import inffluxLogoWhite from "@/assets/w-infflux.svg";
 
 /**
  * Carte globale des restaurants situés (lat/lng en base ; les fermés sont
@@ -34,12 +32,8 @@ const pinIcon = (color: string) =>
     iconAnchor: [10, 20],
   });
 
-const inffluxIcon = L.divIcon({
-  className: "",
-  html: `<div style="width:30px;height:30px;border-radius:9999px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(2,8,40,.45);border:2px solid #113894"><img src="${inffluxLogo}" alt="" style="width:18px;height:18px" /></div>`,
-  iconSize: [30, 30],
-  iconAnchor: [15, 15],
-});
+// Marqueur INFFLUX : même goutte que les restos, en bleu de marque.
+const inffluxIcon = pinIcon("#113894");
 
 const MapReady = ({ onReady }: { onReady: (m: L.Map) => void }) => {
   const map = useMap();
@@ -172,22 +166,11 @@ const RestaurantsMap = ({ restaurants }: Props) => {
 
       <MapZoomControl map={map} />
 
-      {/* Recentrage sur l'ensemble */}
-      <div className="absolute bottom-3 right-3 z-[500] flex items-center gap-2">
-        {missing > 0 && (
-          <span className="inline-flex h-7 items-center rounded-full bg-card px-3 text-xs font-medium text-foreground/60 shadow">
-            {missing} sans localisation
-          </span>
-        )}
-        <button
-          type="button"
-          onClick={fit}
-          aria-label="Recentrer la carte"
-          className="flex h-7 w-7 items-center justify-center rounded-full bg-card shadow transition hover:bg-muted"
-        >
-          <img src={isDark ? inffluxLogoWhite : inffluxLogo} alt="" className="h-4 w-4" />
-        </button>
-      </div>
+      {missing > 0 && (
+        <span className="absolute bottom-3 right-3 z-[500] inline-flex h-7 items-center rounded-full bg-card px-3 text-xs font-medium text-foreground/60 shadow">
+          {missing} sans localisation
+        </span>
+      )}
     </div>
   );
 };

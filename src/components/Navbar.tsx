@@ -112,12 +112,12 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
           <img
             src={darkLogo}
             alt=""
-            className="block h-6 w-6 dark:hidden sm:h-7 sm:w-7"
+            className="block h-7 w-7 dark:hidden sm:h-8 sm:w-8"
           />
           <img
             src={lightLogo}
             alt=""
-            className="hidden h-6 w-6 dark:block sm:h-7 sm:w-7"
+            className="hidden h-7 w-7 dark:block sm:h-8 sm:w-8"
           />
           <span className="ml-1 mr-4 hidden font-display text-lg font-extrabold text-[#113894] dark:text-white xl:block">
             {isAdmin ? "ADMINFFLUNCH" : "INFFLUNCH"}

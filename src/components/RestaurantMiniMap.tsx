@@ -17,8 +17,6 @@ import {
   directionsUrl as buildDirectionsUrl,
 } from "@/services/geocode";
 import { useTheme } from "@/lib/theme";
-import inffluxLogo from "@/assets/infflux.svg";
-import inffluxLogoWhite from "@/assets/w-infflux.svg";
 
 /**
  * Minimap d'un restaurant situé par rapport à INFFLUX. 100 % open source :
@@ -40,13 +38,8 @@ const pinIcon = (color: string) =>
     iconAnchor: [10, 20],
   });
 
-// Marqueur INFFLUX : pastille blanche avec le logo du site.
-const inffluxIcon = L.divIcon({
-  className: "",
-  html: `<div style="width:30px;height:30px;border-radius:9999px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(2,8,40,.45);border:2px solid #113894"><img src="${inffluxLogo}" alt="" style="width:18px;height:18px" /></div>`,
-  iconSize: [30, 30],
-  iconAnchor: [15, 15],
-});
+// Marqueur INFFLUX : même goutte que le resto, en bleu de marque.
+const inffluxIcon = pinIcon("#113894");
 
 // Récupère l'instance de carte une fois prête (pour le recentrage).
 const MapReady = ({ onReady }: { onReady: (m: L.Map) => void }) => {
@@ -118,7 +111,7 @@ const RestaurantMiniMap = ({
     };
   }, [hasStored, lat, lng, address]);
 
-  // Recentrage sur INFFLUX (vue initiale + bouton viseur).
+  // Cadrage initial centré sur INFFLUX.
   const [map, setMap] = useState<L.Map | null>(null);
   const recenter = useCallback(() => {
     if (map && coords) centerOnInfflux(map, coords);
@@ -177,7 +170,7 @@ const RestaurantMiniMap = ({
       {/* Zoom +/- */}
       <MapZoomControl map={map} />
 
-      {/* Distance + recentrage INFFLUX + itinéraire */}
+      {/* Distance + itinéraire */}
       <div className="absolute bottom-3 right-3 z-[500] flex items-center gap-2">
         {distanceLabel && (
           <span className="inline-flex h-7 items-center rounded-full bg-primary px-3 text-xs font-semibold text-primary-foreground shadow">
@@ -185,18 +178,6 @@ const RestaurantMiniMap = ({
             {walkMinutes != null && ` · ${walkMinutes} min`}
           </span>
         )}
-        <button
-          type="button"
-          onClick={recenter}
-          aria-label="Recentrer sur INFFLUX"
-          className="flex h-7 w-7 items-center justify-center rounded-full bg-card shadow transition hover:bg-muted"
-        >
-          <img
-            src={isDark ? inffluxLogoWhite : inffluxLogo}
-            alt=""
-            className="h-4 w-4"
-          />
-        </button>
         <a
           href={directionsUrl}
           target="_blank"
