@@ -12,6 +12,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { FaStar } from "react-icons/fa";
 import MapZoomControl from "@/components/MapZoomControl";
+import OsmAttribution from "@/components/OsmAttribution";
 import { INFFLUX_COORDS } from "@/services/geocode";
 import { useTheme } from "@/lib/theme";
 import { Restaurant } from "@/hooks/useRestaurants";
@@ -165,6 +166,7 @@ const RestaurantsMap = ({ restaurants }: Props) => {
       </MapContainer>
 
       <MapZoomControl map={map} />
+      <OsmAttribution />
 
       {missing > 0 && (
         <span className="absolute bottom-3 right-3 z-[500] inline-flex h-7 items-center rounded-full bg-card px-3 text-xs font-medium text-foreground/60 shadow">

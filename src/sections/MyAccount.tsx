@@ -1,3 +1,4 @@
+import Footer from "@/components/Footer";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { createPortal } from "react-dom";
@@ -306,9 +307,14 @@ const MyAccount = () => {
             {visibleTabs.map((t) => (
               <div
                 key={t.key}
-                className="h-full w-full shrink-0 space-y-3 overflow-y-auto overscroll-y-contain px-2.5 py-3"
+                className="flex h-full w-full shrink-0 flex-col overflow-y-auto overscroll-y-contain px-2.5 pt-3"
               >
-                {visited.has(t.key) && renderTab(t.key)}
+                {/* Contenu au moins plein écran : le footer se cale en bas
+                    quand l'onglet est court, sous le contenu sinon. */}
+                <div className="flex-1 shrink-0 space-y-3">
+                  {visited.has(t.key) && renderTab(t.key)}
+                </div>
+                <Footer />
               </div>
             ))}
           </div>

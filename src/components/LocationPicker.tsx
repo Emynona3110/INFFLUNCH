@@ -6,6 +6,7 @@ import { INFFLUX_COORDS } from "@/services/geocode";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import MapZoomControl from "@/components/MapZoomControl";
+import OsmAttribution from "@/components/OsmAttribution";
 import inffluxLogo from "@/assets/infflux.svg";
 
 /**
@@ -150,6 +151,7 @@ export default function LocationPicker({ lat, lng, onChange, className }: Props)
         </MapContainer>
 
         <MapZoomControl map={map} />
+        <OsmAttribution />
       </div>
 
       <div className="grid grid-cols-2 gap-2">

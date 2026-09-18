@@ -10,6 +10,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { FiNavigation } from "react-icons/fi";
 import MapZoomControl from "@/components/MapZoomControl";
+import OsmAttribution from "@/components/OsmAttribution";
 import {
   geocodeAddress,
   INFFLUX_COORDS,
@@ -169,6 +170,7 @@ const RestaurantMiniMap = ({
 
       {/* Zoom +/- */}
       <MapZoomControl map={map} />
+      <OsmAttribution />
 
       {/* Distance + itinéraire */}
       <div className="absolute bottom-3 right-3 z-[500] flex items-center gap-2">

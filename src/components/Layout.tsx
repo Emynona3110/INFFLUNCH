@@ -31,6 +31,12 @@ interface LayoutProps {
   toolbarPortal?: boolean;
   /** Mobile : tirer vers le bas en haut de page rafraîchit les données. */
   pullToRefresh?: boolean;
+  /**
+   * `false` = le Layout ne rend pas le footer (écran pleine hauteur dont les
+   * panneaux scrollent eux-mêmes et l'affichent en fin de contenu, ex. Mon
+   * compte mobile). Le footer doit rester présent sur tous les écrans.
+   */
+  footer?: boolean;
 }
 
 const Layout = ({
@@ -42,6 +48,7 @@ const Layout = ({
   toolbar,
   pullToRefresh = false,
   toolbarPortal = false,
+  footer = true,
 }: LayoutProps) => {
   const mainRef = useRef<HTMLElement>(null);
   const content = pullToRefresh ? (
@@ -68,27 +75,32 @@ const Layout = ({
 
       {fillContent ? (
         // Pleine hauteur, pas de scroll de page : seul le contenu scrolle.
-        <main className="min-h-0 flex-1 overflow-hidden">
-          <div className="mx-auto h-full w-full max-w-[1200px] px-2.5 py-3 sm:px-4 sm:py-6">
-            {children}
-          </div>
-        </main>
+        <>
+          <main className="min-h-0 flex-1 overflow-hidden">
+            <div className="mx-auto h-full w-full max-w-[1200px] px-2.5 py-3 sm:px-4 sm:py-6">
+              {children}
+            </div>
+          </main>
+          {footer && <Footer compact />}
+        </>
       ) : (
+        // Colonne flex scrollable : le contenu (`flex-1 shrink-0`) occupe au
+        // moins toute la hauteur visible, ce qui cale le footer en bas de
+        // l'écran quand la page est courte et sous le contenu quand elle est
+        // longue — sans dépendre d'un `min-h-full` en pourcentage.
         <main
           ref={mainRef}
-          className="flex-1 overflow-y-auto overscroll-y-contain"
+          className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain"
         >
-          <div className="flex min-h-full flex-col">
-            <div
-              className={cn(
-                "mx-auto flex w-full max-w-[1200px] flex-1 flex-col px-2.5 py-3 sm:px-4 sm:py-6",
-                centerContent && "items-center justify-center"
-              )}
-            >
-              {content}
-            </div>
-            <Footer />
+          <div
+            className={cn(
+              "mx-auto flex w-full max-w-[1200px] flex-1 shrink-0 flex-col px-2.5 py-3 sm:px-4 sm:py-6",
+              centerContent && "items-center justify-center",
+            )}
+          >
+            {content}
           </div>
+          <Footer />
         </main>
       )}
     </div>

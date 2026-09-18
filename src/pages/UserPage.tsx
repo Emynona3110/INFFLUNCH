@@ -156,6 +156,9 @@ const UserPage = () => {
       pullToRefresh={currentPage === "restaurants" || isRestaurantDetail}
       // Mobile : la roue des sous-onglets de Mon compte vit dans le bandeau.
       toolbarPortal={currentPage === "mon-compte" && !isDesktop}
+      // Mon compte mobile : chaque panneau du pager affiche le footer en fin de
+      // contenu (scroll interne) ; pas de footer permanent sous le pager.
+      footer={!(currentPage === "mon-compte" && !isDesktop)}
       navbarProps={{
         page: activeTab,
         setPage: (page) => navigate("/" + page),

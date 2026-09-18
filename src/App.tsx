@@ -6,6 +6,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ForcePasswordChangeGate from "./components/ForcePasswordChangeGate";
 import RequestAccessPage from "./pages/RequestAccessPage";
+import LegalPage from "./pages/LegalPage";
 
 /** Redirige les anciennes URL /user/* vers la racine (compat liens existants). */
 function RedirectFromUser() {
@@ -21,6 +22,8 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/password-oublie" element={<ForgotPassword />} />
       <Route path="/inscription" element={<RequestAccessPage />} />
+      <Route path="/mentions-legales" element={<LegalPage kind="mentions" />} />
+      <Route path="/confidentialite" element={<LegalPage kind="confidentialite" />} />
 
       {/* Compat : anciennes URL /user/* -> racine */}
       <Route path="/user/*" element={<RedirectFromUser />} />
