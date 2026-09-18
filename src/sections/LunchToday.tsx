@@ -347,7 +347,6 @@ const LunchToday = () => {
                                 email={p.email}
                                 avatarPath={p.avatar_path}
                                 size={26}
-                                className="ring-2 ring-card"
                               />
                             </motion.span>
                           ))}

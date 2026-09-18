@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import {
   FiCheck,
   FiChevronRight,
-  FiMoreVertical,
   FiPlus,
   FiX,
   FiPaperclip,
@@ -31,6 +30,10 @@ interface Drag {
   released?: boolean;
 }
 
+/** Appui long avant qu'une tuile ne se détache pour être déplacée : assez
+ *  long pour ne pas confondre avec un clic ou le début d'un défilement. */
+const HOLD_MS = 350;
+
 /** Souplesse de l'animation, la même que le carrousel de la galerie. */
 const EASE = "transform 250ms cubic-bezier(0.22, 1, 0.36, 1)";
 
@@ -40,8 +43,15 @@ const EASE = "transform 250ms cubic-bezier(0.22, 1, 0.36, 1)";
  * passe en bas de liste, grisée.
  */
 const AdminNotes = () => {
-  const { data: notes = [], isPending, add, update, toggleDone, move, remove } =
-    useAdminNotes();
+  const {
+    data: notes = [],
+    isPending,
+    add,
+    update,
+    toggleDone,
+    move,
+    remove,
+  } = useAdminNotes();
 
   // Deux popups : lire (clic sur la tuile) et modifier (bouton de la première,
   // ou ajout depuis l'en-tête).
@@ -93,17 +103,21 @@ const AdminNotes = () => {
     else await add.mutateAsync(values);
   };
 
-  const startDrag = (note: AdminNote, event: React.PointerEvent) => {
+  const startDrag = (
+    note: AdminNote,
+    target: HTMLElement,
+    pointerId: number,
+  ) => {
     const from = todo.findIndex((n) => n.id === note.id);
     const rects = todo.map((n) =>
-      tileRefs.current.get(n.id)?.getBoundingClientRect()
+      tileRefs.current.get(n.id)?.getBoundingClientRect(),
     );
     const mine = rects[from];
     if (from < 0 || !mine) return;
 
-    // La poignée garde le pointeur : les mouvements continuent d'arriver même
-    // si le curseur sort de la tuile.
-    event.currentTarget.setPointerCapture(event.pointerId);
+    // La tuile garde le pointeur : les mouvements continuent d'arriver même
+    // si le curseur en sort.
+    target.setPointerCapture(pointerId);
     midpoints.current = rects
       .filter((_, i) => i !== from)
       .map((r) => (r ? r.top + r.height / 2 : Infinity));
@@ -113,12 +127,55 @@ const AdminNotes = () => {
       from,
       // Tuiles de hauteur identique : l'écart entre deux origines donne la
       // hauteur d'un cran, gouttière comprise.
-      step: rects[0] && rects[1] ? rects[1].top - rects[0].top : mine.height + 8,
+      step:
+        rects[0] && rects[1] ? rects[1].top - rects[0].top : mine.height + 8,
       insert: from,
     });
   };
 
+  /** Appui long en attente : minuteur, point de départ (pour annuler si le
+   *  doigt part défiler) et tuile visée. */
+  const hold = useRef<{
+    timer: ReturnType<typeof setTimeout>;
+    x: number;
+    y: number;
+  } | null>(null);
+  /** Un appui long vient de déclencher un glisser : le clic qui suit le
+   *  relâchement ne doit pas ouvrir la note. */
+  const swallowClick = useRef(false);
+
+  const cancelHold = () => {
+    if (hold.current) clearTimeout(hold.current.timer);
+    hold.current = null;
+  };
+
+  /** Doigt ou souris posé sur une tuile en cours : au bout de HOLD_MS sans
+   *  bouger, la tuile se détache. Un mouvement avant (défilement, clic
+   *  imprécis) annule. */
+  const pressTile = (note: AdminNote, event: React.PointerEvent) => {
+    if (note.done || event.button !== 0) return;
+    cancelHold();
+    const target = event.currentTarget as HTMLElement;
+    const { pointerId, clientX, clientY } = event;
+    hold.current = {
+      x: clientX,
+      y: clientY,
+      timer: setTimeout(() => {
+        hold.current = null;
+        swallowClick.current = true;
+        navigator.vibrate?.(15);
+        startDrag(note, target, pointerId);
+      }, HOLD_MS),
+    };
+  };
+
   const moveDrag = (event: React.PointerEvent) => {
+    if (hold.current) {
+      const dx = event.clientX - hold.current.x;
+      const dy = event.clientY - hold.current.y;
+      if (dx * dx + dy * dy > 36) cancelHold();
+      return;
+    }
     if (!drag || drag.released) return;
     const at = midpoints.current.findIndex((mid) => event.clientY < mid);
     const insert = at < 0 ? midpoints.current.length : at;
@@ -128,6 +185,12 @@ const AdminNotes = () => {
   /** Position d'arrivée = entre les deux voisines de la place visée. Une seule
    *  ligne est écrite, la liste n'est pas renumérotée. */
   const endDrag = () => {
+    cancelHold();
+    // Le clic consécutif au relâchement (s'il y en a un) part avant ce
+    // délai ; au-delà, on ne doit plus avaler le clic suivant.
+    setTimeout(() => {
+      swallowClick.current = false;
+    }, 0);
     const d = drag;
     if (!d || d.released) return;
     if (d.insert === d.from) {
@@ -143,8 +206,8 @@ const AdminNotes = () => {
         ? (before.position + after.position) / 2
         : before.position + 1
       : after
-      ? after.position - 1
-      : 0;
+        ? after.position - 1
+        : 0;
 
     // Les décalages restent en place jusqu'à ce que la liste arrive réordonnée
     // (`settled` ci-dessous) : c'est ce qui supprime le saut au relâchement.
@@ -162,6 +225,16 @@ const AdminNotes = () => {
     const t = setTimeout(() => setDrag(null), 80);
     return () => clearTimeout(t);
   }, [settled]);
+
+  // Tactile : une fois la tuile détachée, le doigt qui bouge ne doit pas faire
+  // défiler la liste. `touch-action` ne se change pas en cours de geste ; un
+  // `touchmove` non passif annulé, lui, retient le défilement.
+  useEffect(() => {
+    if (!active) return;
+    const block = (e: TouchEvent) => e.preventDefault();
+    document.addEventListener("touchmove", block, { passive: false });
+    return () => document.removeEventListener("touchmove", block);
+  }, [active]);
 
   useEffect(() => {
     if (!drag?.released) return;
@@ -204,17 +277,35 @@ const AdminNotes = () => {
           transform: dragged
             ? `translateY(${(drag!.insert - drag!.from) * drag!.step}px)`
             : shift
-            ? `translateY(${shift}px)`
-            : undefined,
+              ? `translateY(${shift}px)`
+              : undefined,
           transition: settled ? "none" : EASE,
         }}
-        className={cn("group relative flex items-center gap-1", dragged && "z-10")}
+        className={cn("group relative flex items-center", dragged && "z-10")}
       >
+        {/* Appui long = saisir la tuile (plus de poignée) ; clic = ouvrir. */}
         <div
+          onPointerDown={(e) => pressTile(note, e)}
+          onPointerMove={moveDrag}
+          onPointerUp={endDrag}
+          onPointerCancel={() => {
+            cancelHold();
+            setDrag(null);
+          }}
+          onClickCapture={(e) => {
+            if (!swallowClick.current) return;
+            swallowClick.current = false;
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          onContextMenu={(e) => e.preventDefault()}
+          // iOS : pas de bulle « copier / partager » pendant l'appui long.
+          style={{ WebkitTouchCallout: "none" }}
           className={cn(
-            "relative flex min-w-0 flex-1 items-center gap-2 overflow-hidden rounded-xl border border-border bg-background py-1.5 pl-3.5 pr-2 transition hover:border-primary/40",
+            "relative flex min-w-0 flex-1 select-none items-center gap-2 overflow-hidden rounded-xl border border-border bg-background py-1.5 pl-3.5 pr-2 transition hover:border-primary/40",
+            dragged && "cursor-grabbing",
             dragged && "shadow-lg",
-            note.done && "opacity-55"
+            note.done && "opacity-55",
           )}
         >
           {/* Catégorie : une bande de couleur qui comble le bord gauche de la
@@ -240,7 +331,9 @@ const AdminNotes = () => {
             {/* Pas de texte barré : le grisé de la tuile dit déjà que la note
                 est terminée, et le barré rendait le libellé pénible à relire. */}
             <p className="my-0 flex items-center gap-2 text-sm text-foreground/85">
-              <span className="min-w-0 flex-1 truncate">{note.description}</span>
+              <span className="min-w-0 flex-1 truncate">
+                {note.description}
+              </span>
               {/* Trombone : des captures sont jointes, à voir dans la popup. */}
               {note.images.length > 0 && (
                 <span className="inline-flex shrink-0 items-center gap-0.5 text-xs text-foreground/45">
@@ -259,10 +352,12 @@ const AdminNotes = () => {
               onClick={() =>
                 toggleDone.mutate(
                   { id: note.id, done: !note.done },
-                  { onError: fail }
+                  { onError: fail },
                 )
               }
-              aria-label={note.done ? "Rouvrir la note" : "Marquer comme terminé"}
+              aria-label={
+                note.done ? "Rouvrir la note" : "Marquer comme terminé"
+              }
               aria-pressed={note.done}
               className={cn(
                 // Fond au survol seulement : la pastille permanente alourdissait
@@ -270,7 +365,7 @@ const AdminNotes = () => {
                 "flex h-8 w-8 cursor-pointer items-center justify-center rounded-full transition",
                 note.done
                   ? "text-primary hover:bg-primary/10"
-                  : "text-foreground/35 hover:bg-muted hover:text-primary"
+                  : "text-foreground/35 hover:bg-muted hover:text-primary",
               )}
             >
               {note.done ? (
@@ -281,26 +376,6 @@ const AdminNotes = () => {
             </button>
           </div>
         </div>
-
-        {/* Poignée hors de la tuile, à droite : trois points à la verticale. */}
-        <span
-          onPointerDown={(e) => {
-            if (!note.done) startDrag(note, e);
-          }}
-          onPointerMove={moveDrag}
-          onPointerUp={endDrag}
-          onPointerCancel={() => setDrag(null)}
-          aria-label={note.done ? undefined : "Glisser pour réordonner"}
-          aria-hidden
-          className={cn(
-            "flex h-8 w-4 shrink-0 touch-none items-center justify-center rounded text-foreground/25 transition-colors",
-            note.done
-              ? "invisible"
-              : "cursor-grab hover:text-foreground/60 active:cursor-grabbing"
-          )}
-        >
-          <FiMoreVertical className="h-4 w-4" />
-        </span>
       </li>
     );
   };
@@ -339,7 +414,9 @@ const AdminNotes = () => {
           Rien à traiter. Note ici ce que tu repères en naviguant.
         </p>
       ) : (
-        <ul className={cn("m-0 list-none space-y-2 p-0", drag && "select-none")}>
+        <ul
+          className={cn("m-0 list-none space-y-2 p-0", drag && "select-none")}
+        >
           {todo.map(renderTile)}
 
           {done.length > 0 && (
@@ -354,7 +431,7 @@ const AdminNotes = () => {
                   <FiChevronRight
                     className={cn(
                       "h-3.5 w-3.5 transition-transform",
-                      showDone && "rotate-90"
+                      showDone && "rotate-90",
                     )}
                   />
                   Terminé ({done.length})
