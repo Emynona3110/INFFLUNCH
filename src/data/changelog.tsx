@@ -24,6 +24,14 @@ export interface ChangelogEntry {
 export const changelog: ChangelogEntry[] = [
   // ─────────────────────── Septembre 2026 ───────────────────────
   {
+    date: "2026-09-18",
+    title: "Affichage mobile",
+    points: [
+      "Le site s'adapte au téléphone : navigation, fiches restos, profils",
+      "Installe-le sur ton écran d'accueil pour l'ouvrir comme une appli",
+    ],
+  },
+  {
     date: "2026-09-14",
     title: "Profils publics",
     points: [

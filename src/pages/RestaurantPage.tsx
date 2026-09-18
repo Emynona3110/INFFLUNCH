@@ -403,7 +403,17 @@ const RestaurantPage = () => {
                 </button>
               )}
             </div>
-            <div className={SECTION_BODY_PAD}>
+            {/* Mobile : comme Photos et Menus, pas de cadre vide quand il n'y
+                a aucun avis — l'en-tête et son bouton suffisent. */}
+            <div
+              className={cn(
+                SECTION_BODY_PAD,
+                !reviewsLoading &&
+                  totalReviews === 0 &&
+                  !(canContribute && showForm) &&
+                  "hidden sm:block"
+              )}
+            >
               {canContribute && showForm && (
                 <ReviewForm
                   restaurantId={restaurant.id}
@@ -414,7 +424,14 @@ const RestaurantPage = () => {
 
               {/* Moyenne en étoiles, puis répartition par note (type Amazon). */}
               {totalReviews > 0 && (
-                <div className="mb-2.5 sm:mb-5 sm:rounded-xl sm:bg-muted/40 sm:p-4">
+                <div
+                  className={cn(
+                    "sm:mb-5 sm:rounded-xl sm:bg-muted/40 sm:p-4",
+                    // Marge basse seulement si une liste suit : des notes
+                    // sans commentaire n'en laissent aucune.
+                    visibleReviews.length > 0 && "mb-2.5"
+                  )}
+                >
                   <div className="flex flex-wrap items-center gap-3 sm:mb-3">
                     <span className="font-display text-2xl sm:text-3xl font-bold leading-none tabular-nums text-card-foreground">
                       {averageRating.toFixed(1)}

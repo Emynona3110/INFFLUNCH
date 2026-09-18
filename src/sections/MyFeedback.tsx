@@ -107,7 +107,7 @@ const MyFeedback = () => {
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
           </div>
         ) : items.length === 0 ? (
-          <p className="py-6 text-center text-sm text-foreground/55">
+          <p className="px-4 py-6 text-center text-sm text-foreground/55">
             Un souci ? Une idée ? Exprime-toi en cliquant sur{" "}
             <FiMessageSquare className="inline h-4 w-4 align-text-bottom text-primary" />
             {/* La flèche dit où le trouver : en haut à droite, dans la barre. */}

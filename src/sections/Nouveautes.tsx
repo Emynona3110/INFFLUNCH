@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
 import { changelog, ChangelogEntry } from "@/data/changelog";
 import useChangelogSeen from "@/hooks/useChangelogSeen";
@@ -32,8 +32,19 @@ const groupByMonth = (entries: ChangelogEntry[]) => {
  * dur dans data/changelog.ts. Marque les nouveautés comme vues au montage.
  */
 const Nouveautes = () => {
-  const { markSeen } = useChangelogSeen();
+  const { markSeen, seenAt } = useChangelogSeen();
   const groups = useMemo(() => groupByMonth(changelog), []);
+
+  // Pastille sur chaque nouveauté parue depuis la dernière visite. On fige la
+  // date « vue » telle qu'elle était à l'OUVERTURE : tout est marqué vu dès
+  // l'arrivée, les pastilles doivent pourtant rester le temps de la lecture.
+  const seenAtOnOpen = useRef<string | null>(null);
+  useEffect(() => {
+    if (seenAtOnOpen.current === null && seenAt !== null)
+      seenAtOnOpen.current = seenAt;
+  }, [seenAt]);
+  const isNew = (date: string) =>
+    seenAtOnOpen.current !== null && date > seenAtOnOpen.current;
 
   useEffect(() => {
     markSeen();
@@ -71,7 +82,13 @@ const Nouveautes = () => {
                 <div key={`${entry.date}-${i}`} className="relative pl-5 sm:pl-8">
                   <span className="absolute left-2 top-5 h-2 w-2 -translate-x-1/2 rounded-full bg-primary ring-4 ring-background sm:left-3 sm:top-6 sm:h-2.5 sm:w-2.5" />
 
-                  <Card className="px-3 py-3 sm:px-5 sm:py-4">
+                  <Card className="relative px-3 py-3 sm:px-5 sm:py-4">
+                    {isNew(entry.date) && (
+                      <span
+                        aria-label="Nouveauté non lue"
+                        className="absolute -right-1 -top-1 z-[1] h-3 w-3 rounded-full bg-primary ring-2 ring-card"
+                      />
+                    )}
                     <div
                       role="heading"
                       aria-level={3}
