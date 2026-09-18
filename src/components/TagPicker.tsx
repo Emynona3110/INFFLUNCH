@@ -8,7 +8,12 @@ import { cn } from "@/lib/utils";
 interface TagPickerProps {
   /** Tags déjà choisis : ils disparaissent de la liste. */
   selected: string[];
+  /** Peut être appelé plusieurs fois d'affilée (saisie « A, B, C ») : mettre
+   *  à jour l'état par fonction, pas depuis une valeur capturée. */
   onPick: (label: string) => void;
+  /** Saisie multiple : les libellés qui ne correspondent à aucun tag connu.
+   *  Sans ce rappel, ils sont simplement ignorés. */
+  onUnknown?: (labels: string[]) => void;
   placeholder?: string;
   className?: string;
 }
@@ -22,7 +27,13 @@ interface TagPickerProps {
  * ne fait que refermer la liste (et ne ferme pas la modale parente tant que la
  * liste est ouverte, d'où le `stopPropagation`).
  */
-const TagPicker = ({ selected, onPick, placeholder, className }: TagPickerProps) => {
+const TagPicker = ({
+  selected,
+  onPick,
+  onUnknown,
+  placeholder,
+  className,
+}: TagPickerProps) => {
   const { data: availableTags } = useTags();
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
@@ -78,6 +89,32 @@ const TagPicker = ({ selected, onPick, placeholder, className }: TagPickerProps)
     setHighlight(0);
   };
 
+  /**
+   * Plusieurs tags d'un coup, séparés par des virgules (« Français, Bistrot,
+   * Burger ») : chacun est rapproché d'un tag connu (même slug : casse et
+   * accents indifférents) et choisi ; ceux qui ne correspondent à rien sont
+   * remontés à l'appelant, qui peut proposer de les créer.
+   */
+  const pickMany = (raw: string) => {
+    const wanted = [
+      ...new Set(raw.split(/[,;\n]/).map((t) => t.trim()).filter(Boolean)),
+    ];
+    const bySlug = new Map(
+      (availableTags ?? []).map((tag) => [slugify(tag.label), tag.label])
+    );
+    const unknown: string[] = [];
+    for (const w of wanted) {
+      const label = bySlug.get(slugify(w));
+      if (label) {
+        if (!selected.includes(label)) onPick(label);
+      } else unknown.push(w);
+    }
+    setSearch("");
+    setHighlight(0);
+    setOpen(false);
+    if (unknown.length) onUnknown?.(unknown);
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Escape") {
       if (!open) return; // laisse la modale parente se fermer
@@ -105,7 +142,8 @@ const TagPicker = ({ selected, onPick, placeholder, className }: TagPickerProps)
     if (e.key === "Enter") {
       // Empêche la validation du formulaire parent (RestaurantDialog).
       e.preventDefault();
-      if (open && flat[highlight]) pick(flat[highlight]);
+      if (/[,;]/.test(search)) pickMany(search);
+      else if (open && flat[highlight]) pick(flat[highlight]);
     }
   };
 
@@ -137,7 +175,15 @@ const TagPicker = ({ selected, onPick, placeholder, className }: TagPickerProps)
           role="listbox"
           className="absolute left-0 right-0 top-full z-20 mt-1 max-h-64 overflow-y-auto rounded-card border border-border bg-card py-1 shadow-xl"
         >
-          {flat.length === 0 ? (
+          {/[,;]/.test(search) ? (
+            <button
+              type="button"
+              onClick={() => pickMany(search)}
+              className="block w-full cursor-pointer px-3 py-3 text-left text-sm text-primary transition hover:bg-primary/10"
+            >
+              Entrée : ajouter ces tags d'un coup
+            </button>
+          ) : flat.length === 0 ? (
             <p className="px-3 py-4 text-center text-sm text-foreground/60">
               {search ? "Aucun tag ne correspond." : "Tous les tags sont déjà choisis."}
             </p>

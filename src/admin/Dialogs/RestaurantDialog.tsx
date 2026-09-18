@@ -239,46 +239,67 @@ const RestaurantDialog = ({
     onClose();
   };
 
+  /**
+   * Un ou PLUSIEURS tags d'un coup : la saisie se découpe sur les virgules
+   * (« Français, Brasserie, Bistrot »). Ceux qui existent déjà en base sont
+   * simplement sélectionnés ; les autres sont créés en une seule insertion,
+   * tous dans la catégorie choisie.
+   */
   const handleCreateTag = async () => {
-    const formatted = formatTagLabel(newTag).trim();
-    if (!formatted) return;
+    const wanted = [
+      ...new Set(
+        newTag
+          .split(/[,;\n]/)
+          .map((t) => formatTagLabel(t).trim())
+          .filter(Boolean)
+      ),
+    ];
+    if (!wanted.length) return;
 
-    // Évite un doublon (insensible à la casse) déjà présent en base.
-    const existing = (availableTags ?? []).find(
-      (t) => t.label.toLowerCase() === formatted.toLowerCase()
+    // Doublons (insensibles à la casse) déjà présents en base → on garde le
+    // libellé de la base.
+    const byLower = new Map(
+      (availableTags ?? []).map((t) => [t.label.toLowerCase(), t.label])
     );
-    if (existing) {
-      if (!tags.includes(existing.label))
-        setTags([...tags, existing.label].sort());
-      setCreatingTag(false);
-      setNewTag("");
-      return;
+    const existing = wanted
+      .map((w) => byLower.get(w.toLowerCase()))
+      .filter((l): l is string => !!l);
+    const toCreate = wanted.filter((w) => !byLower.has(w.toLowerCase()));
+
+    if (toCreate.length) {
+      setTagSubmitting(true);
+      const { error } = await supabaseClient
+        .from("tags")
+        .insert(toCreate.map((label) => ({ label, category: newTagCategory })));
+      setTagSubmitting(false);
+
+      if (error) {
+        toast({
+          title: "Erreur",
+          description: error.message,
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+        return;
+      }
+      // Rafraîchit la liste des tags partout.
+      queryClient.invalidateQueries({ queryKey: ["tags"] });
     }
 
-    setTagSubmitting(true);
-    const { error } = await supabaseClient
-      .from("tags")
-      .insert({ label: formatted, category: newTagCategory });
-    setTagSubmitting(false);
-
-    if (error) {
-      toast({
-        title: "Erreur",
-        description: error.message,
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
-      return;
-    }
-
-    // Rafraîchit la liste des tags partout + sélectionne le nouveau.
-    queryClient.invalidateQueries({ queryKey: ["tags"] });
-    setTags([...tags, formatted].sort());
+    // Sélectionne le tout, sans doublon avec ce qui l'était déjà.
+    setTags([...new Set([...tags, ...existing, ...toCreate])].sort());
     setCreatingTag(false);
     setNewTag("");
     setNewTagCategory(DEFAULT_TAG_CATEGORY);
-    toast({ title: "Tag créé", status: "success", duration: 2500, isClosable: true });
+    if (toCreate.length) {
+      toast({
+        title: toCreate.length > 1 ? `${toCreate.length} tags créés` : "Tag créé",
+        status: "success",
+        duration: 2500,
+        isClosable: true,
+      });
+    }
   };
 
   const formatName = (value: string) =>
@@ -621,7 +642,17 @@ const RestaurantDialog = ({
               <TagPicker
                 className="flex-1"
                 selected={tags}
-                onPick={(label) => setTags([...tags, label].sort())}
+                onPick={(label) =>
+                  setTags((prev) =>
+                    prev.includes(label) ? prev : [...prev, label].sort()
+                  )
+                }
+                // Inconnus au bataillon : on les propose à la création, déjà
+                // saisis dans la ligne « Nouveau tag ».
+                onUnknown={(labels) => {
+                  setNewTag(formatTagLabel(labels.join(", ")));
+                  setCreatingTag(true);
+                }}
               />
               {!creatingTag && (
                 <button
@@ -640,7 +671,7 @@ const RestaurantDialog = ({
                 <Input
                   autoFocus
                   value={newTag}
-                  placeholder="Nouveau tag"
+                  placeholder="Nouveau tag (ou plusieurs, séparés par des virgules)"
                   onChange={(e) => setNewTag(formatTagLabel(e.target.value))}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
