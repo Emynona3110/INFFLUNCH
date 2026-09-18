@@ -23,6 +23,7 @@ import { coverPathBase } from "../../services/storagePaths";
 import { fetchWalkMinutes, estimateWalkMinutes } from "../../services/walkTime";
 import { FiChevronDown, FiPlus, FiCheck, FiX, FiTrash2 } from "react-icons/fi";
 import { Dialog, DialogTitle } from "@/components/ui/dialog";
+import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -79,6 +80,7 @@ const RestaurantDialog = ({
     useState<TagCategory>(DEFAULT_TAG_CATEGORY);
   const [tagSubmitting, setTagSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   // Suppression par appui long (2s) avec barre de progression dans le bouton.
   const HOLD_MS = 1000;
   const [holding, setHolding] = useState(false);
@@ -166,6 +168,7 @@ const RestaurantDialog = ({
       setCreatingTag(false);
       setNewTag("");
       cancelHold();
+      setConfirmDelete(false);
     }
   }, [isOpen, initialData]);
 
@@ -186,7 +189,8 @@ const RestaurantDialog = ({
     holdTimer.current = setTimeout(() => {
       holdTimer.current = null;
       setHolding(false);
-      handleDelete();
+      // Appui long puis confirmation forte (saisie de « supprimer »).
+      setConfirmDelete(true);
     }, HOLD_MS);
   };
 
@@ -530,6 +534,7 @@ const RestaurantDialog = ({
   };
 
   return (
+    <>
     <Dialog open={isOpen} onClose={onClose} className="max-w-3xl">
       <DialogTitle>
         {initialData ? "Modifier un restaurant" : "Ajouter un restaurant"}
@@ -777,6 +782,19 @@ const RestaurantDialog = ({
         </div>
       </div>
     </Dialog>
+      <ConfirmDeleteDialog
+        open={confirmDelete}
+        onClose={() => setConfirmDelete(false)}
+        onConfirm={handleDelete}
+        title="Supprimer le restaurant"
+        description={
+          <>
+            <strong>{initialData?.name}</strong>, ses avis, photos et menus
+            seront définitivement supprimés.
+          </>
+        }
+      />
+    </>
   );
 };
 

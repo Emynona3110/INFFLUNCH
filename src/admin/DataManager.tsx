@@ -147,7 +147,6 @@ const DataManager = ({ section, addSignal }: DataManagerProps) => {
       {deleteRow !== null && (
         <div
           className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/50 p-4"
-          onClick={closeDelete}
         >
           <div
             className="w-full max-w-sm rounded-card border border-border bg-card p-6 shadow-xl"

@@ -74,6 +74,7 @@ const FeedbackViewDialog = ({
           {onDelete && (
             <HoldToDeleteButton
               onConfirm={onDelete}
+              mobileConfirm="Supprimer ce retour ?"
               disabled={busy}
               className="inline-flex h-10 items-center rounded-lg px-4 text-sm font-medium text-destructive transition hover:bg-destructive/10"
               progressClassName="bg-destructive/20"

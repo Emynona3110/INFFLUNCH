@@ -24,6 +24,10 @@ const isTouch =
 
 export function Tooltip({ label, children, side = "top", keepOnClick }: TooltipProps) {
   const [open, setOpen] = useState(false);
+  // Tactile : pas de bulle de survol (elle restait affichée sous les popups
+  // ouvertes par le tap). Seules les bulles « qui sont l'info » (keepOnClick)
+  // gardent l'ouverture au tap.
+  if (isTouch && !keepOnClick) return <>{children}</>;
   return (
     <TooltipPrimitive.Provider delayDuration={150}>
       <TooltipPrimitive.Root open={isTouch ? open : undefined}>

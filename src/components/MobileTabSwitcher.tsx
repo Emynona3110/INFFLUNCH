@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { cn } from "@/lib/utils";
 
@@ -127,22 +127,49 @@ export function MobileTabSwitcher<K extends string>({
   );
 }
 
-/** Balayage horizontal (touch) → onSwipe(-1 | 1). À poser sur la zone de contenu. */
+/** Balayage horizontal (touch) → onSwipe(-1 | 1). À poser sur la zone de
+ *  contenu (`{...swipe}` fournit un `ref`). L'axe est verrouillé dès les
+ *  premiers pixels : un geste horizontal bloque le scroll vertical du panneau
+ *  (écouteur natif non passif, seul moyen d'appeler preventDefault sur
+ *  touchmove), un geste vertical est laissé au scroll et ignoré ici. */
 export function useSwipeTabs(onSwipe: (delta: number) => void) {
-  const start = useRef<{ x: number; y: number } | null>(null);
-  return {
-    onTouchStart: (e: React.TouchEvent) => {
-      start.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    },
-    onTouchEnd: (e: React.TouchEvent) => {
-      if (!start.current) return;
-      const dx = e.changedTouches[0].clientX - start.current.x;
-      const dy = e.changedTouches[0].clientY - start.current.y;
-      start.current = null;
-      // Geste franc et surtout horizontal (sinon c'est un scroll).
-      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-        onSwipe(dx < 0 ? 1 : -1);
+  const cb = useRef(onSwipe);
+  cb.current = onSwipe;
+  const ref = useCallback((el: HTMLElement | null) => {
+    if (!el) return;
+    let start: { x: number; y: number } | null = null;
+    let axis: "x" | "y" | null = null;
+    const onStart = (e: TouchEvent) => {
+      // Zones à défilement horizontal propre (`data-no-swipe`) : on n'y touche pas.
+      if ((e.target as Element).closest?.("[data-no-swipe]")) {
+        start = null;
+        return;
       }
-    },
-  };
+      start = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      axis = null;
+    };
+    const onMove = (e: TouchEvent) => {
+      if (!start) return;
+      const dx = e.touches[0].clientX - start.x;
+      const dy = e.touches[0].clientY - start.y;
+      if (!axis && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) {
+        axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+      }
+      if (axis === "x" && e.cancelable) e.preventDefault();
+    };
+    const onEnd = (e: TouchEvent) => {
+      if (!start) return;
+      const dx = e.changedTouches[0].clientX - start.x;
+      const wasX = axis === "x";
+      start = null;
+      axis = null;
+      // Geste franc et horizontal (sinon c'était un scroll).
+      if (wasX && Math.abs(dx) > 60) cb.current(dx < 0 ? 1 : -1);
+    };
+    el.addEventListener("touchstart", onStart, { passive: true });
+    el.addEventListener("touchmove", onMove, { passive: false });
+    el.addEventListener("touchend", onEnd, { passive: true });
+    el.addEventListener("touchcancel", onEnd, { passive: true });
+  }, []);
+  return { ref };
 }

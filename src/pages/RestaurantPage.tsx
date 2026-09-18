@@ -533,6 +533,7 @@ const RestaurantPage = () => {
                                   )}
                                   <HoldToDeleteButton
                                     onConfirm={() => deleteReview(r.id)}
+                                    mobileConfirm="Supprimer l'avis ?"
                                     className="flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground hover:text-destructive"
                                     progressClassName="bg-destructive/15"
                                   >

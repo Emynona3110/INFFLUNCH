@@ -146,6 +146,7 @@ dans la navbar où il occupait une position permanente. */}
             {hasAvatar && (
               <HoldToDeleteButton
                 onConfirm={handleRemove}
+                mobileConfirm="Retirer la photo de profil ?"
                 title="Maintenir pour retirer la photo"
                 className="absolute -right-1 -top-1 flex h-8 w-8 items-center justify-center rounded-full bg-destructive text-white shadow-md"
                 progressClassName="bg-white/40"

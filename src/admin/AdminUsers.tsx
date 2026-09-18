@@ -7,6 +7,7 @@ import supabaseClient from "../services/supabaseClient";
 import useUsers, { AppUser } from "../hooks/useUsers";
 import useSession from "../hooks/useSession";
 import HoldToDeleteButton from "../components/HoldToDeleteButton";
+import ConfirmDeleteDialog from "../components/ConfirmDeleteDialog";
 import { Button } from "@/components/ui/button";
 import { Tooltip } from "@/components/ui/tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -33,6 +34,7 @@ const AdminUsers = () => {
   const { sessionData } = useSession();
   const myId = sessionData?.user?.id;
 
+  const [toDelete, setToDelete] = useState<AppUser | null>(null);
   const [credentials, setCredentials] = useState<{
     email: string;
     tempPassword: string;
@@ -162,6 +164,7 @@ const AdminUsers = () => {
                           >
                             <HoldToDeleteButton
                               onConfirm={() => handleReset(u)}
+                              mobileConfirm="Réinitialiser le mot de passe ?"
                               disabled={isMe}
                               aria-label="Maintenir pour réinitialiser le mot de passe"
                               className="flex h-8 w-8 items-center justify-center rounded-full text-primary hover:bg-primary/10"
@@ -178,7 +181,8 @@ const AdminUsers = () => {
                             }
                           >
                             <HoldToDeleteButton
-                              onConfirm={() => handleDelete(u)}
+                              onConfirm={() => setToDelete(u)}
+                              mobileConfirm={false}
                               disabled={isMe}
                               aria-label="Maintenir pour supprimer l'utilisateur"
                               className="flex h-8 w-8 items-center justify-center rounded-full text-destructive hover:bg-destructive/10"
@@ -202,7 +206,6 @@ const AdminUsers = () => {
       {credentials && (
         <div
           className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/50 p-4"
-          onClick={() => setCredentials(null)}
         >
           <div
             className="w-full max-w-md rounded-card border border-border bg-card p-6 shadow-xl"
@@ -245,6 +248,19 @@ const AdminUsers = () => {
           </div>
         </div>
       )}
+
+      <ConfirmDeleteDialog
+        open={!!toDelete}
+        onClose={() => setToDelete(null)}
+        onConfirm={() => (toDelete ? handleDelete(toDelete) : undefined)}
+        title="Supprimer l'utilisateur"
+        description={
+          <>
+            Le compte <strong>{toDelete?.email}</strong> et ses données (avis,
+            photos, favoris) seront définitivement supprimés.
+          </>
+        }
+      />
     </div>
   );
 };

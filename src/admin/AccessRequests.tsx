@@ -224,6 +224,7 @@ const AccessRequests = ({ activeType }: { activeType: RequestType }) => {
                           <Tooltip label="Maintenir pour supprimer">
                             <HoldToDeleteButton
                               onConfirm={() => handleDelete(req)}
+                              mobileConfirm="Supprimer la demande ?"
                               aria-label="Maintenir pour supprimer la demande"
                               className="flex h-8 w-8 items-center justify-center rounded-full text-destructive hover:bg-destructive/10"
                               progressClassName="bg-destructive/20"
@@ -247,7 +248,6 @@ const AccessRequests = ({ activeType }: { activeType: RequestType }) => {
       {credentials && (
         <div
           className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/50 p-4"
-          onClick={() => setCredentials(null)}
         >
           <div
             className="w-full max-w-md rounded-card border border-border bg-card p-6 shadow-xl"

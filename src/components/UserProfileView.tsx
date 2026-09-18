@@ -152,9 +152,8 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
                Desktop : rangée centrée, titre en infobulle. */
               <ul
                 // Le défilement du bandeau ne doit pas passer pour un balayage
-                // de changement d'onglet (Mon compte).
-                onTouchStart={(e) => e.stopPropagation()}
-                onTouchEnd={(e) => e.stopPropagation()}
+                // de changement d'onglet (Mon compte) : cf. useSwipeTabs.
+                data-no-swipe
                 className="m-0 flex list-none gap-2 overflow-x-auto p-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap sm:justify-center sm:gap-2 sm:overflow-visible sm:p-0"
               >
                 {unlocked.map(({ def, unlocked_at }) => {

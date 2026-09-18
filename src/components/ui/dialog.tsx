@@ -7,18 +7,26 @@ interface DialogProps {
   onClose: () => void;
   children: ReactNode;
   className?: string;
+  /** Fermeture au clic sur l'overlay (défaut false : seuls Annuler/Échap ferment). */
+  closeOnOverlayClick?: boolean;
 }
 
 /**
- * Modale Tailwind simple : overlay + carte centrée, fermeture Échap / clic
- * extérieur.
+ * Modale Tailwind simple : overlay + carte centrée, fermeture Échap (pas au
+ * clic extérieur, sauf `closeOnOverlayClick`).
  *
  * Rendue dans un portail sur `document.body` : un parent `sticky`/`fixed` avec
  * un z-index (la barre d'outils de l'accueil, par exemple) crée un contexte
  * d'empilement dont la modale ne peut plus sortir — elle passait sous la
  * navbar. Les variables de thème vivent sur `:root`, le portail n'y change rien.
  */
-export function Dialog({ open, onClose, children, className }: DialogProps) {
+export function Dialog({
+  open,
+  onClose,
+  children,
+  className,
+  closeOnOverlayClick = false,
+}: DialogProps) {
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -33,7 +41,7 @@ export function Dialog({ open, onClose, children, className }: DialogProps) {
   return createPortal(
     <div
       className="tw-scope fixed inset-0 z-[1100] flex justify-center overflow-y-auto bg-black/50 p-2.5 sm:p-4"
-      onClick={onClose}
+      onClick={closeOnOverlayClick ? onClose : undefined}
     >
       <div
         role="dialog"

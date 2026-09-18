@@ -1,6 +1,9 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Spinner } from "@/components/ui/spinner";
+import { Dialog, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import useMediaQuery from "@/hooks/useMediaQuery";
 
 interface Props {
   /** Action déclenchée après l'appui maintenu. */
@@ -14,6 +17,12 @@ interface Props {
   disabled?: boolean;
   /** Libellé accessible / title (défaut : « Maintenir pour supprimer »). */
   title?: string;
+  /**
+   * Mobile : question posée dans la popup de validation après l'appui long
+   * (défaut « Supprimer cet élément ? »). `false` désactive la popup (quand
+   * l'appelant enchaîne déjà sur sa propre confirmation).
+   */
+  mobileConfirm?: string | false;
 }
 
 /**
@@ -29,10 +38,24 @@ const HoldToDeleteButton = ({
   children,
   disabled,
   title = "Maintenir pour supprimer",
+  mobileConfirm = "Supprimer cet élément ?",
 }: Props) => {
   const [holding, setHolding] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [asking, setAsking] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Mobile : l'appui long est facile à déclencher par erreur (scroll, doigt
+  // posé) → on demande une validation explicite en plus.
+  const isMobile = useMediaQuery("(max-width: 639px)");
+
+  const run = async () => {
+    setBusy(true);
+    try {
+      await onConfirm();
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const cancel = () => {
     if (timer.current) {
@@ -48,12 +71,8 @@ const HoldToDeleteButton = ({
     timer.current = setTimeout(async () => {
       timer.current = null;
       setHolding(false);
-      setBusy(true);
-      try {
-        await onConfirm();
-      } finally {
-        setBusy(false);
-      }
+      if (isMobile && mobileConfirm !== false) setAsking(true);
+      else await run();
     }, holdMs);
   };
 
@@ -61,6 +80,7 @@ const HoldToDeleteButton = ({
   useEffect(() => () => cancel(), []);
 
   return (
+    <>
     <button
       type="button"
       disabled={disabled || busy}
@@ -88,6 +108,28 @@ const HoldToDeleteButton = ({
         {busy ? <Spinner /> : children}
       </span>
     </button>
+    <Dialog
+      open={asking}
+      onClose={() => setAsking(false)}
+    >
+      <DialogTitle>{mobileConfirm || "Supprimer cet élément ?"}</DialogTitle>
+      <p className="mt-2 text-sm text-foreground/70">Cette action est irréversible.</p>
+      <div className="mt-4 flex justify-end gap-2">
+        <Button variant="outline" onClick={() => setAsking(false)}>
+          Annuler
+        </Button>
+        <Button
+          variant="destructive"
+          onClick={() => {
+            setAsking(false);
+            run();
+          }}
+        >
+          Confirmer
+        </Button>
+      </div>
+    </Dialog>
+    </>
   );
 };
 

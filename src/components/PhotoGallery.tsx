@@ -252,6 +252,7 @@ const PhotoGallery = ({
         {canDelete && (
           <HoldToDeleteButton
             onConfirm={() => deletePhoto(photo)}
+            mobileConfirm="Supprimer la photo ?"
             className="absolute right-1.5 top-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-black/55 text-white opacity-0 backdrop-blur-sm transition group-hover:opacity-100"
             progressClassName="bg-destructive/70"
           >

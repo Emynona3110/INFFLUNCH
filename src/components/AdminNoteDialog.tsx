@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { FiTrash2 } from "react-icons/fi";
+import HoldToDeleteButton from "@/components/HoldToDeleteButton";
 import { NOTE_CATEGORIES, NoteCategory } from "@/services/noteCategories";
 import { AdminNote } from "@/hooks/useAdminNotes";
 import { cn } from "@/lib/utils";
@@ -15,6 +17,8 @@ interface Props {
     description: string;
     category: NoteCategory;
   }) => Promise<void>;
+  /** Suppression (édition seulement) : appui long dans la popup. */
+  onDelete?: () => Promise<void> | void;
 }
 
 /**
@@ -22,7 +26,13 @@ interface Props {
  * aussi bien à créer qu'à modifier — le contenu d'une note tient en un champ,
  * inutile d'avoir deux écrans.
  */
-const AdminNoteDialog = ({ isOpen, onClose, note, onSubmit }: Props) => {
+const AdminNoteDialog = ({
+  isOpen,
+  onClose,
+  note,
+  onSubmit,
+  onDelete,
+}: Props) => {
   const [description, setDescription] = useState("");
   // Pas de catégorie par défaut à la création : on la choisit, sinon tout
   // finirait en « Amélioration » sans y penser.
@@ -112,17 +122,35 @@ const AdminNoteDialog = ({ isOpen, onClose, note, onSubmit }: Props) => {
         </label>
       </div>
 
-      <div className="mt-4 sm:mt-6 flex justify-end gap-2">
-        <Button variant="outline" onClick={onClose} disabled={busy}>
-          Annuler
-        </Button>
-        <Button
-          onClick={submit}
-          loading={busy}
-          disabled={!category || !description.trim()}
-        >
-          {note ? "Enregistrer" : "Ajouter"}
-        </Button>
+      <div className="mt-4 sm:mt-6 flex items-center justify-between gap-2">
+        <div>
+          {note && onDelete && (
+            <HoldToDeleteButton
+              onConfirm={async () => {
+                await onDelete();
+                onClose();
+              }}
+              mobileConfirm="Supprimer la note ?"
+              disabled={busy}
+              className="inline-flex h-10 items-center justify-center rounded-lg bg-destructive px-3 text-sm font-medium text-white hover:bg-destructive/90 sm:px-4"
+            >
+              <FiTrash2 className="h-4 w-4 sm:hidden" />
+              <span className="hidden sm:inline">Supprimer</span>
+            </HoldToDeleteButton>
+          )}
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={onClose} disabled={busy}>
+            Annuler
+          </Button>
+          <Button
+            onClick={submit}
+            loading={busy}
+            disabled={!category || !description.trim()}
+          >
+            {note ? "Enregistrer" : "Ajouter"}
+          </Button>
+        </div>
       </div>
     </Dialog>
   );

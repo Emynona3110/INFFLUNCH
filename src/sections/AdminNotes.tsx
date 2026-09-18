@@ -4,7 +4,6 @@ import {
   FiChevronRight,
   FiMoreVertical,
   FiPlus,
-  FiTrash2,
   FiX,
 } from "react-icons/fi";
 import { toast } from "@/lib/toast";
@@ -12,7 +11,6 @@ import useAdminNotes, { AdminNote } from "@/hooks/useAdminNotes";
 import { NoteCategory, noteCategory } from "@/services/noteCategories";
 import AdminNoteDialog from "@/components/AdminNoteDialog";
 import AdminNoteViewDialog from "@/components/AdminNoteViewDialog";
-import HoldToDeleteButton from "@/components/HoldToDeleteButton";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
@@ -271,15 +269,6 @@ const AdminNotes = () => {
                 <FiCheck className="h-4 w-4" />
               )}
             </button>
-
-            <HoldToDeleteButton
-              onConfirm={() => remove.mutate(note.id, { onError: fail })}
-              aria-label="Maintenir pour supprimer"
-              className="flex h-8 w-8 items-center justify-center rounded-full text-foreground/35 transition hover:bg-muted hover:text-destructive"
-              progressClassName="bg-destructive/25"
-            >
-              <FiTrash2 className="h-4 w-4" />
-            </HoldToDeleteButton>
           </div>
         </div>
 
@@ -380,6 +369,11 @@ const AdminNotes = () => {
         onClose={() => setEditOpen(false)}
         note={editing}
         onSubmit={submit}
+        onDelete={async () => {
+          if (!editing) return;
+          // Suppression depuis la popup (appui long) : la modale se ferme après.
+          await remove.mutateAsync(editing.id).catch(fail);
+        }}
       />
     </Card>
   );

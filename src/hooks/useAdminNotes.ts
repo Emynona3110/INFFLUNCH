@@ -83,15 +83,26 @@ const useAdminNotes = (enabled = true) => {
     queryClient.invalidateQueries({ queryKey: KEY });
   };
 
-  /** La liste telle qu'elle est affichée, notes optimistes comprises : deux
-   *  ajouts coup sur coup doivent recevoir deux positions distinctes, même si
-   *  le premier insert n'est pas encore revenu. */
-  const cached = () => queryClient.getQueryData<AdminNote[]>(KEY) ?? [];
-
   /** Position d'une nouvelle note : en fin de liste des notes en cours. */
   const nextPosition = (notes: AdminNote[]) => {
     const last = notes.filter((n) => !n.done).at(-1);
     return last ? last.position + 1 : 0;
+  };
+
+  /** Même calcul, mais d'après la base : le cache peut dater (mobile rouvert
+   *  après un moment, ajouts depuis un autre poste) et la note finirait au
+   *  milieu de la liste. On lit la dernière position réelle juste avant
+   *  d'écrire. */
+  const nextPositionFromDb = async () => {
+    const { data, error } = await supabaseClient
+      .from("admin_notes")
+      .select("position")
+      .eq("done", false)
+      .order("position", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return data ? (data.position as number) + 1 : 0;
   };
 
   /** Options communes : appliquer dans le cache, défaire si le serveur refuse,
@@ -133,7 +144,7 @@ const useAdminNotes = (enabled = true) => {
         .insert({
           description,
           category,
-          position: nextPosition(cached()),
+          position: await nextPositionFromDb(),
           ...(author_id ? { author_id } : {}),
         })
         .select("id")
@@ -189,11 +200,7 @@ const useAdminNotes = (enabled = true) => {
         .update(
           done
             ? { done }
-            : {
-                done,
-                // Le cache porte déjà la note rouverte : on l'écarte du calcul.
-                position: nextPosition(cached().filter((n) => n.id !== id)),
-              }
+            : { done, position: await nextPositionFromDb() }
         )
         .eq("id", id);
       if (error) throw new Error(error.message);

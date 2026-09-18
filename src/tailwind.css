@@ -210,6 +210,16 @@ input:-webkit-autofill:active {
     overflow: visible;
   }
 
+  /* iOS zoome sur un champ dont la police fait moins de 16px : sur tactile on
+     force 16px (les classes text-sm/text-xs des champs sont écrasées). */
+  @media (hover: none) and (pointer: coarse) {
+    input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+    textarea,
+    select {
+      font-size: 16px !important;
+    }
+  }
+
   /* Neutralise le chrome natif des contrôles (Chakra le faisait globalement
      avant son retrait → sinon contours/fonds gris natifs sur les boutons). */
   .tw-scope button,
