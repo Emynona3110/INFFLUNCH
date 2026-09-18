@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiCamera, FiStar, FiAward, FiLock } from "react-icons/fi";
 import { Card } from "@/components/ui/card";
@@ -7,6 +8,11 @@ import usePublicProfile, { PublicPhoto } from "@/hooks/usePublicProfile";
 import useSession from "@/hooks/useSession";
 import useIsAdmin from "@/hooks/useIsAdmin";
 import PhotoGallery from "@/components/PhotoGallery";
+import ReviewItem from "@/components/ReviewItem";
+import ReviewForm from "@/components/ReviewForm";
+import useUserReviews, { UserReview } from "@/hooks/useUserReviews";
+import { toast } from "@/lib/toast";
+import noImage from "@/assets/no-image.jpg";
 import useAchievements from "@/hooks/useAchievements";
 import { ACHIEVEMENTS, ACHIEVEMENTS_BY_ID } from "@/data/achievements";
 import { formatAuthorName } from "@/utils/authorName";
@@ -16,6 +22,7 @@ import {
   SECTION_HEAD,
   SECTION_TITLE,
   SECTION_BODY,
+  SECTION_BODY_PAD,
 } from "@/lib/sectionClasses";
 
 interface Props {
@@ -43,7 +50,11 @@ const formatDate = (iso: string) =>
 const UserProfileView = ({ userId, isMe = false }: Props) => {
   const navigate = useNavigate();
   const { profile, photos, remove, setCaption } = usePublicProfile(userId);
+  const { reviews, remove: removeReview } = useUserReviews(userId);
+  // Son avis en cours d'édition (même dialog que sur la fiche resto).
+  const [editing, setEditing] = useState<UserReview | null>(null);
   const { sessionData } = useSession();
+  const viewerId = sessionData?.user?.id;
   const isAdmin = useIsAdmin();
   // Les succès du VISITEUR : on ne dévoile le contenu d'un succès que s'il
   // l'a lui-même obtenu — sinon il en voit ce que sa propre galerie en montre.
@@ -56,6 +67,26 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
     .filter((a) => a.def)
     // Le dernier décroché en tête.
     .sort((a, b) => b.unlocked_at.localeCompare(a.unlocked_at));
+
+  // Même règle que sur une fiche : ses propres avis toujours, ceux des autres
+  // seulement s'ils ont un commentaire (une note seule n'apporte rien à lire).
+  const visibleReviews = (reviews.data ?? []).filter(
+    (r) => r.user_id === viewerId || r.comment?.trim(),
+  );
+
+  const deleteReview = async (review: UserReview) => {
+    try {
+      await removeReview.mutateAsync(review);
+      toast({ title: "Avis supprimé", status: "success", duration: 2500 });
+    } catch (e) {
+      toast({
+        title: "Erreur",
+        description: (e as Error).message,
+        status: "error",
+        duration: 5000,
+      });
+    }
+  };
 
   if (profile.isPending) {
     return (
@@ -262,6 +293,96 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
             )}
           </div>
         </section>
+      )}
+      {/* Avis : la même mise en forme que sur une fiche resto, le restaurant
+          (vignette + nom, cliquables) à la place de l'auteur. Sans avis
+          lisible, la section est omise. */}
+      {(reviews.isPending || visibleReviews.length > 0) && (
+        <section
+          className={cn(
+            SECTION,
+            "sm:p-6 sm:shadow-[0_10px_30px_-12px_rgba(2,8,40,0.18)]",
+          )}
+        >
+          <div className={SECTION_HEAD}>
+            <div role="heading" aria-level={2} className={SECTION_TITLE}>
+              Avis
+              {visibleReviews.length > 0 && (
+                <span className="ml-2 hidden text-sm font-medium text-foreground/45 sm:inline">
+                  ({visibleReviews.length})
+                </span>
+              )}
+            </div>
+          </div>
+          <div className={SECTION_BODY_PAD}>
+            {reviews.isPending ? (
+              <div className="flex justify-center py-6">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-border border-t-primary" />
+              </div>
+            ) : (
+              /* Pas de filet au-dessus du premier : ici rien ne le précède
+                 (sur une fiche, c'est le bloc de la note). */
+              <ul className="m-0 list-none space-y-3 p-0 sm:space-y-4 [&>li:first-child]:border-t-0 [&>li:first-child]:pt-0">
+                {visibleReviews.map((r) => {
+                  const mine = r.user_id === viewerId;
+                  const slug = r.restaurant?.slug;
+                  const goToRestaurant = slug
+                    ? () => navigate(`/restaurant/${slug}`)
+                    : undefined;
+                  return (
+                    <ReviewItem
+                      key={r.id}
+                      review={r}
+                      leading={(size) => (
+                        <button
+                          type="button"
+                          onClick={goToRestaurant}
+                          aria-label={r.restaurant?.name ?? "Restaurant indisponible"}
+                          className="flex shrink-0 overflow-hidden rounded-full leading-none transition-transform duration-150 hover:scale-105"
+                          style={{ height: size, width: size }}
+                        >
+                          <img
+                            src={r.restaurant?.image ?? noImage}
+                            alt=""
+                            className="h-full w-full object-cover"
+                          />
+                        </button>
+                      )}
+                      title={
+                        <button
+                          type="button"
+                          onClick={goToRestaurant}
+                          className={cn(
+                            "m-0 cursor-pointer p-0 text-left font-semibold underline-offset-2 hover:underline",
+                            mine ? "text-primary" : "text-card-foreground",
+                          )}
+                        >
+                          {r.restaurant?.name ?? "Restaurant indisponible"}
+                        </button>
+                      }
+                      onEdit={
+                        mine && r.restaurant?.contributions_enabled !== false
+                          ? () => setEditing(r)
+                          : undefined
+                      }
+                      onDelete={
+                        mine || isAdmin ? () => deleteReview(r) : undefined
+                      }
+                    />
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        </section>
+      )}
+
+      {editing && (
+        <ReviewForm
+          restaurantId={editing.restaurant_id}
+          existing={editing}
+          onDone={() => setEditing(null)}
+        />
       )}
     </>
   );

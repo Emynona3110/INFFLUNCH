@@ -10,7 +10,6 @@ import {
   FiGlobe,
   FiExternalLink,
   FiEdit2,
-  FiTrash2,
   FiSlash,
   FiMap,
   FiPlus,
@@ -33,7 +32,8 @@ import LunchAvatars from "@/components/LunchAvatars";
 import ClosedBadge from "@/components/ClosedBadge";
 import TopBadge, { topRankOf } from "@/components/TopBadge";
 import ReviewForm from "@/components/ReviewForm";
-import HoldToDeleteButton from "@/components/HoldToDeleteButton";
+import ReviewItem from "@/components/ReviewItem";
+import Stars from "@/components/Stars";
 import RestaurantDialog from "@/admin/Dialogs/RestaurantDialog";
 import LocationEditDialog from "@/components/LocationEditDialog";
 import { directionsUrl } from "@/services/geocode";
@@ -53,39 +53,6 @@ import {
   ADD_BUTTON,
 } from "@/lib/sectionClasses";
 import Beeeh from "@/sections/Beeeh";
-
-/* ------------------------------ helpers UI ------------------------------ */
-
-function Stars({ rating, size = 18 }: { rating: number; size?: number }) {
-  // Même règle que sur les cards : dès qu'il y a une décimale, demi-étoile.
-  const value = rating ?? 0;
-  const rounded = Math.floor(value) + (value % 1 === 0 ? 0 : 0.5);
-  const pct = (rounded / 5) * 100;
-  return (
-    <span className="relative inline-flex">
-      <span className="flex gap-px text-black/15 dark:text-white/20">
-        {Array.from({ length: 5 }, (_, i) => (
-          <FaStar key={i} style={{ height: size, width: size }} />
-        ))}
-      </span>
-      <span
-        className="absolute inset-0 flex gap-px text-amber-500"
-        style={{ clipPath: `inset(0 ${100 - pct}% 0 0)` }}
-      >
-        {Array.from({ length: 5 }, (_, i) => (
-          <FaStar key={i} style={{ height: size, width: size }} />
-        ))}
-      </span>
-    </span>
-  );
-}
-
-const formatDate = (iso: string) =>
-  new Date(iso).toLocaleDateString("fr-FR", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
 
 /* -------------------------------- page --------------------------------- */
 
@@ -167,16 +134,13 @@ const RestaurantPage = () => {
 
   const totalReviews = reviews.length;
   const myReview = reviews.find((r) => r.user_id === userId) ?? null;
-  // On affiche toujours son propre avis (même sans texte), mais ceux des autres
-  // uniquement s'ils ont un commentaire (une note seule n'apporte rien à lire).
-  // Son propre avis toujours en premier (comme YouTube), le reste inchangé.
-  const visibleReviews = reviews
-    .filter((r) => r.user_id === userId || r.comment?.trim())
-    .sort((a, b) => {
-      if (a.user_id === userId) return -1;
-      if (b.user_id === userId) return 1;
-      return 0;
-    });
+  // Tous les avis, y compris une note seule. Son propre avis toujours en
+  // premier (comme YouTube), le reste inchangé.
+  const sortedReviews = [...reviews].sort((a, b) => {
+    if (a.user_id === userId) return -1;
+    if (b.user_id === userId) return 1;
+    return 0;
+  });
   // Répartition par note (5→1) pour les barres type Amazon.
   const ratingCounts = (star: number) =>
     reviews.filter((r) => r.rating === star).length;
@@ -424,14 +388,7 @@ const RestaurantPage = () => {
 
               {/* Moyenne en étoiles, puis répartition par note (type Amazon). */}
               {totalReviews > 0 && (
-                <div
-                  className={cn(
-                    "sm:mb-5 sm:rounded-xl sm:bg-muted/40 sm:p-4",
-                    // Marge basse seulement si une liste suit : des notes
-                    // sans commentaire n'en laissent aucune.
-                    visibleReviews.length > 0 && "mb-2.5"
-                  )}
-                >
+                <div className="mb-2.5 sm:mb-5 sm:rounded-xl sm:bg-muted/40 sm:p-4">
                   <div className="flex flex-wrap items-center gap-3 sm:mb-3">
                     <span className="font-display text-2xl sm:text-3xl font-bold leading-none tabular-nums text-card-foreground">
                       {averageRating.toFixed(1)}
@@ -483,96 +440,48 @@ const RestaurantPage = () => {
                   Aucun avis pour le moment.
                   {canContribute && " Sois le premier à en laisser un !"}
                 </p>
-              ) : visibleReviews.length === 0 ? null : (
+              ) : (
                 <ul className="m-0 list-none space-y-3 p-0 sm:space-y-4">
-                  {visibleReviews.map((r) => {
+                  {sortedReviews.map((r) => {
                     const mine = r.user_id === userId;
-                    return (
-                      <li
-                        key={r.id}
-                        className="border-t border-border/60 pt-3 sm:pt-4"
+                    const avatar = (size: number) => (
+                      // La photo aussi mène au profil.
+                      <AuthorButton
+                        userId={r.user_id}
+                        email={r.email}
+                        className="flex rounded-full leading-none transition-transform duration-150 hover:scale-105 hover:no-underline"
                       >
-                        <div className="flex items-stretch gap-2 sm:items-start sm:gap-3">
-                          {/* Colonne pp : mobile = petite pp (alignée sur le
-                              nom) prolongée d'un filet vertical ; desktop = 44 px. */}
-                          <div className="flex shrink-0 flex-col items-center">
-                            {/* La photo aussi mène au profil. */}
-                            <AuthorButton
-                              userId={r.user_id}
-                              email={r.email}
-                              className="flex rounded-full leading-none transition-transform duration-150 hover:scale-105 hover:no-underline sm:hidden"
-                            >
-                              <Avatar
-                                email={r.email}
-                                avatarPath={r.avatar_path}
-                                size={28}
-                              />
-                            </AuthorButton>
-                            <AuthorButton
-                              userId={r.user_id}
-                              email={r.email}
-                              className="hidden rounded-full leading-none transition-transform duration-150 hover:scale-105 hover:no-underline sm:flex"
-                            >
-                              <Avatar
-                                email={r.email}
-                                avatarPath={r.avatar_path}
-                                size={44}
-                              />
-                            </AuthorButton>
-                            <span
-                              aria-hidden
-                              className="mt-1.5 w-px flex-1 rounded-full bg-border sm:hidden"
-                            />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex min-h-7 flex-wrap items-center justify-between gap-x-3 gap-y-0.5">
-                              <AuthorButton
-                                userId={r.user_id}
-                                email={r.email}
-                                className={cn(
-                                  "font-semibold",
-                                  mine
-                                    ? "text-primary"
-                                    : "text-card-foreground",
-                                )}
-                              />
-                              {(mine || isAdmin) && (
-                                <div className="flex items-center gap-1">
-                                  {mine && canContribute && (
-                                    <button
-                                      type="button"
-                                      onClick={() => setShowForm(true)}
-                                      aria-label="Modifier"
-                                      className="flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-primary"
-                                    >
-                                      <FiEdit2 className="h-3.5 w-3.5" />
-                                    </button>
-                                  )}
-                                  <HoldToDeleteButton
-                                    onConfirm={() => deleteReview(r.id)}
-                                    mobileConfirm="Supprimer l'avis ?"
-                                    className="flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground hover:text-destructive"
-                                    progressClassName="bg-destructive/15"
-                                  >
-                                    <FiTrash2 className="h-3.5 w-3.5" />
-                                  </HoldToDeleteButton>
-                                </div>
-                              )}
-                            </div>
-                            <div className="mt-1 flex items-center gap-2">
-                              <Stars rating={r.rating} size={16} />
-                              <span className="text-xs text-foreground/45">
-                                {formatDate(r.created_at)}
-                              </span>
-                            </div>
-                            {r.comment && (
-                              <p className="mb-0 mt-1.5 text-[13px] leading-normal text-foreground/75 sm:text-sm sm:leading-relaxed">
-                                {r.comment}
-                              </p>
+                        <Avatar
+                          email={r.email}
+                          avatarPath={r.avatar_path}
+                          size={size}
+                        />
+                      </AuthorButton>
+                    );
+                    return (
+                      <ReviewItem
+                        key={r.id}
+                        review={r}
+                        leading={avatar}
+                        title={
+                          <AuthorButton
+                            userId={r.user_id}
+                            email={r.email}
+                            className={cn(
+                              "font-semibold",
+                              mine ? "text-primary" : "text-card-foreground",
                             )}
-                          </div>
-                        </div>
-                      </li>
+                          />
+                        }
+                        onEdit={
+                          mine && canContribute
+                            ? () => setShowForm(true)
+                            : undefined
+                        }
+                        onDelete={
+                          mine || isAdmin ? () => deleteReview(r.id) : undefined
+                        }
+                      />
                     );
                   })}
                 </ul>

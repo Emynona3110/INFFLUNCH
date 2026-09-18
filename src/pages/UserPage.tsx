@@ -76,7 +76,7 @@ const UserPage = () => {
   );
   // Mode d'affichage : on garde le choix de l'utilisateur d'une session à
   // l'autre (localStorage, comme le thème). À défaut de préférence enregistrée,
-  // la vue liste est le défaut sur mobile (< md = 768px), la grille sinon.
+  // la grille, sur mobile comme sur desktop.
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
     try {
       const saved = localStorage.getItem("viewMode");
@@ -89,12 +89,6 @@ const UserPage = () => {
         return saved;
     } catch {
       /* localStorage indisponible */
-    }
-    if (
-      typeof window !== "undefined" &&
-      window.matchMedia("(max-width: 767px)").matches
-    ) {
-      return "list";
     }
     return "grid";
   });

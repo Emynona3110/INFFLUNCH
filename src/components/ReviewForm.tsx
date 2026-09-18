@@ -15,7 +15,7 @@ const MAX_COMMENT = MAX_TEXT;
 interface Props {
   restaurantId: number;
   /** Avis existant de l'utilisateur (édition) ou null/undefined (création). */
-  existing?: Review | null;
+  existing?: Pick<Review, "rating" | "comment"> | null;
   onDone: () => void;
 }
 
@@ -38,6 +38,9 @@ const ReviewForm = ({ restaurantId, existing, onDone }: Props) => {
     queryClient.invalidateQueries({ queryKey: ["reviews", restaurantId] });
     queryClient.invalidateQueries({ queryKey: ["restaurants"] });
     queryClient.invalidateQueries({ queryKey: ["achievement-metrics"] });
+    // Le profil aussi (on peut éditer son avis depuis « Mon Profil »).
+    queryClient.invalidateQueries({ queryKey: ["user-reviews"] });
+    queryClient.invalidateQueries({ queryKey: ["public-profile"] });
   };
 
   const submit = async () => {
