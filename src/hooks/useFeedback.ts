@@ -54,9 +54,10 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
       let request = supabaseClient
         .from("feedback")
         .select(
-          "id, type, message, images, status, note_id, author_id, created_at, handled_at, cancelled_at, edits, updated_at"
+          "id, type, message, images, status, note_id, author_id, created_at, handled_at, cancelled_at, edits, updated_at",
         )
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: false });
       // L'auteur ne revoit pas ce qu'il a retiré ; l'admin, si.
       if (scope === "mine") {
         request = request
@@ -77,7 +78,7 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
         .select("id, email")
         .in("id", ids);
       const emailById = Object.fromEntries(
-        (users ?? []).map((u) => [u.id as string, u.email as string])
+        (users ?? []).map((u) => [u.id as string, u.email as string]),
       );
       return rows.map((r) => ({ ...r, email: emailById[r.author_id] ?? null }));
     },

@@ -39,14 +39,30 @@ const formatDate = (iso: string) =>
  * termine la demande (et la rouvre si on la décoche).
  */
 const AdminFeedback = () => {
-  const { data: items = [], isPending, error, setStatus, remove } =
-    useFeedback("admin");
-  const { add: addNote, update: updateNote, remove: removeNote } = useAdminNotes();
+  const {
+    data: items = [],
+    isPending,
+    error,
+    setStatus,
+    remove,
+  } = useFeedback("admin");
+  const {
+    add: addNote,
+    update: updateNote,
+    remove: removeNote,
+  } = useAdminNotes();
   const [viewing, setViewing] = useState<Feedback | null>(null);
 
   const lastVersion = (item: Feedback) => item.updated_at ?? item.created_at;
-  const rows = [...items].sort((a, b) =>
-    lastVersion(a) < lastVersion(b) ? 1 : -1
+  // Plus récente d'abord ; à date égale, l'id départage — un comparateur qui ne
+  // rend jamais 0 laissait l'ordre des ex æquo au hasard du refetch.
+  const rows = [...items].sort(
+    (a, b) =>
+      (lastVersion(a) < lastVersion(b)
+        ? 1
+        : lastVersion(a) > lastVersion(b)
+          ? -1
+          : 0) || b.id - a.id,
   );
 
   const fail = (e: any) =>
@@ -156,7 +172,7 @@ const AdminFeedback = () => {
                         "sticky top-0 bg-muted px-4 py-3 text-xs font-semibold uppercase tracking-wide text-foreground/55 shadow-[inset_0_-1px_0_0_var(--border)]",
                         h === "Actions"
                           ? "right-0 z-20 w-[120px] text-center shadow-[inset_1px_0_0_0_var(--border),inset_0_-1px_0_0_var(--border)]"
-                          : "z-10 text-left"
+                          : "z-10 text-left",
                       )}
                     >
                       {h}
@@ -167,7 +183,8 @@ const AdminFeedback = () => {
               <tbody>
                 {rows.map((item) => {
                   const status = feedbackStatus(item.status);
-                  const cancelled = !!item.cancelled_at && item.status === "nouveau";
+                  const cancelled =
+                    !!item.cancelled_at && item.status === "nouveau";
                   const done = item.status === "termine";
                   // Terminée = acceptée et faite : le check reste allumé.
                   const accepted = item.status === "accepte" || done;
@@ -180,8 +197,8 @@ const AdminFeedback = () => {
                     linked && item.status === "nouveau"
                       ? "Refuser la correction (le backlog reste)"
                       : linked
-                      ? "Refuser et retirer du backlog"
-                      : "Refuser";
+                        ? "Refuser et retirer du backlog"
+                        : "Refuser";
                   // Une demande terminée ne se reclasse pas ici : on décoche sa
                   // note dans le carnet, et elle redevient « acceptée ».
                   const frozen = done
@@ -199,7 +216,7 @@ const AdminFeedback = () => {
                         "cursor-pointer transition hover:bg-muted/40 [&>td]:border-t [&>td]:border-border/60",
                         // Ce qui attend une décision se lit en pleine couleur ;
                         // le reste, déjà tranché, reste en retrait.
-                        item.status === "nouveau" && "[&>td]:text-foreground"
+                        item.status === "nouveau" && "[&>td]:text-foreground",
                       )}
                     >
                       {/* Nature : un point de couleur, comme les tuiles du
@@ -209,7 +226,7 @@ const AdminFeedback = () => {
                           aria-label={feedbackType(item.type).label}
                           className={cn(
                             "block h-2.5 w-2.5 rounded-full",
-                            feedbackType(item.type).dot
+                            feedbackType(item.type).dot,
                           )}
                         />
                         <span className="sr-only">
@@ -240,7 +257,7 @@ const AdminFeedback = () => {
                         <span
                           className={cn(
                             "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium",
-                            cancelled ? FEEDBACK_CANCELLED.chip : status.chip
+                            cancelled ? FEEDBACK_CANCELLED.chip : status.chip,
                           )}
                         >
                           {cancelled ? FEEDBACK_CANCELLED.label : status.label}
@@ -271,7 +288,7 @@ const AdminFeedback = () => {
                                   : "cursor-pointer hover:bg-muted hover:text-emerald-600",
                                 accepted
                                   ? "text-emerald-600 dark:text-emerald-400"
-                                  : "text-foreground/35"
+                                  : "text-foreground/35",
                               )}
                             >
                               <FiCheck className="h-4 w-4" />
@@ -289,7 +306,9 @@ const AdminFeedback = () => {
                                 done
                                   ? "cursor-default"
                                   : "cursor-pointer hover:bg-muted hover:text-destructive",
-                                refused ? "text-destructive" : "text-foreground/35"
+                                refused
+                                  ? "text-destructive"
+                                  : "text-foreground/35",
                               )}
                             >
                               <FiX className="h-4 w-4" />

@@ -26,10 +26,14 @@ export interface AdminNote {
 
 const KEY = ["admin-notes"];
 
-/** En cours d'abord, puis dans l'ordre choisi à la souris (miroir de l'index). */
+/** En cours d'abord, puis dans l'ordre choisi à la souris (miroir de l'index).
+ *  Deux notes à la même position (anciens ajouts calculés depuis le cache) se
+ *  départagent par id : sans ce critère, leur ordre dépendait de celui, libre,
+ *  dans lequel la base les renvoyait — et changeait d'un refetch à l'autre. */
 const sortNotes = (notes: AdminNote[]) =>
   [...notes].sort(
-    (a, b) => Number(a.done) - Number(b.done) || a.position - b.position
+    (a, b) =>
+      Number(a.done) - Number(b.done) || a.position - b.position || a.id - b.id,
   );
 
 /** Contexte rendu par onMutate : la liste d'avant, pour rembobiner en cas
@@ -60,10 +64,11 @@ const useAdminNotes = (enabled = true) => {
       const { data, error } = await supabaseClient
         .from("admin_notes")
         .select(
-          "id, description, category, images, position, done, done_at, author_id, created_at"
+          "id, description, category, images, position, done, done_at, author_id, created_at",
         )
         .order("done", { ascending: true })
-        .order("position", { ascending: true });
+        .order("position", { ascending: true })
+        .order("id", { ascending: true });
       if (error) throw new Error(error.message);
       const rows = (data ?? []) as AdminNote[];
 
@@ -76,11 +81,11 @@ const useAdminNotes = (enabled = true) => {
         .select("id, email")
         .in("id", ids as string[]);
       const emailById = Object.fromEntries(
-        (users ?? []).map((u) => [u.id as string, u.email as string])
+        (users ?? []).map((u) => [u.id as string, u.email as string]),
       );
       return rows.map((n) => ({
         ...n,
-        email: n.author_id ? emailById[n.author_id] ?? null : null,
+        email: n.author_id ? (emailById[n.author_id] ?? null) : null,
       }));
     },
   });
@@ -102,7 +107,7 @@ const useAdminNotes = (enabled = true) => {
       .eq("note_id", noteId);
     const ids = (linked ?? []).map((f) => f.id as number);
     const kept = new Set<string>(
-      (linked ?? []).flatMap((f) => (f.images as string[]) ?? [])
+      (linked ?? []).flatMap((f) => (f.images as string[]) ?? []),
     );
     if (ids.length) {
       const { data: revs } = await supabaseClient
@@ -110,7 +115,7 @@ const useAdminNotes = (enabled = true) => {
         .select("images")
         .in("feedback_id", ids);
       (revs ?? []).forEach((r) =>
-        ((r.images as string[]) ?? []).forEach((p) => kept.add(p))
+        ((r.images as string[]) ?? []).forEach((p) => kept.add(p)),
       );
     }
     return candidates.filter((p) => !kept.has(p));
@@ -140,7 +145,9 @@ const useAdminNotes = (enabled = true) => {
 
   /** Options communes : appliquer dans le cache, défaire si le serveur refuse,
    *  puis resynchroniser dans tous les cas. */
-  const optimistic = <V,>(apply: (notes: AdminNote[], vars: V) => AdminNote[]) => ({
+  const optimistic = <V>(
+    apply: (notes: AdminNote[], vars: V) => AdminNote[],
+  ) => ({
     onMutate: async (vars: V): Promise<Rollback> => {
       // Écrit dans le cache AVANT le moindre `await` : l'affichage se met à
       // jour dans la foulée de l'action, sans attendre un tour de boucle.
@@ -199,7 +206,7 @@ const useAdminNotes = (enabled = true) => {
         done: false,
         done_at: null,
         author_id: vars.author_id ?? me?.id ?? null,
-        email: vars.author_id ? vars.email ?? null : me?.email ?? null,
+        email: vars.author_id ? (vars.email ?? null) : (me?.email ?? null),
         created_at: new Date().toISOString(),
       },
     ]),
@@ -237,8 +244,8 @@ const useAdminNotes = (enabled = true) => {
       notes.map((n) =>
         n.id === id
           ? { ...n, description, category, images: images ?? n.images }
-          : n
-      )
+          : n,
+      ),
     ),
   });
 
@@ -248,14 +255,17 @@ const useAdminNotes = (enabled = true) => {
   // Rouvrir une note la renvoie en FIN de liste des notes en cours, comme un
   // ajout : elle repart d'une place où on la retrouve, quitte à la remonter à
   // la souris — plutôt que de ressurgir au milieu, à sa position d'origine.
-  const toggleDone = useMutation<void, Error, { id: number; done: boolean }, Rollback>({
+  const toggleDone = useMutation<
+    void,
+    Error,
+    { id: number; done: boolean },
+    Rollback
+  >({
     mutationFn: async ({ id, done }) => {
       const { error } = await supabaseClient
         .from("admin_notes")
         .update(
-          done
-            ? { done }
-            : { done, position: await nextPositionFromDb() }
+          done ? { done } : { done, position: await nextPositionFromDb() },
         )
         .eq("id", id);
       if (error) throw new Error(error.message);
@@ -277,14 +287,19 @@ const useAdminNotes = (enabled = true) => {
               done_at: done ? new Date().toISOString() : null,
               position: reopenedAt ?? n.position,
             }
-          : n
+          : n,
       );
     }),
   });
 
   /** Déplacement à la souris : une seule ligne écrite, la position calculée
    *  entre les deux voisines d'arrivée. */
-  const move = useMutation<void, Error, { id: number; position: number }, Rollback>({
+  const move = useMutation<
+    void,
+    Error,
+    { id: number; position: number },
+    Rollback
+  >({
     mutationFn: async ({ id, position }) => {
       const { error } = await supabaseClient
         .from("admin_notes")
@@ -293,14 +308,19 @@ const useAdminNotes = (enabled = true) => {
       if (error) throw new Error(error.message);
     },
     ...optimistic((notes, { id, position }) =>
-      notes.map((n) => (n.id === id ? { ...n, position } : n))
+      notes.map((n) => (n.id === id ? { ...n, position } : n)),
     ),
   });
 
   // Les fichiers partent avec la note, sauf ceux que la demande d'origine
   // garde. On les relève AVANT la suppression : `feedback.note_id` passe à
   // null en cascade et on ne saurait plus qui les référence.
-  const remove = useMutation<void, Error, Pick<AdminNote, "id" | "images">, Rollback>({
+  const remove = useMutation<
+    void,
+    Error,
+    Pick<AdminNote, "id" | "images">,
+    Rollback
+  >({
     mutationFn: async ({ id, images }) => {
       const files = await orphanFiles(id, images).catch(() => []);
       const { error } = await supabaseClient
