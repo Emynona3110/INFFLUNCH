@@ -68,11 +68,8 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
     // Le dernier décroché en tête.
     .sort((a, b) => b.unlocked_at.localeCompare(a.unlocked_at));
 
-  // Même règle que sur une fiche : ses propres avis toujours, ceux des autres
-  // seulement s'ils ont un commentaire (une note seule n'apporte rien à lire).
-  const visibleReviews = (reviews.data ?? []).filter(
-    (r) => r.user_id === viewerId || r.comment?.trim(),
-  );
+  // Tous ses avis, note seule comprise (comme sur une fiche).
+  const visibleReviews = reviews.data ?? [];
 
   const deleteReview = async (review: UserReview) => {
     try {
@@ -295,8 +292,8 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
         </section>
       )}
       {/* Avis : la même mise en forme que sur une fiche resto, le restaurant
-          (vignette + nom, cliquables) à la place de l'auteur. Sans avis
-          lisible, la section est omise. */}
+          (vignette + nom, cliquables) à la place de l'auteur. Sans avis, la
+          section est omise. */}
       {(reviews.isPending || visibleReviews.length > 0) && (
         <section
           className={cn(
