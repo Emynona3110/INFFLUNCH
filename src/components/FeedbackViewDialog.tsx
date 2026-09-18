@@ -4,6 +4,7 @@ import HoldToDeleteButton from "@/components/HoldToDeleteButton";
 import { feedbackType } from "@/services/feedbackTypes";
 import { Feedback } from "@/hooks/useFeedback";
 import FeedbackVersions from "@/components/FeedbackVersions";
+import FeedbackImages from "@/components/FeedbackImages";
 import { formatAuthorName } from "@/utils/authorName";
 import { cn } from "@/lib/utils";
 
@@ -67,6 +68,9 @@ const FeedbackViewDialog = ({
         {item.message}
       </p>
 
+      {/* Captures jointes, sous le texte : un clic les ouvre en grand. */}
+      <FeedbackImages paths={item.images} className="mt-3" />
+
       <FeedbackVersions feedbackId={item.id} count={item.edits} />
 
       <div className="mt-4 sm:mt-6 flex items-center justify-between gap-2">
@@ -74,7 +78,7 @@ const FeedbackViewDialog = ({
           {onDelete && (
             <HoldToDeleteButton
               onConfirm={onDelete}
-              mobileConfirm="Supprimer ce retour ?"
+              mobileConfirm={false}
               disabled={busy}
               className="inline-flex h-10 items-center rounded-lg px-4 text-sm font-medium text-destructive transition hover:bg-destructive/10"
               progressClassName="bg-destructive/20"

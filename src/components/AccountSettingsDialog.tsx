@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FiCamera, FiTrash2 } from "react-icons/fi";
+import { FiArrowLeft, FiCamera, FiTrash2 } from "react-icons/fi";
 import { toast } from "@/lib/toast";
 import useSession from "@/hooks/useSession";
 import useProfile from "@/hooks/useProfile";
@@ -117,6 +117,17 @@ taille, et absorbe les clics tant qu'on reste sur ce sous-onglet. */}
             />
           </motion.div>
         )}
+        {/* Sortie : la popup n'a ni bouton Fermer ni fermeture au clic
+            extérieur, et Échap n'existe pas au doigt. Au-dessus du GIF de
+            l'easter egg, sinon on y reste enfermé. */}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Fermer"
+          className="absolute left-3 top-3 z-20 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-foreground/60 transition hover:bg-muted hover:text-foreground"
+        >
+          <FiArrowLeft className="h-5 w-5" />
+        </button>
         {/* Thème clair/sombre : réglage personnel, il a sa place ici plutôt que
 dans la navbar où il occupait une position permanente. */}
         <ColorModeSwitch
@@ -146,7 +157,7 @@ dans la navbar où il occupait une position permanente. */}
             {hasAvatar && (
               <HoldToDeleteButton
                 onConfirm={handleRemove}
-                mobileConfirm="Retirer la photo de profil ?"
+                mobileConfirm={false}
                 title="Maintenir pour retirer la photo"
                 className="absolute -right-1 -top-1 flex h-8 w-8 items-center justify-center rounded-full bg-destructive text-white shadow-md"
                 progressClassName="bg-white/40"

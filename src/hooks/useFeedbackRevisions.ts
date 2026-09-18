@@ -7,6 +7,8 @@ export interface FeedbackRevision {
   version: number;
   type: FeedbackType;
   message: string;
+  /** Chemins (bucket `feedback-images`) des images de cette version-là. */
+  images: string[];
   /** Date à laquelle cette version a cédé la place à la suivante. */
   replaced_at: string;
 }
@@ -26,7 +28,7 @@ const useFeedbackRevisions = (feedbackId: number | null) =>
     queryFn: async () => {
       const { data, error } = await supabaseClient
         .from("feedback_revisions")
-        .select("id, version, type, message, replaced_at")
+        .select("id, version, type, message, images, replaced_at")
         .eq("feedback_id", feedbackId as number)
         .order("version", { ascending: false });
       if (error) throw new Error(error.message);

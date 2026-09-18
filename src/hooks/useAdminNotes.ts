@@ -1,12 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import supabaseClient from "../services/supabaseClient";
 import { NoteCategory } from "../services/noteCategories";
+import { removeFromBucket } from "../services/uploadImage";
+import { FEEDBACK_BUCKET } from "../services/storagePaths";
 import useSession from "./useSession";
 
 export interface AdminNote {
   id: number;
   description: string;
   category: NoteCategory;
+  /** Chemins (bucket `feedback-images`) des captures jointes, 3 au plus.
+   *  Une note née d'une demande acceptée reprend celles de la demande — les
+   *  mêmes fichiers, pas des copies. */
+  images: string[];
   position: number;
   done: boolean;
   done_at: string | null;
@@ -54,7 +60,7 @@ const useAdminNotes = (enabled = true) => {
       const { data, error } = await supabaseClient
         .from("admin_notes")
         .select(
-          "id, description, category, position, done, done_at, author_id, created_at"
+          "id, description, category, images, position, done, done_at, author_id, created_at"
         )
         .order("done", { ascending: true })
         .order("position", { ascending: true });
@@ -81,6 +87,33 @@ const useAdminNotes = (enabled = true) => {
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: KEY });
+  };
+
+  /**
+   * Fichiers d'une note qu'on peut effacer du bucket : ceux qu'aucune demande
+   * liée (version courante ou archivée) ne référence encore — la note issue
+   * d'une demande partage ses fichiers avec elle.
+   */
+  const orphanFiles = async (noteId: number, candidates: string[]) => {
+    if (!candidates.length) return [];
+    const { data: linked } = await supabaseClient
+      .from("feedback")
+      .select("id, images")
+      .eq("note_id", noteId);
+    const ids = (linked ?? []).map((f) => f.id as number);
+    const kept = new Set<string>(
+      (linked ?? []).flatMap((f) => (f.images as string[]) ?? [])
+    );
+    if (ids.length) {
+      const { data: revs } = await supabaseClient
+        .from("feedback_revisions")
+        .select("images")
+        .in("feedback_id", ids);
+      (revs ?? []).forEach((r) =>
+        ((r.images as string[]) ?? []).forEach((p) => kept.add(p))
+      );
+    }
+    return candidates.filter((p) => !kept.has(p));
   };
 
   /** Position d'une nouvelle note : en fin de liste des notes en cours. */
@@ -132,18 +165,20 @@ const useAdminNotes = (enabled = true) => {
   type NewNote = {
     description: string;
     category: NoteCategory;
+    images?: string[];
     author_id?: string;
     /** Email de cet auteur, pour l'affichage optimiste seulement. */
     email?: string | null;
   };
 
   const add = useMutation<number, Error, NewNote, Rollback>({
-    mutationFn: async ({ description, category, author_id }) => {
+    mutationFn: async ({ description, category, images, author_id }) => {
       const { data, error } = await supabaseClient
         .from("admin_notes")
         .insert({
           description,
           category,
+          images: images ?? [],
           position: await nextPositionFromDb(),
           ...(author_id ? { author_id } : {}),
         })
@@ -159,6 +194,7 @@ const useAdminNotes = (enabled = true) => {
         id: -Date.now(),
         description: vars.description,
         category: vars.category,
+        images: vars.images ?? [],
         position: nextPosition(notes),
         done: false,
         done_at: null,
@@ -169,21 +205,40 @@ const useAdminNotes = (enabled = true) => {
     ]),
   });
 
+  // `note` = l'état d'avant, pour effacer du bucket les images retirées (sauf
+  // celles que la demande d'origine référence encore) ; absent quand l'appel
+  // vient de la boîte de réception, qui ne fait que recopier la demande.
   const update = useMutation<
     void,
     Error,
-    { id: number; description: string; category: NoteCategory },
+    {
+      id: number;
+      note?: AdminNote;
+      description: string;
+      category: NoteCategory;
+      images?: string[];
+    },
     Rollback
   >({
-    mutationFn: async ({ id, ...fields }) => {
+    mutationFn: async ({ id, note, ...fields }) => {
       const { error } = await supabaseClient
         .from("admin_notes")
         .update(fields)
         .eq("id", id);
       if (error) throw new Error(error.message);
+      if (note && fields.images) {
+        const next = fields.images;
+        const dropped = note.images.filter((p) => !next.includes(p));
+        const files = await orphanFiles(id, dropped).catch(() => []);
+        await removeFromBucket(files, FEEDBACK_BUCKET).catch(() => {});
+      }
     },
-    ...optimistic((notes, { id, ...fields }) =>
-      notes.map((n) => (n.id === id ? { ...n, ...fields } : n))
+    ...optimistic((notes, { id, description, category, images }) =>
+      notes.map((n) =>
+        n.id === id
+          ? { ...n, description, category, images: images ?? n.images }
+          : n
+      )
     ),
   });
 
@@ -242,15 +297,20 @@ const useAdminNotes = (enabled = true) => {
     ),
   });
 
-  const remove = useMutation<void, Error, number, Rollback>({
-    mutationFn: async (id) => {
+  // Les fichiers partent avec la note, sauf ceux que la demande d'origine
+  // garde. On les relève AVANT la suppression : `feedback.note_id` passe à
+  // null en cascade et on ne saurait plus qui les référence.
+  const remove = useMutation<void, Error, Pick<AdminNote, "id" | "images">, Rollback>({
+    mutationFn: async ({ id, images }) => {
+      const files = await orphanFiles(id, images).catch(() => []);
       const { error } = await supabaseClient
         .from("admin_notes")
         .delete()
         .eq("id", id);
       if (error) throw new Error(error.message);
+      await removeFromBucket(files, FEEDBACK_BUCKET).catch(() => {});
     },
-    ...optimistic((notes, id: number) => notes.filter((n) => n.id !== id)),
+    ...optimistic((notes, { id }) => notes.filter((n) => n.id !== id)),
   });
 
   return { ...query, add, update, toggleDone, move, remove };

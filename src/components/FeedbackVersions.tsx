@@ -2,6 +2,7 @@ import { useState } from "react";
 import { FiChevronRight } from "react-icons/fi";
 import { feedbackType } from "@/services/feedbackTypes";
 import useFeedbackRevisions from "@/hooks/useFeedbackRevisions";
+import FeedbackImages from "@/components/FeedbackImages";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -70,6 +71,7 @@ const FeedbackVersions = ({ feedbackId, count }: Props) => {
                 <p className="mb-0 mt-1 whitespace-pre-wrap break-words text-sm text-foreground/70">
                   {rev.message}
                 </p>
+                <FeedbackImages paths={rev.images} compact className="mt-2" />
               </li>
             );
           })}

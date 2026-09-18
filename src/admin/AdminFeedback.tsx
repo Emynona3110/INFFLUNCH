@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FiCheck, FiX } from "react-icons/fi";
+import { FiCheck, FiPaperclip, FiX } from "react-icons/fi";
 import { toast } from "@/lib/toast";
 import useFeedback, { Feedback } from "@/hooks/useFeedback";
 import useAdminNotes from "@/hooks/useAdminNotes";
@@ -71,6 +71,7 @@ const AdminFeedback = () => {
           id: noteId,
           description: item.message,
           category,
+          images: item.images,
         });
       } else {
         // La note porte le collaborateur à l'origine de la demande, pas
@@ -78,6 +79,7 @@ const AdminFeedback = () => {
         noteId = await addNote.mutateAsync({
           description: item.message,
           category,
+          images: item.images,
           author_id: item.author_id,
           email: item.email,
         });
@@ -111,7 +113,9 @@ const AdminFeedback = () => {
     const rejectingUpdate = item.status === "nouveau" && !!item.note_id;
     try {
       if (item.note_id && !rejectingUpdate) {
-        await removeNote.mutateAsync(item.note_id);
+        // Les fichiers de la note sont ceux de la demande, qui reste : rien
+        // à effacer du bucket.
+        await removeNote.mutateAsync({ id: item.note_id, images: [] });
       }
       await setStatus.mutateAsync({
         id: item.id,
@@ -219,6 +223,13 @@ const AdminFeedback = () => {
                       </td>
                       <td className="whitespace-nowrap px-4 py-1.5 text-foreground/70">
                         {item.email ? formatAuthorName(item.email) : "—"}
+                        {/* Trombone : des captures accompagnent le message. */}
+                        {item.images.length > 0 && (
+                          <span className="ml-2 inline-flex items-center gap-0.5 align-middle text-xs text-foreground/45">
+                            <FiPaperclip className="h-3.5 w-3.5" />
+                            {item.images.length}
+                          </span>
+                        )}
                       </td>
                       {/* « Annulée » ne s'affiche que faute de mieux : une
                           demande retirée alors qu'elle attendait encore n'a pas
@@ -305,7 +316,7 @@ const AdminFeedback = () => {
         onDelete={async () => {
           if (!viewing) return;
           try {
-            await remove.mutateAsync(viewing.id);
+            await remove.mutateAsync(viewing);
             setViewing(null);
           } catch (e) {
             fail(e);

@@ -31,3 +31,10 @@ export const galleryPathBase = (slug: string) =>
 /** Chemin (sans extension) d'un fichier de menu d'un resto (pdf/image). */
 export const menuPathBase = (slug: string) =>
   `${slug}/menu/${storageStamp()}-${shortId()}`;
+
+/** Bucket des images jointes aux demandes (un dossier par auteur). */
+export const FEEDBACK_BUCKET = "feedback-images";
+
+/** Chemin (sans extension) d'une image jointe à une demande. */
+export const feedbackImagePathBase = (userId: string) =>
+  `${userId}/${storageStamp()}-${shortId()}`;

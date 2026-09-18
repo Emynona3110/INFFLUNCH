@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import supabaseClient from "../services/supabaseClient";
 import { FeedbackStatus, FeedbackType } from "../services/feedbackTypes";
+import { removeFromBucket } from "../services/uploadImage";
+import { FEEDBACK_BUCKET } from "../services/storagePaths";
 import useRealtimeTable from "./useRealtimeTable";
 import useSession from "./useSession";
 
@@ -8,6 +10,9 @@ export interface Feedback {
   id: number;
   type: FeedbackType;
   message: string;
+  /** Chemins (bucket `feedback-images`) des images jointes, 3 au plus, dans
+   *  l'ordre choisi par l'auteur. */
+  images: string[];
   status: FeedbackStatus;
   /** Note de backlog créée à l'acceptation, pour la mettre à jour ensuite. */
   note_id: number | null;
@@ -49,7 +54,7 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
       let request = supabaseClient
         .from("feedback")
         .select(
-          "id, type, message, status, note_id, author_id, created_at, handled_at, cancelled_at, edits, updated_at"
+          "id, type, message, images, status, note_id, author_id, created_at, handled_at, cancelled_at, edits, updated_at"
         )
         .order("created_at", { ascending: false });
       // L'auteur ne revoit pas ce qu'il a retiré ; l'admin, si.
@@ -89,7 +94,11 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
   useRealtimeTable("feedback", invalidate, active);
 
   const submit = useMutation({
-    mutationFn: async (values: { type: FeedbackType; message: string }) => {
+    mutationFn: async (values: {
+      type: FeedbackType;
+      message: string;
+      images: string[];
+    }) => {
       const { error } = await supabaseClient.from("feedback").insert(values);
       if (error) throw new Error(error.message);
     },
@@ -97,21 +106,30 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
   });
 
   /** Correction par l'auteur. Le trigger en base remet la demande en attente :
-   *  inutile (et impossible) de toucher au statut d'ici. */
+   *  inutile (et impossible) de toucher au statut d'ici.
+   *
+   *  Les images retirées ne sont effacées du bucket que si la demande était
+   *  encore en attente (retouche en place) : sinon le trigger vient d'archiver
+   *  une version qui les référence encore. */
   const edit = useMutation({
     mutationFn: async ({
-      id,
+      item,
       ...values
     }: {
-      id: number;
+      item: Feedback;
       type: FeedbackType;
       message: string;
+      images: string[];
     }) => {
       const { error } = await supabaseClient
         .from("feedback")
         .update(values)
-        .eq("id", id);
+        .eq("id", item.id);
       if (error) throw new Error(error.message);
+      if (item.status === "nouveau") {
+        const dropped = item.images.filter((p) => !values.images.includes(p));
+        await removeFromBucket(dropped, FEEDBACK_BUCKET).catch(() => {});
+      }
     },
     onSuccess: invalidate,
   });
@@ -158,6 +176,11 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
             .update({ cancelled_at: new Date().toISOString() })
             .eq("id", item.id);
       if (error) throw new Error(error.message);
+      // Effacée pour de bon → ses images aussi (première version : aucune
+      // révision ne les référence).
+      if (untouched) {
+        await removeFromBucket(item.images, FEEDBACK_BUCKET).catch(() => {});
+      }
       return untouched;
     },
     onSuccess: invalidate,
@@ -167,9 +190,34 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
    *  demande (la RLS ne l'autorise qu'à lui). La note du carnet, si elle
    *  existe, reste : c'est le backlog qui la gère. */
   const remove = useMutation({
-    mutationFn: async (id: number) => {
-      const { error } = await supabaseClient.from("feedback").delete().eq("id", id);
+    mutationFn: async (item: Feedback) => {
+      // Les images des versions archivées partent avec la demande : on les
+      // relève avant que la cascade n'efface les lignes.
+      const { data: revisions } = await supabaseClient
+        .from("feedback_revisions")
+        .select("images")
+        .eq("feedback_id", item.id);
+      // La note du carnet, elle, reste (avec les fichiers qu'elle partage
+      // avec la demande) : on ne touche pas à ce qu'elle référence.
+      const kept = new Set<string>();
+      if (item.note_id) {
+        const { data: note } = await supabaseClient
+          .from("admin_notes")
+          .select("images")
+          .eq("id", item.note_id)
+          .maybeSingle();
+        ((note?.images as string[]) ?? []).forEach((p) => kept.add(p));
+      }
+      const files = [
+        ...item.images,
+        ...(revisions ?? []).flatMap((r) => (r.images as string[]) ?? []),
+      ].filter((p) => !kept.has(p));
+      const { error } = await supabaseClient
+        .from("feedback")
+        .delete()
+        .eq("id", item.id);
       if (error) throw new Error(error.message);
+      await removeFromBucket(files, FEEDBACK_BUCKET).catch(() => {});
     },
     onSuccess: invalidate,
   });

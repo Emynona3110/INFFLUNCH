@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import useFeedback, { Feedback } from "@/hooks/useFeedback";
 import useAdminNotes from "@/hooks/useAdminNotes";
 import useIsAdmin from "@/hooks/useIsAdmin";
+import useSession from "@/hooks/useSession";
 import {
   FEEDBACK_TYPES,
   FeedbackType,
@@ -12,6 +13,15 @@ import {
 } from "@/services/feedbackTypes";
 import { cn } from "@/lib/utils";
 import { MAX_TEXT } from "@/services/textLimits";
+import AttachedImagesField from "@/components/AttachedImagesField";
+import {
+  Attached,
+  discardUploaded,
+  fromStored,
+  revokeAttached,
+  sameAsStored,
+  uploadAttached,
+} from "@/services/attachedImages";
 
 interface Props {
   isOpen: boolean;
@@ -35,7 +45,8 @@ const clean = (text: string) =>
     .trim();
 
 /**
- * Saisie d'une demande sur l'appli : une nature, un message. Un seul formulaire
+ * Saisie d'une demande sur l'appli : une nature, un message, et jusqu'à trois
+ * images (une capture vaut souvent mieux qu'un paragraphe). Un seul formulaire
  * pour les trois natures — un bug et une idée ne méritent pas deux écrans, et on
  * ne veut surtout pas que le choix du bon endroit décourage l'envoi. Il sert
  * aussi à corriger une demande déjà envoyée, qui repart alors en attente.
@@ -47,6 +58,8 @@ const FeedbackDialog = ({ isOpen, onClose, item }: Props) => {
   const { submit, edit } = useFeedback("mine", false);
   const isAdmin = useIsAdmin();
   const notes = useAdminNotes(false);
+  const { sessionData } = useSession();
+  const userId = sessionData?.user?.id;
   // Seule une NOUVELLE demande d'admin court-circuite : corriger une demande
   // existante reste une correction de demande.
   const toBacklog = isAdmin && !item;
@@ -54,20 +67,33 @@ const FeedbackDialog = ({ isOpen, onClose, item }: Props) => {
   // par inertie. La saisie n'est ouverte qu'une fois la nature dite.
   const [type, setType] = useState<FeedbackType | null>(null);
   const [message, setMessage] = useState("");
+  const [images, setImages] = useState<Attached[]>([]);
   const [busy, setBusy] = useState(false);
   const messageRef = useRef<HTMLTextAreaElement>(null);
+
+  // Les prévisualisations sont des object URLs : révoquées au démontage.
+  const imagesRef = useRef<Attached[]>([]);
+  imagesRef.current = images;
+  useEffect(() => () => revokeAttached(imagesRef.current), []);
 
   // Formulaire vierge à chaque ouverture.
   useEffect(() => {
     if (!isOpen) return;
     setType(item?.type ?? null);
     setMessage(item?.message ?? "");
+    setImages((prev) => {
+      revokeAttached(prev);
+      return fromStored(item?.images);
+    });
   }, [isOpen, item]);
 
   // Rien n'a bougé : inutile d'écrire en base (l'update ferait ressortir du
   // grisé une demande déjà traitée côté admin) ni d'annoncer une modification.
   const unchanged =
-    !!item && type === item.type && clean(message) === item.message;
+    !!item &&
+    type === item.type &&
+    clean(message) === item.message &&
+    sameAsStored(images, item.images);
 
   const send = async () => {
     const text = clean(message);
@@ -77,14 +103,23 @@ const FeedbackDialog = ({ isOpen, onClose, item }: Props) => {
       return;
     }
     setBusy(true);
+    // Les nouveaux fichiers partent d'abord dans le bucket ; si l'écriture en
+    // base échoue ensuite, on ne laisse pas d'orphelins derrière.
+    let uploaded: string[] = [];
     try {
-      if (item) await edit.mutateAsync({ id: item.id, type, message: text });
+      if (!userId) throw new Error("Session expirée");
+      const sent = await uploadAttached(images, userId);
+      uploaded = sent.uploaded;
+      const paths = sent.paths;
+      if (item)
+        await edit.mutateAsync({ item, type, message: text, images: paths });
       else if (toBacklog)
         await notes.add.mutateAsync({
           description: text,
           category: feedbackType(type).note,
+          images: paths,
         });
-      else await submit.mutateAsync({ type, message: text });
+      else await submit.mutateAsync({ type, message: text, images: paths });
       toast({
         title: item
           ? "Demande modifiée"
@@ -100,6 +135,7 @@ const FeedbackDialog = ({ isOpen, onClose, item }: Props) => {
       });
       onClose();
     } catch (e: any) {
+      await discardUploaded(uploaded);
       toast({
         title: item ? "Modification impossible" : "Envoi impossible",
         description: e?.message ?? "Réessaie.",
@@ -175,6 +211,13 @@ const FeedbackDialog = ({ isOpen, onClose, item }: Props) => {
             {message.length}/{MAX_TEXT}
           </span>
         </label>
+
+        <AttachedImagesField
+          value={images}
+          onChange={setImages}
+          disabled={!type || busy}
+          active={isOpen}
+        />
       </div>
 
       {/* Pas de suppression ici : elle vit dans la popup de lecture, d'où l'on

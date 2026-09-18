@@ -1,6 +1,6 @@
 import supabaseClient from "./supabaseClient";
 import { compressImage, CompressOptions } from "../utils/imageCompress";
-import { PHOTOS_BUCKET } from "./storagePaths";
+import { FEEDBACK_BUCKET, PHOTOS_BUCKET } from "./storagePaths";
 
 /**
  * Compresse une image puis l'upload dans le bucket Storage, et renvoie son URL
@@ -11,20 +11,27 @@ import { PHOTOS_BUCKET } from "./storagePaths";
 export async function uploadImageToBucket(
   file: File,
   pathBase: string,
-  compress?: CompressOptions
+  compress?: CompressOptions,
+  bucket: string = PHOTOS_BUCKET
 ): Promise<{ url: string; path: string }> {
   const { blob, ext } = await compressImage(file, compress);
   const path = `${pathBase}.${ext}`;
 
   const { error } = await supabaseClient.storage
-    .from(PHOTOS_BUCKET)
+    .from(bucket)
     .upload(path, blob, { contentType: `image/${ext}`, upsert: false });
   if (error) throw new Error(error.message);
 
-  const url = supabaseClient.storage.from(PHOTOS_BUCKET).getPublicUrl(path).data
-    .publicUrl;
-  return { url, path };
+  return { url: publicUrlOf(bucket, path), path };
 }
+
+/** URL publique d'un fichier d'un bucket public. */
+export const publicUrlOf = (bucket: string, path: string) =>
+  supabaseClient.storage.from(bucket).getPublicUrl(path).data.publicUrl;
+
+/** URL publique d'une image jointe à une demande. */
+export const feedbackImageUrl = (path: string) =>
+  publicUrlOf(FEEDBACK_BUCKET, path);
 
 /**
  * Extrait le chemin interne au bucket depuis une URL publique Supabase, ou null
@@ -39,8 +46,9 @@ export function bucketPathFromPublicUrl(url: string | null | undefined): string 
 
 /** Supprime un ou plusieurs fichiers du bucket (best effort). */
 export async function removeFromBucket(
-  paths: string | string[]
+  paths: string | string[],
+  bucket: string = PHOTOS_BUCKET
 ): Promise<void> {
   const list = Array.isArray(paths) ? paths : [paths];
-  if (list.length) await supabaseClient.storage.from(PHOTOS_BUCKET).remove(list);
+  if (list.length) await supabaseClient.storage.from(bucket).remove(list);
 }

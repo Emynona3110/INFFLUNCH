@@ -7,6 +7,17 @@ import { NOTE_CATEGORIES, NoteCategory } from "@/services/noteCategories";
 import { AdminNote } from "@/hooks/useAdminNotes";
 import { cn } from "@/lib/utils";
 import { MAX_TEXT } from "@/services/textLimits";
+import useSession from "@/hooks/useSession";
+import { toast } from "@/lib/toast";
+import AttachedImagesField from "@/components/AttachedImagesField";
+import {
+  Attached,
+  discardUploaded,
+  fromStored,
+  revokeAttached,
+  sameAsStored,
+  uploadAttached,
+} from "@/services/attachedImages";
 
 interface Props {
   isOpen: boolean;
@@ -16,15 +27,20 @@ interface Props {
   onSubmit: (values: {
     description: string;
     category: NoteCategory;
+    images: string[];
   }) => Promise<void>;
   /** Suppression (édition seulement) : appui long dans la popup. */
   onDelete?: () => Promise<void> | void;
 }
 
 /**
- * Saisie d'une note de backlog : un descriptif libre et une catégorie. Sert
- * aussi bien à créer qu'à modifier — le contenu d'une note tient en un champ,
- * inutile d'avoir deux écrans.
+ * Saisie d'une note de backlog : un descriptif libre, une catégorie et jusqu'à
+ * trois captures. Sert aussi bien à créer qu'à modifier — le contenu d'une
+ * note tient en un champ, inutile d'avoir deux écrans.
+ *
+ * Les images sont envoyées dans le bucket AVANT d'appeler `onSubmit` (qui
+ * écrit la note) ; si cette écriture échoue, on efface ce qu'on vient
+ * d'envoyer.
  */
 const AdminNoteDialog = ({
   isOpen,
@@ -37,23 +53,56 @@ const AdminNoteDialog = ({
   // Pas de catégorie par défaut à la création : on la choisit, sinon tout
   // finirait en « Amélioration » sans y penser.
   const [category, setCategory] = useState<NoteCategory | null>(null);
+  const [images, setImages] = useState<Attached[]>([]);
   const [busy, setBusy] = useState(false);
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
+  const { sessionData } = useSession();
+  const userId = sessionData?.user?.id;
+
+  const imagesRef = useRef<Attached[]>([]);
+  imagesRef.current = images;
+  useEffect(() => () => revokeAttached(imagesRef.current), []);
 
   // Repart du contenu de la note à chaque ouverture (ou d'un formulaire vierge).
   useEffect(() => {
     if (!isOpen) return;
     setDescription(note?.description ?? "");
     setCategory(note?.category ?? null);
+    setImages((prev) => {
+      revokeAttached(prev);
+      return fromStored(note?.images);
+    });
   }, [isOpen, note]);
+
+  const unchanged =
+    !!note &&
+    category === note.category &&
+    description.trim() === note.description &&
+    sameAsStored(images, note.images);
 
   const submit = async () => {
     const text = description.trim();
     if (!category || !text) return;
-    setBusy(true);
-    try {
-      await onSubmit({ description: text, category });
+    if (unchanged) {
       onClose();
+      return;
+    }
+    setBusy(true);
+    let uploaded: string[] = [];
+    try {
+      if (!userId) throw new Error("Session expirée");
+      const sent = await uploadAttached(images, userId);
+      uploaded = sent.uploaded;
+      await onSubmit({ description: text, category, images: sent.paths });
+      onClose();
+    } catch (e) {
+      await discardUploaded(uploaded);
+      toast({
+        title: "Enregistrement impossible",
+        description: (e as Error)?.message ?? "Réessaie.",
+        status: "error",
+        duration: 5000,
+      });
     } finally {
       setBusy(false);
     }
@@ -120,6 +169,13 @@ const AdminNoteDialog = ({
             {description.length}/{MAX_TEXT}
           </span>
         </label>
+
+        <AttachedImagesField
+          value={images}
+          onChange={setImages}
+          disabled={!category || busy}
+          active={isOpen}
+        />
       </div>
 
       <div className="mt-4 sm:mt-6 flex items-center justify-between gap-2">
@@ -130,7 +186,7 @@ const AdminNoteDialog = ({
                 await onDelete();
                 onClose();
               }}
-              mobileConfirm="Supprimer la note ?"
+              mobileConfirm={false}
               disabled={busy}
               className="inline-flex h-10 items-center justify-center rounded-lg bg-destructive px-3 text-sm font-medium text-white hover:bg-destructive/90 sm:px-4"
             >
@@ -146,7 +202,7 @@ const AdminNoteDialog = ({
           <Button
             onClick={submit}
             loading={busy}
-            disabled={!category || !description.trim()}
+            disabled={!category || !description.trim() || unchanged}
           >
             {note ? "Enregistrer" : "Ajouter"}
           </Button>

@@ -5,6 +5,7 @@ import {
   FiMoreVertical,
   FiPlus,
   FiX,
+  FiPaperclip,
 } from "react-icons/fi";
 import { toast } from "@/lib/toast";
 import useAdminNotes, { AdminNote } from "@/hooks/useAdminNotes";
@@ -85,9 +86,11 @@ const AdminNotes = () => {
   const submit = async (values: {
     description: string;
     category: NoteCategory;
+    images: string[];
   }) => {
-    if (editing) update.mutate({ id: editing.id, ...values }, { onError: fail });
-    else add.mutate(values, { onError: fail });
+    if (editing)
+      await update.mutateAsync({ id: editing.id, note: editing, ...values });
+    else await add.mutateAsync(values);
   };
 
   const startDrag = (note: AdminNote, event: React.PointerEvent) => {
@@ -236,8 +239,15 @@ const AdminNotes = () => {
                 descriptif complet se lit dans la popup. */}
             {/* Pas de texte barré : le grisé de la tuile dit déjà que la note
                 est terminée, et le barré rendait le libellé pénible à relire. */}
-            <p className="my-0 truncate text-sm text-foreground/85">
-              {note.description}
+            <p className="my-0 flex items-center gap-2 text-sm text-foreground/85">
+              <span className="min-w-0 flex-1 truncate">{note.description}</span>
+              {/* Trombone : des captures sont jointes, à voir dans la popup. */}
+              {note.images.length > 0 && (
+                <span className="inline-flex shrink-0 items-center gap-0.5 text-xs text-foreground/45">
+                  <FiPaperclip className="h-3.5 w-3.5" />
+                  {note.images.length}
+                </span>
+              )}
             </p>
           </button>
 
@@ -362,6 +372,16 @@ const AdminNotes = () => {
         onClose={() => setViewing(null)}
         note={viewing}
         onEdit={() => viewing && openEdit(viewing)}
+        busy={remove.isPending}
+        onDelete={async () => {
+          if (!viewing) return;
+          try {
+            await remove.mutateAsync(viewing);
+            setViewing(null);
+          } catch (e) {
+            fail(e);
+          }
+        }}
       />
 
       <AdminNoteDialog
@@ -372,7 +392,7 @@ const AdminNotes = () => {
         onDelete={async () => {
           if (!editing) return;
           // Suppression depuis la popup (appui long) : la modale se ferme après.
-          await remove.mutateAsync(editing.id).catch(fail);
+          await remove.mutateAsync(editing).catch(fail);
         }}
       />
     </Card>

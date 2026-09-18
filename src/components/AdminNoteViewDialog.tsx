@@ -1,9 +1,11 @@
 import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import HoldToDeleteButton from "@/components/HoldToDeleteButton";
 import { noteCategory } from "@/services/noteCategories";
 import { AdminNote } from "@/hooks/useAdminNotes";
 import useNoteFeedback from "@/hooks/useNoteFeedback";
 import FeedbackVersions from "@/components/FeedbackVersions";
+import FeedbackImages from "@/components/FeedbackImages";
 import { formatAuthorName } from "@/utils/authorName";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +15,10 @@ interface Props {
   note: AdminNote | null;
   /** Bascule vers la popup de modification, sur la même note. */
   onEdit: () => void;
+  /** Suppression de la note, sous appui long. */
+  onDelete?: () => void;
+  /** Une action est en cours : on verrouille les boutons. */
+  busy?: boolean;
 }
 
 const formatDate = (iso: string) =>
@@ -27,7 +33,14 @@ const formatDate = (iso: string) =>
  * qu'on lit le descriptif en entier. La modification se fait dans une popup à
  * part — on ne risque donc pas d'éditer par accident ce qu'on venait consulter.
  */
-const AdminNoteViewDialog = ({ isOpen, onClose, note, onEdit }: Props) => {
+const AdminNoteViewDialog = ({
+  isOpen,
+  onClose,
+  note,
+  onEdit,
+  onDelete,
+  busy = false,
+}: Props) => {
   // Une note reprise d'une demande hérite de son historique : l'admin voit ce
   // que le collaborateur disait avant, sans quitter le carnet.
   const { data: origin } = useNoteFeedback(isOpen && note ? note.id : null);
@@ -57,16 +70,37 @@ const AdminNoteViewDialog = ({ isOpen, onClose, note, onEdit }: Props) => {
         {note.description}
       </p>
 
+      <FeedbackImages paths={note.images} className="mt-3" />
+
       <FeedbackVersions
         feedbackId={origin?.id ?? null}
         count={origin?.edits ?? 0}
       />
 
-      <div className="mt-4 sm:mt-6 flex justify-end gap-2">
-        <Button variant="outline" onClick={onClose}>
-          Fermer
-        </Button>
-        <Button onClick={onEdit}>Modifier</Button>
+      <div className="mt-4 sm:mt-6 flex items-center justify-between gap-2">
+        <div>
+          {/* Comme la popup d'une demande : supprimer se fait d'ici, sous
+              appui long. */}
+          {onDelete && (
+            <HoldToDeleteButton
+              onConfirm={onDelete}
+              mobileConfirm={false}
+              disabled={busy}
+              className="inline-flex h-10 items-center rounded-lg px-4 text-sm font-medium text-destructive transition hover:bg-destructive/10"
+              progressClassName="bg-destructive/20"
+            >
+              Supprimer
+            </HoldToDeleteButton>
+          )}
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={onClose} disabled={busy}>
+            Fermer
+          </Button>
+          <Button onClick={onEdit} disabled={busy}>
+            Modifier
+          </Button>
+        </div>
       </div>
     </Dialog>
   );
