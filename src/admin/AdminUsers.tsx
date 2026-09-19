@@ -35,6 +35,9 @@ const AdminUsers = () => {
   const myId = sessionData?.user?.id;
 
   const [toDelete, setToDelete] = useState<AppUser | null>(null);
+  // Par défaut on anonymise (avis, photos, menus restent, sans nom) ; effacer
+  // aussi les contributions ne se fait que si la personne l'a demandé.
+  const [erase, setErase] = useState(false);
   const [credentials, setCredentials] = useState<{
     email: string;
     tempPassword: string;
@@ -66,7 +69,7 @@ const AdminUsers = () => {
   const handleDelete = async (u: AppUser) => {
     const { data, error } = await supabaseClient.functions.invoke(
       "admin-delete-user",
-      { body: { userId: u.id } }
+      { body: { userId: u.id, mode: erase ? "erase" : "anonymize" } }
     );
     if (error || data?.error) {
       toast({
@@ -79,7 +82,14 @@ const AdminUsers = () => {
       return;
     }
     queryClient.invalidateQueries({ queryKey: ["users"] });
-    toast({ title: "Utilisateur supprimé", status: "success", duration: 2500 });
+    setErase(false);
+    toast({
+      title: erase
+        ? "Compte et contributions supprimés"
+        : "Compte supprimé, contributions anonymisées",
+      status: "success",
+      duration: 3000,
+    });
   };
 
   return (
@@ -242,13 +252,30 @@ const AdminUsers = () => {
 
       <ConfirmDeleteDialog
         open={!!toDelete}
-        onClose={() => setToDelete(null)}
+        onClose={() => {
+          setToDelete(null);
+          setErase(false);
+        }}
         onConfirm={() => (toDelete ? handleDelete(toDelete) : undefined)}
         title="Supprimer l'utilisateur"
         description={
           <>
-            Le compte <strong>{toDelete?.email}</strong> et ses données (avis,
-            photos, favoris) seront définitivement supprimés.
+            Le compte <strong>{toDelete?.email}</strong> et ses données
+            personnelles (profil, favoris, demandes…) seront définitivement
+            supprimés. Ses avis, photos et menus resteront, anonymisés
+            (« Ancien collaborateur »).
+            <label className="mt-3 flex cursor-pointer items-start gap-2 text-sm text-foreground">
+              <input
+                type="checkbox"
+                checked={erase}
+                onChange={(e) => setErase(e.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-destructive"
+              />
+              <span>
+                Effacer aussi ses contributions (à sa demande expresse
+                uniquement)
+              </span>
+            </label>
           </>
         }
       />

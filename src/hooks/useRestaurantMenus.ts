@@ -8,7 +8,8 @@ export type MenuKind = "link" | "pdf" | "image";
 export interface RestaurantMenu {
   id: number;
   restaurant_id: number;
-  user_id: string;
+  /** Null = auteur anonymisé (compte supprimé, contribution conservée). */
+  user_id: string | null;
   kind: MenuKind;
   url: string | null;
   storage_path: string | null;
@@ -50,7 +51,9 @@ const useRestaurantMenus = (restaurantId: number | undefined, slug?: string) => 
       if (error) throw new Error(error.message);
 
       const rows = data ?? [];
-      const ids = [...new Set(rows.map((r) => r.user_id))];
+      const ids = [
+        ...new Set(rows.map((r) => r.user_id).filter((id): id is string => !!id)),
+      ];
 
       let emailById: Record<string, string> = {};
       if (ids.length) {
@@ -66,7 +69,7 @@ const useRestaurantMenus = (restaurantId: number | undefined, slug?: string) => 
       return rows.map((r) => ({
         ...(r as Omit<RestaurantMenu, "href" | "email">),
         href: r.kind === "link" ? (r.url as string) : publicUrl(r.storage_path as string),
-        email: emailById[r.user_id] ?? null,
+        email: r.user_id ? (emailById[r.user_id] ?? null) : null,
       }));
     },
   });

@@ -1,6 +1,6 @@
 # Registre des activités de traitement — INFFLUNCH
 
-Tenu au titre de l'art. 30 RGPD (modèle simplifié CNIL). Dernière mise à jour : 2026-09-18.
+Tenu au titre de l'art. 30 RGPD (modèle simplifié CNIL). Dernière mise à jour : 2026-09-19.
 
 **Responsable du traitement** : Lucas Lambrechts (« LLS », éditeur non professionnel, initiative personnelle) — contact@infflunch.com. Pas de DPO, pas de représentant.
 **Sous-traitants** : Supabase Inc. (base, auth, storage — eu-west-1, Irlande) · Render Services, Inc. (hébergement statique, États-Unis) · Cloudflare (Turnstile, page d'inscription) · IONOS (domaine + redirection de `contact@infflunch.com` vers la boîte pro de l'éditeur, UE).
@@ -19,7 +19,7 @@ Tenu au titre de l'art. 30 RGPD (modèle simplifié CNIL). Dernière mise à jou
 | Données | E-mail pro, mot de passe haché, rôle (user/admin), avatar facultatif, date de création, `must_change_password` ; `waiting_list` : e-mail, type, état, date ; IP + empreinte navigateur transmises à Cloudflare Turnstile à l'inscription |
 | Tables | `auth.users`, `users`, `profiles`, `waiting_list` ; bucket `avatars` |
 | Destinataires | Admin (LLS) ; les autres collaborateurs voient e-mail formaté (`P.Nom`) et avatar |
-| Conservation | Durée de vie du compte ; suppression à la demande, au départ de la société constaté, ou après 2 ans sans connexion (`auth.users.last_sign_in_at`). **Revue des comptes au moins annuelle** (à dater ci-dessous). Demandes refusées : 12 mois max |
+| Conservation | Tant que la personne ne demande pas la suppression de son compte (décision du responsable, 2026-09-19 : pas de purge automatique ni au départ de la société — les contributions gardent leur utilité pour les collègues ; sur demande explicite : suppression du compte + effacement des données personnelles, contributions anonymisées — effacées si la personne le précise ; cf. journal ci-dessous). Demandes d'accès refusées : 12 mois max |
 | Sécurité | Voir en-tête ; Edge Functions `admin-create-user` / `admin-delete-user` ; mdp temporaire transmis par Teams |
 
 ## Fiche 2 — Contributions (avis, photos, menus, favoris, réactions, déjeuner, succès)
@@ -42,8 +42,8 @@ Tenu au titre de l'art. 30 RGPD (modèle simplifié CNIL). Dernière mise à jou
 | Finalité | Recueillir les retours (bugs, suggestions) et prévenir des nouveautés par notification push |
 | Base légale | Intérêt légitime — amélioration du service (6.1.f) ; **consentement** pour les push (retirable dans « Mon compte ») |
 | Personnes concernées | Collaborateurs disposant d'un compte |
-| Données | Texte + images jointes (3 max), versions, état de traitement ; abonnement push (endpoint, clés p256dh/auth, user agent) |
-| Tables | `feedback`, `feedback_revisions`, `push_subscriptions` ; `admin_notes` (backlog admin, peut citer un utilisateur) |
+| Données | Texte + images jointes (3 max), versions, état de traitement, fil de discussion auteur/admin ; abonnement push (endpoint, clés p256dh/auth, user agent) |
+| Tables | `feedback`, `feedback_revisions`, `feedback_messages`, `push_subscriptions` ; `admin_notes` (backlog admin, peut citer un utilisateur) |
 | Destinataires | Admin (LLS) ; l'auteur voit ses propres demandes |
 | Conservation | Demandes : durée de vie du compte ; abonnement push : jusqu'au retrait du consentement, suppression du compte ou expiration de l'endpoint |
 | Sécurité | RLS own-read/own-write ; Edge Function `notify-admins` (VAPID) |
@@ -54,11 +54,6 @@ Tenu au titre de l'art. 30 RGPD (modèle simplifié CNIL). Dernière mise à jou
 - Aucune mesure d'audience, aucun cookie publicitaire, aucun profilage.
 - Stockage local navigateur (session, thème, viewMode, nouveautés vues, dernier onglet) : traceurs strictement nécessaires, exemptés de consentement.
 - Aucune donnée sensible (art. 9), aucun mineur, aucune décision automatisée.
-
-## Revues des comptes
-| Date | Comptes supprimés | Motif |
-|---|---|---|
-| | | |
 
 ## Journal des demandes d'exercice de droits
 | Date | Personne | Droit exercé | Réponse le |

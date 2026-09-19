@@ -6,7 +6,8 @@ import { PHOTOS_BUCKET, galleryPathBase } from "../services/storagePaths";
 export interface RestaurantPhoto {
   id: number;
   restaurant_id: number;
-  user_id: string;
+  /** Null = auteur anonymisé (compte supprimé, contribution conservée). */
+  user_id: string | null;
   storage_path: string;
   width: number | null;
   height: number | null;
@@ -47,7 +48,9 @@ const useRestaurantPhotos = (
       if (error) throw new Error(error.message);
 
       const rows = data ?? [];
-      const ids = [...new Set(rows.map((r) => r.user_id))];
+      const ids = [
+        ...new Set(rows.map((r) => r.user_id).filter((id): id is string => !!id)),
+      ];
 
       let emailById: Record<string, string> = {};
       if (ids.length) {
@@ -63,7 +66,7 @@ const useRestaurantPhotos = (
       return rows.map((r) => ({
         ...r,
         url: publicUrl(r.storage_path),
-        email: emailById[r.user_id] ?? null,
+        email: r.user_id ? (emailById[r.user_id] ?? null) : null,
       }));
     },
   });

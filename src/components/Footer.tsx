@@ -6,8 +6,9 @@ const linkCls =
 
 /**
  * Pied de page présent sur TOUS les écrans (mentions légales obligatoires dès
- * la page de connexion). `compact` = variante d'une ligne, sans marge, pour les
- * écrans pleine hauteur (carte, roue, admin, Mon compte mobile).
+ * la page de connexion). `compact` = sans marge au-dessus, pour les écrans
+ * pleine hauteur (carte, roue, admin, Mon compte mobile) où il est déjà calé
+ * en bas — même rendu sinon.
  */
 export const Footer = ({ compact = false }: { compact?: boolean }) => {
   // Depuis une page légale, l'autre s'ouvre en `replace` : les deux pages ne
@@ -19,9 +20,10 @@ export const Footer = ({ compact = false }: { compact?: boolean }) => {
     <footer
       className={cn(
         "flex shrink-0 flex-wrap items-center justify-center gap-x-2 text-center text-[11px] text-foreground/45",
-        compact
-          ? "border-t border-border/60 py-1"
-          : "mt-4 border-t border-border py-2 sm:mt-8 sm:py-3",
+        // Même filet et même hauteur partout ; `compact` retire seulement la
+        // marge au-dessus (le footer est déjà calé en bas de l'écran).
+        "border-t border-border py-2 sm:py-3",
+        !compact && "mt-4 sm:mt-8",
       )}
     >
       <span>Infflunch 2026</span>

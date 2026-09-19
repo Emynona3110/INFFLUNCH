@@ -5,7 +5,8 @@ import { profilePath } from "@/utils/profilePath";
 import { cn } from "@/lib/utils";
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
-  userId: string;
+  /** Null = auteur anonymisé : le nom s'affiche, sans lien. */
+  userId: string | null;
   email?: string | null;
   /** Contenu à la place du nom (un avatar, par exemple). */
   children?: ReactNode;
@@ -23,6 +24,15 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
 const AuthorButton = forwardRef<HTMLButtonElement, Props>(
   ({ userId, email, className, children, onClick, ...rest }, ref) => {
     const navigate = useNavigate();
+    // Compte supprimé, contribution conservée : « Ancien collaborateur », et
+    // rien où aller.
+    if (!userId) {
+      return (
+        <span className={cn("m-0 p-0 text-left", className)}>
+          {children ?? formatAuthorName(email)}
+        </span>
+      );
+    }
     return (
       <button
         ref={ref}

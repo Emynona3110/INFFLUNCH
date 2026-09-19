@@ -6,7 +6,8 @@
  *   "cdubois@infflux.com" → "C.Dubois" / initiales "CD".
  */
 export const formatAuthorName = (email: string | null | undefined): string => {
-  if (!email) return "Anonyme";
+  // Sans email = contribution anonymisée (compte supprimé, avis conservé).
+  if (!email) return "Ancien collaborateur";
   const local = email.split("@")[0];
   if (!local) return email;
   const first = local[0].toUpperCase();

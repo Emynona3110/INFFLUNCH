@@ -4,7 +4,8 @@ import supabaseClient from "../services/supabaseClient";
 export interface Review {
   id: number;
   restaurant_id: number;
-  user_id: string;
+  /** Null = auteur anonymisé (compte supprimé, contribution conservée). */
+  user_id: string | null;
   rating: number;
   comment: string | null;
   created_at: string;
@@ -35,7 +36,9 @@ const useReviews = (restaurantId: number | undefined) =>
       if (error) throw new Error(error.message);
 
       const rows = data ?? [];
-      const ids = [...new Set(rows.map((r) => r.user_id))];
+      const ids = [
+        ...new Set(rows.map((r) => r.user_id).filter((id): id is string => !!id)),
+      ];
 
       let emailById: Record<string, string> = {};
       let avatarById: Record<string, string | null> = {};
@@ -60,8 +63,8 @@ const useReviews = (restaurantId: number | undefined) =>
 
       return rows.map((r) => ({
         ...r,
-        email: emailById[r.user_id] ?? null,
-        avatar_path: avatarById[r.user_id] ?? null,
+        email: r.user_id ? (emailById[r.user_id] ?? null) : null,
+        avatar_path: r.user_id ? (avatarById[r.user_id] ?? null) : null,
       }));
     },
   });

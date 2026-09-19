@@ -24,7 +24,7 @@ const EDITOR_NAME = "LLS";
  * seuls collègues connectés — les personnes concernées au sens du RGPD. Le
  * public (et le bundle JS) ne voit que le pseudonyme : anonymat LCEN préservé.
  */
-const LAST_UPDATE = "18 septembre 2026";
+const LAST_UPDATE = "19 septembre 2026";
 
 const HOST = {
   name: "Render Services, Inc.",
@@ -212,8 +212,9 @@ const Confidentialite = () => {
             <span className="font-medium text-foreground">
               Demandes et suggestions
             </span>{" "}
-            : textes et images que tu envoies via « Compte › Demandes » — pour
-            améliorer le site.
+            : textes et images que tu envoies via « Compte › Demandes », et les
+            échanges qui s'ensuivent avec l'administrateur — pour améliorer le
+            site.
           </li>
           <li>
             <span className="font-medium text-foreground">Notifications</span> :
@@ -266,12 +267,14 @@ const Confidentialite = () => {
 
       <Section title="Durée de conservation">
         <p>
-          Les données du compte et les contributions sont conservées tant que le
-          compte existe. Le compte est supprimé à ta demande, lorsque ton départ
-          de la société est constaté, ou après 2 ans sans connexion — les
-          comptes sont revus au moins une fois par an ; les demandes d'accès
-          refusées sont supprimées sous 12 mois. À la suppression du compte, tes
-          données et contributions sont effacées ou anonymisées.
+          Ton compte et tes contributions sont conservés tant que tu n'en
+          demandes pas la suppression, y compris après ton départ de la
+          société : tes avis et photos restent utiles aux collègues. Aucune
+          suppression n'est faite sans ta demande explicite. Quand tu la
+          demandes, ton compte est supprimé et tes données personnelles
+          effacées ; tes contributions (avis, photos, menus) sont anonymisées
+          — ou effacées aussi, si tu le précises. Les demandes d'accès refusées sont
+          supprimées sous 12 mois.
         </p>
       </Section>
 
@@ -294,8 +297,6 @@ const Confidentialite = () => {
           Profil », tes avis dans « Compte › Avis », tes photos depuis la fiche
           du restaurant ; pour le reste (dont la suppression du compte),
           contacte l'éditeur (<Contact />
-          ). Tu peux aussi introduire une réclamation auprès de la CNIL (
-          <Ext href="https://www.cnil.fr/fr/plaintes">cnil.fr/fr/plaintes</Ext>
           ).
         </p>
       </Section>

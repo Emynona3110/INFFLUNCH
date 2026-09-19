@@ -135,10 +135,10 @@ const RestaurantGallery = ({
             userId={userId}
             isAdmin={isAdmin}
             // Sous chaque photo : qui l'a prise, et un clic mène à son profil.
-            labelOf={(photo) =>
-              photo.email ? formatAuthorName(photo.email) : null
+            labelOf={(photo) => formatAuthorName(photo.email)}
+            onLabelClick={(photo) =>
+              photo.user_id && navigate(`/profil/${photo.user_id}`)
             }
-            onLabelClick={(photo) => navigate(`/profil/${photo.user_id}`)}
             onDelete={(photo) => remove.mutateAsync(photo)}
             onSetCaption={(photo, caption) =>
               setCaption.mutateAsync({ id: photo.id, caption })
