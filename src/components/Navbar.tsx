@@ -50,8 +50,9 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
 
   // Puce "une de mes demandes a été classée" : l'admin a tranché depuis ma
   // dernière visite de « Mes demandes ». Temps réel via le canal de useFeedback.
+  // Pas pour l'admin : il n'a pas cet onglet (ses demandes vont au backlog).
   const { hasUnseen: hasUnseenFeedback } = useFeedbackSeen();
-  const myAccountDot = hasUnseenAchievements || hasUnseenFeedback;
+  const myAccountDot = hasUnseenAchievements || (!isAdmin && hasUnseenFeedback);
 
   // Puce "déjeuner" : je n'ai rien déclaré pour aujourd'hui. Elle disparaît dès
   // que j'ai choisi un restaurant OU dit que je ne mange pas au resto. On attend la fin du

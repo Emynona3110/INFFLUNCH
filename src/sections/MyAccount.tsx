@@ -24,7 +24,8 @@ const subTabs = [
   // « Avis » retiré (2026-09-19) : redondant avec le profil — voir MyReviews.tsx.
   { key: "succes", label: "Succès", adminOnly: false },
   // Suivi de ses propres signalements : l'envoi se fait depuis la navbar.
-  { key: "retours", label: "Demandes", adminOnly: false },
+  // Inutile à l'admin : ses demandes vont directement au backlog.
+  { key: "retours", label: "Demandes", adminOnly: false, userOnly: true },
   // Carnet de backlog : ce que l'admin repère en naviguant, pour plus tard.
   { key: "backlog", label: "Backlog", adminOnly: true },
 ] as const;
@@ -45,7 +46,9 @@ const MyAccount = () => {
   // un avatar : l'URL reste propre).
   const stateTab = (location.state as { tab?: string } | null)?.tab ?? null;
   const tabParam = searchParams.get("tab") ?? stateTab;
-  const visibleTabs = subTabs.filter((t) => !t.adminOnly || isAdmin);
+  const visibleTabs = subTabs.filter(
+    (t) => (!t.adminOnly || isAdmin) && !("userOnly" in t && isAdmin),
+  );
   // Un ?tab= qui vise un onglet interdit (ou inconnu) est ignoré.
   const isTabKey = (v: string | null): v is SubTabKey =>
     visibleTabs.some((t) => t.key === v);

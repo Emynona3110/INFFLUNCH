@@ -43,7 +43,10 @@ export const feedbackType = (value?: string | null) =>
 /**
  * Où en est le TRAITEMENT d'une demande — l'auteur le voit aussi, c'est la
  * réponse qu'on lui doit :
- *   - « En attente » : arrivée, ou corrigée depuis son classement ;
+ *   - « En attente » : arrivée, corrigée depuis son classement, ou relancée
+ *                      par son auteur dans le fil — la balle est chez l'admin ;
+ *   - « Répondue »   : l'admin a écrit dans le fil sans classer — la balle est
+ *                      chez l'auteur (posé par la base) ;
  *   - « Acceptée »   : reportée dans le carnet de backlog ;
  *   - « Terminée »   : la note du carnet a été cochée (posé par la base) ;
  *   - « Refusée »    : lue et écartée.
@@ -57,6 +60,11 @@ export const FEEDBACK_STATUSES = [
     value: "nouveau",
     label: "En attente",
     chip: "bg-amber-500/12 text-amber-600 dark:text-amber-400",
+  },
+  {
+    value: "repondu",
+    label: "Répondue",
+    chip: "bg-indigo-500/12 text-indigo-600 dark:text-indigo-400",
   },
   {
     value: "accepte",

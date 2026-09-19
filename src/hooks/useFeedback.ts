@@ -6,6 +6,17 @@ import { FEEDBACK_BUCKET } from "../services/storagePaths";
 import useRealtimeTable from "./useRealtimeTable";
 import useSession from "./useSession";
 
+/** Un message du fil d'une demande : de l'admin ou de l'auteur, immuable. */
+export interface FeedbackMessage {
+  id: number;
+  feedback_id: number;
+  author_id: string;
+  body: string;
+  created_at: string;
+  /** Email de l'auteur du message (jointure manuelle, admins seulement). */
+  email?: string | null;
+}
+
 export interface Feedback {
   id: number;
   type: FeedbackType;
@@ -30,7 +41,13 @@ export interface Feedback {
   updated_at: string | null;
   /** Email de l'auteur (jointure manuelle) : seuls les admins en ont besoin. */
   email?: string | null;
+  /** Fil de discussion sous la demande, du plus ancien au plus récent. */
+  messages: FeedbackMessage[];
 }
+
+/** Dernier message du fil, s'il y en a un. */
+export const lastMessage = (item: Feedback): FeedbackMessage | undefined =>
+  item.messages[item.messages.length - 1];
 
 /**
  * Demandes des collaborateurs sur l'appli (`feedback`).
@@ -67,12 +84,42 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
 
       const { data, error } = await request;
       if (error) throw new Error(error.message);
-      const rows = (data ?? []) as Feedback[];
-      if (scope === "mine" || rows.length === 0) return rows;
+      const base = (data ?? []) as Omit<Feedback, "messages">[];
+      if (base.length === 0) return [];
+
+      // Le fil de chaque demande, en une requête pour toutes : la RLS ne rend
+      // que ce que la demande elle-même laisse lire.
+      const { data: msgs, error: msgsError } = await supabaseClient
+        .from("feedback_messages")
+        .select("id, feedback_id, author_id, body, created_at")
+        .in(
+          "feedback_id",
+          base.map((r) => r.id),
+        )
+        .order("created_at", { ascending: true })
+        .order("id", { ascending: true });
+      if (msgsError) throw new Error(msgsError.message);
+      const byFeedback = new Map<number, FeedbackMessage[]>();
+      for (const m of (msgs ?? []) as FeedbackMessage[]) {
+        const list = byFeedback.get(m.feedback_id) ?? [];
+        list.push(m);
+        byFeedback.set(m.feedback_id, list);
+      }
+      const rows: Feedback[] = base.map((r) => ({
+        ...r,
+        messages: byFeedback.get(r.id) ?? [],
+      }));
+      if (scope === "mine") return rows;
 
       // Comme reviews et photos : pas de FK vers public.users, on rapporte les
-      // emails en une requête plutôt qu'une par ligne.
-      const ids = [...new Set(rows.map((r) => r.author_id))];
+      // emails en une requête plutôt qu'une par ligne — auteurs des demandes
+      // et des messages confondus.
+      const ids = [
+        ...new Set([
+          ...rows.map((r) => r.author_id),
+          ...rows.flatMap((r) => r.messages.map((m) => m.author_id)),
+        ]),
+      ];
       const { data: users } = await supabaseClient
         .from("users")
         .select("id, email")
@@ -80,7 +127,14 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
       const emailById = Object.fromEntries(
         (users ?? []).map((u) => [u.id as string, u.email as string]),
       );
-      return rows.map((r) => ({ ...r, email: emailById[r.author_id] ?? null }));
+      return rows.map((r) => ({
+        ...r,
+        email: emailById[r.author_id] ?? null,
+        messages: r.messages.map((m) => ({
+          ...m,
+          email: emailById[m.author_id] ?? null,
+        })),
+      }));
     },
   });
 
@@ -93,6 +147,9 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
   // suite dans la boîte de réception admin (et sa puce), et l'auteur voit son
   // classement sans recharger. La RLS filtre déjà ce que chacun reçoit.
   useRealtimeTable("feedback", invalidate, active);
+  // Le fil vit dans sa propre table : un message de l'admin apparaît chez
+  // l'auteur (et allume sa puce) sans recharger, et réciproquement.
+  useRealtimeTable("feedback_messages", invalidate, active);
 
   const submit = useMutation({
     mutationFn: async (values: {
@@ -151,6 +208,18 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
         .from("feedback")
         .update(note_id === undefined ? { status } : { status, note_id })
         .eq("id", id);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: invalidate,
+  });
+
+  /** Un message de plus dans le fil, en son nom (admin partout, auteur sous
+   *  ses propres demandes — la RLS tranche). Immuable : c'est l'historique. */
+  const reply = useMutation({
+    mutationFn: async ({ id, body }: { id: number; body: string }) => {
+      const { error } = await supabaseClient
+        .from("feedback_messages")
+        .insert({ feedback_id: id, author_id: userId, body: body.trim() });
       if (error) throw new Error(error.message);
     },
     onSuccess: invalidate,
@@ -223,7 +292,7 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
     onSuccess: invalidate,
   });
 
-  return { ...query, submit, edit, setStatus, cancel, remove };
+  return { ...query, submit, edit, setStatus, reply, cancel, remove };
 };
 
 export default useFeedback;

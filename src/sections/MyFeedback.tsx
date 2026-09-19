@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FiArrowUpRight, FiMessageSquare, FiPaperclip } from "react-icons/fi";
 import { toast } from "@/lib/toast";
-import useFeedbackSeen from "@/hooks/useFeedbackSeen";
-import useFeedback, { Feedback } from "@/hooks/useFeedback";
+import useFeedbackSeen, { feedbackTouchedAt } from "@/hooks/useFeedbackSeen";
+import useFeedback, { Feedback, lastMessage } from "@/hooks/useFeedback";
+import useSession from "@/hooks/useSession";
 import { feedbackStatus, feedbackType } from "@/services/feedbackTypes";
 import FeedbackDialog from "@/components/FeedbackDialog";
 import FeedbackViewDialog from "@/components/FeedbackViewDialog";
@@ -38,7 +39,9 @@ const formatDate = (iso: string) =>
  * l'envoi — sans lui, une demande part dans le vide.
  */
 const MyFeedback = () => {
-  const { data: fetched = [], isPending, cancel } = useFeedback("mine");
+  const { sessionData } = useSession();
+  const userId = sessionData?.user?.id;
+  const { data: fetched = [], isPending, cancel, reply } = useFeedback("mine");
   // Ce qui attend encore quelque chose d'abord ; les demandes closes
   // (terminées, refusées) descendent en bas, chaque groupe gardant l'ordre
   // du plus récent au plus ancien.
@@ -51,10 +54,38 @@ const MyFeedback = () => {
   // relire. Corriger remet la demande en attente côté admin.
   const [viewing, setViewing] = useState<Feedback | null>(null);
   const [editing, setEditing] = useState<Feedback | null>(null);
+  // La popup lit toujours la version courante de la demande (fil compris) :
+  // mon message envoyé, ou une réponse arrivée en direct, s'y affichent.
+  const viewingLive = viewing
+    ? (fetched.find((f) => f.id === viewing.id) ?? viewing)
+    : null;
 
-  // Lire cette liste vaut acquittement : la puce s'éteint, y compris pour un
-  // classement qui arriverait en direct pendant qu'on la regarde.
-  const { markSeen } = useFeedbackSeen();
+  // Puce sur chaque demande classée ou répondue depuis la dernière visite. On fige la date
+  // « vue » telle qu'elle était à l'OUVERTURE de la liste : on marque tout
+  // comme vu dès l'ouverture (ci-dessous), les puces doivent pourtant rester
+  // le temps de la consultation. Cet effet est déclaré AVANT l'acquittement
+  // pour capturer la valeur d'avant.
+  const { markSeen, seenAt } = useFeedbackSeen();
+  const seenAtOnOpen = useRef<string | null>(null);
+  useEffect(() => {
+    if (seenAtOnOpen.current === null && seenAt !== null)
+      seenAtOnOpen.current = seenAt;
+  }, [seenAt]);
+  // Ouvrir une demande vaut lecture : sa puce s'éteint aussitôt, même si la
+  // liste, elle, garde les autres allumées jusqu'à ce qu'on la quitte.
+  const [acked, setAcked] = useState<Set<number>>(() => new Set());
+  const isNew = (item: Feedback) =>
+    seenAtOnOpen.current !== null &&
+    !acked.has(item.id) &&
+    feedbackTouchedAt(item, userId) > seenAtOnOpen.current;
+  const open = (item: Feedback) => {
+    setAcked((prev) => new Set(prev).add(item.id));
+    setViewing(item);
+  };
+
+  // Lire cette liste vaut acquittement : la puce de l'onglet s'éteint, y
+  // compris pour un classement qui arriverait en direct pendant qu'on la
+  // regarde (celui-ci garde sa puce à lui, plus récent que l'ouverture).
   useEffect(() => {
     markSeen();
   }, [markSeen]);
@@ -123,18 +154,28 @@ const MyFeedback = () => {
                   key={item.id}
                   className={cn(
                     "group relative flex min-h-[60px] items-center gap-3 px-3 py-2.5 transition sm:min-h-0 sm:items-start sm:rounded-xl sm:border sm:border-border sm:bg-background sm:p-3 sm:hover:border-primary/40",
-                    // Classée sans retour possible : grisée, comme les notes
-                    // terminées du carnet et les demandes traitées côté admin.
-                    frozen(item) && "opacity-55",
                   )}
                 >
+                  {isNew(item) && (
+                    <span
+                      aria-label="Du nouveau depuis ta dernière visite"
+                      className="absolute right-1 top-1 z-[1] h-3 w-3 rounded-full bg-primary ring-2 ring-card sm:-right-1 sm:-top-1"
+                    />
+                  )}
                   {/* Toute la tuile ouvre la lecture ; modifier et supprimer sont
                     dans cette popup, plus rien ne dispute le clic. */}
                   <button
                     type="button"
-                    onClick={() => setViewing(item)}
+                    onClick={() => open(item)}
                     aria-label="Voir la demande"
-                    className="min-w-0 flex-1 cursor-pointer text-left after:absolute after:inset-0 after:content-['']"
+                    className={cn(
+                      "min-w-0 flex-1 cursor-pointer text-left after:absolute after:inset-0 after:content-['']",
+                      // Classée sans retour possible : grisée, comme les notes
+                      // terminées du carnet et les demandes traitées côté admin.
+                      // Sur le contenu et non la tuile, pour que la puce
+                      // « classée depuis ta visite » reste bien visible.
+                      frozen(item) && "opacity-55",
+                    )}
                   >
                     {/* Mobile : type à gauche, statut à droite ; dessous date
                       courte + message sur une ligne (…). Desktop : inchangé. */}
@@ -165,6 +206,22 @@ const MyFeedback = () => {
                       <span className="truncate sm:whitespace-pre-wrap">
                         {item.message}
                       </span>
+                      {/* Bulle + nombre de messages du fil ; en couleur quand
+                          le dernier mot est à l'admin (une réponse à lire). */}
+                      {item.messages.length > 0 && (
+                        <span
+                          className={cn(
+                            "inline-flex shrink-0 items-center gap-0.5 text-xs",
+                            lastMessage(item)?.author_id !== userId
+                              ? "text-primary"
+                              : "text-foreground/45",
+                          )}
+                          aria-label={`${item.messages.length} message(s)`}
+                        >
+                          <FiMessageSquare className="h-3.5 w-3.5" />
+                          {item.messages.length}
+                        </span>
+                      )}
                       {/* Trombone : des images sont jointes, à voir dans la
                           popup. */}
                       {item.images.length > 0 && (
@@ -188,8 +245,25 @@ const MyFeedback = () => {
       <FeedbackViewDialog
         isOpen={!!viewing}
         onClose={() => setViewing(null)}
-        item={viewing}
+        item={viewingLive}
         busy={cancel.isPending}
+        currentUserId={userId}
+        // Répondre dans le fil : possible même sur une demande classée — on
+        // peut vouloir en rediscuter, c'est l'historique de l'échange.
+        onReply={async (body) => {
+          if (!viewing) return;
+          try {
+            await reply.mutateAsync({ id: viewing.id, body });
+          } catch (e: any) {
+            toast({
+              title: "Envoi impossible",
+              description: e?.message ?? "Réessaie.",
+              status: "error",
+              duration: 5000,
+            });
+            throw e;
+          }
+        }}
         onEdit={
           viewing && !frozen(viewing)
             ? () => {

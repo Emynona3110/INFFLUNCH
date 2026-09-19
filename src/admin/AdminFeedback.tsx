@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { FiCheck, FiPaperclip, FiX } from "react-icons/fi";
+import { FiCheck, FiMessageSquare, FiPaperclip, FiX } from "react-icons/fi";
 import { toast } from "@/lib/toast";
 import useFeedback, { Feedback } from "@/hooks/useFeedback";
+import useSession from "@/hooks/useSession";
 import useAdminNotes from "@/hooks/useAdminNotes";
 import {
   FEEDBACK_CANCELLED,
@@ -44,14 +45,21 @@ const AdminFeedback = () => {
     isPending,
     error,
     setStatus,
+    reply,
     remove,
   } = useFeedback("admin");
+  const { sessionData } = useSession();
+  const userId = sessionData?.user?.id;
   const {
     add: addNote,
     update: updateNote,
     remove: removeNote,
   } = useAdminNotes();
   const [viewing, setViewing] = useState<Feedback | null>(null);
+  // La popup lit toujours la version courante de la demande (fil compris).
+  const viewingLive = viewing
+    ? (items.find((f) => f.id === viewing.id) ?? viewing)
+    : null;
 
   const lastVersion = (item: Feedback) => item.updated_at ?? item.created_at;
   // Plus récente d'abord ; à date égale, l'id départage — un comparateur qui ne
@@ -126,7 +134,7 @@ const AdminFeedback = () => {
    * être mise à jour si l'admin change d'avis.
    */
   const refuse = async (item: Feedback) => {
-    const rejectingUpdate = item.status === "nouveau" && !!item.note_id;
+    const rejectingUpdate = pending(item) && !!item.note_id;
     try {
       if (item.note_id && !rejectingUpdate) {
         // Les fichiers de la note sont ceux de la demande, qui reste : rien
@@ -183,8 +191,7 @@ const AdminFeedback = () => {
               <tbody>
                 {rows.map((item) => {
                   const status = feedbackStatus(item.status);
-                  const cancelled =
-                    !!item.cancelled_at && item.status === "nouveau";
+                  const cancelled = !!item.cancelled_at && pending(item);
                   const done = item.status === "termine";
                   // Terminée = acceptée et faite : le check reste allumé.
                   const accepted = item.status === "accepte" || done;
@@ -194,7 +201,7 @@ const AdminFeedback = () => {
                     ? "Mettre le backlog à jour"
                     : "Ajouter au backlog";
                   const refuseLabel =
-                    linked && item.status === "nouveau"
+                    linked && pending(item)
                       ? "Refuser la correction (le backlog reste)"
                       : linked
                         ? "Refuser et retirer du backlog"
@@ -240,6 +247,13 @@ const AdminFeedback = () => {
                       </td>
                       <td className="whitespace-nowrap px-4 py-1.5 text-foreground/70">
                         {item.email ? formatAuthorName(item.email) : "—"}
+                        {/* Bulle + nombre de messages du fil. */}
+                        {item.messages.length > 0 && (
+                          <span className="ml-2 inline-flex items-center gap-0.5 align-middle text-xs text-foreground/45">
+                            <FiMessageSquare className="h-3.5 w-3.5" />
+                            {item.messages.length}
+                          </span>
+                        )}
                         {/* Trombone : des captures accompagnent le message. */}
                         {item.images.length > 0 && (
                           <span className="ml-2 inline-flex items-center gap-0.5 align-middle text-xs text-foreground/45">
@@ -330,8 +344,18 @@ const AdminFeedback = () => {
       <FeedbackViewDialog
         isOpen={!!viewing}
         onClose={() => setViewing(null)}
-        item={viewing}
+        item={viewingLive}
         busy={remove.isPending}
+        currentUserId={userId}
+        onReply={async (body) => {
+          if (!viewing) return;
+          try {
+            await reply.mutateAsync({ id: viewing.id, body });
+          } catch (e) {
+            fail(e);
+            throw e;
+          }
+        }}
         onDelete={async () => {
           if (!viewing) return;
           try {
@@ -346,7 +370,15 @@ const AdminFeedback = () => {
   );
 };
 
-/** Nombre de demandes encore en attente : sert la puce de l'onglet Admin. */
+/** Pas encore classée : en attente (balle chez l'admin) ou répondue (balle
+ *  chez l'auteur). Ce que « accepter » ou « refuser » tranche pour la première
+ *  fois. */
+const pending = (item: Feedback) =>
+  item.status === "nouveau" || item.status === "repondu";
+
+/** Nombre de demandes qui attendent l'admin : sert la puce de l'onglet Admin.
+ *  « Répondue » n'y compte pas — la balle est chez l'auteur, et la base remet
+ *  la demande en attente dès qu'il écrit. */
 export const useNewFeedbackCount = () => {
   const { data = [] } = useFeedback("admin");
   return data.filter((f) => f.status === "nouveau").length;

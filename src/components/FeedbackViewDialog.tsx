@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import HoldToDeleteButton from "@/components/HoldToDeleteButton";
@@ -16,6 +17,10 @@ interface Props {
   onEdit?: () => void;
   /** Suppression de la demande, sous appui long. */
   onDelete?: () => void;
+  /** Écrire dans le fil (admin comme auteur). Absent = lecture seule. */
+  onReply?: (body: string) => Promise<void>;
+  /** Pour distinguer « Toi » des autres dans le fil. */
+  currentUserId?: string;
   /** Une action est en cours : on verrouille les boutons. */
   busy?: boolean;
 }
@@ -26,6 +31,140 @@ const formatDate = (iso: string) =>
     month: "long",
     year: "numeric",
   });
+
+const REPLY_MAX = 2000;
+
+const formatDateTime = (iso: string) =>
+  new Date(iso).toLocaleString("fr-FR", {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+/**
+ * Fil de discussion sous la demande : les messages dans l'ordre, les miens à
+ * droite, puis un champ pour en ajouter un. Immuable — c'est l'historique de
+ * l'échange entre l'auteur et l'admin.
+ */
+const FeedbackThread = ({
+  item,
+  me,
+  onReply,
+}: {
+  item: Feedback;
+  me?: string;
+  onReply?: (body: string) => Promise<void>;
+}) => {
+  const [draft, setDraft] = useState("");
+  const [sending, setSending] = useState(false);
+  const listRef = useRef<HTMLUListElement>(null);
+  // Le dernier message en vue à l'ouverture comme à chaque arrivée.
+  useEffect(() => {
+    listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
+  }, [item.messages.length]);
+
+  const send = async () => {
+    const body = draft.trim();
+    if (!body || sending || !onReply) return;
+    setSending(true);
+    try {
+      await onReply(body);
+      setDraft("");
+    } catch {
+      /* déjà signalé par l'appelant */
+    } finally {
+      setSending(false);
+    }
+  };
+
+  if (item.messages.length === 0 && !onReply) return null;
+
+  const who = (authorId: string, email?: string | null) =>
+    authorId === me
+      ? "Toi"
+      : email
+        ? formatAuthorName(email)
+        : authorId === item.author_id
+          ? "Auteur"
+          : "Admin";
+
+  return (
+    <div className="mt-4 border-t border-border pt-3">
+      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-foreground/55">
+        Échanges
+        {item.messages.length > 0 && (
+          <span className="ml-1.5 font-medium normal-case tracking-normal text-foreground/40">
+            ({item.messages.length})
+          </span>
+        )}
+      </p>
+      {item.messages.length > 0 && (
+        <ul
+          ref={listRef}
+          className="m-0 mb-3 max-h-56 list-none space-y-2 overflow-y-auto p-0"
+        >
+          {item.messages.map((m) => {
+            const mine = m.author_id === me;
+            return (
+              <li
+                key={m.id}
+                className={cn("flex", mine ? "justify-end" : "justify-start")}
+              >
+                <div
+                  className={cn(
+                    "max-w-[85%] rounded-lg px-3 py-2",
+                    mine
+                      ? "bg-primary/10 text-foreground"
+                      : "bg-muted/60 text-foreground",
+                  )}
+                >
+                  <p className="mb-0.5 text-[11px] text-foreground/45">
+                    <span className="font-semibold text-foreground/60">
+                      {who(m.author_id, m.email)}
+                    </span>
+                    {" · "}
+                    {formatDateTime(m.created_at)}
+                  </p>
+                  <p className="mb-0 whitespace-pre-wrap break-words text-sm">
+                    {m.body}
+                  </p>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      {onReply && (
+        <div className="flex items-end gap-2">
+          <textarea
+            value={draft}
+            maxLength={REPLY_MAX}
+            rows={2}
+            placeholder="Écrire une réponse…"
+            onChange={(e) => setDraft(e.target.value.slice(0, REPLY_MAX))}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                send();
+              }
+            }}
+            className="min-h-[2.5rem] w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition placeholder:text-foreground/40 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/25"
+          />
+          <Button
+            variant="primarySoft"
+            onClick={send}
+            disabled={!draft.trim()}
+            loading={sending}
+            aria-label="Envoyer"
+          >
+            Envoyer
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+};
 
 /**
  * Lecture d'une demande : la tuile n'en montre qu'une ligne tronquée, c'est ici
@@ -41,6 +180,8 @@ const FeedbackViewDialog = ({
   item,
   onEdit,
   onDelete,
+  onReply,
+  currentUserId,
   busy = false,
 }: Props) => {
   if (!item) return null;
@@ -72,6 +213,8 @@ const FeedbackViewDialog = ({
       <FeedbackImages paths={item.images} className="mt-3" />
 
       <FeedbackVersions feedbackId={item.id} count={item.edits} />
+
+      <FeedbackThread item={item} me={currentUserId} onReply={onReply} />
 
       <div className="mt-4 sm:mt-6 flex items-center justify-between gap-2">
         <div>
