@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
+import { FiSettings } from "react-icons/fi";
 import Layout from "../components/Layout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -218,8 +219,9 @@ const Confidentialite = () => {
           </li>
           <li>
             <span className="font-medium text-foreground">Notifications</span> :
-            abonnement push du navigateur, uniquement si tu l'actives — pour te
-            prévenir des nouveautés.
+            abonnement push du navigateur, proposé aux administrateurs seulement
+            et uniquement s'ils l'activent — pour être prévenus des demandes
+            d'accès.
           </li>
           <li>
             <span className="font-medium text-foreground">
@@ -231,14 +233,20 @@ const Confidentialite = () => {
           </li>
         </ul>
         <p>
-          Pourquoi c'est permis : le compte, les demandes d'accès et les
-          contributions sont nécessaires au service que tu as demandé en créant
-          ton compte ; les données techniques et la modération relèvent de
-          l'intérêt légitime de l'éditeur à faire fonctionner et sécuriser le
-          site ; les notifications reposent sur ton consentement, retirable à
-          tout moment dans « Compte › Profil » (paramètres). Les champs sont
-          obligatoires sauf mention contraire ; sans e-mail, aucun compte ne
-          peut être créé.
+          Sur quelle base : ton compte, tes demandes d'accès, tes contributions
+          et tes demandes sont traités parce que c'est le service que tu
+          demandes en t'inscrivant ; les données techniques et la modération
+          relèvent de l'intérêt légitime de l'éditeur à faire fonctionner et
+          sécuriser le site ; les notifications push reposent sur le
+          consentement de l'administrateur, retirable à tout moment dans les
+          réglages (
+          <FiSettings
+            aria-label="Réglages"
+            className="inline h-3.5 w-3.5 align-[-2px]"
+          />
+          ). Seul l'e-mail est indispensable : sans lui, pas de compte. Tout le
+          reste (photo de profil, avis, photos, menus, demandes…) est
+          facultatif.
         </p>
       </Section>
 
@@ -338,7 +346,7 @@ export default function LegalPage({ kind }: { kind: Kind }) {
     location.key === "default" ? navigate("/") : navigate(-1);
 
   return (
-    <Layout>
+    <Layout scrollKey={location.pathname}>
       <div className="tw-scope flex w-full justify-center sm:px-4">
         <Card className="w-full max-w-2xl p-5 sm:p-8">
           <div

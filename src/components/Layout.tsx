@@ -1,7 +1,7 @@
 import Footer from "./Footer";
 import Navbar from "./Navbar";
 import { RestaurantFilters } from "../pages/UserPage";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import PullToRefresh from "@/components/PullToRefresh";
 import { cn } from "@/lib/utils";
 
@@ -37,6 +37,13 @@ interface LayoutProps {
    * compte mobile). Le footer doit rester présent sur tous les écrans.
    */
   footer?: boolean;
+  /**
+   * Quand cette valeur change, le contenu remonte en haut. À passer (ex. le
+   * pathname) sur les pages où une navigation réutilise le même Layout sans
+   * le remonter — mentions légales ↔ confidentialité —, sinon on arrive au
+   * milieu de la nouvelle page, à la position de l'ancienne.
+   */
+  scrollKey?: string;
 }
 
 const Layout = ({
@@ -49,8 +56,13 @@ const Layout = ({
   pullToRefresh = false,
   toolbarPortal = false,
   footer = true,
+  scrollKey,
 }: LayoutProps) => {
   const mainRef = useRef<HTMLElement>(null);
+  // C'est <main> qui scrolle (pas window) : c'est lui qu'on remonte.
+  useEffect(() => {
+    mainRef.current?.scrollTo({ top: 0 });
+  }, [scrollKey]);
   const content = pullToRefresh ? (
     <PullToRefresh scrollRef={mainRef}>{children}</PullToRefresh>
   ) : (
