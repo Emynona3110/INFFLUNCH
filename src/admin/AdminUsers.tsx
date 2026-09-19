@@ -3,12 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { FiCopy, FiKey, FiTrash2 } from "react-icons/fi";
 import { toast } from "@/lib/toast";
+import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import supabaseClient from "../services/supabaseClient";
 import useUsers, { AppUser } from "../hooks/useUsers";
 import useSession from "../hooks/useSession";
 import HoldToDeleteButton from "../components/HoldToDeleteButton";
 import ConfirmDeleteDialog from "../components/ConfirmDeleteDialog";
-import { Button } from "@/components/ui/button";
 import { Tooltip } from "@/components/ui/tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -204,20 +204,16 @@ const AdminUsers = () => {
 
       {/* Mot de passe temporaire après réinitialisation */}
       {credentials && (
-        <div
-          className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/50 p-4"
+        <Dialog
+          open
+          onClose={() => setCredentials(null)}
+          showClose
+          className="p-6"
         >
-          <div
-            className="w-full max-w-md rounded-card border border-border bg-card p-6 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div
-              role="heading"
-              aria-level={2}
-              className="font-display text-xl font-bold text-card-foreground"
-            >
-              Mot de passe réinitialisé ✅
-            </div>
+          <div>
+            <DialogTitle>
+              <span className="mr-8">Mot de passe réinitialisé ✅</span>
+            </DialogTitle>
             <p className="mt-3 text-sm text-foreground/80">
               Transmets ce mot de passe à <b>{credentials.email}</b> via Teams.
               Il devra le changer à la prochaine connexion.
@@ -240,13 +236,8 @@ const AdminUsers = () => {
                 </button>
               </div>
             </div>
-            <div className="mt-6 flex justify-end">
-              <Button variant="outline" onClick={() => setCredentials(null)}>
-                Fermer
-              </Button>
-            </div>
           </div>
-        </div>
+        </Dialog>
       )}
 
       <ConfirmDeleteDialog

@@ -107,3 +107,10 @@ export const FEEDBACK_CANCELLED = {
   label: "Annulée",
   chip: "bg-muted text-foreground/55",
 } as const;
+
+/** Demande supprimée par l'admin : elle quitte la boîte de réception, mais
+ *  l'auteur garde sa tuile, grisée, en lecture seule. */
+export const FEEDBACK_DELETED = {
+  label: "Supprimée",
+  chip: "bg-muted text-foreground/55",
+} as const;

@@ -2,7 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import HoldToDeleteButton from "@/components/HoldToDeleteButton";
-import { feedbackStatus, feedbackType } from "@/services/feedbackTypes";
+import {
+  FEEDBACK_DELETED,
+  feedbackStatus,
+  feedbackType,
+} from "@/services/feedbackTypes";
 import { FiCheck, FiEdit2, FiSend } from "react-icons/fi";
 import { Feedback, FeedbackMessage } from "@/hooks/useFeedback";
 import Avatar from "@/components/Avatar";
@@ -326,12 +330,15 @@ const FeedbackViewDialog = ({
 }: Props) => {
   if (!item) return null;
   const type = feedbackType(item.type);
-  const status = feedbackStatus(item.status);
+  const status = item.deleted_at
+    ? FEEDBACK_DELETED
+    : feedbackStatus(item.status);
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className="max-w-lg">
+    <Dialog open={isOpen} onClose={onClose} className="max-w-lg" showClose>
+      {/* Marge à droite : la croix de fermeture. */}
       <DialogTitle>
-        <span className="inline-flex items-center gap-2">
+        <span className="mr-8 inline-flex items-center gap-2">
           <span className={cn("h-2 w-2 rounded-full", type.dot)} />
           {type.label}
         </span>
@@ -373,12 +380,25 @@ const FeedbackViewDialog = ({
         onEditMessage={onEditMessage}
       />
 
-      {/* Deux rangées : les DÉCISIONS (admin) d'abord — chacune son style
-          pour qu'on ne les confonde pas —, puis les gestes de base (retirer /
-          fermer / modifier). */}
-      <div className="mt-4 sm:mt-6 space-y-3">
-        {(onRefuse || onAccept || onCloseRequest || onReopenRequest) && (
-          <div className="flex flex-wrap justify-end gap-2 border-t border-border pt-3">
+      {/* Une seule rangée : Supprimer à gauche, les DÉCISIONS (admin) et
+          Modifier (auteur) à droite — chacune son style pour qu'on ne les
+          confonde pas. Fermer = la croix en haut. */}
+      {(onDelete || onRefuse || onAccept || onCloseRequest || onReopenRequest || onEdit) && (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3 sm:mt-6">
+          <div>
+            {onDelete && (
+              <HoldToDeleteButton
+                onConfirm={onDelete}
+                mobileConfirm={false}
+                disabled={busy}
+                className="inline-flex h-10 items-center rounded-lg px-4 text-sm font-medium text-destructive transition hover:bg-destructive/10"
+                progressClassName="bg-destructive/20"
+              >
+                Supprimer
+              </HoldToDeleteButton>
+            )}
+          </div>
+          <div className="flex flex-wrap justify-end gap-2">
             {onRefuse && (
               <HoldToDeleteButton
                 onConfirm={onRefuse}
@@ -420,26 +440,6 @@ const FeedbackViewDialog = ({
                 Accepter
               </HoldToDeleteButton>
             )}
-          </div>
-        )}
-        <div className="flex items-center justify-between gap-2">
-          <div>
-            {onDelete && (
-              <HoldToDeleteButton
-                onConfirm={onDelete}
-                mobileConfirm={false}
-                disabled={busy}
-                className="inline-flex h-10 items-center rounded-lg px-4 text-sm font-medium text-destructive transition hover:bg-destructive/10"
-                progressClassName="bg-destructive/20"
-              >
-                Supprimer
-              </HoldToDeleteButton>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={onClose} disabled={busy}>
-              Fermer
-            </Button>
             {onEdit && (
               <Button onClick={onEdit} disabled={busy}>
                 Modifier
@@ -447,7 +447,7 @@ const FeedbackViewDialog = ({
             )}
           </div>
         </div>
-      </div>
+      )}
     </Dialog>
   );
 };

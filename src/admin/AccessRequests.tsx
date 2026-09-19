@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { FiCopy, FiCheck, FiX, FiTrash2 } from "react-icons/fi";
 import { toast } from "@/lib/toast";
+import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import supabaseClient from "../services/supabaseClient";
 import useAccessRequests, {
   AccessRequest,
@@ -9,7 +10,6 @@ import useAccessRequests, {
   RequestType,
 } from "../hooks/useAccessRequests";
 import HoldToDeleteButton from "../components/HoldToDeleteButton";
-import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Tooltip } from "@/components/ui/tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -246,20 +246,16 @@ const AccessRequests = ({ activeType }: { activeType: RequestType }) => {
 
       {/* Mot de passe temporaire après acceptation */}
       {credentials && (
-        <div
-          className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/50 p-4"
+        <Dialog
+          open
+          onClose={() => setCredentials(null)}
+          showClose
+          className="p-6"
         >
-          <div
-            className="w-full max-w-md rounded-card border border-border bg-card p-6 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div
-              role="heading"
-              aria-level={2}
-              className="font-display text-xl font-bold text-card-foreground"
-            >
-              Demande acceptée ✅
-            </div>
+          <div>
+            <DialogTitle>
+              <span className="mr-8">Demande acceptée ✅</span>
+            </DialogTitle>
             <p className="mt-3 text-sm text-foreground/80">
               Transmets ces identifiants à <b>{credentials.email}</b> via Teams.
               Le mot de passe devra être changé à la prochaine connexion.
@@ -282,13 +278,8 @@ const AccessRequests = ({ activeType }: { activeType: RequestType }) => {
                 </button>
               </div>
             </div>
-            <div className="mt-6 flex justify-end">
-              <Button variant="outline" onClick={() => setCredentials(null)}>
-                Fermer
-              </Button>
-            </div>
           </div>
-        </div>
+        </Dialog>
       )}
     </div>
   );

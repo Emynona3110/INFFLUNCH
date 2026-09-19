@@ -41,6 +41,9 @@ export interface Feedback {
   /** L'auteur s'est retiré : la demande sort de sa liste, mais l'admin la garde
    *  (et le backlog qu'elle a produit continue sa vie). */
   cancelled_at: string | null;
+  /** L'admin l'a supprimée : elle quitte la boîte de réception, l'auteur garde
+   *  sa tuile grisée (figée, en lecture). */
+  deleted_at: string | null;
   /** Versions archivées (historique : depuis le 2026-09-19 une demande ne se
    *  corrige plus que tant qu'elle est en attente, en place — le fil sert à
    *  préciser ensuite). */
@@ -90,15 +93,18 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
       let request = supabaseClient
         .from("feedback")
         .select(
-          "id, type, message, images, status, note_id, author_id, created_at, handled_at, cancelled_at, edits, updated_at",
+          "id, type, message, images, status, note_id, author_id, created_at, handled_at, cancelled_at, deleted_at, edits, updated_at",
         )
         .order("created_at", { ascending: false })
         .order("id", { ascending: false });
-      // L'auteur ne revoit pas ce qu'il a retiré ; l'admin, si.
+      // L'auteur ne revoit pas ce qu'il a retiré ; l'admin, si. L'admin ne
+      // revoit pas ce qu'il a supprimé ; l'auteur, si (tuile grisée).
       if (scope === "mine") {
         request = request
           .eq("author_id", userId as string)
           .is("cancelled_at", null);
+      } else {
+        request = request.is("deleted_at", null);
       }
 
       const { data, error } = await request;
@@ -294,38 +300,17 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
     onSuccess: invalidate,
   });
 
-  /** Suppression pure et simple par l'admin, quel que soit l'état de la
-   *  demande (la RLS ne l'autorise qu'à lui). La note du carnet, si elle
-   *  existe, reste : c'est le backlog qui la gère. */
+  /** Suppression par l'admin : la demande quitte la boîte de réception, mais
+   *  la ligne reste (`deleted_at`) — l'auteur garde sa tuile, grisée, avec
+   *  tout l'historique. Rien n'est effacé du bucket. La note du carnet, si
+   *  elle existe, reste : c'est le backlog qui la gère. */
   const remove = useMutation({
     mutationFn: async (item: Feedback) => {
-      // Les images des versions archivées partent avec la demande : on les
-      // relève avant que la cascade n'efface les lignes.
-      const { data: revisions } = await supabaseClient
-        .from("feedback_revisions")
-        .select("images")
-        .eq("feedback_id", item.id);
-      // La note du carnet, elle, reste (avec les fichiers qu'elle partage
-      // avec la demande) : on ne touche pas à ce qu'elle référence.
-      const kept = new Set<string>();
-      if (item.note_id) {
-        const { data: note } = await supabaseClient
-          .from("admin_notes")
-          .select("images")
-          .eq("id", item.note_id)
-          .maybeSingle();
-        ((note?.images as string[]) ?? []).forEach((p) => kept.add(p));
-      }
-      const files = [
-        ...item.images,
-        ...(revisions ?? []).flatMap((r) => (r.images as string[]) ?? []),
-      ].filter((p) => !kept.has(p));
       const { error } = await supabaseClient
         .from("feedback")
-        .delete()
+        .update({ deleted_at: new Date().toISOString() })
         .eq("id", item.id);
       if (error) throw new Error(error.message);
-      await removeFromBucket(files, FEEDBACK_BUCKET).catch(() => {});
     },
     onSuccess: invalidate,
   });

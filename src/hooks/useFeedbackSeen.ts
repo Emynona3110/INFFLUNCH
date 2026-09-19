@@ -23,14 +23,16 @@ import useFeedback, { Feedback, lastMessage } from "./useFeedback";
  */
 /**
  * Date du dernier geste de QUELQU'UN D'AUTRE sur une demande ("" si aucun) :
- * un classement, ou le dernier message du fil s'il n'est pas de `me`. Mes
- * propres messages n'allument jamais ma puce.
+ * un classement, une suppression par l'admin, ou le dernier message du fil
+ * s'il n'est pas de `me`. Mes propres messages n'allument jamais ma puce.
  */
 export const feedbackTouchedAt = (item: Feedback, me: string | undefined) => {
-  const a = item.handled_at ?? "";
   const last = lastMessage(item);
-  const b = last && last.author_id !== me ? last.created_at : "";
-  return a > b ? a : b;
+  return [
+    item.handled_at ?? "",
+    item.deleted_at ?? "",
+    last && last.author_id !== me ? last.created_at : "",
+  ].reduce((max, d) => (d > max ? d : max), "");
 };
 
 const useFeedbackSeen = () => {

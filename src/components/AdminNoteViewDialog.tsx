@@ -49,7 +49,7 @@ const AdminNoteViewDialog = ({
   const category = noteCategory(note.category);
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className="max-w-lg">
+    <Dialog open={isOpen} onClose={onClose} className="max-w-lg" showClose>
       {/* La catégorie tient lieu de titre — la pastille faisait doublon. */}
       <DialogTitle>
         <span className="inline-flex items-center gap-2">
@@ -93,14 +93,9 @@ const AdminNoteViewDialog = ({
             </HoldToDeleteButton>
           )}
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={onClose} disabled={busy}>
-            Fermer
-          </Button>
-          <Button onClick={onEdit} disabled={busy}>
-            Modifier
-          </Button>
-        </div>
+        <Button onClick={onEdit} disabled={busy}>
+          Modifier
+        </Button>
       </div>
     </Dialog>
   );

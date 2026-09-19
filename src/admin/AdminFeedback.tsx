@@ -126,7 +126,6 @@ const AdminFeedback = () => {
         status: "accepte",
         note_id: noteId,
       });
-      setViewing(null);
       toast({ title: "Ajouté au backlog", status: "success", duration: 2500 });
     } catch (e) {
       fail(e);
@@ -147,7 +146,6 @@ const AdminFeedback = () => {
         status: "refuse",
         note_id: null,
       });
-      setViewing(null);
       toast({ title: "Demande refusée", status: "success", duration: 2500 });
     } catch (e) {
       fail(e);
@@ -157,7 +155,6 @@ const AdminFeedback = () => {
   const close = async (item: Feedback) => {
     try {
       await setStatus.mutateAsync({ id: item.id, status: "clos" });
-      setViewing(null);
       toast({ title: "Demande clôturée", status: "success", duration: 2500 });
     } catch (e) {
       fail(e);
@@ -286,8 +283,9 @@ const AdminFeedback = () => {
             - refusée : Accepter ;
             - clôturée : Rouvrir ;
             - terminée : rien — on décoche sa note dans le backlog.
-          Supprimer (appui long) : la demande disparaît pour tout le monde, sa
-          note de backlog éventuelle reste dans le carnet. */}
+          Supprimer (appui long) : la demande quitte la boîte de réception ;
+          l'auteur garde sa tuile, grisée « Supprimée ». Sa note de backlog
+          éventuelle reste dans le carnet. */}
       <FeedbackViewDialog
         isOpen={!!viewing}
         onClose={() => setViewing(null)}

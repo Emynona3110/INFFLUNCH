@@ -5,6 +5,7 @@ import useFeedbackSeen, { feedbackTouchedAt } from "@/hooks/useFeedbackSeen";
 import useFeedback, { Feedback } from "@/hooks/useFeedback";
 import useSession from "@/hooks/useSession";
 import {
+  FEEDBACK_DELETED,
   feedbackStatus,
   feedbackType,
   isFeedbackFrozen,
@@ -19,9 +20,10 @@ import {
   SECTION_BODY,
 } from "@/lib/sectionClasses";
 
-/** Demande classée sans retour possible : son auteur ne peut plus la
- *  corriger ni écrire dans son fil. */
-const frozen = (item: Feedback) => isFeedbackFrozen(item.status);
+/** Demande classée sans retour possible, ou supprimée par l'admin : son
+ *  auteur ne peut plus la corriger ni écrire dans son fil. */
+const frozen = (item: Feedback) =>
+  isFeedbackFrozen(item.status) || !!item.deleted_at;
 
 /** Mobile : date courte JJ/MM/AA. */
 const formatShortDate = (iso: string) =>
@@ -158,7 +160,11 @@ const MyFeedback = () => {
           <ul className="m-0 list-none divide-y divide-border p-0 sm:divide-y-0 sm:space-y-2">
             {items.map((item) => {
               const type = feedbackType(item.type);
-              const status = feedbackStatus(item.status);
+              // Supprimée par l'admin : c'est ce qu'on lit, quel que soit
+              // l'état où elle en était.
+              const status = item.deleted_at
+                ? FEEDBACK_DELETED
+                : feedbackStatus(item.status);
               return (
                 <li
                   key={item.id}

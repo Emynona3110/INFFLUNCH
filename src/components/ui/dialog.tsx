@@ -1,5 +1,6 @@
 import { ReactNode, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { FiX } from "react-icons/fi";
 import { cn } from "@/lib/utils";
 
 interface DialogProps {
@@ -9,6 +10,9 @@ interface DialogProps {
   className?: string;
   /** Fermeture au clic sur l'overlay (défaut false : seuls Annuler/Échap ferment). */
   closeOnOverlayClick?: boolean;
+  /** Croix en haut à droite : pour les popups de LECTURE, où un bouton
+   *  « Fermer » en bas serait de trop. Les formulaires gardent Annuler. */
+  showClose?: boolean;
 }
 
 /**
@@ -26,6 +30,7 @@ export function Dialog({
   children,
   className,
   closeOnOverlayClick = false,
+  showClose = false,
 }: DialogProps) {
   useEffect(() => {
     if (!open) return;
@@ -47,11 +52,21 @@ export function Dialog({
         role="dialog"
         aria-modal="true"
         className={cn(
-          "my-auto w-full max-w-md rounded-card border border-border bg-card p-4 shadow-xl sm:p-6",
+          "relative my-auto w-full max-w-md rounded-card border border-border bg-card p-4 shadow-xl sm:p-6",
           className
         )}
         onClick={(e) => e.stopPropagation()}
       >
+        {showClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Fermer"
+            className="absolute right-3 top-3 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-foreground/50 transition hover:bg-muted hover:text-foreground sm:right-4 sm:top-4"
+          >
+            <FiX className="h-5 w-5" />
+          </button>
+        )}
         {children}
       </div>
     </div>,
