@@ -49,7 +49,7 @@ const clean = (text: string) =>
  * images (une capture vaut souvent mieux qu'un paragraphe). Un seul formulaire
  * pour les trois natures — un bug et une idée ne méritent pas deux écrans, et on
  * ne veut surtout pas que le choix du bon endroit décourage l'envoi. Il sert
- * aussi à corriger une demande déjà envoyée, qui repart alors en attente.
+ * aussi à corriger une demande déjà envoyée, tant qu'elle est en attente.
  *
  * Un admin qui l'utilise n'a personne à convaincre : sa demande file droit
  * dans le carnet de backlog, sans passer par la boîte de réception.

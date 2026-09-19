@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { FiCheck, FiMessageSquare, FiPaperclip, FiX } from "react-icons/fi";
+import { FiPaperclip } from "react-icons/fi";
 import { toast } from "@/lib/toast";
-import useFeedback, { Feedback } from "@/hooks/useFeedback";
+import useFeedback, { Feedback, awaitingAdmin } from "@/hooks/useFeedback";
 import useSession from "@/hooks/useSession";
 import useAdminNotes from "@/hooks/useAdminNotes";
 import {
@@ -10,12 +10,11 @@ import {
   feedbackType,
 } from "@/services/feedbackTypes";
 import FeedbackViewDialog from "@/components/FeedbackViewDialog";
-import { Tooltip } from "@/components/ui/tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { formatAuthorName } from "@/utils/authorName";
 
-const COLUMNS = ["Nature", "Date", "Auteur", "État", "Versions"];
+const COLUMNS = ["Nature", "Date", "Auteur", "État"];
 
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString("fr-FR", {
@@ -24,20 +23,28 @@ const formatDate = (iso: string) =>
     year: "numeric",
   });
 
+/** Pas encore classée : en attente (balle chez l'admin) ou répondue (balle
+ *  chez l'auteur). Ce qu'accepter, refuser ou clôturer tranche. */
+const pending = (item: Feedback) =>
+  item.status === "nouveau" || item.status === "repondu";
+
 /**
  * Boîte de réception des demandes des collaborateurs, tenue comme les autres
- * tables de l'admin : une ligne par demande, le message complet dans une popup.
+ * tables de l'admin : une ligne par demande — un aperçu —, et tout le reste
+ * dans la popup : le message, le fil, et les décisions.
  *
  * L'ordre suit la DERNIÈRE VERSION de chaque demande : ce qui vient de bouger
- * — une arrivée comme une correction — se lit en haut, sans avoir à chercher.
+ * se lit en haut, sans avoir à chercher.
  *
- * Deux gestes, et un seul aboutit à du travail : le check reporte la demande
- * dans le carnet de backlog, la croix la refuse. Le sort choisi est rendu à
- * l'auteur, et rien n'est définitif — on peut changer d'avis à tout moment, et
- * une demande corrigée revient d'elle-même en attente.
- *
- * « Terminée » ne s'attribue pas ici : c'est la note du carnet qui, cochée,
- * termine la demande (et la rouvre si on la décoche).
+ * Les décisions, toutes dans la popup :
+ *   - Accepter : la demande part au carnet de backlog ;
+ *   - Refuser : lue et écartée (sa note de backlog, s'il y en a une, part) ;
+ *   - Clôturer (appui long) : le fil a réglé la question, rien à porter au
+ *     backlog — ou la demande est simplement sans suite ;
+ *   - Rouvrir : une clôturée repart là où le fil s'était arrêté.
+ * Rien n'est définitif : accepter une refusée, refuser une acceptée restent
+ * possibles. « Terminée » ne s'attribue pas ici : c'est la note du carnet qui,
+ * cochée, termine la demande (et la rouvre si on la décoche).
  */
 const AdminFeedback = () => {
   const {
@@ -46,6 +53,7 @@ const AdminFeedback = () => {
     error,
     setStatus,
     reply,
+    editMessage,
     remove,
   } = useFeedback("admin");
   const { sessionData } = useSession();
@@ -81,11 +89,16 @@ const AdminFeedback = () => {
       duration: 5000,
     });
 
-  /**
-   * Accepter = porter la demande au carnet de backlog. Si une note en est déjà
-   * issue, on la met à jour (l'auteur a pu corriger son message entre-temps)
-   * plutôt que d'en créer une seconde.
-   */
+  const busy =
+    setStatus.isPending ||
+    addNote.isPending ||
+    updateNote.isPending ||
+    removeNote.isPending ||
+    remove.isPending;
+
+  /** Accepter = porter la demande au carnet de backlog. Si une note en est
+   *  déjà issue (historique), on la met à jour plutôt que d'en créer une
+   *  seconde. */
   const accept = async (item: Feedback) => {
     const category = feedbackType(item.type).note;
     try {
@@ -113,30 +126,18 @@ const AdminFeedback = () => {
         status: "accepte",
         note_id: noteId,
       });
-      toast({
-        title: item.note_id ? "Backlog mis à jour" : "Ajouté au backlog",
-        status: "success",
-        duration: 2500,
-      });
+      setViewing(null);
+      toast({ title: "Ajouté au backlog", status: "success", duration: 2500 });
     } catch (e) {
       fail(e);
     }
   };
 
-  /**
-   * Refuser une demande acceptée retire sa note du carnet : une demande refusée
-   * n'a rien à y faire.
-   *
-   * SAUF quand ce qu'on refuse est une CORRECTION : la demande est revenue en
-   * attente alors qu'une note existe déjà, donc une version antérieure avait été
-   * validée. Le carnet garde alors cette version — on refuse le nouveau texte,
-   * pas le travail déjà retenu — et la note reste liée à la demande, prête à
-   * être mise à jour si l'admin change d'avis.
-   */
+  /** Refuser une demande acceptée retire sa note du carnet : une demande
+   *  refusée n'a rien à y faire. */
   const refuse = async (item: Feedback) => {
-    const rejectingUpdate = pending(item) && !!item.note_id;
     try {
-      if (item.note_id && !rejectingUpdate) {
+      if (item.note_id) {
         // Les fichiers de la note sont ceux de la demande, qui reste : rien
         // à effacer du bucket.
         await removeNote.mutateAsync({ id: item.note_id, images: [] });
@@ -144,8 +145,34 @@ const AdminFeedback = () => {
       await setStatus.mutateAsync({
         id: item.id,
         status: "refuse",
-        note_id: rejectingUpdate ? item.note_id : null,
+        note_id: null,
       });
+      setViewing(null);
+      toast({ title: "Demande refusée", status: "success", duration: 2500 });
+    } catch (e) {
+      fail(e);
+    }
+  };
+
+  const close = async (item: Feedback) => {
+    try {
+      await setStatus.mutateAsync({ id: item.id, status: "clos" });
+      setViewing(null);
+      toast({ title: "Demande clôturée", status: "success", duration: 2500 });
+    } catch (e) {
+      fail(e);
+    }
+  };
+
+  /** Rouvrir une clôturée : elle repart là où le fil s'était arrêté — en
+   *  attente si le dernier mot est à l'auteur, répondue sinon. */
+  const reopen = async (item: Feedback) => {
+    try {
+      await setStatus.mutateAsync({
+        id: item.id,
+        status: awaitingAdmin(item) ? "nouveau" : "repondu",
+      });
+      toast({ title: "Demande rouverte", status: "success", duration: 2500 });
     } catch (e) {
       fail(e);
     }
@@ -163,25 +190,17 @@ const AdminFeedback = () => {
         <p className="text-foreground/60">Aucune demande pour le moment.</p>
       ) : (
         <div className="flex max-h-full flex-col overflow-hidden rounded-card border border-border bg-card">
-          <ScrollArea
-            className="min-h-0 os-grid"
-            style={{ ["--grid-right" as string]: "120px" }}
-          >
+          <ScrollArea className="min-h-0 os-grid">
             <table
               className="w-full border-separate border-spacing-0 text-sm"
-              style={{ minWidth: 720 }}
+              style={{ minWidth: 560 }}
             >
               <thead>
                 <tr>
-                  {[...COLUMNS, "Actions"].map((h) => (
+                  {COLUMNS.map((h) => (
                     <th
                       key={h}
-                      className={cn(
-                        "sticky top-0 bg-muted px-4 py-3 text-xs font-semibold uppercase tracking-wide text-foreground/55 shadow-[inset_0_-1px_0_0_var(--border)]",
-                        h === "Actions"
-                          ? "right-0 z-20 w-[120px] text-center shadow-[inset_1px_0_0_0_var(--border),inset_0_-1px_0_0_var(--border)]"
-                          : "z-10 text-left",
-                      )}
+                      className="sticky top-0 z-10 bg-muted px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-foreground/55 shadow-[inset_0_-1px_0_0_var(--border)]"
                     >
                       {h}
                     </th>
@@ -192,43 +211,24 @@ const AdminFeedback = () => {
                 {rows.map((item) => {
                   const status = feedbackStatus(item.status);
                   const cancelled = !!item.cancelled_at && pending(item);
-                  const done = item.status === "termine";
-                  // Terminée = acceptée et faite : le check reste allumé.
-                  const accepted = item.status === "accepte" || done;
-                  const refused = item.status === "refuse";
-                  const linked = !!item.note_id;
-                  const acceptLabel = linked
-                    ? "Mettre le backlog à jour"
-                    : "Ajouter au backlog";
-                  const refuseLabel =
-                    linked && pending(item)
-                      ? "Refuser la correction (le backlog reste)"
-                      : linked
-                        ? "Refuser et retirer du backlog"
-                        : "Refuser";
-                  // Une demande terminée ne se reclasse pas ici : on décoche sa
-                  // note dans le carnet, et elle redevient « acceptée ».
-                  const frozen = done
-                    ? "Terminée — décoche sa note dans le backlog pour la rouvrir"
-                    : null;
-
                   return (
                     // Le message ne tient pas dans une colonne : toute la ligne
-                    // ouvre la lecture, seules les actions gardent leur clic.
+                    // ouvre la lecture.
                     <tr
                       key={item.id}
                       onClick={() => setViewing(item)}
                       aria-label="Voir la demande"
                       className={cn(
                         "cursor-pointer transition hover:bg-muted/40 [&>td]:border-t [&>td]:border-border/60",
-                        // Ce qui attend une décision se lit en pleine couleur ;
+                        // Ce qui attend l'admin — pas encore classée, ou
+                        // dernier mot à l'auteur — se lit en pleine couleur ;
                         // le reste, déjà tranché, reste en retrait.
-                        item.status === "nouveau" && "[&>td]:text-foreground",
+                        awaitingAdmin(item) && "[&>td]:text-foreground",
                       )}
                     >
                       {/* Nature : un point de couleur, comme les tuiles du
                           carnet. Le libellé est dans la popup. */}
-                      <td className="w-10 whitespace-nowrap px-4 py-1.5">
+                      <td className="w-10 whitespace-nowrap px-4 py-2.5">
                         <span
                           aria-label={feedbackType(item.type).label}
                           className={cn(
@@ -242,18 +242,11 @@ const AdminFeedback = () => {
                       </td>
                       {/* Date de la dernière version : celle qui donne l'ordre
                           du tableau. */}
-                      <td className="whitespace-nowrap px-4 py-1.5 text-foreground/70">
+                      <td className="whitespace-nowrap px-4 py-2.5 text-foreground/70">
                         {formatDate(lastVersion(item))}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-1.5 text-foreground/70">
+                      <td className="whitespace-nowrap px-4 py-2.5 text-foreground/70">
                         {item.email ? formatAuthorName(item.email) : "—"}
-                        {/* Bulle + nombre de messages du fil. */}
-                        {item.messages.length > 0 && (
-                          <span className="ml-2 inline-flex items-center gap-0.5 align-middle text-xs text-foreground/45">
-                            <FiMessageSquare className="h-3.5 w-3.5" />
-                            {item.messages.length}
-                          </span>
-                        )}
                         {/* Trombone : des captures accompagnent le message. */}
                         {item.images.length > 0 && (
                           <span className="ml-2 inline-flex items-center gap-0.5 align-middle text-xs text-foreground/45">
@@ -267,7 +260,7 @@ const AdminFeedback = () => {
                           d'autre état à montrer. Dès qu'elle a été classée,
                           c'est le traitement qui compte — il continue, et son
                           auteur n'en saura simplement rien. */}
-                      <td className="whitespace-nowrap px-4 py-1.5">
+                      <td className="whitespace-nowrap px-4 py-2.5">
                         <span
                           className={cn(
                             "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium",
@@ -276,59 +269,6 @@ const AdminFeedback = () => {
                         >
                           {cancelled ? FEEDBACK_CANCELLED.label : status.label}
                         </span>
-                      </td>
-                      {/* Nombre de versions : l'originale plus chaque
-                          correction. Le détail est dans la popup. */}
-                      <td className="whitespace-nowrap px-4 py-1.5 text-foreground/70">
-                        {item.edits + 1}
-                      </td>
-                      <td className="sticky right-0 z-[1] w-[120px] bg-card px-4 py-1.5 text-center shadow-[inset_1px_0_0_0_var(--border)]">
-                        {/* Les actions ne doivent pas ouvrir la popup au
-                            passage : elles arrêtent le clic de la ligne. */}
-                        <div
-                          className="flex justify-center gap-2"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Tooltip label={frozen ?? acceptLabel}>
-                            <button
-                              type="button"
-                              onClick={() => accept(item)}
-                              disabled={done}
-                              aria-label={frozen ?? acceptLabel}
-                              className={cn(
-                                "flex h-8 w-8 items-center justify-center rounded-full transition",
-                                done
-                                  ? "cursor-default"
-                                  : "cursor-pointer hover:bg-muted hover:text-emerald-600",
-                                accepted
-                                  ? "text-emerald-600 dark:text-emerald-400"
-                                  : "text-foreground/35",
-                              )}
-                            >
-                              <FiCheck className="h-4 w-4" />
-                            </button>
-                          </Tooltip>
-
-                          <Tooltip label={frozen ?? refuseLabel}>
-                            <button
-                              type="button"
-                              onClick={() => refuse(item)}
-                              disabled={done}
-                              aria-label={frozen ?? refuseLabel}
-                              className={cn(
-                                "flex h-8 w-8 items-center justify-center rounded-full transition",
-                                done
-                                  ? "cursor-default"
-                                  : "cursor-pointer hover:bg-muted hover:text-destructive",
-                                refused
-                                  ? "text-destructive"
-                                  : "text-foreground/35",
-                              )}
-                            >
-                              <FiX className="h-4 w-4" />
-                            </button>
-                          </Tooltip>
-                        </div>
                       </td>
                     </tr>
                   );
@@ -339,23 +279,68 @@ const AdminFeedback = () => {
         </div>
       )}
 
-      {/* Supprimer (appui long) : la demande disparaît pour tout le monde, sa
+      {/* Toutes les décisions sont ici. Ce qui n'a pas de sens sur l'état
+          courant n'est pas proposé :
+            - en attente / répondue : Accepter, Refuser, Clôturer ;
+            - acceptée : Refuser (retire du backlog) ;
+            - refusée : Accepter ;
+            - clôturée : Rouvrir ;
+            - terminée : rien — on décoche sa note dans le backlog.
+          Supprimer (appui long) : la demande disparaît pour tout le monde, sa
           note de backlog éventuelle reste dans le carnet. */}
       <FeedbackViewDialog
         isOpen={!!viewing}
         onClose={() => setViewing(null)}
         item={viewingLive}
-        busy={remove.isPending}
+        busy={busy}
         currentUserId={userId}
-        onReply={async (body) => {
-          if (!viewing) return;
-          try {
-            await reply.mutateAsync({ id: viewing.id, body });
-          } catch (e) {
-            fail(e);
-            throw e;
-          }
-        }}
+        onAccept={
+          viewingLive &&
+          (pending(viewingLive) || viewingLive.status === "refuse")
+            ? () => accept(viewingLive)
+            : undefined
+        }
+        onRefuse={
+          viewingLive &&
+          (pending(viewingLive) || viewingLive.status === "accepte")
+            ? () => refuse(viewingLive)
+            : undefined
+        }
+        onCloseRequest={
+          viewingLive && pending(viewingLive)
+            ? () => close(viewingLive)
+            : undefined
+        }
+        onReopenRequest={
+          viewingLive?.status === "clos" ? () => reopen(viewingLive) : undefined
+        }
+        // Clôturée : plus d'envoi ni de retouche, d'aucun côté, tant qu'elle
+        // n'est pas rouverte (la RLS le garantit aussi).
+        onReply={
+          viewingLive?.status === "clos"
+            ? undefined
+            : async (body) => {
+                if (!viewing) return;
+                try {
+                  await reply.mutateAsync({ id: viewing.id, body });
+                } catch (e) {
+                  fail(e);
+                  throw e;
+                }
+              }
+        }
+        onEditMessage={
+          viewingLive?.status === "clos"
+            ? undefined
+            : async (id, body) => {
+                try {
+                  await editMessage.mutateAsync({ id, body });
+                } catch (e) {
+                  fail(e);
+                  throw e;
+                }
+              }
+        }
         onDelete={async () => {
           if (!viewing) return;
           try {
@@ -370,18 +355,10 @@ const AdminFeedback = () => {
   );
 };
 
-/** Pas encore classée : en attente (balle chez l'admin) ou répondue (balle
- *  chez l'auteur). Ce que « accepter » ou « refuser » tranche pour la première
- *  fois. */
-const pending = (item: Feedback) =>
-  item.status === "nouveau" || item.status === "repondu";
-
-/** Nombre de demandes qui attendent l'admin : sert la puce de l'onglet Admin.
- *  « Répondue » n'y compte pas — la balle est chez l'auteur, et la base remet
- *  la demande en attente dès qu'il écrit. */
+/** Nombre de demandes qui attendent l'admin : sert la puce de l'onglet Admin. */
 export const useNewFeedbackCount = () => {
   const { data = [] } = useFeedback("admin");
-  return data.filter((f) => f.status === "nouveau").length;
+  return data.filter(awaitingAdmin).length;
 };
 
 export default AdminFeedback;

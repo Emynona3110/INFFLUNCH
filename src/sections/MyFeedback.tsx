@@ -2,9 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { FiArrowUpRight, FiMessageSquare, FiPaperclip } from "react-icons/fi";
 import { toast } from "@/lib/toast";
 import useFeedbackSeen, { feedbackTouchedAt } from "@/hooks/useFeedbackSeen";
-import useFeedback, { Feedback, lastMessage } from "@/hooks/useFeedback";
+import useFeedback, { Feedback } from "@/hooks/useFeedback";
 import useSession from "@/hooks/useSession";
-import { feedbackStatus, feedbackType } from "@/services/feedbackTypes";
+import {
+  feedbackStatus,
+  feedbackType,
+  isFeedbackFrozen,
+} from "@/services/feedbackTypes";
 import FeedbackDialog from "@/components/FeedbackDialog";
 import FeedbackViewDialog from "@/components/FeedbackViewDialog";
 import { cn } from "@/lib/utils";
@@ -15,9 +19,9 @@ import {
   SECTION_BODY,
 } from "@/lib/sectionClasses";
 
-/** Demande classée sans retour possible : son auteur ne peut plus la corriger. */
-const frozen = (item: Feedback) =>
-  item.status === "termine" || item.status === "refuse";
+/** Demande classée sans retour possible : son auteur ne peut plus la
+ *  corriger ni écrire dans son fil. */
+const frozen = (item: Feedback) => isFeedbackFrozen(item.status);
 
 /** Mobile : date courte JJ/MM/AA. */
 const formatShortDate = (iso: string) =>
@@ -41,7 +45,13 @@ const formatDate = (iso: string) =>
 const MyFeedback = () => {
   const { sessionData } = useSession();
   const userId = sessionData?.user?.id;
-  const { data: fetched = [], isPending, cancel, reply } = useFeedback("mine");
+  const {
+    data: fetched = [],
+    isPending,
+    cancel,
+    reply,
+    editMessage,
+  } = useFeedback("mine");
   // Ce qui attend encore quelque chose d'abord ; les demandes closes
   // (terminées, refusées) descendent en bas, chaque groupe gardant l'ordre
   // du plus récent au plus ancien.
@@ -50,8 +60,8 @@ const MyFeedback = () => {
     ...fetched.filter(frozen),
   ];
   // Deux popups, comme le carnet de backlog : lire (clic sur la tuile), puis
-  // corriger si besoin. On ne modifie donc pas par accident ce qu'on venait
-  // relire. Corriger remet la demande en attente côté admin.
+  // corriger si besoin — tant que la demande est en attente seulement ;
+  // après, on précise dans le fil.
   const [viewing, setViewing] = useState<Feedback | null>(null);
   const [editing, setEditing] = useState<Feedback | null>(null);
   // La popup lit toujours la version courante de la demande (fil compris) :
@@ -206,22 +216,6 @@ const MyFeedback = () => {
                       <span className="truncate sm:whitespace-pre-wrap">
                         {item.message}
                       </span>
-                      {/* Bulle + nombre de messages du fil ; en couleur quand
-                          le dernier mot est à l'admin (une réponse à lire). */}
-                      {item.messages.length > 0 && (
-                        <span
-                          className={cn(
-                            "inline-flex shrink-0 items-center gap-0.5 text-xs",
-                            lastMessage(item)?.author_id !== userId
-                              ? "text-primary"
-                              : "text-foreground/45",
-                          )}
-                          aria-label={`${item.messages.length} message(s)`}
-                        >
-                          <FiMessageSquare className="h-3.5 w-3.5" />
-                          {item.messages.length}
-                        </span>
-                      )}
                       {/* Trombone : des images sont jointes, à voir dans la
                           popup. */}
                       {item.images.length > 0 && (
@@ -239,33 +233,54 @@ const MyFeedback = () => {
         )}
       </div>
 
-      {/* Une demande classée sans retour possible — terminée ou refusée — ne se
-          corrige plus : le bouton Modifier disparaît, il ne reste qu'à la relire
-          (ou à la retirer de sa liste). */}
+      {/* Corriger n'est proposé qu'en attente : dès que l'admin s'est
+          prononcé (ou a répondu), le texte est figé et c'est le fil qui sert
+          à préciser. Il reste à relire, ou à retirer la demande de sa liste. */}
       <FeedbackViewDialog
         isOpen={!!viewing}
         onClose={() => setViewing(null)}
         item={viewingLive}
         busy={cancel.isPending}
         currentUserId={userId}
-        // Répondre dans le fil : possible même sur une demande classée — on
-        // peut vouloir en rediscuter, c'est l'historique de l'échange.
-        onReply={async (body) => {
-          if (!viewing) return;
-          try {
-            await reply.mutateAsync({ id: viewing.id, body });
-          } catch (e: any) {
-            toast({
-              title: "Envoi impossible",
-              description: e?.message ?? "Réessaie.",
-              status: "error",
-              duration: 5000,
-            });
-            throw e;
-          }
-        }}
+        // Répondre dans le fil, tant que la demande n'est pas figée
+        // (terminée, refusée, clôturée) : le fil reste lisible, plus rien
+        // ne s'y ajoute.
+        onReply={
+          viewingLive && !frozen(viewingLive)
+            ? async (body) => {
+                try {
+                  await reply.mutateAsync({ id: viewingLive.id, body });
+                } catch (e: any) {
+                  toast({
+                    title: "Envoi impossible",
+                    description: e?.message ?? "Réessaie.",
+                    status: "error",
+                    duration: 5000,
+                  });
+                  throw e;
+                }
+              }
+            : undefined
+        }
+        onEditMessage={
+          viewingLive && !frozen(viewingLive)
+            ? async (id, body) => {
+                try {
+                  await editMessage.mutateAsync({ id, body });
+                } catch (e: any) {
+                  toast({
+                    title: "Modification impossible",
+                    description: e?.message ?? "Réessaie.",
+                    status: "error",
+                    duration: 5000,
+                  });
+                  throw e;
+                }
+              }
+            : undefined
+        }
         onEdit={
-          viewing && !frozen(viewing)
+          viewingLive?.status === "nouveau"
             ? () => {
                 setEditing(viewing);
                 setViewing(null);

@@ -1,6 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import supabaseClient from "../services/supabaseClient";
-import { FeedbackStatus, FeedbackType } from "../services/feedbackTypes";
+import {
+  FeedbackStatus,
+  FeedbackType,
+  isFeedbackFrozen,
+} from "../services/feedbackTypes";
 import { removeFromBucket } from "../services/uploadImage";
 import { FEEDBACK_BUCKET } from "../services/storagePaths";
 import useRealtimeTable from "./useRealtimeTable";
@@ -13,8 +17,12 @@ export interface FeedbackMessage {
   author_id: string;
   body: string;
   created_at: string;
-  /** Email de l'auteur du message (jointure manuelle, admins seulement). */
-  email?: string | null;
+  /** Dernière retouche du texte par son auteur, null si jamais corrigé. */
+  edited_at: string | null;
+  /** Email et pp de l'auteur du message (jointure manuelle) : le fil nomme
+   *  chacun, côté admin comme côté auteur. */
+  email: string | null;
+  avatar_path: string | null;
 }
 
 export interface Feedback {
@@ -33,9 +41,9 @@ export interface Feedback {
   /** L'auteur s'est retiré : la demande sort de sa liste, mais l'admin la garde
    *  (et le backlog qu'elle a produit continue sa vie). */
   cancelled_at: string | null;
-  /** Nombre de versions archivées : on n'en crée une que si la demande avait
-   *  déjà été classée. Tant qu'elle attend, l'auteur retouche la version en
-   *  cours. */
+  /** Versions archivées (historique : depuis le 2026-09-19 une demande ne se
+   *  corrige plus que tant qu'elle est en attente, en place — le fil sert à
+   *  préciser ensuite). */
   edits: number;
   /** Date de la dernière correction, null si la demande n'a jamais bougé. */
   updated_at: string | null;
@@ -48,6 +56,17 @@ export interface Feedback {
 /** Dernier message du fil, s'il y en a un. */
 export const lastMessage = (item: Feedback): FeedbackMessage | undefined =>
   item.messages[item.messages.length - 1];
+
+/**
+ * La balle est chez l'admin : demande pas encore classée, ou fil dont le
+ * dernier mot est à l'auteur (sous une acceptée, par exemple) tant qu'elle
+ * n'est pas figée. Sert la puce de l'onglet Admin et la mise en avant des
+ * lignes de la boîte de réception.
+ */
+export const awaitingAdmin = (item: Feedback) =>
+  item.status === "nouveau" ||
+  (!isFeedbackFrozen(item.status) &&
+    lastMessage(item)?.author_id === item.author_id);
 
 /**
  * Demandes des collaborateurs sur l'appli (`feedback`).
@@ -91,7 +110,7 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
       // que ce que la demande elle-même laisse lire.
       const { data: msgs, error: msgsError } = await supabaseClient
         .from("feedback_messages")
-        .select("id, feedback_id, author_id, body, created_at")
+        .select("id, feedback_id, author_id, body, created_at, edited_at")
         .in(
           "feedback_id",
           base.map((r) => r.id),
@@ -109,30 +128,39 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
         ...r,
         messages: byFeedback.get(r.id) ?? [],
       }));
-      if (scope === "mine") return rows;
 
-      // Comme reviews et photos : pas de FK vers public.users, on rapporte les
-      // emails en une requête plutôt qu'une par ligne — auteurs des demandes
-      // et des messages confondus.
+      // Comme reviews et photos : pas de FK vers public.users, on rapporte
+      // emails et pp en deux requêtes plutôt qu'une par ligne — auteurs des
+      // demandes (admin seulement) et des messages (tout le monde : le fil
+      // nomme chacun) confondus.
       const ids = [
         ...new Set([
-          ...rows.map((r) => r.author_id),
+          ...(scope === "admin" ? rows.map((r) => r.author_id) : []),
           ...rows.flatMap((r) => r.messages.map((m) => m.author_id)),
         ]),
       ];
-      const { data: users } = await supabaseClient
-        .from("users")
-        .select("id, email")
-        .in("id", ids);
+      if (ids.length === 0) return rows;
+      const [{ data: users }, { data: profiles }] = await Promise.all([
+        supabaseClient.from("users").select("id, email").in("id", ids),
+        supabaseClient.from("profiles").select("id, avatar_path").in("id", ids),
+      ]);
       const emailById = Object.fromEntries(
         (users ?? []).map((u) => [u.id as string, u.email as string]),
       );
+      const avatarById = Object.fromEntries(
+        (profiles ?? []).map((p) => [
+          p.id as string,
+          p.avatar_path as string | null,
+        ]),
+      );
       return rows.map((r) => ({
         ...r,
-        email: emailById[r.author_id] ?? null,
+        // Sur ses propres demandes, l'auteur n'a pas à se voir nommer.
+        ...(scope === "admin" && { email: emailById[r.author_id] ?? null }),
         messages: r.messages.map((m) => ({
           ...m,
           email: emailById[m.author_id] ?? null,
+          avatar_path: avatarById[m.author_id] ?? null,
         })),
       }));
     },
@@ -163,12 +191,9 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
     onSuccess: invalidate,
   });
 
-  /** Correction par l'auteur. Le trigger en base remet la demande en attente :
-   *  inutile (et impossible) de toucher au statut d'ici.
-   *
-   *  Les images retirées ne sont effacées du bucket que si la demande était
-   *  encore en attente (retouche en place) : sinon le trigger vient d'archiver
-   *  une version qui les référence encore. */
+  /** Correction par l'auteur, possible tant que la demande est en attente
+   *  (retouche en place, le trigger fige le reste). Les images retirées
+   *  partent du bucket. */
   const edit = useMutation({
     mutationFn: async ({
       item,
@@ -184,10 +209,8 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
         .update(values)
         .eq("id", item.id);
       if (error) throw new Error(error.message);
-      if (item.status === "nouveau") {
-        const dropped = item.images.filter((p) => !values.images.includes(p));
-        await removeFromBucket(dropped, FEEDBACK_BUCKET).catch(() => {});
-      }
+      const dropped = item.images.filter((p) => !values.images.includes(p));
+      await removeFromBucket(dropped, FEEDBACK_BUCKET).catch(() => {});
     },
     onSuccess: invalidate,
   });
@@ -220,6 +243,18 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
       const { error } = await supabaseClient
         .from("feedback_messages")
         .insert({ feedback_id: id, author_id: userId, body: body.trim() });
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: invalidate,
+  });
+
+  /** Corriger SON message dans le fil (la RLS n'autorise que l'auteur). */
+  const editMessage = useMutation({
+    mutationFn: async ({ id, body }: { id: number; body: string }) => {
+      const { error } = await supabaseClient
+        .from("feedback_messages")
+        .update({ body: body.trim() })
+        .eq("id", id);
       if (error) throw new Error(error.message);
     },
     onSuccess: invalidate,
@@ -292,7 +327,7 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
     onSuccess: invalidate,
   });
 
-  return { ...query, submit, edit, setStatus, reply, cancel, remove };
+  return { ...query, submit, edit, setStatus, reply, editMessage, cancel, remove };
 };
 
 export default useFeedback;

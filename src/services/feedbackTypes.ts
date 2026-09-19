@@ -49,7 +49,11 @@ export const feedbackType = (value?: string | null) =>
  *                      chez l'auteur (posé par la base) ;
  *   - « Acceptée »   : reportée dans le carnet de backlog ;
  *   - « Terminée »   : la note du carnet a été cochée (posé par la base) ;
- *   - « Refusée »    : lue et écartée.
+ *   - « Refusée »    : lue et écartée ;
+ *   - « Clôturée »   : le fil a réglé la question, rien à porter au backlog
+ *                      (appui long de l'admin dans la popup).
+ * Terminée, Refusée et Clôturée figent la demande pour son auteur : plus de
+ * correction, plus de message dans le fil.
  *
  * L'ordre du tableau est celui des sections de la boîte de réception admin.
  * L'annulation par l'auteur n'est pas là-dedans : c'est une autre dimension
@@ -81,12 +85,21 @@ export const FEEDBACK_STATUSES = [
     label: "Refusée",
     chip: "bg-rose-500/12 text-rose-600 dark:text-rose-400",
   },
+  {
+    value: "clos",
+    label: "Clôturée",
+    chip: "bg-muted text-foreground/55",
+  },
 ] as const;
 
 export type FeedbackStatus = (typeof FEEDBACK_STATUSES)[number]["value"];
 
 export const feedbackStatus = (value?: string | null) =>
   FEEDBACK_STATUSES.find((s) => s.value === value) ?? FEEDBACK_STATUSES[0];
+
+/** Classée sans retour possible : l'auteur ne corrige plus, n'écrit plus. */
+export const isFeedbackFrozen = (status: FeedbackStatus) =>
+  status === "termine" || status === "refuse" || status === "clos";
 
 /** Demande retirée par son auteur : plus rien de neuf ne viendra d'elle, mais
  *  l'admin la garde sous les yeux (et son backlog, s'il y en a un). */
