@@ -288,3 +288,37 @@ input:-webkit-autofill:active {
 .osm-map .leaflet-tooltip::before {
   display: none;
 }
+
+/* Easter egg « Shooting Stars » (classe posée sur <html> par ShootingStarsTrail) :
+   le curseur natif est masqué, l'étoile qui tourne est dessinée dans le canvas.
+   Sans animation (reduced-motion) : étoile statique en curseur. */
+.shooting-stars,
+.shooting-stars * {
+  cursor: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .shooting-stars,
+  .shooting-stars * {
+    cursor: url("/cursors/star.svg") 16 16, auto !important;
+  }
+}
+
+/* Easter egg : l'étoile cliquée fait un petit bond lumineux (retour en place). */
+@keyframes stars-pulse {
+  0% {
+    transform: translateY(0) scale(1) rotate(0deg);
+    filter: drop-shadow(0 0 0 transparent);
+  }
+  40% {
+    transform: translateY(-7px) scale(1.4) rotate(18deg);
+    filter: drop-shadow(0 0 6px #fbbf24);
+  }
+  100% {
+    transform: translateY(0) scale(1) rotate(0deg);
+    filter: drop-shadow(0 0 0 transparent);
+  }
+}
+.stars-pulse {
+  animation: stars-pulse 0.4s ease-out both;
+  z-index: 1;
+}

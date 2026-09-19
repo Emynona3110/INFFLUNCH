@@ -31,6 +31,7 @@ export type AchievementId =
   // Easter eggs divers
   | "jour_nuit"
   | "narcisse"
+  | "shooting_stars"
   // Méta / assiduité
   | "fidele_au_poste"
   | "troupeau_complet";
@@ -200,6 +201,14 @@ export const ACHIEVEMENTS: Achievement[] = [
     title: "Narcisse",
     icon: "🪞",
     image: "/achievements/narcisse.svg",
+    secret: true,
+  },
+  {
+    // Bag Raiders : curseur étoile + traînée jusqu'au rechargement (fiche resto).
+    id: "shooting_stars",
+    title: "Shooting Stars",
+    icon: "🌠",
+    image: "/achievements/shooting_stars.svg",
     secret: true,
   },
 

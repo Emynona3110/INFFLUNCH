@@ -34,6 +34,8 @@ import TopBadge, { topRankOf } from "@/components/TopBadge";
 import ReviewForm from "@/components/ReviewForm";
 import ReviewItem from "@/components/ReviewItem";
 import Stars from "@/components/Stars";
+import useAchievements from "@/hooks/useAchievements";
+import { toggleShootingStars } from "@/lib/shootingStars";
 import RestaurantDialog from "@/admin/Dialogs/RestaurantDialog";
 import LocationEditDialog from "@/components/LocationEditDialog";
 import { directionsUrl } from "@/services/geocode";
@@ -53,6 +55,11 @@ import {
   ADD_BUTTON,
 } from "@/lib/sectionClasses";
 import Beeeh from "@/sections/Beeeh";
+
+/** Easter egg « Shooting Stars » : 5 clics (sans limite de temps) sur les
+ *  étoiles de la note moyenne. Compteur au niveau module. */
+const SHOOTING_STARS_CLICKS = 5;
+let starsClickRun = 0;
 
 /* -------------------------------- page --------------------------------- */
 
@@ -81,6 +88,23 @@ const RestaurantPage = () => {
   const userId = sessionData?.user?.id;
   const isAdmin = useIsAdmin();
   const queryClient = useQueryClient();
+  const { unlock } = useAchievements();
+  // Index d'étoile → clé du dernier clic : chaque étoile joue son bond sans
+  // couper celle d'avant (clics rapides).
+  const [starPulse, setStarPulse] = useState<Record<number, number>>({});
+
+  const onStarsClick = () => {
+    starsClickRun += 1;
+    // Index figé ici : l'updater tourne plus tard, après la remise à 0.
+    const index = starsClickRun - 1;
+    setStarPulse((p) => ({ ...p, [index]: Date.now() }));
+    if (starsClickRun < SHOOTING_STARS_CLICKS) return;
+    starsClickRun = 0;
+    // 5e étoile : le curseur devient étoile filante (toggle : 5 clics de plus
+    // pour désactiver).
+    toggleShootingStars();
+    unlock("shooting_stars");
+  };
   const { data: reviews = [], isPending: reviewsLoading } = useReviews(
     restaurant?.id,
   );
@@ -393,7 +417,12 @@ const RestaurantPage = () => {
                     <span className="font-display text-2xl sm:text-3xl font-bold leading-none tabular-nums text-card-foreground">
                       {averageRating.toFixed(1)}
                     </span>
-                    <Stars rating={averageRating} size={22} />
+                    <Stars
+                      rating={averageRating}
+                      size={22}
+                      pulse={starPulse}
+                      onClick={onStarsClick}
+                    />
                     <span className="text-sm text-foreground/55">
                       {totalReviews} avis
                     </span>
