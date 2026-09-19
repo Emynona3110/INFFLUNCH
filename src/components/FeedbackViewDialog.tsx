@@ -56,6 +56,16 @@ const formatDay = (iso: string) =>
 
 const dayKey = (iso: string) => new Date(iso).toDateString();
 
+/** Pastille système dans le fil : l'auteur a retiré sa demande, à cette date. */
+const WithdrawnNotice = ({ item }: { item: Feedback }) => (
+  <div className="my-3 flex justify-center">
+    <span className="rounded-full bg-destructive/10 px-3 py-0.5 text-[11px] text-destructive">
+      {item.email ? formatAuthorName(item.email) : "L'auteur"} a retiré sa
+      demande · {formatDay(item.cancelled_at as string)}
+    </span>
+  </div>
+);
+
 /**
  * Fil de discussion sous la demande, façon messagerie : pp et nom de qui parle
  * au-dessus de sa série de messages, bulles arrondies (les miennes à droite,
@@ -146,8 +156,16 @@ const FeedbackThread = ({
             // Même auteur qu'au message d'avant, même jour : la bulle suit la
             // précédente de près, sans répéter pp ni nom.
             const chained = !newDay && prev?.author_id === m.author_id;
+            // L'auteur s'est retiré entre ce message et le précédent : on le
+            // dit ici, à sa place dans le fil (l'admin seul voit une demande
+            // retirée).
+            const withdrawnHere =
+              !!item.cancelled_at &&
+              item.cancelled_at <= m.created_at &&
+              (!prev || prev.created_at < item.cancelled_at);
             return (
               <div key={m.id} className={cn(chained ? "mt-0.5" : "mt-3")}>
+                {withdrawnHere && <WithdrawnNotice item={item} />}
                 {newDay && (
                   <div className="mb-3 flex justify-center">
                     <span className="rounded-full bg-muted px-3 py-0.5 text-[11px] text-foreground/55">
@@ -228,6 +246,17 @@ const FeedbackThread = ({
               </div>
             );
           })}
+          {/* Retrait postérieur au dernier message : en fin de fil. */}
+          {!!item.cancelled_at &&
+            item.messages.every((m) => m.created_at < item.cancelled_at!) && (
+              <WithdrawnNotice item={item} />
+            )}
+        </div>
+      )}
+      {/* Fil vide mais demande retirée : on le dit quand même. */}
+      {item.messages.length === 0 && !!item.cancelled_at && (
+        <div className="mb-3">
+          <WithdrawnNotice item={item} />
         </div>
       )}
       {onReply && (
@@ -344,61 +373,79 @@ const FeedbackViewDialog = ({
         onEditMessage={onEditMessage}
       />
 
-      <div className="mt-4 sm:mt-6 flex flex-wrap items-center justify-between gap-2">
-        <div>
-          {onDelete && (
-            <HoldToDeleteButton
-              onConfirm={onDelete}
-              mobileConfirm={false}
-              disabled={busy}
-              className="inline-flex h-10 items-center rounded-lg px-4 text-sm font-medium text-destructive transition hover:bg-destructive/10"
-              progressClassName="bg-destructive/20"
-            >
-              Supprimer
-            </HoldToDeleteButton>
-          )}
-        </div>
-        <div className="flex flex-wrap justify-end gap-2">
-          {onRefuse && (
-            <Button
-              variant="outline"
-              onClick={onRefuse}
-              disabled={busy}
-              className="text-destructive hover:bg-destructive/10"
-            >
-              Refuser
+      {/* Deux rangées : les DÉCISIONS (admin) d'abord — chacune son style
+          pour qu'on ne les confonde pas —, puis les gestes de base (retirer /
+          fermer / modifier). */}
+      <div className="mt-4 sm:mt-6 space-y-3">
+        {(onRefuse || onAccept || onCloseRequest || onReopenRequest) && (
+          <div className="flex flex-wrap justify-end gap-2 border-t border-border pt-3">
+            {onRefuse && (
+              <HoldToDeleteButton
+                onConfirm={onRefuse}
+                mobileConfirm={false}
+                disabled={busy}
+                title="Maintenir pour refuser"
+                className="inline-flex h-10 items-center rounded-lg bg-destructive/10 px-4 text-sm font-medium text-destructive transition hover:bg-destructive/20"
+                progressClassName="bg-destructive/20"
+              >
+                Refuser
+              </HoldToDeleteButton>
+            )}
+            {onCloseRequest && (
+              <HoldToDeleteButton
+                onConfirm={onCloseRequest}
+                mobileConfirm={false}
+                disabled={busy}
+                title="Maintenir pour clôturer"
+                className="inline-flex h-10 items-center rounded-lg bg-muted px-4 text-sm font-medium text-foreground/80 transition hover:bg-muted/70"
+                progressClassName="bg-foreground/10"
+              >
+                Clôturer
+              </HoldToDeleteButton>
+            )}
+            {onReopenRequest && (
+              <Button variant="primarySoft" onClick={onReopenRequest} disabled={busy}>
+                Rouvrir
+              </Button>
+            )}
+            {onAccept && (
+              <HoldToDeleteButton
+                onConfirm={onAccept}
+                mobileConfirm={false}
+                disabled={busy}
+                title="Maintenir pour accepter"
+                className="inline-flex h-10 items-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition hover:bg-primary/90"
+                progressClassName="bg-white/25"
+              >
+                Accepter
+              </HoldToDeleteButton>
+            )}
+          </div>
+        )}
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            {onDelete && (
+              <HoldToDeleteButton
+                onConfirm={onDelete}
+                mobileConfirm={false}
+                disabled={busy}
+                className="inline-flex h-10 items-center rounded-lg px-4 text-sm font-medium text-destructive transition hover:bg-destructive/10"
+                progressClassName="bg-destructive/20"
+              >
+                Supprimer
+              </HoldToDeleteButton>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={onClose} disabled={busy}>
+              Fermer
             </Button>
-          )}
-          {onAccept && (
-            <Button onClick={onAccept} disabled={busy}>
-              Accepter
-            </Button>
-          )}
-          {onReopenRequest && (
-            <Button onClick={onReopenRequest} disabled={busy}>
-              Rouvrir
-            </Button>
-          )}
-          {onCloseRequest && (
-            <HoldToDeleteButton
-              onConfirm={onCloseRequest}
-              mobileConfirm={false}
-              disabled={busy}
-              title="Maintenir pour clôturer"
-              className="inline-flex h-10 items-center rounded-lg border border-border px-4 text-sm font-medium text-foreground transition hover:bg-muted"
-              progressClassName="bg-primary/20"
-            >
-              Clôturer
-            </HoldToDeleteButton>
-          )}
-          <Button variant="outline" onClick={onClose} disabled={busy}>
-            Fermer
-          </Button>
-          {onEdit && (
-            <Button onClick={onEdit} disabled={busy}>
-              Modifier
-            </Button>
-          )}
+            {onEdit && (
+              <Button onClick={onEdit} disabled={busy}>
+                Modifier
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </Dialog>

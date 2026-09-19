@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { FiArrowUpRight, FiMessageSquare, FiPaperclip } from "react-icons/fi";
+import { FiArrowUpRight, FiMessageSquare } from "react-icons/fi";
 import { toast } from "@/lib/toast";
 import useFeedbackSeen, { feedbackTouchedAt } from "@/hooks/useFeedbackSeen";
 import useFeedback, { Feedback } from "@/hooks/useFeedback";
@@ -216,14 +216,6 @@ const MyFeedback = () => {
                       <span className="truncate sm:whitespace-pre-wrap">
                         {item.message}
                       </span>
-                      {/* Trombone : des images sont jointes, à voir dans la
-                          popup. */}
-                      {item.images.length > 0 && (
-                        <span className="inline-flex shrink-0 items-center gap-0.5 text-xs text-foreground/45">
-                          <FiPaperclip className="h-3.5 w-3.5" />
-                          {item.images.length}
-                        </span>
-                      )}
                     </p>
                   </button>
                 </li>

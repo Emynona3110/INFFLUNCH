@@ -263,8 +263,8 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
   /**
    * « Supprimer », côté auteur, et ce que ça veut dire selon le moment :
    *   - la demande n'a laissé aucune trace — personne ne s'est prononcé, rien
-   *     dans le carnet, première version — : on l'efface pour de bon, elle
-   *     quitte aussi la boîte de réception ;
+   *     dans le carnet, première version, pas de fil — : on l'efface pour de
+   *     bon, elle quitte aussi la boîte de réception ;
    *   - elle a déjà été traitée, ou reprise après l'avoir été : on la marque
    *     seulement retirée. L'admin doit pouvoir constater ce qui a été enlevé,
    *     et ni le travail engagé ni l'historique ne s'évaporent avec elle.
@@ -273,7 +273,10 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
   const cancel = useMutation({
     mutationFn: async (item: Feedback) => {
       const untouched =
-        item.status === "nouveau" && !item.note_id && item.edits === 0;
+        item.status === "nouveau" &&
+        !item.note_id &&
+        item.edits === 0 &&
+        item.messages.length === 0;
       const { error } = untouched
         ? await supabaseClient.from("feedback").delete().eq("id", item.id)
         : await supabaseClient

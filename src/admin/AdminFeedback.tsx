@@ -315,9 +315,10 @@ const AdminFeedback = () => {
           viewingLive?.status === "clos" ? () => reopen(viewingLive) : undefined
         }
         // Clôturée : plus d'envoi ni de retouche, d'aucun côté, tant qu'elle
-        // n'est pas rouverte (la RLS le garantit aussi).
+        // n'est pas rouverte (la RLS le garantit aussi). Retirée par son
+        // auteur : plus personne ne la lit en face, inutile d'écrire.
         onReply={
-          viewingLive?.status === "clos"
+          viewingLive?.status === "clos" || viewingLive?.cancelled_at
             ? undefined
             : async (body) => {
                 if (!viewing) return;
@@ -341,15 +342,21 @@ const AdminFeedback = () => {
                 }
               }
         }
-        onDelete={async () => {
-          if (!viewing) return;
-          try {
-            await remove.mutateAsync(viewing);
-            setViewing(null);
-          } catch (e) {
-            fail(e);
-          }
-        }}
+        // Supprimer : seulement une demande déjà tranchée (acceptée, terminée,
+        // refusée, clôturée) ou retirée par son auteur — ce qui attend encore
+        // se traite, ne s'efface pas (la RLS l'impose aussi).
+        onDelete={
+          viewingLive && (!pending(viewingLive) || viewingLive.cancelled_at)
+            ? async () => {
+                try {
+                  await remove.mutateAsync(viewingLive);
+                  setViewing(null);
+                } catch (e) {
+                  fail(e);
+                }
+              }
+            : undefined
+        }
       />
     </div>
   );
