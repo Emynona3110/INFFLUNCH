@@ -27,6 +27,9 @@ const ThemedToaster = () => {
 // cache offline). Sans lui, pas d'abonnement possible.
 registerServiceWorker();
 
+// Un chunk de l'ancien build a disparu après un déploiement : on recharge.
+window.addEventListener("vite:preloadError", () => location.reload());
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>

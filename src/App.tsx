@@ -7,6 +7,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ForcePasswordChangeGate from "./components/ForcePasswordChangeGate";
 import RequestAccessPage from "./pages/RequestAccessPage";
 import LegalPage from "./pages/LegalPage";
+import { useVersionCheck } from "./hooks/useVersionCheck";
 
 /** Redirige les anciennes URL /user/* vers la racine (compat liens existants). */
 function RedirectFromUser() {
@@ -16,6 +17,7 @@ function RedirectFromUser() {
 }
 
 function App() {
+  useVersionCheck();
   return (
     <Routes>
       {/* Pages publiques */}
