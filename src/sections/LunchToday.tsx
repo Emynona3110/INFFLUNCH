@@ -61,12 +61,15 @@ const LunchToday = () => {
     [restaurants]
   );
 
-  // « Inscrits » = ceux qui vont au restaurant. Déclarer qu'on ne mange pas au
-  // resto est une information PRIVÉE : elle ne sert qu'à l'utilisateur (état de
-  // son encart, extinction de la puce de l'onglet) et n'apparaît nulle part
-  // pour les autres — ni dans le compteur, ni dans les tablées.
+  // « Inscrits » = ceux qui vont au restaurant (compteur de l'entête). Ceux qui
+  // ont déclaré ne pas manger au resto forment une « tablée » à part, affichée
+  // en fin de liste sans image ni bouton Rejoindre.
   const registered = useMemo(
     () => participants.filter((p) => p.restaurant_id != null),
+    [participants]
+  );
+  const offSite = useMemo(
+    () => participants.filter((p) => p.restaurant_id == null),
     [participants]
   );
 
@@ -224,39 +227,112 @@ const LunchToday = () => {
           </div>
         </div>
 
-        {/* Mobile : les boutons prennent toute la largeur sous le texte. */}
-        <div className="flex w-full shrink-0 items-center gap-2 sm:w-auto">
-          {hasPlan ? (
-            <Button
-              variant="outline"
-              onClick={leave}
-              loading={saving}
-              className="flex-1 sm:flex-none"
-            >
-              Annuler
-            </Button>
-          ) : weekendOff ? null : (
-            <>
-              <Button
-                onClick={() => setPickOpen(true)}
-                disabled={saving || restaurantsLoading}
-                className="flex-1 sm:flex-none"
-              >
-                <span className="sm:hidden">Choisir un resto</span>
-                <span className="hidden sm:inline">Choisir un restaurant</span>
-              </Button>
+        {/* Mobile : les boutons prennent toute la largeur sous le texte. Le
+            week-end, aucun conteneur : un bloc `w-full` vide passerait quand
+            même à la ligne et ajouterait le `gap` sous le texte. */}
+        {weekendOff ? null : (
+          <div className="flex w-full shrink-0 items-center gap-2 sm:w-auto">
+            {hasPlan ? (
               <Button
                 variant="outline"
-                onClick={skip}
-                disabled={saving}
+                onClick={leave}
+                loading={saving}
                 className="flex-1 sm:flex-none"
               >
-                Pas de resto
+                Annuler
               </Button>
-            </>
-          )}
-        </div>
+            ) : (
+              <>
+                <Button
+                  onClick={() => setPickOpen(true)}
+                  disabled={saving || restaurantsLoading}
+                  className="flex-1 sm:flex-none"
+                >
+                  <span className="sm:hidden">Choisir un resto</span>
+                  <span className="hidden sm:inline">Choisir un restaurant</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={skip}
+                  disabled={saving}
+                  className="flex-1 sm:flex-none"
+                >
+                  Pas de resto
+                </Button>
+              </>
+            )}
+          </div>
+        )}
       </div>
+      )}
+
+      {/* Ceux qui ne mangent pas au restaurant (gamelle, télétravail…) : une
+          ligne sobre, non cliquable, sans bouton — on la rejoint depuis
+          l'encart du haut (« Pas de resto »). Affiché AVANT les tablées. */}
+      {!loading && offSite.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
+          className={cn(
+            "mb-3 flex items-center gap-3 rounded-card border border-border bg-card p-2.5 sm:mb-6 sm:gap-4 sm:p-3",
+            skipsRestaurant && "bg-primary/5 sm:bg-card sm:ring-2 sm:ring-primary"
+          )}
+        >
+          <span className="relative flex h-12 w-16 shrink-0 items-center justify-center rounded-lg bg-foreground/5 text-foreground/45 sm:h-16 sm:w-24">
+            <LuUtensilsCrossed className="h-5 w-5 sm:h-6 sm:w-6" />
+            <motion.span
+              key={offSite.length}
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={spring}
+              className="absolute bottom-0.5 right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-foreground/35 px-1 text-[11px] font-bold text-white shadow sm:bottom-1 sm:right-1 sm:h-6 sm:min-w-6 sm:px-1.5 sm:text-xs"
+            >
+              {offSite.length}
+            </motion.span>
+          </span>
+
+          <div className="min-w-0 flex-1">
+            <div className="truncate font-display text-base font-bold text-foreground/70 sm:text-lg">
+              Pas au restaurant
+            </div>
+            <div className="mt-1 flex items-center gap-2">
+              <span className="hidden -space-x-2 sm:flex">
+                <AnimatePresence initial={false}>
+                  {offSite.slice(0, 5).map((p) => (
+                    <motion.span
+                      key={p.user_id}
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0, opacity: 0 }}
+                      transition={spring}
+                      className="inline-flex"
+                    >
+                      <Avatar
+                        email={p.email}
+                        avatarPath={p.avatar_path}
+                        size={26}
+                      />
+                    </motion.span>
+                  ))}
+                </AnimatePresence>
+              </span>
+              <span className="min-w-0 truncate text-xs text-foreground/55">
+                {offSite.map((p, i) => (
+                  <span key={p.user_id}>
+                    {i > 0 && ", "}
+                    <span className="sm:hidden">{formatAuthorName(p.email)}</span>
+                    <AuthorButton
+                      userId={p.user_id}
+                      email={p.email}
+                      className="hidden hover:text-foreground sm:inline"
+                    />
+                  </span>
+                ))}
+              </span>
+            </div>
+          </div>
+        </motion.div>
       )}
 
       {/* Tablées du jour. */}
@@ -276,7 +352,7 @@ const LunchToday = () => {
           >
             <LuUtensils className="h-10 w-10 text-primary" />
           </motion.span>
-          <p className="text-sm text-foreground/60">
+          <p className="m-0 text-sm text-foreground/60">
             Personne n'a encore choisi. Sois le premier à proposer un restaurant
             pour ce midi.
           </p>
