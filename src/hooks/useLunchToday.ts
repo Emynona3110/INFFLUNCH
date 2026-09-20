@@ -2,6 +2,7 @@ import { useEffect, useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import useSession from "./useSession";
 import supabaseClient from "../services/supabaseClient";
+import useAchievements from "./useAchievements";
 
 export interface LunchParticipant {
   user_id: string;
@@ -27,6 +28,16 @@ export const isWeekend = () => {
   });
   return day === "Sat" || day === "Sun";
 };
+
+/** Heure courante à Paris (0-23), pour le succès « Speedrunner ». */
+const parisHour = () =>
+  Number(
+    new Date().toLocaleTimeString("en-US", {
+      timeZone: "Europe/Paris",
+      hour12: false,
+      hour: "2-digit",
+    })
+  );
 
 /* ---------------------------- canal Realtime ----------------------------- */
 // Le hook est monté par la page /dejeuner, la fiche resto et chaque card : on
@@ -78,6 +89,7 @@ const useLunchToday = () => {
   const { sessionData } = useSession();
   const userId = sessionData?.user?.id;
   const queryClient = useQueryClient();
+  const { unlock } = useAchievements();
   const day = parisDay();
   const queryKey = ["lunch-today", day];
 
@@ -165,7 +177,12 @@ const useLunchToday = () => {
         );
       if (error) throw new Error(error.message);
     },
-    onSuccess: invalidate,
+    onSuccess: (_data, restaurantId) => {
+      invalidate();
+      // Succès secret « Speedrunner » : un restaurant (pas « pas au resto »)
+      // choisi avant 8 h, heure de Paris.
+      if (restaurantId != null && parisHour() < 8) unlock("speedrunner");
+    },
   });
 
   const clearMutation = useMutation({

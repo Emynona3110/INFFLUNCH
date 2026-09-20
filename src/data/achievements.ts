@@ -35,6 +35,7 @@ export type AchievementId =
   // Méta / assiduité
   | "fidele_au_poste"
   | "flambe"
+  | "speedrunner"
   | "troupeau_complet";
 
 export interface Achievement {
@@ -230,6 +231,13 @@ export const ACHIEVEMENTS: Achievement[] = [
     title: "Flambé",
     icon: "🔥",
     image: "/achievements/flambe.svg",
+    secret: true,
+  },
+  {
+    id: "speedrunner",
+    title: "Speedrunner",
+    icon: "⏱️",
+    image: "/achievements/speedrunner.svg",
     secret: true,
   },
   {
