@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import supabaseClient from "../services/supabaseClient";
 import useSession from "./useSession";
 import useAchievements from "./useAchievements";
-import { ACHIEVEMENTS, AchievementId } from "@/data/achievements";
+import { ACHIEVEMENTS, AchievementId, FLAMBE_STREAK } from "@/data/achievements";
 
 interface Metrics {
   reviews: number;
@@ -15,6 +15,8 @@ interface Metrics {
   reactionsReceived: number;
   /** Jours de connexion consécutifs (renvoyé par touch_login). */
   loginStreak: number;
+  /** Jours ouvrés consécutifs avec un midi déclaré (rpc lunch_streak). */
+  lunchStreak: number;
 }
 
 /**
@@ -80,6 +82,10 @@ const useAchievementTriggers = () => {
 
       // Streak de connexion : enregistre le jour courant et renvoie le streak.
       const { data: streak } = await supabaseClient.rpc("touch_login");
+      // Série de midis déclarés (« Qui déjeune où »), jours ouvrés seulement.
+      const { data: lunchStreak } = await supabaseClient.rpc("lunch_streak", {
+        target: userId,
+      });
 
       return {
         reviews: reviews.count ?? 0,
@@ -88,6 +94,7 @@ const useAchievementTriggers = () => {
         reactionsGivenDistinct,
         reactionsReceived,
         loginStreak: (streak as number | null) ?? 0,
+        lunchStreak: (lunchStreak as number | null) ?? 0,
       };
     },
   });
@@ -109,6 +116,7 @@ const useAchievementTriggers = () => {
     if (metrics.reactionsReceived >= 5) reached.push("approuve");
     if (metrics.favorites >= 5) reached.push("quinte_gagnant");
     if (metrics.loginStreak >= 5) reached.push("fidele_au_poste");
+    if (metrics.lunchStreak >= FLAMBE_STREAK) reached.push("flambe");
     reached.forEach((id) => unlock(id));
 
     // Complétionniste : tous les AUTRES succès débloqués. Se ré-évalue à chaque

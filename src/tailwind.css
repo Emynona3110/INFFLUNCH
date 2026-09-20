@@ -322,3 +322,65 @@ input:-webkit-autofill:active {
   animation: stars-pulse 0.4s ease-out both;
   z-index: 1;
 }
+
+/* Profil « Flambé » (série de midis ≥ seuil) : halo orange qui respire derrière
+   la pp + étincelles (`.streak-spark`, placées en JS) qui montent le long des
+   bords et s'éteignent. La pp elle-même est au-dessus (z-index). */
+.streak-fire::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, #fde68a 0%, #fb923c 45%, #ea580c 70%, transparent 100%);
+  filter: blur(7px);
+  animation: streak-breathe 2.6s ease-in-out infinite;
+}
+.streak-spark {
+  position: absolute;
+  bottom: 8%;
+  left: var(--x);
+  width: var(--size, 4px);
+  height: var(--size, 4px);
+  border-radius: 9999px;
+  background: var(--color, #fb923c);
+  box-shadow: 0 0 4px var(--color, #fb923c);
+  opacity: 0;
+  animation: streak-rise var(--dur, 2s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+@keyframes streak-breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.97);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.06);
+  }
+}
+@keyframes streak-rise {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(1);
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--drift), var(--rise)) scale(0.3);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .streak-fire::before,
+  .streak-spark {
+    animation: none;
+  }
+  .streak-fire::before {
+    opacity: 0.75;
+  }
+  .streak-spark {
+    display: none;
+  }
+}

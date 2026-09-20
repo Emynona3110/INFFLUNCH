@@ -1,10 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiCamera, FiStar, FiAward, FiLock } from "react-icons/fi";
+import { LuFlame, LuUtensils } from "react-icons/lu";
+import { FLAMBE_STREAK } from "@/data/achievements";
 import { Card } from "@/components/ui/card";
 import { Tooltip } from "@/components/ui/tooltip";
 import Avatar from "@/components/Avatar";
-import usePublicProfile, { PublicPhoto } from "@/hooks/usePublicProfile";
+import usePublicProfile, {
+  PublicPhoto,
+  PublicProfile,
+} from "@/hooks/usePublicProfile";
 import useSession from "@/hooks/useSession";
 import useIsAdmin from "@/hooks/useIsAdmin";
 import PhotoGallery from "@/components/PhotoGallery";
@@ -47,6 +52,83 @@ const formatDate = (iso: string) =>
  * succès et ses photos. Le même composant sert de première page de « Mon
  * Profil » (pour soi) et de page /profil/:id (pour les autres).
  */
+/** Étincelles autour de la pp « Flambé » : position horizontale (% de la
+ *  largeur, hors cercle = le long des bords), dérive, durée et délai. Fixes
+ *  plutôt qu'aléatoires : rendu stable entre deux rendus. */
+const SPARKS = [
+  { x: -6, drift: -10, rise: 1.15, dur: 2.2, delay: 0, size: 4, color: "#fb923c" },
+  { x: 4, drift: -6, rise: 1.0, dur: 1.8, delay: 0.6, size: 3, color: "#fde68a" },
+  { x: 14, drift: -3, rise: 1.25, dur: 2.6, delay: 1.3, size: 3, color: "#fb923c" },
+  { x: 50, drift: 2, rise: 1.3, dur: 2.4, delay: 0.3, size: 3, color: "#fde68a" },
+  { x: 84, drift: 4, rise: 1.2, dur: 2.0, delay: 1.7, size: 3, color: "#fb923c" },
+  { x: 96, drift: 7, rise: 1.05, dur: 1.9, delay: 0.9, size: 4, color: "#ea580c" },
+  { x: 104, drift: 11, rise: 1.15, dur: 2.3, delay: 1.1, size: 3, color: "#fde68a" },
+  { x: 30, drift: -4, rise: 1.35, dur: 2.8, delay: 2.0, size: 2, color: "#fb923c" },
+  { x: 70, drift: 5, rise: 1.3, dur: 2.5, delay: 0.15, size: 2, color: "#fde68a" },
+];
+
+/**
+ * Photo de profil avec la série de midis : à partir de 2 jours ouvrés d'affilée
+ * (« pas au resto » compris), contour orange et pastille flamme + nombre.
+ * L'Avatar rogne (overflow-hidden) : la pastille vit dans un cadre autour.
+ */
+const StreakAvatar = ({
+  profile,
+  size,
+  className,
+}: {
+  profile: PublicProfile;
+  size: number;
+  className?: string;
+}) => {
+  const streak = profile.lunch_streak ?? 0;
+  const onFire = streak >= 2;
+  // Palier du succès « Flambé » : la pp prend feu (halo + étincelles).
+  const flambe = streak >= FLAMBE_STREAK;
+  return (
+    <span
+      className={cn("relative shrink-0", flambe && "streak-fire", className)}
+      style={{ width: size, height: size }}
+    >
+      {flambe &&
+        SPARKS.map((sp, i) => (
+          <span
+            key={i}
+            aria-hidden
+            className="streak-spark"
+            style={
+              {
+                "--x": `${sp.x}%`,
+                "--drift": `${sp.drift}px`,
+                // Hauteur de montée relative à la pp : dépasse le sommet.
+                "--rise": `${-Math.round(size * sp.rise)}px`,
+                "--dur": `${sp.dur}s`,
+                "--delay": `${sp.delay}s`,
+                "--size": `${sp.size}px`,
+                "--color": sp.color,
+              } as React.CSSProperties
+            }
+          />
+        ))}
+      <Avatar
+        email={profile.email}
+        avatarPath={profile.avatar_path}
+        size={size}
+        className={cn("relative z-[1] ring-2", onFire ? "ring-accent" : "ring-border")}
+      />
+      {onFire && (
+        <span
+          aria-label={`${streak} midis d'affilée`}
+          className="absolute -bottom-0.5 -right-0.5 z-[2] flex h-5 min-w-5 items-center justify-center gap-0.5 rounded-full bg-accent pl-1 pr-1.5 text-xs leading-none text-white shadow ring-2 ring-card"
+        >
+          <LuFlame className="h-3 w-3" />
+          {streak}
+        </span>
+      )}
+    </span>
+  );
+};
+
 const UserProfileView = ({ userId, isMe = false }: Props) => {
   const navigate = useNavigate();
   const { profile, photos, remove, setCaption } = usePublicProfile(userId);
@@ -107,18 +189,8 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
       <Card className="p-4 sm:p-8">
         <div className="flex items-center gap-4 text-left">
           {/* Mobile : pp plus petite. */}
-          <Avatar
-            email={data.email}
-            avatarPath={data.avatar_path}
-            size={64}
-            className="ring-2 ring-border sm:hidden"
-          />
-          <Avatar
-            email={data.email}
-            avatarPath={data.avatar_path}
-            size={96}
-            className="hidden ring-2 ring-border sm:flex"
-          />
+          <StreakAvatar profile={data} size={64} className="sm:hidden" />
+          <StreakAvatar profile={data} size={96} className="hidden sm:block" />
           <div className="min-w-0 flex-1">
             <div
               role="heading"
@@ -141,6 +213,13 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
                 {data.photos_count}
                 <span className="hidden sm:inline">
                   photo{data.photos_count > 1 ? "s" : ""}
+                </span>
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <LuUtensils className="h-4 w-4 text-primary" />
+                {data.lunches_count}
+                <span className="hidden sm:inline">
+                  midi{data.lunches_count > 1 ? "s" : ""}
                 </span>
               </span>
               <span className="inline-flex items-center gap-1.5">

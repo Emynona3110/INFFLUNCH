@@ -146,7 +146,12 @@ const useLunchToday = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, queryClient, day]);
 
-  const invalidate = () => queryClient.invalidateQueries({ queryKey });
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey });
+    // Série de midis (succès « Flambé ») et compteur du profil.
+    queryClient.invalidateQueries({ queryKey: ["achievement-metrics"] });
+    queryClient.invalidateQueries({ queryKey: ["public-profile", userId] });
+  };
 
   // restaurantId null = « je ne mange pas au resto ce midi ».
   const setMutation = useMutation({

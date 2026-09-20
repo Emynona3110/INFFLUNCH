@@ -11,6 +11,10 @@ export interface PublicProfile {
   member_since: string;
   reviews_count: number;
   photos_count: number;
+  /** Midis déclarés (jours de semaine, « pas au resto » compris). */
+  lunches_count: number;
+  /** Jours ouvrés consécutifs avec déclaration (0/1 = rien à afficher). */
+  lunch_streak: number;
   achievements: { achievement_id: AchievementId; unlocked_at: string }[];
 }
 

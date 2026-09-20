@@ -34,6 +34,7 @@ export type AchievementId =
   | "shooting_stars"
   // Méta / assiduité
   | "fidele_au_poste"
+  | "flambe"
   | "troupeau_complet";
 
 export interface Achievement {
@@ -60,6 +61,10 @@ export interface Achievement {
    */
   secret?: boolean;
 }
+
+/** Palier du succès « Flambé » : jours ouvrés d'affilée avec un midi déclaré
+ *  (déblocage dans useAchievementTriggers, flammes sur la pp du profil). */
+export const FLAMBE_STREAK = 10;
 
 export const ACHIEVEMENTS: Achievement[] = [
   // — Easter egg mouton (Beeeh) —
@@ -219,6 +224,13 @@ export const ACHIEVEMENTS: Achievement[] = [
     condition: "Se connecter 5 jours d'affilée",
     icon: "📅",
     image: "/achievements/fidele_au_poste.svg",
+  },
+  {
+    id: "flambe",
+    title: "Flambé",
+    icon: "🔥",
+    image: "/achievements/flambe.svg",
+    secret: true,
   },
   {
     id: "troupeau_complet",
