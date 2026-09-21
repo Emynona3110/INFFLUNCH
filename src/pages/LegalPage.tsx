@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { FiSettings } from "react-icons/fi";
 import Layout from "../components/Layout";
+import CookieWord from "@/components/CookieWord";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import useSession from "../hooks/useSession";
@@ -288,7 +289,7 @@ const Confidentialite = () => {
 
       <Section title="Cookies et stockage local">
         <p>
-          Le site n'utilise ni cookie publicitaire ni outil de mesure
+          Le site n'utilise ni <CookieWord /> publicitaire ni outil de mesure
           d'audience. Seuls des éléments strictement nécessaires sont
           enregistrés dans ton navigateur : jeton de session (connexion), thème
           clair/sombre, mode d'affichage, éléments déjà consultés (nouveautés,

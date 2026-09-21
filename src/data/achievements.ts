@@ -34,6 +34,7 @@ export type AchievementId =
   | "jour_nuit"
   | "narcisse"
   | "shooting_stars"
+  | "cookie"
   // Méta / assiduité
   | "fidele_au_poste"
   | "flambe"
@@ -217,6 +218,17 @@ export const ACHIEVEMENTS: Achievement[] = [
     title: "Shooting Stars",
     icon: "🌠",
     image: "/achievements/shooting_stars.svg",
+    secret: true,
+  },
+
+  {
+    // Le seul cookie du site est dans la phrase qui dit qu'il n'y en a pas
+    // (page confidentialité) ; le manger débloque. Le gros cookie de
+    // l'easter egg est un autre fichier (public/easter/cookie.svg), hors DA.
+    id: "cookie",
+    title: "Cookie",
+    icon: "🍪",
+    image: "/achievements/cookie.svg",
     secret: true,
   },
 
