@@ -5,6 +5,8 @@
 // Succès SECRET = pas de `condition` ici, mais une ligne dans la table
 // `achievement_secrets` (sql/2026-09-14_achievement_secrets.sql).
 
+import type { AchievementMetrics } from "@/hooks/useAchievementMetrics";
+
 export type AchievementId =
   // Easter egg mouton (Beeeh)
   | "anti_panurgisme"
@@ -248,6 +250,28 @@ export const ACHIEVEMENTS: Achievement[] = [
     image: "/achievements/completionniste.svg",
   },
 ];
+
+/** Paliers des succès à compteur : la métrique (useAchievementMetrics) et le
+ *  nombre à atteindre. Une seule table pour deux usages — les déclencheurs
+ *  (useAchievementTriggers) et la progression « 12 / 20 » de la popup d'un
+ *  succès. Un secret peut y figurer : sa progression n'est montrée qu'une fois
+ *  la condition révélée. */
+export const ACHIEVEMENT_GOALS: Partial<
+  Record<AchievementId, { metric: keyof AchievementMetrics; goal: number }>
+> = {
+  premier_avis: { metric: "reviews", goal: 1 },
+  critique_confirme: { metric: "reviews", goal: 5 },
+  plume_gastronomique: { metric: "reviews", goal: 20 },
+  premiere_photo: { metric: "photos", goal: 1 },
+  objectif_midi: { metric: "photos", goal: 5 },
+  paparazzi_pause: { metric: "photos", goal: 20 },
+  premiere_reaction: { metric: "reactionsGivenDistinct", goal: 1 },
+  public_conquis: { metric: "reactionsGivenDistinct", goal: 20 },
+  approuve: { metric: "reactionsReceived", goal: 5 },
+  quinte_gagnant: { metric: "favorites", goal: 5 },
+  fidele_au_poste: { metric: "loginStreak", goal: 5 },
+  flambe: { metric: "lunchStreak", goal: FLAMBE_STREAK },
+};
 
 export const ACHIEVEMENTS_BY_ID = Object.fromEntries(
   ACHIEVEMENTS.map((a) => [a.id, a])

@@ -19,7 +19,14 @@ import useUserReviews, { UserReview } from "@/hooks/useUserReviews";
 import { toast } from "@/lib/toast";
 import noImage from "@/assets/no-image.jpg";
 import useAchievements from "@/hooks/useAchievements";
-import { ACHIEVEMENTS, ACHIEVEMENTS_BY_ID } from "@/data/achievements";
+import useAchievementStats from "@/hooks/useAchievementStats";
+import useSecretConditions from "@/hooks/useSecretConditions";
+import AchievementDialog from "@/components/AchievementDialog";
+import {
+  ACHIEVEMENTS,
+  ACHIEVEMENTS_BY_ID,
+  Achievement,
+} from "@/data/achievements";
 import { formatAuthorName } from "@/utils/authorName";
 import { cn } from "@/lib/utils";
 import {
@@ -141,6 +148,11 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
   // Les succès du VISITEUR : on ne dévoile le contenu d'un succès que s'il
   // l'a lui-même obtenu — sinon il en voit ce que sa propre galerie en montre.
   const { unlockedIds: mine } = useAchievements();
+  // Fiche d'un succès (clic sur une tuile) : condition si je l'ai aussi,
+  // rareté, et qui l'a décroché.
+  const [opened, setOpened] = useState<Achievement | null>(null);
+  const { percentById, ready: statsReady } = useAchievementStats();
+  const secretConditions = useSecretConditions();
 
   const data = profile.data;
   const unlocked = (data?.achievements ?? [])
@@ -271,7 +283,6 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
                   return (
                     <li key={def.id} className="shrink-0">
                       <Tooltip
-                        keepOnClick
                         label={
                           <span className="block text-center">
                             <span className="block font-semibold">
@@ -283,11 +294,14 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
                           </span>
                         }
                       >
-                        <div
-                          tabIndex={0}
+                        {/* Tactile : pas de bulle, c'est la fiche qui
+                            s'ouvre au tap et porte titre et date. */}
+                        <button
+                          type="button"
+                          onClick={() => setOpened(def)}
                           aria-label={`${def.title}, obtenu le ${formatDate(unlocked_at)}`}
                           className={cn(
-                            "flex h-12 w-12 items-center justify-center rounded-xl border border-border p-1.5 text-2xl outline-none transition focus-visible:ring-2 focus-visible:ring-primary/40 sm:h-14 sm:w-14 sm:p-2 sm:text-3xl",
+                            "flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl border border-border p-1.5 text-2xl outline-none transition hover:border-primary/40 focus-visible:ring-2 focus-visible:ring-primary/40 sm:h-14 sm:w-14 sm:p-2 sm:text-3xl",
                             known
                               ? cn(
                                   "bg-background",
@@ -307,7 +321,7 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
                           ) : (
                             def.icon
                           )}
-                        </div>
+                        </button>
                       </Tooltip>
                     </li>
                   );
@@ -460,6 +474,17 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
           onDone={() => setEditing(null)}
         />
       )}
+
+      <AchievementDialog
+        isOpen={!!opened}
+        onClose={() => setOpened(null)}
+        achievement={opened}
+        unlocked={!!opened && (isMe || mine.includes(opened.id))}
+        condition={
+          opened ? (opened.condition ?? secretConditions[opened.id]) : undefined
+        }
+        percent={statsReady && opened ? (percentById[opened.id] ?? 0) : undefined}
+      />
     </>
   );
 };

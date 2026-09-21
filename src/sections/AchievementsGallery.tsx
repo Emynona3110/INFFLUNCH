@@ -1,12 +1,19 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FiLock, FiTrash2 } from "react-icons/fi";
 import HoldToDeleteButton from "@/components/HoldToDeleteButton";
+import AchievementDialog from "@/components/AchievementDialog";
 import useAchievements from "@/hooks/useAchievements";
 import useAchievementStats from "@/hooks/useAchievementStats";
+import useAchievementMetrics from "@/hooks/useAchievementMetrics";
 import useAchievementsSeen from "@/hooks/useAchievementsSeen";
 import useSecretConditions from "@/hooks/useSecretConditions";
 import useIsAdmin from "@/hooks/useIsAdmin";
-import { ACHIEVEMENTS, AchievementId } from "@/data/achievements";
+import {
+  ACHIEVEMENTS,
+  ACHIEVEMENTS_BY_ID,
+  ACHIEVEMENT_GOALS,
+  AchievementId,
+} from "@/data/achievements";
 import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import {
@@ -57,6 +64,23 @@ const AchievementsGallery = () => {
   const unlockedCount = ACHIEVEMENTS.filter((a) =>
     unlockedIds.includes(a.id),
   ).length;
+
+  // Fiche d'un succès (clic sur une ligne) : qui l'a, et où j'en suis.
+  const [opened, setOpened] = useState<AchievementId | null>(null);
+  const { data: metrics } = useAchievementMetrics();
+  const progressOf = (id: AchievementId) => {
+    const goal = ACHIEVEMENT_GOALS[id];
+    if (goal && metrics) return { value: metrics[goal.metric], goal: goal.goal };
+    if (id === "troupeau_complet") {
+      const others = ACHIEVEMENTS.filter((a) => a.id !== id);
+      return {
+        value: others.filter((a) => unlockedIds.includes(a.id)).length,
+        goal: others.length,
+      };
+    }
+    return undefined;
+  };
+  const openedDef = opened ? ACHIEVEMENTS_BY_ID[opened] : null;
 
   // Tri : du plus courant au plus rare (% d'obtention décroissant → les plus
   // rares à la fin), puis par intitulé pour les raretés égales. Un succès sans
@@ -128,10 +152,19 @@ const AchievementsGallery = () => {
                   )}
                   <div
                     className={cn(
-                      "flex h-full min-h-[60px] items-center gap-3 px-3 py-2.5 sm:min-h-0 sm:rounded-xl sm:border sm:border-border sm:p-3",
+                      "flex h-full min-h-[60px] items-center gap-3 px-3 py-2.5 transition sm:min-h-0 sm:rounded-xl sm:border sm:border-border sm:p-3 sm:hover:border-primary/40",
                       unlocked ? "sm:bg-background" : "bg-muted/40",
                     )}
                   >
+                    {/* Toute la ligne ouvre la fiche : un bouton sans contenu
+                        posé sur toute la tuile, plutôt que d'imbriquer le
+                        bouton admin dans un bouton. */}
+                    <button
+                      type="button"
+                      onClick={() => setOpened(a.id)}
+                      aria-label={`Détails du succès ${a.title}`}
+                      className="absolute inset-0 cursor-pointer rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                    />
                     <div
                       className={cn(
                         "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-xl sm:h-14 sm:w-14 sm:text-3xl",
@@ -236,7 +269,7 @@ const AchievementsGallery = () => {
                         onConfirm={() => handleReset(a.id)}
                         mobileConfirm="Reverrouiller ce succès ?"
                         aria-label="Maintenir pour reverrouiller ce succès"
-                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:text-destructive"
+                        className="relative z-[1] flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:text-destructive"
                         progressClassName="bg-destructive/15"
                       >
                         <FiTrash2 className="h-3.5 w-3.5" />
@@ -249,6 +282,18 @@ const AchievementsGallery = () => {
           </ul>
         )}
       </div>
+
+      <AchievementDialog
+        isOpen={!!opened}
+        onClose={() => setOpened(null)}
+        achievement={openedDef}
+        unlocked={!!opened && unlockedIds.includes(opened)}
+        condition={
+          openedDef ? (openedDef.condition ?? secretConditions[openedDef.id]) : undefined
+        }
+        percent={statsReady && opened ? (percentById[opened] ?? 0) : undefined}
+        progress={opened ? progressOf(opened) : undefined}
+      />
     </section>
   );
 };
