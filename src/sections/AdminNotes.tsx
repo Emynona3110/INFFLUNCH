@@ -37,6 +37,11 @@ const HOLD_MS = 350;
 /** Souplesse de l'animation, la même que le carrousel de la galerie. */
 const EASE = "transform 250ms cubic-bezier(0.22, 1, 0.36, 1)";
 
+/** Retient le défilement tactile pendant un glisser. Déclaré ici, et non dans
+ *  le composant : c'est la même fonction d'un rendu à l'autre, donc on peut
+ *  l'ajouter et l'ôter sans se tromper de référence. */
+const blockScroll = (e: TouchEvent) => e.preventDefault();
+
 /**
  * Carnet de backlog des admins : les idées et bugs notés à la volée, sous forme
  * de tuiles réordonnables à la souris. Cocher une note ne la supprime pas — elle
@@ -50,6 +55,7 @@ const AdminNotes = () => {
     update,
     toggleDone,
     move,
+    reorder,
     remove,
   } = useAdminNotes();
 
@@ -63,7 +69,17 @@ const AdminNotes = () => {
   // mais repliées, pour que le carnet montre d'abord ce qui reste à faire.
   const [showDone, setShowDone] = useState(false);
 
+  // `drag` sert au rendu, `dragRef` aux gestes. React traite `pointermove` en
+  // priorité basse : sur un mobile occupé, le dernier mouvement pouvait n'être
+  // rendu qu'APRÈS le `pointerup`, et le relâchement lisait alors une place
+  // visée périmée — la tuile revenait doucement à sa place d'origine, comme si
+  // le déplacement était refusé. Le ref, lui, est à jour dès l'événement.
   const [drag, setDrag] = useState<Drag | null>(null);
+  const dragRef = useRef<Drag | null>(null);
+  const applyDrag = (next: Drag | null) => {
+    dragRef.current = next;
+    setDrag(next);
+  };
   const tileRefs = useRef(new Map<number, HTMLLIElement>());
   /** Milieux des autres tuiles, relevés AVANT que rien ne bouge : elles
    *  s'écartent ensuite par transformation, la mise en page ne change pas. */
@@ -118,11 +134,15 @@ const AdminNotes = () => {
     // La tuile garde le pointeur : les mouvements continuent d'arriver même
     // si le curseur en sort.
     target.setPointerCapture(pointerId);
+    // Posé ici, et pas seulement par l'effet plus bas : entre les deux il
+    // s'écoule un rendu, de quoi laisser le navigateur emporter le geste en
+    // défilement — il annule alors le pointeur et le glisser tombe à l'eau.
+    document.addEventListener("touchmove", blockScroll, { passive: false });
     midpoints.current = rects
       .filter((_, i) => i !== from)
       .map((r) => (r ? r.top + r.height / 2 : Infinity));
 
-    setDrag({
+    applyDrag({
       id: note.id,
       from,
       // Tuiles de hauteur identique : l'écart entre deux origines donne la
@@ -176,10 +196,11 @@ const AdminNotes = () => {
       if (dx * dx + dy * dy > 36) cancelHold();
       return;
     }
-    if (!drag || drag.released) return;
+    const d = dragRef.current;
+    if (!d || d.released) return;
     const at = midpoints.current.findIndex((mid) => event.clientY < mid);
     const insert = at < 0 ? midpoints.current.length : at;
-    if (insert !== drag.insert) setDrag({ ...drag, insert });
+    if (insert !== d.insert) applyDrag({ ...d, insert });
   };
 
   /** Position d'arrivée = entre les deux voisines de la place visée. Une seule
@@ -191,10 +212,11 @@ const AdminNotes = () => {
     setTimeout(() => {
       swallowClick.current = false;
     }, 0);
-    const d = drag;
+    const d = dragRef.current;
+    document.removeEventListener("touchmove", blockScroll);
     if (!d || d.released) return;
     if (d.insert === d.from) {
-      setDrag(null);
+      applyDrag(null);
       return;
     }
 
@@ -211,8 +233,22 @@ const AdminNotes = () => {
 
     // Les décalages restent en place jusqu'à ce que la liste arrive réordonnée
     // (`settled` ci-dessous) : c'est ce qui supprime le saut au relâchement.
-    setDrag({ ...d, released: true });
-    move.mutate({ id: d.id, position }, { onError: fail });
+    applyDrag({ ...d, released: true });
+
+    // La moyenne ne sépare pas toujours : deux voisines à la même position
+    // (vieux ajouts calculés depuis le cache) la rendent égale à toutes deux,
+    // l'ordre retombe alors sur l'id et la tuile revient à sa place au premier
+    // rechargement. Dans ce cas seulement, on renumérote la liste en cours.
+    const separates =
+      (!before || before.position < position) &&
+      (!after || position < after.position);
+    if (separates) {
+      move.mutate({ id: d.id, position }, { onError: fail });
+      return;
+    }
+    const ids = others.map((n) => n.id);
+    ids.splice(d.insert, 0, d.id);
+    reorder.mutate({ ids }, { onError: fail });
   };
 
   /** La liste est arrivée dans son nouvel ordre : chaque tuile est déjà à sa
@@ -222,7 +258,7 @@ const AdminNotes = () => {
 
   useEffect(() => {
     if (!settled) return;
-    const t = setTimeout(() => setDrag(null), 80);
+    const t = setTimeout(() => applyDrag(null), 80);
     return () => clearTimeout(t);
   }, [settled]);
 
@@ -231,16 +267,15 @@ const AdminNotes = () => {
   // `touchmove` non passif annulé, lui, retient le défilement.
   useEffect(() => {
     if (!active) return;
-    const block = (e: TouchEvent) => e.preventDefault();
-    document.addEventListener("touchmove", block, { passive: false });
-    return () => document.removeEventListener("touchmove", block);
+    document.addEventListener("touchmove", blockScroll, { passive: false });
+    return () => document.removeEventListener("touchmove", blockScroll);
   }, [active]);
 
   useEffect(() => {
     if (!drag?.released) return;
     // Garde-fou : si la liste réordonnée n'arrive jamais (refus du serveur), on
     // ne reste pas figé avec des tuiles décalées.
-    const t = setTimeout(() => setDrag(null), 600);
+    const t = setTimeout(() => applyDrag(null), 600);
     return () => clearTimeout(t);
   }, [drag?.released]);
 
@@ -290,7 +325,11 @@ const AdminNotes = () => {
           onPointerUp={endDrag}
           onPointerCancel={() => {
             cancelHold();
-            setDrag(null);
+            // Le navigateur reprend parfois le pointeur en plein geste
+            // (défilement, notification). Un glisser déjà commencé se conclut
+            // alors sur la place visée plutôt que de s'annuler.
+            if (dragRef.current) endDrag();
+            else applyDrag(null);
           }}
           onClickCapture={(e) => {
             if (!swallowClick.current) return;

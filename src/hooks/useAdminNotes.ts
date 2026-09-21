@@ -301,14 +301,41 @@ const useAdminNotes = (enabled = true) => {
     Rollback
   >({
     mutationFn: async ({ id, position }) => {
-      const { error } = await supabaseClient
+      // `select` pour savoir si la ligne a bougé : sans lui, une mise à jour
+      // qui ne touche aucune ligne (note effacée entre-temps) passerait pour
+      // un succès et la tuile reviendrait à sa place sans rien dire.
+      const { data, error } = await supabaseClient
         .from("admin_notes")
         .update({ position })
-        .eq("id", id);
+        .eq("id", id)
+        .select("id");
       if (error) throw new Error(error.message);
+      if (!data?.length) throw new Error("Cette note n'existe plus.");
     },
     ...optimistic((notes, { id, position }) =>
       notes.map((n) => (n.id === id ? { ...n, position } : n)),
+    ),
+  });
+
+  /** Renumérotation de secours : quand la moyenne ne sépare plus les deux
+   *  voisines (positions égales héritées, marge épuisée par les moyennes
+   *  successives), on réécrit toute la liste des notes en cours en entiers.
+   *  Rare, et borné au carnet : quelques dizaines de lignes au plus. */
+  const reorder = useMutation<void, Error, { ids: number[] }, Rollback>({
+    mutationFn: async ({ ids }) => {
+      const results = await Promise.all(
+        ids.map((id, position) =>
+          supabaseClient.from("admin_notes").update({ position }).eq("id", id),
+        ),
+      );
+      const failed = results.find((r) => r.error);
+      if (failed?.error) throw new Error(failed.error.message);
+    },
+    ...optimistic((notes, { ids }) =>
+      notes.map((n) => {
+        const i = ids.indexOf(n.id);
+        return i < 0 ? n : { ...n, position: i };
+      }),
     ),
   });
 
@@ -333,7 +360,7 @@ const useAdminNotes = (enabled = true) => {
     ...optimistic((notes, { id }) => notes.filter((n) => n.id !== id)),
   });
 
-  return { ...query, add, update, toggleDone, move, remove };
+  return { ...query, add, update, toggleDone, move, reorder, remove };
 };
 
 export default useAdminNotes;
