@@ -224,7 +224,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     // Le seul cookie du site est dans la phrase qui dit qu'il n'y en a pas
     // (page confidentialité) ; le manger débloque. Le gros cookie de
-    // l'easter egg est un autre fichier (public/easter/cookie.svg), hors DA.
+    // l'easter egg est un autre fichier (public/easter/cookie.png), hors DA.
     id: "cookie",
     title: "Cookie",
     icon: "🍪",

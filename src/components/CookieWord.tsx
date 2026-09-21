@@ -6,8 +6,9 @@ import useAchievements from "@/hooks/useAchievements";
  *  la dernière l'avale. */
 const BITES = 5;
 
-/** Image du cookie (Recraft, recadrée au carré). */
-const COOKIE_SRC = "/easter/cookie.svg";
+/** Image du cookie (PNG fond transparent, recadré au carré, 640 px : deux
+ *  fois la taille d'affichage maximale, net sur écran dense). */
+const COOKIE_SRC = "/easter/cookie.png";
 
 /** Morsures successives : centre et rayon en % de l'image, et `dir` la
  *  direction (degrés, 90 = vers le bas) dans laquelle les dents s'enfoncent.
