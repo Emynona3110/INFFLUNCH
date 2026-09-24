@@ -12,6 +12,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { copyTempPassword } from "@/utils/tempPassword";
 import { fnError } from "@/utils/fnError";
 import RowActionsDialog from "./RowActionsDialog";
+import { sortRows, useTableSort } from "./tableSort";
+import { SortHeader } from "./SortHeader";
 import { formatAuthorName } from "@/utils/authorName";
 
 // Table d'une catégorie de demandes. Les onglets (Inscription / Mot de passe)
@@ -38,6 +40,19 @@ const AccessRequests = ({ activeType }: { activeType: RequestType }) => {
       if (a.state !== "Waiting" && b.state === "Waiting") return 1;
       return 0;
     });
+
+  // Tri par colonne (3e clic = ordre naturel : en attente d'abord).
+  const { sort, toggle } = useTableSort<"who" | "date" | "state">();
+  const rows = sortRows(sorted, sort, (r, key) =>
+    key === "who"
+      ? isCreation
+        ? r.email
+        : formatAuthorName(r.email)
+      : key === "date"
+        ? Date.parse(r.created_at)
+        : // En attente d'abord, puis acceptée, puis refusée.
+          ["Waiting", "Accepted", "Rejected"].indexOf(r.state)
+  );
 
   const setState = (id: number, state: RequestState) =>
     supabaseClient.from("waiting_list").update({ state }).eq("id", id);
@@ -132,20 +147,31 @@ const AccessRequests = ({ activeType }: { activeType: RequestType }) => {
             >
               <thead>
                 <tr>
-                  {[isCreation ? "Email" : "Utilisateur", "Date", "Statut"].map(
-                    (h) => (
-                      <th
-                        key={h}
-                        className="sticky top-0 z-10 bg-muted px-2 py-3 first:pl-4 last:pr-4 text-center text-xs font-semibold uppercase tracking-wide text-foreground/55 shadow-[inset_0_-1px_0_0_var(--border)]"
-                      >
-                        {h}
-                      </th>
-                    )
-                  )}
+                  {(
+                    [
+                      {
+                        key: "who",
+                        label: isCreation ? "Email" : "Utilisateur",
+                      },
+                      { key: "date", label: "Date" },
+                      { key: "state", label: "Statut" },
+                    ] as const
+                  ).map((c) => (
+                    <th
+                      key={c.key}
+                      className="sticky top-0 z-10 bg-muted px-2 py-3 first:pl-4 last:pr-4 text-center text-xs font-semibold uppercase tracking-wide text-foreground/55 shadow-[inset_0_-1px_0_0_var(--border)]"
+                    >
+                      <SortHeader
+                        label={c.label}
+                        dir={sort?.key === c.key ? sort.dir : null}
+                        onClick={() => toggle(c.key)}
+                      />
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-              {sorted.map((req) => {
+              {rows.map((req) => {
                 const pending = req.state === "Waiting";
                 return (
                   <tr

@@ -13,8 +13,9 @@ import FeedbackViewDialog from "@/components/FeedbackViewDialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { formatAuthorName } from "@/utils/authorName";
+import { sortRows, useTableSort } from "./tableSort";
+import { SortHeader } from "./SortHeader";
 
-const COLUMNS = ["Nature", "Date", "Auteur", "État"];
 
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString("fr-FR", {
@@ -79,6 +80,18 @@ const AdminFeedback = () => {
         : lastVersion(a) > lastVersion(b)
           ? -1
           : 0) || b.id - a.id,
+  );
+
+  // Tri par colonne (3e clic = ordre naturel : la plus récente d'abord).
+  const { sort, toggle } = useTableSort<"type" | "date" | "author" | "state">();
+  const sortedRows = sortRows(rows, sort, (item, key) =>
+    key === "type"
+      ? feedbackType(item.type).label
+      : key === "date"
+        ? Date.parse(lastVersion(item))
+        : key === "author"
+          ? formatAuthorName(item.email)
+          : feedbackStatus(item.status).label
   );
 
   const fail = (e: any) =>
@@ -200,20 +213,29 @@ const AdminFeedback = () => {
             >
               <thead>
                 <tr>
-                  {COLUMNS.map((h) => (
+                  {(
+                    [
+                      { key: "type", label: "Nature" },
+                      { key: "date", label: "Date" },
+                      { key: "author", label: "Auteur" },
+                      { key: "state", label: "État" },
+                    ] as const
+                  ).map((c) => (
                     <th
-                      key={h}
-                      // Titre centré dans sa colonne ; les cellules, elles,
-                      // restent calées à gauche.
+                      key={c.key}
                       className="sticky top-0 z-10 bg-muted px-2 py-3 first:pl-4 last:pr-4 text-center text-xs font-semibold uppercase tracking-wide text-foreground/55 shadow-[inset_0_-1px_0_0_var(--border)]"
                     >
-                      {h}
+                      <SortHeader
+                        label={c.label}
+                        dir={sort?.key === c.key ? sort.dir : null}
+                        onClick={() => toggle(c.key)}
+                      />
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {rows.map((item) => {
+                {sortedRows.map((item) => {
                   const status = feedbackStatus(item.status);
                   const cancelled = !!item.cancelled_at && pending(item);
                   return (

@@ -7,6 +7,8 @@ import { tagCategoryLabel } from "../services/tagCategories";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import RowActionsDialog from "./RowActionsDialog";
+import { sortRows, useTableSort } from "./tableSort";
+import { SortHeader } from "./SortHeader";
 import useRealtimeTable from "../hooks/useRealtimeTable";
 
 interface AdminTableProps {
@@ -67,6 +69,10 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
     },
   });
 
+  // Tri par colonne (3e clic = ordre de la requête). Les colonnes sont
+  // dynamiques : la clé de tri EST le nom de la colonne.
+  const { sort, toggle } = useTableSort<string>();
+
   const error = queryError ? queryError.message : "";
   const columnNames = data.length > 0 ? columns ?? Object.keys(data[0]) : [];
   const visibleColumns = columnNames.filter((c) => c !== "id");
@@ -74,6 +80,11 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
   // disponible et se rapprochent quand l'écran rétrécit ; en dessous, la
   // ScrollArea reprend la main. 110 px par colonne.
   const minWidth = visibleColumns.length * 110;
+  // Une cellule peut porter un tableau (tags, badges) : on trie sur son texte.
+  const rows = sortRows(data, sort, (row, key) => {
+    const value = row[key];
+    return Array.isArray(value) ? value.join(", ") : value;
+  });
 
   if (loading) {
     return (
@@ -112,17 +123,19 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
               {visibleColumns.map((col) => (
                 <th
                   key={col}
-                  // Titre centré dans sa colonne ; les cellules, elles,
-                  // restent calées à gauche.
                   className="sticky top-0 z-10 bg-muted px-2 py-3 first:pl-4 last:pr-4 text-center text-xs font-semibold uppercase tracking-wide text-foreground/55 shadow-[inset_0_-1px_0_0_var(--border)]"
                 >
-                  {columnLabels[col] ?? col}
+                  <SortHeader
+                    label={columnLabels[col] ?? col}
+                    dir={sort?.key === col ? sort.dir : null}
+                    onClick={() => toggle(col)}
+                  />
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {data.map((row, idx) => (
+            {rows.map((row, idx) => (
               <tr
                 key={idx}
                 // Clic sur la ligne = ce qu'on peut en faire (modifier,

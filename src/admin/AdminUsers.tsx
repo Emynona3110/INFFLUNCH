@@ -7,6 +7,8 @@ import useUsers, { AppUser } from "../hooks/useUsers";
 import useSession from "../hooks/useSession";
 import ConfirmDeleteDialog from "../components/ConfirmDeleteDialog";
 import RowActionsDialog from "./RowActionsDialog";
+import { sortRows, useTableSort } from "./tableSort";
+import { SortHeader } from "./SortHeader";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { profilePath } from "@/utils/profilePath";
@@ -28,6 +30,16 @@ const AdminUsers = () => {
   const navigate = useNavigate();
   const { sessionData } = useSession();
   const myId = sessionData?.user?.id;
+
+  // Tri par colonne (3e clic = ordre de la requête, par email).
+  const { sort, toggle } = useTableSort<"user" | "role" | "created">();
+  const rows = sortRows(users, sort, (u, key) =>
+    key === "user"
+      ? formatAuthorName(u.email)
+      : key === "role"
+        ? u.role
+        : Date.parse(u.created_at)
+  );
 
   // Ligne dont la popup d'actions est ouverte (clic sur la ligne).
   const [actionsFor, setActionsFor] = useState<AppUser | null>(null);
@@ -110,18 +122,28 @@ const AdminUsers = () => {
             >
               <thead>
                 <tr>
-                  {["Utilisateur", "Rôle", "Inscrit le"].map((h) => (
+                  {(
+                    [
+                      { key: "user", label: "Utilisateur" },
+                      { key: "role", label: "Rôle" },
+                      { key: "created", label: "Inscrit le" },
+                    ] as const
+                  ).map((c) => (
                     <th
-                      key={h}
+                      key={c.key}
                       className="sticky top-0 z-10 bg-muted px-2 py-3 first:pl-4 last:pr-4 text-center text-xs font-semibold uppercase tracking-wide text-foreground/55 shadow-[inset_0_-1px_0_0_var(--border)]"
                     >
-                      {h}
+                      <SortHeader
+                        label={c.label}
+                        dir={sort?.key === c.key ? sort.dir : null}
+                        onClick={() => toggle(c.key)}
+                      />
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {users.map((u) => {
+                {rows.map((u) => {
                   const isAdmin = u.role === "admin";
                   return (
                     <tr
