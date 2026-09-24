@@ -3,7 +3,6 @@ import { Dialog } from "@/components/ui/dialog";
 import Avatar from "@/components/Avatar";
 import AuthorButton from "@/components/AuthorButton";
 import useAchievementHolders from "@/hooks/useAchievementHolders";
-import useSession from "@/hooks/useSession";
 import { Achievement } from "@/data/achievements";
 import { formatAuthorName } from "@/utils/authorName";
 import { cn } from "@/lib/utils";
@@ -47,8 +46,6 @@ const AchievementDialog = ({
   percent,
   progress,
 }: Props) => {
-  const { sessionData } = useSession();
-  const me = sessionData?.user?.id;
   const holders = useAchievementHolders(
     isOpen && achievement ? achievement.id : null,
   );
@@ -159,11 +156,6 @@ const AchievementDialog = ({
                   className="min-w-0 flex-1 truncate text-sm font-medium text-card-foreground"
                 >
                   {formatAuthorName(h.email)}
-                  {h.user_id === me && (
-                    <span className="ml-1 font-normal text-foreground/45">
-                      (vous)
-                    </span>
-                  )}
                 </AuthorButton>
                 <span className="shrink-0 text-xs tabular-nums text-foreground/45">
                   {formatDate(h.unlocked_at)}

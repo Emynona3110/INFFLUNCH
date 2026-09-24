@@ -1,31 +1,26 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { FiCopy, FiKey, FiTrash2 } from "react-icons/fi";
 import { toast } from "@/lib/toast";
-import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import supabaseClient from "../services/supabaseClient";
 import useUsers, { AppUser } from "../hooks/useUsers";
 import useSession from "../hooks/useSession";
-import HoldToDeleteButton from "../components/HoldToDeleteButton";
 import ConfirmDeleteDialog from "../components/ConfirmDeleteDialog";
-import { Tooltip } from "@/components/ui/tooltip";
+import RowActionsDialog from "./RowActionsDialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { profilePath } from "@/utils/profilePath";
+import { formatAuthorName } from "@/utils/authorName";
+import { copyTempPassword } from "@/utils/tempPassword";
+import { fnError } from "@/utils/fnError";
 
-/** Extrait un message d'erreur lisible d'un retour d'Edge Function. */
-const fnError = async (error: any, data: any): Promise<string> => {
-  if (data?.error) return data.error;
-  if (error?.context) {
-    try {
-      return (await error.context.json())?.error ?? error.message;
-    } catch {
-      /* ignore */
-    }
-  }
-  return error?.message ?? "Une erreur est survenue.";
-};
+/** Date d'inscription, format court FR (identique à AdminFeedback). */
+const formatDate = (iso: string) =>
+  new Date(iso).toLocaleDateString("fr-FR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
 
 const AdminUsers = () => {
   const queryClient = useQueryClient();
@@ -34,19 +29,12 @@ const AdminUsers = () => {
   const { sessionData } = useSession();
   const myId = sessionData?.user?.id;
 
+  // Ligne dont la popup d'actions est ouverte (clic sur la ligne).
+  const [actionsFor, setActionsFor] = useState<AppUser | null>(null);
   const [toDelete, setToDelete] = useState<AppUser | null>(null);
   // Par défaut on anonymise (avis, photos, menus restent, sans nom) ; effacer
   // aussi les contributions ne se fait que si la personne l'a demandé.
   const [erase, setErase] = useState(false);
-  const [credentials, setCredentials] = useState<{
-    email: string;
-    tempPassword: string;
-  } | null>(null);
-
-  const copy = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast({ title: "Copié", status: "success", duration: 1500 });
-  };
 
   const handleReset = async (u: AppUser) => {
     const { data, error } = await supabaseClient.functions.invoke(
@@ -63,7 +51,9 @@ const AdminUsers = () => {
       });
       return;
     }
-    setCredentials({ email: data.email, tempPassword: data.tempPassword });
+    // Le mot de passe temporaire ne vit que dans le presse-papier : l'admin
+    // n'a plus qu'à coller le message dans Teams.
+    void copyTempPassword(data.email, data.tempPassword);
   };
 
   const handleDelete = async (u: AppUser) => {
@@ -93,7 +83,7 @@ const AdminUsers = () => {
   };
 
   return (
-    <div className="tw-scope flex h-full w-full flex-col px-4 pb-4">
+    <div className="tw-scope flex h-full w-full flex-col sm:px-4 sm:pb-4">
       {isPending ? (
         <div className="flex h-[40vh] items-center justify-center">
           <div className="h-10 w-10 animate-spin rounded-full border-2 border-border border-t-primary" />
@@ -106,23 +96,24 @@ const AdminUsers = () => {
         <div className="flex max-h-full flex-col overflow-hidden rounded-card border border-border bg-card">
           <ScrollArea
             className="min-h-0 os-grid"
-            style={{ ["--grid-right" as string]: "120px" }}
+            // La barre verticale démarre sous l'entête figée ; l'horizontale
+            // va jusqu'au bord, faute de colonne Actions à contourner.
+            style={{ ["--grid-right" as string]: "0px" }}
           >
             <table
-              className="w-full border-separate border-spacing-0 text-sm"
-              style={{ minWidth: 600 }}
+              className="w-full border-separate border-spacing-0 text-center text-sm"
+              // Les colonnes s'étalent sur la largeur disponible et se
+              // rapprochent quand l'écran rétrécit (répartition naturelle de
+              // `w-full`). Ce plancher n'est qu'un filet : en dessous, la
+              // ScrollArea reprend la main plutôt que d'écraser les colonnes.
+              style={{ minWidth: 400 }}
             >
               <thead>
                 <tr>
-                  {["Email", "Rôle", "Actions"].map((h) => (
+                  {["Utilisateur", "Rôle", "Inscrit le"].map((h) => (
                     <th
                       key={h}
-                      className={cn(
-                        "sticky top-0 bg-muted px-4 py-3 text-xs font-semibold uppercase tracking-wide text-foreground/55 shadow-[inset_0_-1px_0_0_var(--border)]",
-                        h === "Actions"
-                          ? "right-0 z-20 w-[120px] text-center shadow-[inset_1px_0_0_0_var(--border),inset_0_-1px_0_0_var(--border)]"
-                          : "z-10 text-left"
-                      )}
+                      className="sticky top-0 z-10 bg-muted px-2 py-3 first:pl-4 last:pr-4 text-center text-xs font-semibold uppercase tracking-wide text-foreground/55 shadow-[inset_0_-1px_0_0_var(--border)]"
                     >
                       {h}
                     </th>
@@ -131,24 +122,20 @@ const AdminUsers = () => {
               </thead>
               <tbody>
                 {users.map((u) => {
-                  const isMe = u.id === myId;
                   const isAdmin = u.role === "admin";
                   return (
                     <tr
                       key={u.id}
-                      // La ligne mène au profil ; les boutons d'action stoppent
-                      // la propagation pour ne pas naviguer en même temps.
-                      onClick={() => navigate(profilePath(u.id, u.email))}
-                      aria-label="Voir le profil"
+                      // Clic sur la ligne = ce qu'on peut faire de ce compte
+                      // (le profil en fait partie), comme la fiche d'une demande.
+                      onClick={() => setActionsFor(u)}
+                      aria-label="Actions sur ce compte"
                       className="cursor-pointer transition hover:bg-muted/40 [&>td]:border-t [&>td]:border-border/60"
                     >
-                      <td className="px-4 py-1.5 text-foreground/90">
-                        {u.email}
-                        {isMe && (
-                          <span className="ml-2 text-xs text-foreground/45">(moi)</span>
-                        )}
+                      <td className="px-2 py-1.5 first:pl-4 last:pr-4 text-foreground/90">
+                        {formatAuthorName(u.email)}
                       </td>
-                      <td className="px-4 py-1.5">
+                      <td className="px-2 py-1.5 first:pl-4 last:pr-4">
                         <span
                           className={cn(
                             "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium",
@@ -160,48 +147,8 @@ const AdminUsers = () => {
                           {isAdmin ? "Admin" : "Membre"}
                         </span>
                       </td>
-                      <td className="sticky right-0 z-[1] w-[120px] bg-card px-4 py-1.5 text-center shadow-[inset_1px_0_0_0_var(--border)]">
-                        <div
-                          className="flex justify-center gap-2"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Tooltip
-                            label={
-                              isMe
-                                ? "Change ton mot de passe depuis Mon compte"
-                                : "Maintenir pour réinitialiser le mot de passe"
-                            }
-                          >
-                            <HoldToDeleteButton
-                              onConfirm={() => handleReset(u)}
-                              mobileConfirm="Réinitialiser le mot de passe ?"
-                              disabled={isMe}
-                              aria-label="Maintenir pour réinitialiser le mot de passe"
-                              className="flex h-8 w-8 items-center justify-center rounded-full text-primary hover:bg-primary/10"
-                              progressClassName="bg-primary/20"
-                            >
-                              <FiKey className="h-4 w-4" />
-                            </HoldToDeleteButton>
-                          </Tooltip>
-                          <Tooltip
-                            label={
-                              isMe
-                                ? "Vous ne pouvez pas vous supprimer"
-                                : "Maintenir pour supprimer"
-                            }
-                          >
-                            <HoldToDeleteButton
-                              onConfirm={() => setToDelete(u)}
-                              mobileConfirm={false}
-                              disabled={isMe}
-                              aria-label="Maintenir pour supprimer l'utilisateur"
-                              className="flex h-8 w-8 items-center justify-center rounded-full text-destructive hover:bg-destructive/10"
-                              progressClassName="bg-destructive/20"
-                            >
-                              <FiTrash2 className="h-4 w-4" />
-                            </HoldToDeleteButton>
-                          </Tooltip>
-                        </div>
+                      <td className="whitespace-nowrap px-2 py-1.5 first:pl-4 last:pr-4 text-foreground/70">
+                        {formatDate(u.created_at)}
                       </td>
                     </tr>
                   );
@@ -212,43 +159,50 @@ const AdminUsers = () => {
         </div>
       )}
 
-      {/* Mot de passe temporaire après réinitialisation */}
-      {credentials && (
-        <Dialog
-          open
-          onClose={() => setCredentials(null)}
-          showClose
-          className="p-6"
-        >
-          <div>
-            <DialogTitle>
-              <span className="mr-8">Mot de passe réinitialisé ✅</span>
-            </DialogTitle>
-            <p className="mt-3 text-sm text-foreground/80">
-              Transmets ce mot de passe à <b>{credentials.email}</b> via Teams.
-              Il devra le changer à la prochaine connexion.
-            </p>
-            <div className="mt-4">
-              <span className="text-xs text-foreground/50">
-                Mot de passe temporaire
-              </span>
-              <div className="mt-1 flex items-center gap-2">
-                <code className="rounded-md bg-muted px-3 py-1.5 text-base text-foreground">
-                  {credentials.tempPassword}
-                </code>
-                <button
-                  type="button"
-                  onClick={() => copy(credentials.tempPassword)}
-                  aria-label="Copier"
-                  className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-border text-foreground/70 transition hover:bg-muted"
-                >
-                  <FiCopy />
-                </button>
-              </div>
-            </div>
-          </div>
-        </Dialog>
-      )}
+      {/* Actions de la ligne cliquée. Celles qui ouvrent une autre popup la
+          referment d'abord : jamais deux fenêtres empilées. */}
+      <RowActionsDialog
+        open={!!actionsFor}
+        onClose={() => setActionsFor(null)}
+        title={actionsFor ? formatAuthorName(actionsFor.email) : ""}
+        subtitle={actionsFor?.email}
+        actions={
+          actionsFor
+            ? [
+                {
+                  key: "profile",
+                  label: "Voir le profil",
+                  // Navigation : rien à attendre, la popup se ferme aussitôt.
+                  onSelect: () =>
+                    navigate(profilePath(actionsFor.id, actionsFor.email)),
+                },
+                {
+                  key: "reset",
+                  label: "Réinitialiser le mot de passe",
+                  tone: "primary",
+                  hold: true,
+                  holdTitle: "Maintenir pour réinitialiser le mot de passe",
+                  disabled: actionsFor.id === myId,
+                  disabledReason: "Change ton mot de passe depuis Mon compte.",
+                  // Appel serveur : le bouton tourne jusqu'à la réponse.
+                  onSelect: () => handleReset(actionsFor),
+                },
+                {
+                  key: "delete",
+                  label: "Supprimer le compte",
+                  tone: "destructive",
+                  hold: true,
+                  holdTitle: "Maintenir pour supprimer le compte",
+                  disabled: actionsFor.id === myId,
+                  disabledReason: "Vous ne pouvez pas vous supprimer.",
+                  // Ouvre la confirmation : celle-ci la remplace dans le
+                  // même rendu.
+                  onSelect: () => setToDelete(actionsFor),
+                },
+              ]
+            : []
+        }
+      />
 
       <ConfirmDeleteDialog
         open={!!toDelete}

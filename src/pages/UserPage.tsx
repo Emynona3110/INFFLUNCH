@@ -148,8 +148,10 @@ const UserPage = () => {
       fillContent={fillContent}
       // Liste/grille des restos et fiche resto : tirer vers le bas = refetch.
       pullToRefresh={currentPage === "restaurants" || isRestaurantDetail}
-      // Mobile : la roue des sous-onglets de Mon compte vit dans le bandeau.
-      toolbarPortal={currentPage === "mon-compte" && !isDesktop}
+      // Mobile : la roue des sous-onglets (Mon compte, Admin) vit dans le bandeau.
+      toolbarPortal={
+        (currentPage === "mon-compte" || currentPage === "admin") && !isDesktop
+      }
       // Mon compte mobile : chaque panneau du pager affiche le footer en fin de
       // contenu (scroll interne) ; pas de footer permanent sous le pager.
       footer={!(currentPage === "mon-compte" && !isDesktop)}

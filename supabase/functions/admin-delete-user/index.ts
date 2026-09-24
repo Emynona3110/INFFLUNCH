@@ -11,7 +11,8 @@
 // Dans les deux cas, ses fichiers personnels (pp, images de demandes) partent.
 //
 // Déploiement : Dashboard Supabase → Edge Functions → coller ce code → Deploy.
-// SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY sont injectés automatiquement.
+// SUPABASE_URL est injecté automatiquement ; pour la clé secrète, voir le choix
+// commenté plus bas (nouvelles clés d'API Supabase vs JWT « legacy »).
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -36,17 +37,46 @@ Deno.serve(async (req) => {
 
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-    const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    // Clé secrète du serveur. Depuis la migration des clés d'API Supabase, un
+    // projet passé aux nouvelles clés (front en `sb_publishable_…`) expose
+    // SUPABASE_SECRET_KEY ; l'ancienne SUPABASE_SERVICE_ROLE_KEY (JWT
+    // « legacy ») reste injectée mais peut être DÉSACTIVÉE côté projet — le
+    // client admin est alors refusé et tout appel finit en 401 « Non
+    // authentifié », alors que l'appelant est bien connecté. On prend donc la
+    // nouvelle clé en priorité ; ADMIN_SECRET_KEY permet de la fournir à la
+    // main (Dashboard → Edge Functions → Secrets) si le projet ne l'injecte pas.
+    const SERVICE_ROLE =
+      Deno.env.get("SUPABASE_SECRET_KEY") ??
+      Deno.env.get("ADMIN_SECRET_KEY") ??
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
 
     // 1) Authentifier l'appelant
     const token = (req.headers.get("Authorization") ?? "").replace("Bearer ", "");
+    if (!token) {
+      return json({ error: "Non authentifié : aucun jeton envoyé." }, 401);
+    }
     const {
       data: { user },
       error: userErr,
     } = await admin.auth.getUser(token);
     if (userErr || !user) {
-      return json({ error: "Non authentifié." }, 401);
+      // Deux 401 très différents se cachaient derrière le même message :
+      // le jeton de l'appelant est refusé, OU c'est la clé secrète du serveur
+      // qui l'est (clés legacy désactivées). Sans les distinguer, impossible de
+      // diagnostiquer depuis le front.
+      const msg = userErr?.message ?? "jeton refusé";
+      if (/api key/i.test(msg)) {
+        return json(
+          {
+            error:
+              "Configuration serveur : clé d'API refusée (clés legacy désactivées ?). " +
+              "Renseigner ADMIN_SECRET_KEY dans les secrets des Edge Functions.",
+          },
+          500
+        );
+      }
+      return json({ error: `Session expirée, reconnecte-toi. (${msg})` }, 401);
     }
 
     // 2) Vérifier le rôle admin

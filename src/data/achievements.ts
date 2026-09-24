@@ -243,9 +243,9 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: "flambe",
     title: "Flambé",
+    condition: `Déclarer son midi ${FLAMBE_STREAK} jours ouvrés d'affilée`,
     icon: "🔥",
     image: "/achievements/flambe.svg",
-    secret: true,
   },
   {
     id: "speedrunner",

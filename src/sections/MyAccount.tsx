@@ -76,10 +76,23 @@ const MyAccount = () => {
     visibleTabs.findIndex((t) => t.key === key);
   const changeTab = (key: SubTabKey) => setActive(key);
 
-  // Cible du portail (existe après le premier commit du Layout).
+  // Cible du portail. Le bandeau appartient au Layout, qui décide de le monter
+  // d'après la même media query — mais pas forcément dans le même commit, les
+  // deux composants s'abonnant chacun de leur côté. En ne regardant qu'une
+  // fois, on pouvait tomber sur un bandeau pas encore monté et ne jamais
+  // revoir celui apparu juste après : la roue des onglets disparaissait en
+  // redimensionnant la fenêtre de desktop à mobile. D'où le second regard au
+  // rendu suivant.
   const [toolbarSlot, setToolbarSlot] = useState<HTMLElement | null>(null);
   useEffect(() => {
-    setToolbarSlot(document.getElementById("page-toolbar"));
+    const find = () =>
+      setToolbarSlot((prev) => {
+        const el = document.getElementById("page-toolbar");
+        return prev === el ? prev : el;
+      });
+    find();
+    const raf = requestAnimationFrame(find);
+    return () => cancelAnimationFrame(raf);
   }, [isDesktop]);
 
   // Mobile : balayer le contenu change de sous-onglet.

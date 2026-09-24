@@ -1,12 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
-import { FiEdit2, FiTrash2 } from "react-icons/fi";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { BsBan } from "react-icons/bs";
 import supabaseClient from "../services/supabaseClient";
 import badgeMap, { orderBadges } from "../services/badgeMap";
 import { tagCategoryLabel } from "../services/tagCategories";
 import { Badge } from "@/components/ui/badge";
-import { Tooltip } from "@/components/ui/tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import RowActionsDialog from "./RowActionsDialog";
+import useRealtimeTable from "../hooks/useRealtimeTable";
 
 interface AdminTableProps {
   tableName: string;
@@ -19,6 +20,20 @@ interface AdminTableProps {
 const columnLabels: Record<string, string> = { category: "catégorie" };
 
 const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) => {
+  const queryClient = useQueryClient();
+
+  // Temps réel : la table se rafraîchit dès qu'une ligne change, d'où qu'elle
+  // vienne (un autre admin, un autre onglet). Sans événement — table absente de
+  // la publication realtime — on retombe simplement sur l'ancien comportement.
+  useRealtimeTable(tableName, () =>
+    queryClient.invalidateQueries({ queryKey: ["table", tableName] })
+  );
+
+  // Ligne dont la popup d'actions est ouverte (clic sur la ligne).
+  const [actionsFor, setActionsFor] = useState<Record<string, unknown> | null>(
+    null
+  );
+
   const isBadgeColumn = (col: string) =>
     col.toLowerCase() === "badges" || col.toLowerCase().includes("badge");
 
@@ -55,7 +70,10 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
   const error = queryError ? queryError.message : "";
   const columnNames = data.length > 0 ? columns ?? Object.keys(data[0]) : [];
   const visibleColumns = columnNames.filter((c) => c !== "id");
-  const minWidth = visibleColumns.length * 150 + 130;
+  // Plancher, pas une largeur cible : les colonnes s'étalent sur la largeur
+  // disponible et se rapprochent quand l'écran rétrécit ; en dessous, la
+  // ScrollArea reprend la main. 110 px par colonne.
+  const minWidth = visibleColumns.length * 110;
 
   if (loading) {
     return (
@@ -81,10 +99,12 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
     <div className="tw-scope flex max-h-full flex-col overflow-hidden rounded-card border border-border bg-card">
       <ScrollArea
         className="min-h-0 os-grid"
-        style={{ ["--grid-right" as string]: "120px" }}
+        // La barre verticale démarre sous l'entête figée ; l'horizontale va
+        // jusqu'au bord, faute de colonne Actions à contourner.
+        style={{ ["--grid-right" as string]: "0px" }}
       >
         <table
-          className="w-full border-separate border-spacing-0 text-sm"
+          className="w-full border-separate border-spacing-0 text-center text-sm"
           style={{ minWidth }}
         >
           <thead>
@@ -92,21 +112,24 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
               {visibleColumns.map((col) => (
                 <th
                   key={col}
-                  className="sticky top-0 z-10 bg-muted px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-foreground/55 shadow-[inset_0_-1px_0_0_var(--border)]"
+                  // Titre centré dans sa colonne ; les cellules, elles,
+                  // restent calées à gauche.
+                  className="sticky top-0 z-10 bg-muted px-2 py-3 first:pl-4 last:pr-4 text-center text-xs font-semibold uppercase tracking-wide text-foreground/55 shadow-[inset_0_-1px_0_0_var(--border)]"
                 >
                   {columnLabels[col] ?? col}
                 </th>
               ))}
-              <th className="sticky right-0 top-0 z-20 w-[120px] bg-muted px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-foreground/55 shadow-[inset_1px_0_0_0_var(--border),inset_0_-1px_0_0_var(--border)]">
-                Actions
-              </th>
             </tr>
           </thead>
           <tbody>
             {data.map((row, idx) => (
               <tr
                 key={idx}
-                className="transition hover:bg-muted/40 [&>td]:border-t [&>td]:border-border/60"
+                // Clic sur la ligne = ce qu'on peut en faire (modifier,
+                // supprimer), comme les autres tables admin.
+                onClick={() => setActionsFor(row)}
+                aria-label="Actions sur cette ligne"
+                className="cursor-pointer transition hover:bg-muted/40 [&>td]:border-t [&>td]:border-border/60"
               >
                 {visibleColumns.map((col) => {
                   const value = row[col];
@@ -119,7 +142,7 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
                     col.toLowerCase().includes("website");
 
                   return (
-                    <td key={col} className="px-4 py-1.5 align-middle text-foreground/90">
+                    <td key={col} className="px-2 py-1.5 first:pl-4 last:pr-4 align-middle text-foreground/90">
                       {value === null || value === undefined || value === "" ? (
                         <BsBan className="text-foreground/30" />
                       ) : isImage ? (
@@ -167,35 +190,41 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
                     </td>
                   );
                 })}
-                <td className="sticky right-0 z-[1] w-[120px] bg-card px-4 py-1.5 text-center align-middle shadow-[inset_1px_0_0_0_var(--border)]">
-                  <div className="flex justify-center gap-2">
-                    <Tooltip label="Modifier">
-                      <button
-                        type="button"
-                        onClick={() => onEdit?.(row)}
-                        aria-label="Modifier"
-                        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-primary transition hover:bg-primary/10"
-                      >
-                        <FiEdit2 className="h-4 w-4" />
-                      </button>
-                    </Tooltip>
-                    <Tooltip label="Supprimer">
-                      <button
-                        type="button"
-                        onClick={() => onDelete?.(row)}
-                        aria-label="Supprimer"
-                        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-destructive transition hover:bg-destructive/10"
-                      >
-                        <FiTrash2 className="h-4 w-4" />
-                      </button>
-                    </Tooltip>
-                  </div>
-                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </ScrollArea>
+
+      {/* Actions de la ligne cliquée. Les deux ouvrent une autre popup
+          (formulaire, confirmation) : on referme celle-ci d'abord. */}
+      <RowActionsDialog
+        open={!!actionsFor}
+        onClose={() => setActionsFor(null)}
+        title={
+          actionsFor ? String(actionsFor[visibleColumns[0]] ?? "") : ""
+        }
+        actions={
+          actionsFor
+            ? [
+                {
+                  key: "edit",
+                  label: "Modifier",
+                  tone: "primary",
+                  // Ouvre le formulaire : il remplace cette popup.
+                  onSelect: () => onEdit?.(actionsFor),
+                },
+                {
+                  key: "delete",
+                  label: "Supprimer",
+                  tone: "destructive",
+                  // Ouvre la confirmation : elle remplace cette popup.
+                  onSelect: () => onDelete?.(actionsFor),
+                },
+              ]
+            : []
+        }
+      />
     </div>
   );
 };

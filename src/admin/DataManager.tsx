@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "@/lib/toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -12,11 +12,9 @@ import { Button } from "@/components/ui/button";
 
 export interface DataManagerProps {
   section: AdminSection;
-  /** Incrémenter cette valeur (depuis le parent) ouvre le dialog d'ajout. */
-  addSignal?: number;
 }
 
-const DataManager = ({ section, addSignal }: DataManagerProps) => {
+const DataManager = ({ section }: DataManagerProps) => {
   const { tableName, columns } = section;
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editData, setEditData] = useState<any | null>(null);
@@ -29,15 +27,6 @@ const DataManager = ({ section, addSignal }: DataManagerProps) => {
 
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-
-  // Ouverture du dialog d'ajout pilotée par le parent (bouton remonté dans la
-  // barre d'onglets). On ignore la valeur initiale (0/undefined).
-  useEffect(() => {
-    if (addSignal) {
-      setEditData(null);
-      setIsDialogOpen(true);
-    }
-  }, [addSignal]);
 
   const handleSuccess = (slug?: string) => {
     // Un restaurant qui vient d'être créé s'ouvre directement : on y est
@@ -129,7 +118,7 @@ const DataManager = ({ section, addSignal }: DataManagerProps) => {
   };
 
   return (
-    <div className="tw-scope flex h-full w-full flex-col px-4 pb-4">
+    <div className="tw-scope flex h-full w-full flex-col sm:px-4 sm:pb-4">
       <AdminTable
         tableName={tableName}
         columns={columns}

@@ -176,7 +176,7 @@ const AdminFeedback = () => {
   };
 
   return (
-    <div className="tw-scope flex h-full w-full flex-col px-4 pb-4">
+    <div className="tw-scope flex h-full w-full flex-col sm:px-4 sm:pb-4">
       {isPending ? (
         <div className="flex h-[40vh] items-center justify-center">
           <div className="h-10 w-10 animate-spin rounded-full border-2 border-border border-t-primary" />
@@ -187,17 +187,25 @@ const AdminFeedback = () => {
         <p className="text-foreground/60">Aucune demande pour le moment.</p>
       ) : (
         <div className="flex max-h-full flex-col overflow-hidden rounded-card border border-border bg-card">
-          <ScrollArea className="min-h-0 os-grid">
+          <ScrollArea
+            className="min-h-0 os-grid"
+            // Pas de colonne Actions ici non plus : l'horizontale va au bord.
+            style={{ ["--grid-right" as string]: "0px" }}
+          >
             <table
-              className="w-full border-separate border-spacing-0 text-sm"
-              style={{ minWidth: 560 }}
+              className="w-full border-separate border-spacing-0 text-center text-sm"
+              // Cf. AdminUsers : plancher, pas une largeur cible. Plus bas ici,
+              // faute de colonne Actions.
+              style={{ minWidth: 340 }}
             >
               <thead>
                 <tr>
                   {COLUMNS.map((h) => (
                     <th
                       key={h}
-                      className="sticky top-0 z-10 bg-muted px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-foreground/55 shadow-[inset_0_-1px_0_0_var(--border)]"
+                      // Titre centré dans sa colonne ; les cellules, elles,
+                      // restent calées à gauche.
+                      className="sticky top-0 z-10 bg-muted px-2 py-3 first:pl-4 last:pr-4 text-center text-xs font-semibold uppercase tracking-wide text-foreground/55 shadow-[inset_0_-1px_0_0_var(--border)]"
                     >
                       {h}
                     </th>
@@ -225,11 +233,11 @@ const AdminFeedback = () => {
                     >
                       {/* Nature : un point de couleur, comme les tuiles du
                           carnet. Le libellé est dans la popup. */}
-                      <td className="w-10 whitespace-nowrap px-4 py-2.5">
+                      <td className="w-10 whitespace-nowrap px-2 py-2.5 first:pl-4 last:pr-4">
                         <span
                           aria-label={feedbackType(item.type).label}
                           className={cn(
-                            "block h-2.5 w-2.5 rounded-full",
+                            "mx-auto block h-2.5 w-2.5 rounded-full",
                             feedbackType(item.type).dot,
                           )}
                         />
@@ -239,10 +247,10 @@ const AdminFeedback = () => {
                       </td>
                       {/* Date de la dernière version : celle qui donne l'ordre
                           du tableau. */}
-                      <td className="whitespace-nowrap px-4 py-2.5 text-foreground/70">
+                      <td className="whitespace-nowrap px-2 py-2.5 first:pl-4 last:pr-4 text-foreground/70">
                         {formatDate(lastVersion(item))}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-2.5 text-foreground/70">
+                      <td className="whitespace-nowrap px-2 py-2.5 first:pl-4 last:pr-4 text-foreground/70">
                         {item.email ? formatAuthorName(item.email) : "—"}
                         {/* Trombone : des captures accompagnent le message. */}
                         {item.images.length > 0 && (
@@ -257,7 +265,7 @@ const AdminFeedback = () => {
                           d'autre état à montrer. Dès qu'elle a été classée,
                           c'est le traitement qui compte — il continue, et son
                           auteur n'en saura simplement rien. */}
-                      <td className="whitespace-nowrap px-4 py-2.5">
+                      <td className="whitespace-nowrap px-2 py-2.5 first:pl-4 last:pr-4">
                         <span
                           className={cn(
                             "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium",
