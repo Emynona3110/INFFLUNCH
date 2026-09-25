@@ -123,11 +123,12 @@ body {
   --os-handle-bg-active: color-mix(in srgb, var(--foreground) 70%, transparent);
 }
 
-/* Au bout d'une zone scrollable, le geste se propageait au parent puis à la
-   page : le défilement horizontal d'une table entraînait tout l'écran avec lui.
-   La chaîne s'arrête à la zone elle-même. */
+/* `none`, pas `contain` : `contain` arrête bien la propagation au parent — le
+   défilement d'une table n'entraîne plus la page — mais laisse la zone faire
+   SON propre rebond élastique. Au doigt, la table se tirait alors par-dessus
+   son entête figée, découvrant du vide au-dessus. `none` supprime les deux. */
 .os-infflunch [data-overlayscrollbars-viewport] {
-  overscroll-behavior-x: contain;
+  overscroll-behavior: none;
 }
 
 /* Mode "grille figée" : la barre verticale démarre sous l'entête, l'horizontale
