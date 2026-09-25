@@ -213,7 +213,11 @@ const MyAccount = () => {
             {visibleTabs.map((t) => (
               <div
                 key={t.key}
-                className="flex h-full w-full shrink-0 flex-col overflow-y-auto overscroll-y-contain px-2.5 pt-3"
+                // `overscroll-y-none`, pas `-contain` : `contain` arrête bien
+                // la propagation à la page, mais laisse le panneau faire SON
+                // propre rebond élastique — on tirait le contenu au-dessus du
+                // bandeau d'onglets ou sous le footer. `none` supprime les deux.
+                className="flex h-full w-full shrink-0 flex-col overflow-y-auto overscroll-y-none px-2.5 pt-3"
               >
                 {/* Contenu au moins plein écran : le footer se cale en bas
                     quand l'onglet est court, sous le contenu sinon. */}
