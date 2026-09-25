@@ -302,7 +302,7 @@ const RestaurantPage = () => {
           la même hauteur que lui. */}
       {restaurant.closed ? (
         <div className="mt-2.5 flex items-center gap-2.5 rounded-card border border-border bg-muted/40 px-3 py-2.5 text-sm text-foreground/70 sm:mt-4 sm:px-4 sm:py-3">
-          <FiSlash className="h-4 w-4 shrink-0 text-foreground/45" />
+          <FiSlash className="h-4 w-4 shrink-0 text-foreground opacity-45" />
           {/* Mobile : version courte. */}
           <span className="sm:hidden">Restaurant fermé</span>
           <span className="hidden sm:inline">

@@ -207,8 +207,9 @@ const Confidentialite = () => {
           <li>
             <span className="font-medium text-foreground">Contributions</span> :
             avis et notes, votes, réactions, photos, menus, favoris, choix « je
-            déjeune où ? », succès débloqués — pour faire fonctionner le service
-            et les afficher aux autres collaborateurs.
+            déjeune où ? » — y compris « pas de restaurant » ou « pas sur
+            site » quand tu le déclares —, succès débloqués — pour faire
+            fonctionner le service et les afficher aux autres collaborateurs.
           </li>
           <li>
             <span className="font-medium text-foreground">

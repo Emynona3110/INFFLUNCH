@@ -4,10 +4,19 @@ import useSession from "./useSession";
 import supabaseClient from "../services/supabaseClient";
 import useAchievements from "./useAchievements";
 
+/** Pourquoi on ne mange pas au restaurant : présent sur site mais déjeunant
+ *  autrement (gamelle, plat apporté, resto de son côté), ou absent du site.
+ *  On ne demande PAS le motif de l'absence (télétravail, congé…) : le déjeuner
+ *  n'a besoin que de savoir si l'on est joignable sur site. */
+export type LunchOffReason = "on_site" | "away";
+
 export interface LunchParticipant {
   user_id: string;
   /** null = la personne a déclaré ne pas manger au restaurant aujourd'hui. */
   restaurant_id: number | null;
+  /** Qualification du « pas au restaurant » (null quand un restaurant est
+   *  choisi, ou pour les lignes d'avant le 2026-09-25 : non précisé). */
+  off_reason: LunchOffReason | null;
   /** Email (jointure public.users), pour le nom affiché. */
   email: string | null;
   /** profiles.avatar_path, null = initiales. */
@@ -83,7 +92,8 @@ const closeChannel = () => {
  * restaurant est un upsert, se retirer un delete.
  *
  * Une intention sans restaurant (`restaurant_id` null) veut dire « je ne mange
- * pas au resto ce midi » — gamelle, télétravail, peu importe.
+ * pas au resto ce midi », qualifiée par `off_reason` : « pas de restaurant »
+ * (sur site, mais gamelle ou déjeuner de son côté) ou « pas sur site ».
  */
 const useLunchToday = () => {
   const { sessionData } = useSession();
@@ -107,13 +117,14 @@ const useLunchToday = () => {
     queryFn: async () => {
       const { data, error } = await supabaseClient
         .from("lunch_plans")
-        .select("user_id, restaurant_id")
+        .select("user_id, restaurant_id, off_reason")
         .eq("day", day);
       if (error) throw new Error(error.message);
 
       const rows = (data ?? []) as {
         user_id: string;
         restaurant_id: number | null;
+        off_reason: LunchOffReason | null;
       }[];
       if (rows.length === 0) return [];
 
@@ -165,23 +176,31 @@ const useLunchToday = () => {
     queryClient.invalidateQueries({ queryKey: ["public-profile", userId] });
   };
 
-  // restaurantId null = « je ne mange pas au resto ce midi ».
+  // Une déclaration, deux formes : un restaurant, ou une absence de restaurant
+  // qualifiée (« pas de restaurant » / « pas sur site »). Les deux s'excluent, la
+  // contrainte lunch_plans_off_reason_coherent le garantit en base.
   const setMutation = useMutation({
-    mutationFn: async (restaurantId: number | null) => {
+    mutationFn: async (plan: {
+      restaurantId: number | null;
+      offReason: LunchOffReason | null;
+    }) => {
       if (!userId) throw new Error("Session expirée, reconnecte-toi.");
-      const { error } = await supabaseClient
-        .from("lunch_plans")
-        .upsert(
-          { user_id: userId, day, restaurant_id: restaurantId },
-          { onConflict: "user_id,day" }
-        );
+      const { error } = await supabaseClient.from("lunch_plans").upsert(
+        {
+          user_id: userId,
+          day,
+          restaurant_id: plan.restaurantId,
+          off_reason: plan.offReason,
+        },
+        { onConflict: "user_id,day" }
+      );
       if (error) throw new Error(error.message);
     },
-    onSuccess: (_data, restaurantId) => {
+    onSuccess: (_data, plan) => {
       invalidate();
       // Succès secret « Speedrunner » : un restaurant (pas « pas au resto »)
       // choisi avant 8 h, heure de Paris.
-      if (restaurantId != null && parisHour() < 8) unlock("speedrunner");
+      if (plan.restaurantId != null && parisHour() < 8) unlock("speedrunner");
     },
   });
 
@@ -215,14 +234,25 @@ const useLunchToday = () => {
     participants,
     byRestaurant,
     /** J'ai déclaré quelque chose aujourd'hui — restaurant ou « pas au resto ».
-     *  Le « pas au resto » ne regarde que l'intéressé : il n'est ni compté ni
-     *  affiché ailleurs, il sert juste à éteindre la puce de l'onglet. */
+     *  Le « pas au resto » n'est pas compté dans les inscrits : il apparaît
+     *  seulement sur la page du midi et éteint la puce de l'onglet. */
     hasPlan: !!myPlan,
     /** Restaurant où je déjeune, null si je n'ai pas choisi OU pas de resto. */
     myRestaurantId: myPlan?.restaurant_id ?? null,
+    /** Ma raison de ne pas aller au resto, null si je vais au resto ou n'ai
+     *  rien déclaré. Une ancienne ligne sans raison est traitée comme
+     *  « pas de restaurant » (sur site), le cas le plus courant. */
+    myOffReason: myPlan && myPlan.restaurant_id == null
+      ? myPlan.off_reason ?? "on_site"
+      : null,
     loading: isPending,
     saving: setMutation.isPending || clearMutation.isPending,
-    setLunch: setMutation.mutateAsync,
+    /** « Je déjeune dans ce restaurant. » */
+    setLunch: (restaurantId: number) =>
+      setMutation.mutateAsync({ restaurantId, offReason: null }),
+    /** « Je ne vais pas au resto », en disant lequel des deux cas. */
+    setLunchOff: (offReason: LunchOffReason) =>
+      setMutation.mutateAsync({ restaurantId: null, offReason }),
     clearLunch: clearMutation.mutateAsync,
   };
 };

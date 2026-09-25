@@ -29,7 +29,7 @@ Tenu au titre de l'art. 30 RGPD (modèle simplifié CNIL). Dernière mise à jou
 | Finalité | Permettre aux collaborateurs de noter et commenter les restaurants, partager photos et menus, indiquer où ils déjeunent, débloquer des succès (gamification) |
 | Base légale | Exécution du service demandé (6.1.b) |
 | Personnes concernées | Collaborateurs disposant d'un compte |
-| Données | Note 1-5 + commentaire, votes sur avis, réactions emoji, photos (WebP, attribution auteur), menus (lien/pdf/image), favoris, choix « je déjeune où » (resto + date), succès débloqués, horodatages |
+| Données | Note 1-5 + commentaire, votes sur avis, réactions emoji, photos (WebP, attribution auteur), menus (lien/pdf/image), favoris, choix « je déjeune où » (resto + date, ou à défaut « pas de restaurant » / « pas sur site » — jamais le motif de l'absence), succès débloqués, horodatages |
 | Tables | `reviews`, `review_votes`, `reactions`, `restaurant_photos`, `restaurant_menus`, `favorites`, `lunch_plans`, `user_achievements` ; bucket `restaurant-photos` |
 | Destinataires | Tous les collaborateurs connectés ; modération admin |
 | Conservation | Durée de vie du compte (suppression en cascade) ; `lunch_plans` du jour uniquement |

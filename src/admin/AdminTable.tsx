@@ -158,7 +158,7 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
                   return (
                     <td key={col} className="px-2 py-1.5 first:pl-4 last:pr-4 align-middle text-foreground/90">
                       {value === null || value === undefined || value === "" ? (
-                        <BsBan className="text-foreground/30" />
+                        <BsBan className="text-foreground opacity-30" />
                       ) : isImage ? (
                         <img
                           src={value}

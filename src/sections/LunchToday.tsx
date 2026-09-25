@@ -1,12 +1,17 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { LuUtensils, LuUtensilsCrossed } from "react-icons/lu";
+import { LuMapPinOff, LuSandwich, LuUtensils, LuUtensilsCrossed } from "react-icons/lu";
 import { FiPlus } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import Avatar from "@/components/Avatar";
 import LunchPickDialog from "@/components/LunchPickDialog";
-import useLunchToday, { isWeekend } from "@/hooks/useLunchToday";
+import LunchOffDialog from "@/components/LunchOffDialog";
+import useLunchToday, {
+  isWeekend,
+  LunchOffReason,
+  LunchParticipant,
+} from "@/hooks/useLunchToday";
 import useRestaurants from "@/hooks/useRestaurants";
 import { defaultRestaurantFilters } from "@/pages/UserPage";
 import AuthorButton from "@/components/AuthorButton";
@@ -31,6 +36,95 @@ const todayLabel = () => {
 const spring = { type: "spring" as const, stiffness: 380, damping: 30 };
 
 /**
+ * Ligne « hors restaurant » : même gabarit qu'une tablée, mais sans image, sans
+ * lien et sans bouton Rejoindre — on s'y déclare depuis l'encart du haut
+ * (« Pas de resto »). Il y en a deux, et c'est le but : être sur site sans
+ * aller au resto laisse la porte ouverte aux collègues, être absent non.
+ */
+const OffTable = ({
+  people,
+  label,
+  icon: Icon,
+  mine,
+}: {
+  people: LunchParticipant[];
+  label: string;
+  icon: typeof LuSandwich;
+  /** C'est ma ligne : fond teinté sur mobile, anneau sur desktop. */
+  mine: boolean;
+}) => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    transition={{ duration: 0.2 }}
+    className={cn(
+      // Aucun contour : ce n'est pas une tablée, juste du contexte. Ma ligne se
+      // repère au fond teinté, pas à un anneau.
+      "flex items-center gap-3 overflow-hidden rounded-card p-2.5 sm:gap-4 sm:bg-card sm:p-3",
+      mine && "bg-primary/5 sm:bg-primary/5"
+    )}
+  >
+    <span className="relative flex h-12 w-16 shrink-0 items-center justify-center rounded-lg bg-foreground/5 sm:h-16 sm:w-24">
+      {/* Couleur OPAQUE + `opacity` sur le svg, jamais `text-foreground/45` :
+          une icône barrée ou croisée (LuMapPinOff, LuUtensilsCrossed) dessine
+          des traits qui se recouvrent, et en couleur translucide chaque
+          intersection cumule son alpha — on y voit une seconde icône
+          superposée. L'opacité de groupe compose les traits d'abord et
+          n'atténue qu'ensuite. */}
+      <Icon className="h-5 w-5 text-foreground opacity-45 sm:h-6 sm:w-6" />
+      <motion.span
+        key={people.length}
+        initial={{ scale: 0.5, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={spring}
+        className="absolute bottom-0.5 right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-foreground/35 px-1 text-[11px] font-bold text-white shadow sm:bottom-1 sm:right-1 sm:h-6 sm:min-w-6 sm:px-1.5 sm:text-xs"
+      >
+        {people.length}
+      </motion.span>
+    </span>
+
+    <div className="min-w-0 flex-1">
+      <div className="truncate font-display text-base font-bold text-foreground/70 sm:text-lg">
+        {label}
+      </div>
+      <div className="mt-1 flex items-center gap-2">
+        <span className="hidden -space-x-2 sm:flex">
+          <AnimatePresence initial={false}>
+            {people.slice(0, 5).map((p) => (
+              <motion.span
+                key={p.user_id}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                transition={spring}
+                className="inline-flex"
+              >
+                <Avatar email={p.email} avatarPath={p.avatar_path} size={26} />
+              </motion.span>
+            ))}
+          </AnimatePresence>
+        </span>
+        {/* Mobile : noms en texte simple, comme sur les tablées. */}
+        <span className="min-w-0 truncate text-xs text-foreground/55">
+          {people.map((p, i) => (
+            <span key={p.user_id}>
+              {i > 0 && ", "}
+              <span className="sm:hidden">{formatAuthorName(p.email)}</span>
+              <AuthorButton
+                userId={p.user_id}
+                email={p.email}
+                className="hidden hover:text-foreground sm:inline"
+              />
+            </span>
+          ))}
+        </span>
+      </div>
+    </div>
+  </motion.div>
+);
+
+/**
  * Section « Déjeuner » : qui déjeune où aujourd'hui. Il n'y a ni organisateur ni
  * invitation — chacun déclare son restaurant du jour et les tablées se forment
  * par regroupement. La liste se met à jour en direct (Realtime) ; les arrivées
@@ -41,6 +135,7 @@ const spring = { type: "spring" as const, stiffness: 380, damping: 30 };
 const LunchToday = () => {
   const navigate = useNavigate();
   const [pickOpen, setPickOpen] = useState(false);
+  const [offOpen, setOffOpen] = useState(false);
 
   const { data: restaurants, loading: restaurantsLoading } = useRestaurants(
     defaultRestaurantFilters
@@ -50,9 +145,11 @@ const LunchToday = () => {
     byRestaurant,
     hasPlan,
     myRestaurantId,
+    myOffReason,
     loading,
     saving,
     setLunch,
+    setLunchOff,
     clearLunch,
   } = useLunchToday();
 
@@ -62,14 +159,25 @@ const LunchToday = () => {
   );
 
   // « Inscrits » = ceux qui vont au restaurant (compteur de l'entête). Ceux qui
-  // ont déclaré ne pas manger au resto forment une « tablée » à part, affichée
-  // en fin de liste sans image ni bouton Rejoindre.
+  // ont déclaré ne pas manger au resto forment deux « tablées » à part,
+  // affichées après les vraies, sans image ni bouton Rejoindre : être sur site
+  // sans aller au resto n'a pas le même sens qu'être absent (on peut croiser le
+  // premier, lui rapporter quelque chose, grouper une commande).
   const registered = useMemo(
     () => participants.filter((p) => p.restaurant_id != null),
     [participants]
   );
-  const offSite = useMemo(
-    () => participants.filter((p) => p.restaurant_id == null),
+  // Une ligne d'avant le 2026-09-25 n'a pas de raison : on la range avec « pas
+  // de restaurant », le cas le plus courant (le hook fait pareil pour moi).
+  const onSite = useMemo(
+    () =>
+      participants.filter(
+        (p) => p.restaurant_id == null && p.off_reason !== "away"
+      ),
+    [participants]
+  );
+  const away = useMemo(
+    () => participants.filter((p) => p.off_reason === "away"),
     [participants]
   );
 
@@ -93,8 +201,9 @@ const LunchToday = () => {
   // de la liste des restaurants : sinon on affiche une fraction de seconde
   // « pas encore choisi » (bouton bleu) avant que le nom du resto n'arrive.
   // hasPlan couvre les deux déclarations possibles : un restaurant, ou « pas au
-  // resto » (gamelle, télétravail…) qui ne porte pas de restaurant.
-  const skipsRestaurant = hasPlan && myRestaurantId == null;
+  // resto », qui ne porte pas de restaurant mais toujours une raison.
+  const skipsRestaurant = myOffReason != null;
+  const awayToday = myOffReason === "away";
   // Week-end sans déclaration : on ne réclame rien, l'encart reste neutre.
   const weekendOff = !hasPlan && isWeekend();
   const myRestaurant = myRestaurantId ? restById.get(myRestaurantId) : undefined;
@@ -116,8 +225,8 @@ const LunchToday = () => {
   };
 
   const join = (restaurantId: number) => guard(() => setLunch(restaurantId));
-  /** « Je ne mange pas au resto » : une intention sans restaurant. */
-  const skip = () => guard(() => setLunch(null));
+  /** « Je ne mange pas au resto », en disant lequel des deux cas. */
+  const skip = (reason: LunchOffReason) => guard(() => setLunchOff(reason));
   const leave = () => guard(() => clearLunch());
 
   return (
@@ -188,7 +297,11 @@ const LunchToday = () => {
                 : "bg-primary/10 text-primary"
             )}
           >
-            {skipsRestaurant || weekendOff ? (
+            {awayToday ? (
+              <LuMapPinOff className="h-5 w-5" />
+            ) : skipsRestaurant ? (
+              <LuSandwich className="h-5 w-5" />
+            ) : weekendOff ? (
               <LuUtensilsCrossed className="h-5 w-5" />
             ) : (
               <LuUtensils className="h-5 w-5" />
@@ -197,7 +310,9 @@ const LunchToday = () => {
           <div className="flex h-11 min-w-0 flex-col justify-center sm:h-12">
             {skipsRestaurant ? (
               <div className="text-sm text-foreground/70">
-                Ce midi, tu ne manges pas au restaurant.
+                {awayToday
+                  ? "Ce midi, tu n'es pas sur site."
+                  : "Ce midi, tu es sur site sans aller au restaurant."}
               </div>
             ) : hasPlan ? (
               <>
@@ -253,7 +368,7 @@ const LunchToday = () => {
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={skip}
+                  onClick={() => setOffOpen(true)}
                   disabled={saving}
                   className="flex-1 sm:flex-none"
                 >
@@ -264,75 +379,6 @@ const LunchToday = () => {
           </div>
         )}
       </div>
-      )}
-
-      {/* Ceux qui ne mangent pas au restaurant (gamelle, télétravail…) : une
-          ligne sobre, non cliquable, sans bouton — on la rejoint depuis
-          l'encart du haut (« Pas de resto »). Affiché AVANT les tablées. */}
-      {!loading && offSite.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.2 }}
-          className={cn(
-            "mb-3 flex items-center gap-3 rounded-card border border-border bg-card p-2.5 sm:mb-6 sm:gap-4 sm:p-3",
-            skipsRestaurant && "bg-primary/5 sm:bg-card sm:ring-2 sm:ring-primary"
-          )}
-        >
-          <span className="relative flex h-12 w-16 shrink-0 items-center justify-center rounded-lg bg-foreground/5 text-foreground/45 sm:h-16 sm:w-24">
-            <LuUtensilsCrossed className="h-5 w-5 sm:h-6 sm:w-6" />
-            <motion.span
-              key={offSite.length}
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={spring}
-              className="absolute bottom-0.5 right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-foreground/35 px-1 text-[11px] font-bold text-white shadow sm:bottom-1 sm:right-1 sm:h-6 sm:min-w-6 sm:px-1.5 sm:text-xs"
-            >
-              {offSite.length}
-            </motion.span>
-          </span>
-
-          <div className="min-w-0 flex-1">
-            <div className="truncate font-display text-base font-bold text-foreground/70 sm:text-lg">
-              Pas au restaurant
-            </div>
-            <div className="mt-1 flex items-center gap-2">
-              <span className="hidden -space-x-2 sm:flex">
-                <AnimatePresence initial={false}>
-                  {offSite.slice(0, 5).map((p) => (
-                    <motion.span
-                      key={p.user_id}
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 0, opacity: 0 }}
-                      transition={spring}
-                      className="inline-flex"
-                    >
-                      <Avatar
-                        email={p.email}
-                        avatarPath={p.avatar_path}
-                        size={26}
-                      />
-                    </motion.span>
-                  ))}
-                </AnimatePresence>
-              </span>
-              <span className="min-w-0 truncate text-xs text-foreground/55">
-                {offSite.map((p, i) => (
-                  <span key={p.user_id}>
-                    {i > 0 && ", "}
-                    <span className="sm:hidden">{formatAuthorName(p.email)}</span>
-                    <AuthorButton
-                      userId={p.user_id}
-                      email={p.email}
-                      className="hidden hover:text-foreground sm:inline"
-                    />
-                  </span>
-                ))}
-              </span>
-            </div>
-          </div>
-        </motion.div>
       )}
 
       {/* Tablées du jour. */}
@@ -470,6 +516,33 @@ const LunchToday = () => {
         </div>
       )}
 
+      {/* Ceux qui ne déjeunent pas au restaurant, après les tablées : c'est du
+          contexte, la question du midi reste « qui va où ». */}
+      {!loading && (onSite.length > 0 || away.length > 0) && (
+        <div className="mt-3 flex flex-col gap-1 sm:mt-6 sm:gap-3">
+          <AnimatePresence initial={false}>
+            {onSite.length > 0 && (
+              <OffTable
+                key="on_site"
+                people={onSite}
+                label="Pas de restaurant"
+                icon={LuSandwich}
+                mine={myOffReason === "on_site"}
+              />
+            )}
+            {away.length > 0 && (
+              <OffTable
+                key="away"
+                people={away}
+                label="Pas sur site"
+                icon={LuMapPinOff}
+                mine={awayToday}
+              />
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+
       <LunchPickDialog
         open={pickOpen}
         onClose={() => setPickOpen(false)}
@@ -478,6 +551,16 @@ const LunchToday = () => {
         onPick={(id) => {
           setPickOpen(false);
           join(id);
+        }}
+      />
+
+      <LunchOffDialog
+        open={offOpen}
+        onClose={() => setOffOpen(false)}
+        current={myOffReason}
+        onPick={(reason) => {
+          setOffOpen(false);
+          skip(reason);
         }}
       />
     </motion.div>
