@@ -113,12 +113,14 @@ const AdminUsers = () => {
             style={{ ["--grid-right" as string]: "0px" }}
           >
             <table
-              className="w-full border-separate border-spacing-0 text-center text-sm"
+              className="admin-table w-full border-separate border-spacing-0 text-center text-sm"
               // Les colonnes s'étalent sur la largeur disponible et se
               // rapprochent quand l'écran rétrécit (répartition naturelle de
               // `w-full`). Ce plancher n'est qu'un filet : en dessous, la
               // ScrollArea reprend la main plutôt que d'écraser les colonnes.
-              style={{ minWidth: 400 }}
+              // Il ne vaut qu'à partir de 640 px : sur mobile il dépassait la
+              // carte et imposait le défilement à lui seul (cf. `.admin-table`).
+              style={{ ["--admin-min-w" as string]: "400px" }}
             >
               <thead>
                 <tr>

@@ -140,10 +140,11 @@ const AccessRequests = ({ activeType }: { activeType: RequestType }) => {
             style={{ ["--grid-right" as string]: "0px" }}
           >
             <table
-              className="w-full border-separate border-spacing-0 text-center text-sm"
-              // Cf. AdminUsers : plancher, pas une largeur cible. Un peu plus
-              // haut ici, la colonne Inscriptions montrant l'email entier.
-              style={{ minWidth: 420 }}
+              className="admin-table w-full border-separate border-spacing-0 text-center text-sm"
+              // Cf. AdminUsers : plancher, pas une largeur cible, et seulement
+              // à partir de 640 px (cf. `.admin-table`). Un peu plus haut ici,
+              // la colonne Inscriptions montrant l'email entier.
+              style={{ ["--admin-min-w" as string]: "420px" }}
             >
               <thead>
                 <tr>

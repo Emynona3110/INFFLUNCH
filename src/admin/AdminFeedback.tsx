@@ -206,10 +206,11 @@ const AdminFeedback = () => {
             style={{ ["--grid-right" as string]: "0px" }}
           >
             <table
-              className="w-full border-separate border-spacing-0 text-center text-sm"
-              // Cf. AdminUsers : plancher, pas une largeur cible. Plus bas ici,
-              // faute de colonne Actions.
-              style={{ minWidth: 340 }}
+              className="admin-table w-full border-separate border-spacing-0 text-center text-sm"
+              // Cf. AdminUsers : plancher, pas une largeur cible, et seulement
+              // à partir de 640 px (cf. `.admin-table`). Plus bas ici, faute de
+              // colonne Actions.
+              style={{ ["--admin-min-w" as string]: "340px" }}
             >
               <thead>
                 <tr>

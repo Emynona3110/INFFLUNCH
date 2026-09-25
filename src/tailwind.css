@@ -69,14 +69,33 @@
 }
 
 /* Reset global html/body (Chakra le faisait avant son retrait) : supprime la
-   marge native de 8px et aligne le fond pour éviter tout liseré au toggle dark. */
+   marge native de 8px et aligne le fond pour éviter tout liseré au toggle dark.
+
+   `overflow-x: clip` : rien ne doit décaler la page latéralement. Une table
+   admin plus large que son écran débordait jusqu'au <body> — au doigt, on
+   « scrollait à côté » de la table, tout le contenu partant de travers. `clip`
+   plutôt que `hidden` : `hidden` ferait du <body> un conteneur de défilement et
+   casserait la navbar `sticky`. (Cette règle vivait dans src/App.css, que plus
+   personne n'importait : elle ne s'appliquait pas.)
+
+   `overscroll-behavior: none` : supprime le rebond élastique du document. En
+   appli installée (raccourci écran d'accueil), maintenir n'importe où hors
+   d'une zone scrollable — la navbar, typiquement — tirait TOUTE l'application
+   et découvrait le fond de la fenêtre (le `theme-color` bleu). Le document n'a
+   de toute façon rien à faire défiler : le Layout tient en `h-dvh` et c'est le
+   <main> qui scrolle. */
 html,
 body {
   margin: 0;
   background-color: var(--background);
+  overflow-x: clip;
+  overscroll-behavior: none;
 }
+/* dvh, pas vh : avec `100vh` la page était plus haute que la fenêtre de la
+   hauteur de la barre d'URL mobile, et tout l'écran se laissait tirer
+   verticalement alors que le Layout (`h-dvh`) se veut fixe. */
 #root {
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* Fondu rapide des tooltips */
@@ -104,6 +123,13 @@ body {
   --os-handle-bg-active: color-mix(in srgb, var(--foreground) 70%, transparent);
 }
 
+/* Au bout d'une zone scrollable, le geste se propageait au parent puis à la
+   page : le défilement horizontal d'une table entraînait tout l'écran avec lui.
+   La chaîne s'arrête à la zone elle-même. */
+.os-infflunch [data-overlayscrollbars-viewport] {
+  overscroll-behavior-x: contain;
+}
+
 /* Mode "grille figée" : la barre verticale démarre sous l'entête, l'horizontale
    s'arrête avant la colonne Actions figée (valeurs via --grid-top / --grid-right). */
 .os-grid .os-scrollbar-vertical {
@@ -111,6 +137,43 @@ body {
 }
 .os-grid .os-scrollbar-horizontal {
   right: var(--grid-right, 120px) !important;
+}
+
+/* ---------------------------------------------------------------------------
+   Tables admin (Demandes, Inscriptions, Mot de passe, Utilisateurs, Tags)
+
+   Au doigt, la carte dépasse rarement 340 px : aux gouttières du bureau, ces
+   tables débordaient dès la première ligne et ne se lisaient qu'en défilant.
+   Sous 640 px on resserre donc les colonnes — gouttières réduites, texte d'un
+   cran plus petit — pour qu'elles tiennent dans la largeur disponible.
+
+   Le plancher de largeur (--admin-min-w) empêche les colonnes de s'écraser sur
+   les grands écrans ; sur mobile il dépassait la carte et forçait le
+   défilement à lui seul, d'où la media query. En dessous, la table reprend sa
+   largeur naturelle : elle tient si elle peut, et défile sinon.
+--------------------------------------------------------------------------- */
+@media (min-width: 640px) {
+  .admin-table {
+    min-width: var(--admin-min-w, 0);
+  }
+}
+@media (max-width: 639px) {
+  .admin-table {
+    font-size: 0.8125rem; /* 13px ; les en-têtes gardent leur `text-xs` */
+  }
+  .admin-table th,
+  .admin-table td {
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+  }
+  .admin-table th:first-child,
+  .admin-table td:first-child {
+    padding-left: 0.625rem;
+  }
+  .admin-table th:last-child,
+  .admin-table td:last-child {
+    padding-right: 0.625rem;
+  }
 }
 
 /* Hôtes OverlayScrollbars pas encore initialisés (le composant est monté en
