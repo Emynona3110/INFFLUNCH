@@ -142,6 +142,8 @@ const RestaurantCardTW = ({
           )}
         </div>
 
+        {/* Étoiles, note, nombre d'avis et prix : une seule ligne, tous centrés
+            verticalement les uns par rapport aux autres. */}
         <div className="flex min-h-5 items-center gap-1.5 text-xs text-foreground/60 sm:min-h-6 sm:gap-2 sm:text-sm">
           <Stars rating={restaurant.rating ?? 0} />
           {restaurant.reviews > 0 && (
@@ -151,8 +153,8 @@ const RestaurantCardTW = ({
               <span>{restaurant.reviews} avis</span>
             </span>
           )}
-          {/* Prix du midi, à droite de la ligne des notes et centré sur elle. */}
-          <PriceTag restaurant={restaurant} className="ml-auto self-center" />
+          {/* Prix du midi, poussé à droite de la même ligne. */}
+          <PriceTag restaurant={restaurant} className="ml-auto" />
         </div>
 
         <div className="flex items-center justify-between gap-2">

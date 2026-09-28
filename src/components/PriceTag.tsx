@@ -17,9 +17,8 @@ interface PriceTagProps {
   className?: string;
 }
 
-// La taille de texte est HÉRITÉE de la ligne qui accueille la pastille : dans
-// les listes, le prix se lit alors exactement comme la note du restaurant
-// posée à côté (même graisse, même opacité, même corps aux points de rupture).
+// Le CORPS du texte est hérité de la ligne (text-xs puis sm:text-sm), la
+// graisse et l'opacité reprennent celles de la note du restaurant.
 // leading-none : le padding vertical devient symétrique, la pastille se centre
 // donc exactement sur sa ligne.
 const TONES = {
