@@ -6,6 +6,8 @@ export interface AchievementMetrics {
   reviews: number;
   photos: number;
   favorites: number;
+  /** Restaurants dont l'utilisateur a déclaré le prix (une par resto). */
+  prices: number;
   /** Nombre de photos DIFFÉRENTES sur lesquelles l'utilisateur a réagi. */
   reactionsGivenDistinct: number;
   /** Réactions reçues (par d'autres) sur les photos de l'utilisateur. */
@@ -32,7 +34,7 @@ const useAchievementMetrics = () => {
     queryKey: ["achievement-metrics", userId],
     enabled: !!userId,
     queryFn: async () => {
-      const [reviews, photos, favorites] = await Promise.all([
+      const [reviews, photos, favorites, prices] = await Promise.all([
         supabaseClient
           .from("reviews")
           .select("*", { count: "exact", head: true })
@@ -43,6 +45,12 @@ const useAchievementMetrics = () => {
           .eq("user_id", userId),
         supabaseClient
           .from("favorites")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", userId),
+        // La RLS de restaurant_prices ne laisse voir que ses propres
+        // déclarations ; le filtre explicite garde la requête lisible.
+        supabaseClient
+          .from("restaurant_prices")
           .select("*", { count: "exact", head: true })
           .eq("user_id", userId),
       ]);
@@ -86,6 +94,7 @@ const useAchievementMetrics = () => {
         reviews: reviews.count ?? 0,
         photos: photos.count ?? 0,
         favorites: favorites.count ?? 0,
+        prices: prices.count ?? 0,
         reactionsGivenDistinct,
         reactionsReceived,
         loginStreak: (streak as number | null) ?? 0,

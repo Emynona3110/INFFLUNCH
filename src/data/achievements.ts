@@ -24,6 +24,9 @@ export type AchievementId =
   | "premiere_reaction"
   | "public_conquis"
   | "approuve"
+  // Prix déclarés
+  | "note_de_frais"
+  | "addition"
   // Favoris
   | "quinte_gagnant"
   // Roulette (Surprise du midi)
@@ -139,6 +142,22 @@ export const ACHIEVEMENTS: Achievement[] = [
     condition: "Ajouter 20 photos",
     icon: "🍕",
     image: "/achievements/pizzarazzi.svg",
+  },
+
+  // — Prix déclarés —
+  {
+    id: "note_de_frais",
+    title: "Note de frais",
+    condition: "Déclarer le prix d'un premier restaurant",
+    icon: "🧾",
+    image: "/achievements/note_de_frais.svg",
+  },
+  {
+    id: "addition",
+    title: "L'addition !",
+    condition: "Déclarer le prix de 5 restaurants",
+    icon: "💳",
+    image: "/achievements/addition.svg",
   },
 
   // — Réactions —
@@ -277,6 +296,8 @@ export const ACHIEVEMENT_GOALS: Partial<
   premiere_photo: { metric: "photos", goal: 1 },
   objectif_midi: { metric: "photos", goal: 5 },
   paparazzi_pause: { metric: "photos", goal: 20 },
+  note_de_frais: { metric: "prices", goal: 1 },
+  addition: { metric: "prices", goal: 5 },
   premiere_reaction: { metric: "reactionsGivenDistinct", goal: 1 },
   public_conquis: { metric: "reactionsGivenDistinct", goal: 20 },
   approuve: { metric: "reactionsReceived", goal: 5 },

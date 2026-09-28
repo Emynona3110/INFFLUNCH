@@ -17,15 +17,19 @@ interface PriceTagProps {
   className?: string;
 }
 
+// Pastille CREUSE (contour, pas de fond) : les tags et le « +N » de
+// TagsOneLine sont des pilules PLEINES — un prix rempli de gris se confondait
+// avec eux. Même forme, traitement inverse : la différence se voit d'un coup
+// d'œil sans ajouter de couleur.
 // Le CORPS du texte est hérité de la ligne (text-xs puis sm:text-sm), la
 // graisse et l'opacité reprennent celles de la note du restaurant.
 // leading-none : le padding vertical devient symétrique, la pastille se centre
 // donc exactement sur sa ligne.
 const TONES = {
   muted:
-    "rounded-full bg-muted px-2 py-1 font-semibold leading-none text-foreground/80",
+    "rounded-full border border-border px-2 py-1 font-semibold leading-none text-foreground/80",
   primary:
-    "rounded-full bg-primary/10 px-2 py-1 font-semibold leading-none text-primary",
+    "rounded-full border border-primary/25 px-2 py-1 font-semibold leading-none text-primary",
   plain: "font-medium",
 };
 

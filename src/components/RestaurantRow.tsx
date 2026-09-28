@@ -111,8 +111,9 @@ const RestaurantRow = ({
               <span className="hidden sm:inline">{restaurant.reviews} avis</span>
             </span>
           )}
-          {/* Prix du midi : à la suite de la note, en gardant la même ligne. */}
-          <PriceTag restaurant={restaurant} />
+          {/* Prix du midi : à la suite de la note sur mobile — sur desktop il
+              part à droite, avec la distance (voir plus bas). */}
+          <PriceTag restaurant={restaurant} className="sm:hidden" />
         </div>
 
         {tags.length > 0 && (
@@ -139,6 +140,10 @@ const RestaurantRow = ({
         <div className="hidden sm:block">
           <LunchAvatars restaurantId={restaurant.id} size={22} />
         </div>
+
+        {/* Desktop : le prix rejoint les infos pratiques de droite, juste
+            avant la distance. */}
+        <PriceTag restaurant={restaurant} className="hidden text-xs sm:inline-flex" />
 
         <span className="hidden items-center gap-1 whitespace-nowrap text-xs font-medium text-foreground/60 sm:inline-flex">
           <HiOutlineLocationMarker className="h-3.5 w-3.5" />
