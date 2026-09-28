@@ -5,9 +5,18 @@ import { FiChevronDown } from "react-icons/fi";
 import { SortOrder } from "./SortSelector";
 import { defaultRestaurantFilters, RestaurantFilters } from "../pages/UserPage";
 import BadgesToggles from "./BadgesToggles";
+import { RangeSlider } from "@/components/ui/slider";
+import {
+  DEFAULT_PRICE_FILTER,
+  PRICE_FILTER_MAX,
+  PRICE_FILTER_MIN,
+  formatPriceFilter,
+  isPriceFilterActive,
+} from "../services/price";
 import TagPicker from "./TagPicker";
 import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface FilterDialogProps {
   restaurantFilters: RestaurantFilters;
@@ -16,6 +25,7 @@ interface FilterDialogProps {
 
 const hasActiveFilters = (filters: RestaurantFilters) =>
   filters.minRate > 0 ||
+  isPriceFilterActive(filters.priceRange) ||
   filters.tags.length > 0 ||
   filters.badges.length > 0 ||
   filters.sortOrder !== defaultRestaurantFilters.sortOrder;
@@ -114,6 +124,39 @@ const FilterDialog = ({ restaurantFilters, onFilterChange }: FilterDialogProps) 
                 onChange={(v) => setLocalQuery({ ...localQuery, minRate: v })}
               />
             </div>
+          </div>
+
+          {/* Prix du midi : curseur à deux poignées. Collé aux deux bornes, il
+              ne filtre rien ; la borne haute au maximum vaut « et plus ». */}
+          <div>
+            <div className="flex items-baseline justify-between gap-2">
+              <span className="text-sm font-bold text-foreground">
+                Prix du midi
+              </span>
+              <span
+                className={cn(
+                  "text-sm tabular-nums",
+                  isPriceFilterActive(localQuery.priceRange)
+                    ? "font-semibold text-primary"
+                    : "text-foreground/50",
+                )}
+              >
+                {formatPriceFilter(localQuery.priceRange ?? DEFAULT_PRICE_FILTER)}
+              </span>
+            </div>
+            <RangeSlider
+              className="mt-1.5"
+              value={localQuery.priceRange ?? DEFAULT_PRICE_FILTER}
+              onChange={(priceRange) =>
+                setLocalQuery({ ...localQuery, priceRange })
+              }
+              min={PRICE_FILTER_MIN}
+              max={PRICE_FILTER_MAX}
+              labels={["Prix minimum", "Prix maximum"]}
+            />
+            <p className="mt-1 text-xs text-foreground/50">
+              Les restaurants dont le prix n'est pas renseigné sont masqués.
+            </p>
           </div>
 
           {/* Tags */}

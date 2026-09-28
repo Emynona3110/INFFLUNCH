@@ -7,6 +7,7 @@ import badgeMap, { orderBadges } from "@/services/badgeMap";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip } from "@/components/ui/tooltip";
 import LikeButton from "@/components/LikeButton";
+import PriceTag from "@/components/PriceTag";
 import useSortedTags from "@/hooks/useSortedTags";
 import LunchAvatars from "@/components/LunchAvatars";
 import ClosedBadge from "@/components/ClosedBadge";
@@ -110,6 +111,8 @@ const RestaurantRow = ({
               <span className="hidden sm:inline">{restaurant.reviews} avis</span>
             </span>
           )}
+          {/* Prix du midi : à la suite de la note, en gardant la même ligne. */}
+          <PriceTag restaurant={restaurant} />
         </div>
 
         {tags.length > 0 && (

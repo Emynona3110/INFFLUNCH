@@ -1,5 +1,5 @@
 /**
- * Sections de la fiche restaurant (Coordonnées, Menu, Photos, Avis…).
+ * Sections de la fiche restaurant (Infos pratiques, Menu, Photos, Avis…).
  * Desktop : carte bordée avec titre à l'intérieur. Mobile : petit libellé
  * au-dessus du contour, le contour n'entourant que le contenu.
  */

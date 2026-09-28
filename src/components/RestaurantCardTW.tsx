@@ -7,6 +7,7 @@ import noImage from "@/assets/no-image.jpg";
 import badgeMap, { orderBadges } from "@/services/badgeMap";
 import { Tooltip } from "@/components/ui/tooltip";
 import LikeButton from "@/components/LikeButton";
+import PriceTag from "@/components/PriceTag";
 import useSortedTags from "@/hooks/useSortedTags";
 import TagsOneLine from "@/components/TagsOneLine";
 import LunchAvatars from "@/components/LunchAvatars";
@@ -150,6 +151,8 @@ const RestaurantCardTW = ({
               <span>{restaurant.reviews} avis</span>
             </span>
           )}
+          {/* Prix du midi, à droite de la ligne des notes et centré sur elle. */}
+          <PriceTag restaurant={restaurant} className="ml-auto self-center" />
         </div>
 
         <div className="flex items-center justify-between gap-2">

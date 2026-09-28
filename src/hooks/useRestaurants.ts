@@ -21,6 +21,13 @@ export type Restaurant = {
   closed: boolean;
   /** Autorise les nouveaux avis / photos / menus (le contenu existant reste). */
   contributions_enabled: boolean;
+  /** Fourchette du midi : médiane des bornes déclarées par les collaborateurs. */
+  price_low: number | null;
+  price_high: number | null;
+  /** Nombre de collègues ayant déclaré un prix. */
+  price_count: number;
+  /** Milieu de la fourchette : sert au filtre par plage de prix. */
+  price_ref: number | null;
 };
 
 import useSupabaseQuery from "./useSupabaseQuery";
@@ -29,9 +36,14 @@ import supabaseClient from "../services/supabaseClient";
 import useIsAdmin from "./useIsAdmin";
 import useSession from "./useSession";
 import { RestaurantFilters, defaultRestaurantFilters } from "../pages/UserPage";
+import {
+  PRICE_FILTER_MAX,
+  PRICE_FILTER_MIN,
+  isPriceFilterActive,
+} from "../services/price";
 
 const useRestaurants = (restaurantFilters: RestaurantFilters) => {
-  const { id, slug, sortOrder, minRate, tags, badges, searchText } =
+  const { id, slug, sortOrder, minRate, tags, badges, searchText, priceRange } =
     restaurantFilters;
   const isAdmin = useIsAdmin();
   // La clé contient `isAdmin` : tant que la session n'est pas lue on ne lance
@@ -64,6 +76,17 @@ const useRestaurants = (restaurantFilters: RestaurantFilters) => {
         query = query.contains("badges", badges);
       }
 
+      // Plage de prix : `price_ref` est NULL quand le prix est inconnu, et une
+      // comparaison SQL sur NULL est fausse → les restos sans prix sortent
+      // d'eux-mêmes de la liste dès qu'une plage est demandée. La borne haute
+      // au maximum du curseur signifie « et plus » : on ne la pose pas.
+      if (isPriceFilterActive(priceRange) && priceRange) {
+        if (priceRange[0] > PRICE_FILTER_MIN)
+          query = query.gte("price_ref", priceRange[0]);
+        if (priceRange[1] < PRICE_FILTER_MAX)
+          query = query.lte("price_ref", priceRange[1]);
+      }
+
       if (searchText !== "") {
         const slugifiedSearchText = slugify(searchText);
         query = query.or(
@@ -93,7 +116,7 @@ const useRestaurants = (restaurantFilters: RestaurantFilters) => {
   // clé évite de refaire la même requête en cochant/décochant les favoris.
   const queryKey = [
     "restaurants",
-    { id, slug, sortOrder, minRate, tags, badges, searchText },
+    { id, slug, sortOrder, minRate, tags, badges, searchText, priceRange },
     isAdmin,
   ];
 
@@ -108,6 +131,7 @@ const useRestaurants = (restaurantFilters: RestaurantFilters) => {
     minRate === defaultRestaurantFilters.minRate &&
     tags.length === 0 &&
     badges.length === 0 &&
+    !isPriceFilterActive(priceRange) &&
     searchText === "";
 
   return useSupabaseQuery<Restaurant>(queryKey, buildQuery, {

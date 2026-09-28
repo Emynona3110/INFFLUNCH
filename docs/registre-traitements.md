@@ -22,18 +22,18 @@ Tenu au titre de l'art. 30 RGPD (modèle simplifié CNIL). Dernière mise à jou
 | Conservation | Tant que la personne ne demande pas la suppression de son compte (décision du responsable, 2026-09-19 : pas de purge automatique ni au départ de la société — les contributions gardent leur utilité pour les collègues ; sur demande explicite : suppression du compte + effacement des données personnelles, contributions anonymisées — effacées si la personne le précise ; cf. journal ci-dessous). Demandes d'accès refusées : 12 mois max |
 | Sécurité | Voir en-tête ; Edge Functions `admin-create-user` / `admin-delete-user` ; mdp temporaire transmis par Teams |
 
-## Fiche 2 — Contributions (avis, photos, menus, favoris, réactions, déjeuner, succès)
+## Fiche 2 — Contributions (avis, photos, menus, favoris, réactions, déjeuner, prix, succès)
 
 | | |
 |---|---|
-| Finalité | Permettre aux collaborateurs de noter et commenter les restaurants, partager photos et menus, indiquer où ils déjeunent, débloquer des succès (gamification) |
+| Finalité | Permettre aux collaborateurs de noter et commenter les restaurants, partager photos et menus, indiquer où ils déjeunent, déclarer ce qu'ils dépensent dans un restaurant pour en déduire une fourchette de prix, débloquer des succès (gamification) |
 | Base légale | Exécution du service demandé (6.1.b) |
 | Personnes concernées | Collaborateurs disposant d'un compte |
-| Données | Note 1-5 + commentaire, votes sur avis, réactions emoji, photos (WebP, attribution auteur), menus (lien/pdf/image), favoris, choix « je déjeune où » (resto + date, ou à défaut « pas de restaurant » / « pas sur site » — jamais le motif de l'absence), succès débloqués, horodatages |
-| Tables | `reviews`, `review_votes`, `reactions`, `restaurant_photos`, `restaurant_menus`, `favorites`, `lunch_plans`, `user_achievements` ; bucket `restaurant-photos` |
-| Destinataires | Tous les collaborateurs connectés ; modération admin |
+| Données | Note 1-5 + commentaire, votes sur avis, réactions emoji, photos (WebP, attribution auteur), menus (lien/pdf/image), favoris, choix « je déjeune où » (resto + date, ou à défaut « pas de restaurant » / « pas sur site » — jamais le motif de l'absence), succès débloqués, prix déclarés (deux montants en euros — habituel et maximum —, 1 déclaration par personne et par restaurant), horodatages |
+| Tables | `reviews`, `review_votes`, `reactions`, `restaurant_photos`, `restaurant_menus`, `favorites`, `lunch_plans`, `restaurant_prices`, `user_achievements` ; bucket `restaurant-photos` |
+| Destinataires | Tous les collaborateurs connectés ; modération admin. Exception : les prix déclarés ne sont lisibles que par leur auteur et les admins (RLS) — les autres ne voient que la fourchette agrégée du restaurant et le nombre de contributeurs |
 | Conservation | Durée de vie du compte (suppression en cascade) ; `lunch_plans` du jour uniquement |
-| Sécurité | RLS own-write / admin-delete ; 1 photo par personne et par resto ; contrôle qualité image |
+| Sécurité | RLS own-write / admin-delete ; RLS own-read sur `restaurant_prices` ; 1 photo par personne et par resto ; contrôle qualité image ; fourchettes de prix calculées par trigger côté serveur (non falsifiables) |
 
 ## Fiche 3 — Demandes, suggestions et notifications
 

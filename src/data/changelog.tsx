@@ -22,6 +22,16 @@ export interface ChangelogEntry {
 }
 
 export const changelog: ChangelogEntry[] = [
+  // ──────────────────────── Octobre 2026 ────────────────────────
+  {
+    date: "2026-10-01",
+    title: "Prix du midi",
+    points: [
+      "Chaque resto affiche une fourchette de prix par personne",
+      "Déclare ce que tu dépenses pour affiner les montants affichés",
+      "Nouveau curseur « Prix du midi » dans les filtres",
+    ],
+  },
   // ─────────────────────── Septembre 2026 ───────────────────────
   {
     date: "2026-09-18",

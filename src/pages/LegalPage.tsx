@@ -208,8 +208,12 @@ const Confidentialite = () => {
             <span className="font-medium text-foreground">Contributions</span> :
             avis et notes, votes, réactions, photos, menus, favoris, choix « je
             déjeune où ? » — y compris « pas de restaurant » ou « pas sur
-            site » quand tu le déclares —, succès débloqués — pour faire
-            fonctionner le service et les afficher aux autres collaborateurs.
+            site » quand tu le déclares —, prix déclarés, succès débloqués —
+            pour faire fonctionner le service et les afficher aux autres
+            collaborateurs. Les montants que tu déclares dépenser dans un
+            restaurant ne sont visibles que de toi et de l'administrateur : les
+            autres n'en voient que la fourchette du restaurant, calculée à
+            partir de l'ensemble des déclarations.
           </li>
           <li>
             <span className="font-medium text-foreground">

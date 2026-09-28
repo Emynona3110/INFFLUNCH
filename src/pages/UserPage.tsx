@@ -12,6 +12,7 @@ import RestaurantPage from "./RestaurantPage";
 import PageNotFound from "./PageNotFound";
 import { useState } from "react";
 import { SortOrder } from "../components/SortSelector";
+import { DEFAULT_PRICE_FILTER, PriceRangeFilter } from "../services/price";
 import MyAccount from "../sections/MyAccount";
 import About from "../sections/About";
 import Nouveautes from "../sections/Nouveautes";
@@ -53,6 +54,8 @@ export interface RestaurantFilters {
   badges: string[];
   searchText: string;
   favoritesOnly?: boolean;
+  /** Plage de prix du midi (€/personne) ; collée aux bornes = pas de filtre. */
+  priceRange?: PriceRangeFilter;
 }
 
 export const defaultRestaurantFilters: RestaurantFilters = {
@@ -62,6 +65,7 @@ export const defaultRestaurantFilters: RestaurantFilters = {
   badges: [],
   searchText: "",
   favoritesOnly: false,
+  priceRange: DEFAULT_PRICE_FILTER,
 };
 
 const UserPage = () => {

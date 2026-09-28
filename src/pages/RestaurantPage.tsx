@@ -14,6 +14,7 @@ import {
   FiMap,
   FiPlus,
 } from "react-icons/fi";
+import { LuWallet } from "react-icons/lu";
 import useRestaurants from "@/hooks/useRestaurants";
 import useTopRated from "@/hooks/useTopRated";
 import useFavorites from "@/hooks/useFavorites";
@@ -34,6 +35,10 @@ import TopBadge, { topRankOf } from "@/components/TopBadge";
 import ReviewForm from "@/components/ReviewForm";
 import ReviewItem from "@/components/ReviewItem";
 import Stars from "@/components/Stars";
+import PriceTag from "@/components/PriceTag";
+import PriceReportDialog from "@/components/PriceReportDialog";
+import useMyPriceReport from "@/hooks/useMyPriceReport";
+import { effectivePriceRange } from "@/services/price";
 import useAchievements from "@/hooks/useAchievements";
 import { toggleShootingStars } from "@/lib/shootingStars";
 import RestaurantDialog from "@/admin/Dialogs/RestaurantDialog";
@@ -111,9 +116,12 @@ const RestaurantPage = () => {
   // Ordre des tags : origines, puis caractéristiques, puis plats. Appelé ici
   // (avant les retours anticipés de chargement) pour respecter l'ordre des hooks.
   const tags = useSortedTags(restaurant?.tags);
+  // Ma déclaration de prix : sert au libellé du lien (déclarer / corriger).
+  const { report: myPrice } = useMyPriceReport(restaurant?.id);
   const [showForm, setShowForm] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [mapEditOpen, setMapEditOpen] = useState(false);
+  const [priceOpen, setPriceOpen] = useState(false);
 
   // Remonte en haut quand on ouvre une nouvelle fiche. Corps de bloc obligatoire :
   // une flèche à expression retournerait la valeur de scrollTo, que React prendrait
@@ -519,14 +527,14 @@ const RestaurantPage = () => {
           </section>
         </div>
 
-        {/* Sidebar : coordonnées + carte. Indépendante (pas de row-span). */}
+        {/* Sidebar : infos pratiques + carte. Indépendante (pas de row-span). */}
         {/* gap plutôt que space-y : la Carte masquée sur mobile n'ajoute pas de marge. */}
         <aside className="order-2 flex flex-col gap-3 self-start sm:gap-6 lg:col-start-3 lg:row-start-1">
-          {/* Coordonnées */}
+          {/* Infos pratiques (contact, prix ; les horaires viendront ici) */}
           <section className={SECTION}>
             <div className={SECTION_HEAD}>
               <div role="heading" aria-level={2} className={SECTION_TITLE}>
-                Coordonnées
+                Infos pratiques
               </div>
             </div>
             <ul
@@ -572,6 +580,45 @@ const RestaurantPage = () => {
                   )}
                 </li>
               )}
+
+              {/* Prix du midi : la fourchette si elle est connue, et le lien de
+                  déclaration — affiché même sans fourchette, sinon personne
+                  n'amorcerait la collecte. */}
+              <li className="flex items-center gap-3">
+                <LuWallet className="h-4 w-4 shrink-0 text-primary" />
+                {/* Le lien suit le prix de près : c'est le même sujet. */}
+                <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  {effectivePriceRange(restaurant) ? (
+                    <PriceTag
+                      restaurant={restaurant}
+                      tone="plain"
+                      hint={false}
+                      className="text-foreground/80"
+                    />
+                  ) : (
+                    <span className="text-foreground/50">Prix inconnu</span>
+                  )}
+                  {canContribute && !restaurant.closed && userId && (
+                    <button
+                      type="button"
+                      onClick={() => setPriceOpen(true)}
+                      aria-label={
+                        myPrice
+                          ? "Modifier mon prix pour ce restaurant"
+                          : "Déclarer mon prix pour ce restaurant"
+                      }
+                      className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-primary/25 px-2 py-0.5 text-xs font-medium text-primary transition hover:border-primary/50 hover:bg-primary/10"
+                    >
+                      {myPrice ? (
+                        <FiEdit2 className="h-3 w-3" />
+                      ) : (
+                        <FiPlus className="h-3.5 w-3.5" />
+                      )}
+                      Mon prix
+                    </button>
+                  )}
+                </span>
+              </li>
             </ul>
           </section>
 
@@ -617,6 +664,13 @@ const RestaurantPage = () => {
           </section>
         </aside>
       </div>
+
+      <PriceReportDialog
+        isOpen={priceOpen}
+        onClose={() => setPriceOpen(false)}
+        restaurantId={restaurant.id}
+        restaurantName={restaurant.name}
+      />
 
       {isAdmin && (
         <>
