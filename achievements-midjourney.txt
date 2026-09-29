@@ -17,26 +17,35 @@ Le style visé est celui de `berger_dun_jour` : TRÈS simple, trois couleurs,
 dominante blanc cassé, contours bleus, et l'orange en touche ponctuelle (dans
 ce fichier-là : 19 formes blanches, 4 bleues, UNE seule orange).
 
-Méthode recommandée — partir de tes propres icônes :
-  1. Exporter en PNG (Photopea) 3 icônes du style visé. Les plus proches, en
-     nombre de couleurs et en simplicité de formes :
-        berger_dun_jour   (3 couleurs)   ← la référence citée
-        palais_aguerri    (3 couleurs, 8 formes)
-        plume_gastronomique (3 couleurs, 7 formes)
-     Midjourney n'accepte pas les SVG : il faut des PNG ou des JPG.
-  2. Les poster dans un salon Discord, clic droit > « Copier le lien de
-     l'image » (le lien doit finir par .png).
-  3. Remplacer SREF par les trois URL séparées par un espace, dans TOUT ce
-     fichier (chercher-remplacer) :
-        --sref URL1 URL2 URL3
-  ⚠️ Les liens Discord ne sont pas éternels. Pour pouvoir regénérer une icône
-  dans six mois, déposer plutôt les 3 PNG dans public/achievements/ref/ : une
-  fois le site déployé ils auront une URL stable, servie sans authentification.
+Les 7 images de référence sont DANS LE REPO : public/achievements/ref/.
+Une fois le site déployé, elles ont une URL publique stable (servies sans
+authentification), donc réutilisable dans six mois — contrairement à un lien
+Discord, qui expire.
+
+  https://infflunch.com/achievements/ref/ref-calendrier-flamme.png
+  https://infflunch.com/achievements/ref/ref-mouton-sorcier.png
+  https://infflunch.com/achievements/ref/ref-plume-toque.png
+  https://infflunch.com/achievements/ref/ref-fer-a-cheval.png
+  https://infflunch.com/achievements/ref/ref-chronometre.png
+  https://infflunch.com/achievements/ref/ref-de.png
+  https://infflunch.com/achievements/ref/ref-mouton-ble.png
+
+À faire UNE fois :
+  1. Vérifier qu'une de ces URL s'ouvre dans un navigateur en navigation
+     privée (si elle demande une connexion, Midjourney ne pourra pas la lire).
+  2. Chercher-remplacer SREF dans TOUT ce fichier par les 7 URL séparées par
+     un espace. Le --sref de chaque prompt devient :
+        --sref <url1> <url2> <url3> <url4> <url5> <url6> <url7>
+  3. Ne plus y toucher jusqu'à la 26e icône.
+
+  Si Midjourney refuse la commande (trop d'images en référence), retirer des
+  URL en gardant les plus représentatives du style voulu : ref-mouton-ble,
+  ref-plume-toque, ref-fer-a-cheval.
 
 Variante — style neuf plutôt que continuité :
   /imagine prompt: a wrench icon --sref random --v 7, noter le code renvoyé,
   et l'utiliser à la place des URL. À ne choisir que si le style actuel ne te
-  convient plus du tout : il ne ressemblera pas aux icônes existantes.
+  convient plus du tout : le résultat ne ressemblera pas aux icônes existantes.
 
 RÈGLES POUR QUE LA SÉRIE RESTE COHÉRENTE
   - Tout générer dans UNE session, à la suite. C'est ce qui pèse le plus.
