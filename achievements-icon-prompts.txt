@@ -6,15 +6,15 @@ PROMPTS ICÔNES SUCCÈS — INFFLUNCH (Midjourney / Recraft / Gemini)
 les étapes 2 à 4. Recraft, lui, sort du SVG directement : les étapes 2-3
 sautent, et avec elles la dérive de couleurs et de cadrage. Workflow raster :
   1) Générer chaque icône une par une (prompts ci-dessous, bloc de style inclus).
-  2) Fond VERT uni (#00B140), carré, haute résolution → détourage par sélection
-     de couleur. ⚠️ Le fond était NOIR jusqu'au 2026-09-28 ; il a changé parce
-     que le NOIR est devenu une couleur du dessin (contours). Un fond de la
-     même couleur qu'un trait est indétourable. Vert #00B140 (le vert
-     « broadcast ») plutôt que #00FF00 : moins de frange verte sur les bords.
-  3) Détourer le fond vert puis vectoriser en SVG propre (aplats 4 couleurs) :
+  2) Fond UNI (une seule couleur plate, pas de décor ni de dégradé), carré,
+     haute résolution. Aucune couleur n'est imposée : le détourage se fait à la
+     main sous PHOTOPEA (décision du user, 2026-09-29 — le fond chroma key vert
+     imposé la veille est abandonné). Seule contrainte : que le fond ne soit pas
+     de la même couleur qu'un trait, sinon il emporte le dessin avec lui.
+  3) Détourer le fond sous Photopea, puis vectoriser en SVG propre (4 aplats) :
      - Illustrator : Objet > Vectorisation de l'image (Mode Couleur, Palette
        limitée 4 couleurs), régler "Ignorer le blanc"/fond > Développer, puis
-       forcer les hex exacts et supprimer le fond vert tracé.
+       forcer les hex exacts et supprimer le fond tracé.
      ⚠️ C'est CETTE étape qui fait dériver la série : le vectoriseur invente
      ses propres teintes (on a aujourd'hui une quarantaine de bleus et
      d'oranges en base au lieu de 2) et recadre au plus près du dessin (des
@@ -26,16 +26,20 @@ Astuce : nomme le fichier final avec l'ID indiqué (ex. anti_panurgisme.svg),
 range-les dans public/achievements/ pour l'intégration ensuite.
 
 Suffixe utile à ajouter à un prompt si besoin (rappel format) :
-  "1024x1024, solid pure green background (#00B140), single centered icon."
+  "1024x1024, plain solid background, single centered icon."
 
-Style commun (rappel, MIS À JOUR le 2026-09-28) : Minimalist flat vector icon,
-single centered subject, clean geometric rounded shapes, thick uniform strokes,
-subtle soft depth, strict four-colour palette (deep royal blue #113894 primary
-+ warm orange #EA580C accent + off-white #FAF8F4 + black #000000 outlines),
-no text, solid pure green background (#00B140), square 1:1.
+Style commun (rappel, MIS À JOUR le 2026-09-29) : Very simple minimalist flat
+vector icon, single centered subject, few large clean geometric rounded shapes,
+thick uniform royal blue outlines (#113894), flat shading only, mostly off-white
+fills with one small warm orange accent, strict three-colour palette (deep royal
+blue #113894, warm orange #EA580C, off-white #FAF8F4), no text, plain solid
+background, square 1:1.
 
-Palette : quatre couleurs, pas une de plus — bleu, orange, blanc cassé, et le
-NOIR réservé aux CONTOURS. Le fond est vert et n'appartient pas au dessin.
+Palette : TROIS couleurs — bleu (contours), orange (accent PONCTUEL), blanc
+cassé (dominante). Référence : `berger_dun_jour` (19 formes blanches, 4 bleues,
+UNE seule orange). ⚠️ Le NOIR a été ajouté le 2026-09-28 puis RETIRÉ le
+2026-09-29 : le style visé n'en contient pas. Ne pas le remettre.
+Le fond n'appartient pas au dessin : il est uni et retiré sous Photopea.
 
 Pour Midjourney (abonnement en cours) : générer UN code de style une fois
 (`--sref random`), noter le numéro et le réutiliser sur les 26 prompts, avec
@@ -49,24 +53,27 @@ EASTER EGG — MOUTONS (succès secrets)
 ================================================================================
 
 --- 1. anti_panurgisme — "Anti-panurgisme" (trouver un mouton) ---------------
-Minimalist flat vector icon, single centered subject, clean geometric rounded
-shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
-royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
-green background (#00B140), square 1:1. Subject: a single sheep stepping out of a line of
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a single sheep stepping out of a line of
 identical sheep, breaking away from the herd, standing out.
 
 --- 2. berger_dun_jour — "Berger d'un jour" (nourrir un mouton) --------------
-Minimalist flat vector icon, single centered subject, clean geometric rounded
-shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
-royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
-green background (#00B140), square 1:1. Subject: a hand offering a golden wheat sheaf / hay to a
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a hand offering a golden wheat sheaf / hay to a
 small cute sheep.
 
 --- 3. gourou_du_troupeau — "Gourou du troupeau" (nourrir 50x d'affilée) -----
-Minimalist flat vector icon, single centered subject, clean geometric rounded
-shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
-royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
-green background (#00B140), square 1:1. Subject: a wise sheep guru wearing a tiny halo and a
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a wise sheep guru wearing a tiny halo and a
 pointed sage hat, serene expression.
 
 
@@ -75,24 +82,27 @@ AVIS
 ================================================================================
 
 --- 4. premier_avis — "Critique en herbe" (1er avis) ------------------------
-Minimalist flat vector icon, single centered subject, clean geometric rounded
-shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
-royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
-green background (#00B140), square 1:1. Subject: a pencil with a small sprouting green-blue leaf,
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a pencil with a small sprouting green-blue leaf,
 next to a single review star.
 
 --- 5. critique_confirme — "Palais aguerri" (10 avis) -----------------------
-Minimalist flat vector icon, single centered subject, clean geometric rounded
-shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
-royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
-green background (#00B140), square 1:1. Subject: crossed fork and knife with three small stars
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: crossed fork and knife with three small stars
 above, refined tasting emblem.
 
 --- 6. plume_gastronomique — "Plume gastronomique" (50 avis) ----------------
-Minimalist flat vector icon, single centered subject, clean geometric rounded
-shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
-royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
-green background (#00B140), square 1:1. Subject: an elegant writing quill pen dipped over a
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: an elegant writing quill pen dipped over a
 chef's toque, with one shining star.
 
 
@@ -101,24 +111,27 @@ PHOTOS
 ================================================================================
 
 --- 7. premiere_photo — "Apprenti photographe" (1re photo) ------------------
-Minimalist flat vector icon, single centered subject, clean geometric rounded
-shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
-royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
-green background (#00B140), square 1:1. Subject: a plate of food surrounded by a ring light, with
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a plate of food surrounded by a ring light, with
 a couple of small like bubbles.
 
 --- 8. objectif_midi — "Influenceur culinaire" (10 photos) ------------------
-Minimalist flat vector icon, single centered subject, clean geometric rounded
-shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
-royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
-green background (#00B140), square 1:1. Subject: a fan / spread of several overlapping Polaroid
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a fan / spread of several overlapping Polaroid
 photos of food dishes, one small sparkle.
 
 --- 9. paparazzi_pause — "Pizzarazzi" (50 photos) ---------------------------
-Minimalist flat vector icon, single centered subject, clean geometric rounded
-shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
-royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
-green background (#00B140), square 1:1. Subject: a pizza slice merged with a camera lens, playful
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a pizza slice merged with a camera lens, playful
 flash sparkles around it.
 
 
@@ -127,24 +140,27 @@ RÉACTIONS
 ================================================================================
 
 --- 10. premiere_reaction — "Petit geste" (1re réaction) --------------------
-Minimalist flat vector icon, single centered subject, clean geometric rounded
-shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
-royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
-green background (#00B140), square 1:1. Subject: a single thumbs-up hand inside a soft speech
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a single thumbs-up hand inside a soft speech
 bubble.
 
 --- 11. public_conquis — "Public conquis" (réagir à 20 photos) --------------
-Minimalist flat vector icon, single centered subject, clean geometric rounded
-shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
-royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
-green background (#00B140), square 1:1. Subject: two hands clapping with small motion sparkles,
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: two hands clapping with small motion sparkles,
 applause.
 
 --- 12. approuve — "Approuvé" (recevoir 10 réactions) -----------------------
-Minimalist flat vector icon, single centered subject, clean geometric rounded
-shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
-royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
-green background (#00B140), square 1:1. Subject: a heart with a small orange approval checkmark
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a heart with a small orange approval checkmark
 badge.
 
 
@@ -153,10 +169,11 @@ FAVORIS
 ================================================================================
 
 --- 13. quinte_gagnant — "Le quinté gagnant" (5 favoris) --------------------
-Minimalist flat vector icon, single centered subject, clean geometric rounded
-shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
-royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
-green background (#00B140), square 1:1. Subject: a lucky horseshoe surrounded by five small
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a lucky horseshoe surrounded by five small
 hearts, winning bet motif.
 
 
@@ -165,17 +182,19 @@ ASSIDUITÉ / MÉTA
 ================================================================================
 
 --- 14. fidele_au_poste — "Fidèle au poste" (5 jours d'affilée) -------------
-Minimalist flat vector icon, single centered subject, clean geometric rounded
-shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
-royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
-green background (#00B140), square 1:1. Subject: a calendar showing a streak of five checked
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a calendar showing a streak of five checked
 days, with a small orange flame.
 
 --- 15. troupeau_complet — "Complétionniste" (tous les autres succès) -------
-Minimalist flat vector icon, single centered subject, clean geometric rounded
-shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
-royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
-green background (#00B140), square 1:1. Subject: a shining trophy cup with a star, completion
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a shining trophy cup with a star, completion
 award.
 
 
@@ -184,26 +203,29 @@ ROULETTE — SURPRISE DU MIDI
 ================================================================================
 
 --- 16. gambling — "Gambling" (tirer le repas au hasard) --------------------
-Minimalist flat vector icon, single centered subject, clean geometric rounded
-shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
-royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
-green background (#00B140), square 1:1. Subject: a top-down casino roulette wheel, ring segments
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a top-down casino roulette wheel, ring segments
 alternating deep royal blue and white, thick blue outline, with the central casino spinning
 cross / turret hub in warm orange.
 
 --- 17. indecis — "Indécis" (lancer la roue 5 fois, succès secret) ----------
-Minimalist flat vector icon, single centered subject, clean geometric rounded
-shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
-royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
-green background (#00B140), square 1:1. Subject: a balance scale with two hanging pans, level and
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a balance scale with two hanging pans, level and
 perfectly balanced, with a small floating orange question mark above the central pivot,
 unable to choose between options.
 
 --- 18. de_pipe — "Dé pipé" (lancer avec un seul resto, succès secret) ------
-Minimalist flat vector icon, single centered subject, clean geometric rounded
-shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
-royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
-green background (#00B140), square 1:1. Subject: a single loaded / weighted dice tilted on one
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a single loaded / weighted dice tilted on one
 corner, all visible faces showing the same one pip, with a tiny sly wink sparkle, cheating motif.
 
 
@@ -244,19 +266,21 @@ AJOUT 2026-09-14 — 2 succès secrets
 ================================================================================
 
 --- jour_nuit — "Jour ! Nuit ! Jour ! Nuit !" (basculer le thème 8 fois) ------
-Minimalist flat vector icon, single centered subject, clean geometric rounded
-shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
-royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
-green background (#00B140), square 1:1. Subject: a vintage wall light switch
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a vintage wall light switch
 (toggle lever) flipped repeatedly, with motion lines, half of the icon lit by a
 small sun and the other half by a crescent moon, split down the middle —
 day on one side, night on the other.
 
 --- narcisse — "Narcisse" (réagir à sa propre photo) ---------------------------
-Minimalist flat vector icon, single centered subject, clean geometric rounded
-shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
-royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
-green background (#00B140), square 1:1. Subject: a hand mirror showing a
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a hand mirror showing a
 smiling reflection, with a small heart floating above it — admiring oneself
 and liking it.
 
@@ -265,10 +289,11 @@ AJOUT 2026-09-19 — succès secret Shooting Stars
 ================================================================================
 
 --- shooting_stars — "Shooting Stars" (faire filer les étoiles d'un restaurant) -
-Minimalist flat vector icon, single centered subject, clean geometric rounded
-shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
-royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
-green background (#00B140), square 1:1. Subject: a five-pointed star streaking
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a five-pointed star streaking
 diagonally across the frame like a shooting star, with a long tapered glowing
 tail behind it and three or four tiny sparkling stars scattered along the
 tail — a comet made of a rating star.
@@ -278,10 +303,11 @@ AJOUT 2026-09-20 — succès secret Flambé
 ================================================================================
 
 --- flambe — "Flambé" (déclarer son midi 10 jours ouvrés d'affilée) ------------
-Minimalist flat vector icon, single centered subject, clean geometric rounded
-shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
-royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
-green background (#00B140), square 1:1. Subject: a flambéed dish — a small
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a flambéed dish — a small
 skillet or shallow pan seen from the side with a tall lively flame bursting
 upward from it, a couple of tiny sparks rising above the flame, the pan and
 handle in blue, the flame in orange — a dish set alight at the table.
@@ -291,10 +317,11 @@ AJOUT 2026-09-20 — succès secret Speedrunner
 ================================================================================
 
 --- speedrunner — "Speedrunner" (choisir son restaurant du midi avant 8 h) ------
-Minimalist flat vector icon, single centered subject, clean geometric rounded
-shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
-royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
-green background (#00B140), square 1:1. Subject: a stopwatch with its button
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a stopwatch with its button
 pressed, the hand frozen very early on the dial, with two or three horizontal
 speed lines trailing off to the left, and a small rising sun peeking behind
 the top of the watch — a record set at dawn.
@@ -304,10 +331,11 @@ AJOUT 2026-09-21 — succès secret Cookie
 ================================================================================
 
 --- cookie — "Cookie" (manger le seul cookie du site) -------------------------
-Minimalist flat vector icon, single centered subject, clean geometric rounded
-shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
-royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
-green background (#00B140), square 1:1. Subject: a round chocolate-chip cookie
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a round chocolate-chip cookie
 being eaten from the top down — its whole upper half is gone, replaced by a
 scalloped bite edge (rows of small rounded tooth marks), only the lower half
 remains, with a few crumbs tumbling down below it — the one and only cookie a
@@ -318,18 +346,20 @@ AJOUT 2026-09-28 — prix du midi déclarés
 ================================================================================
 
 --- note_de_frais — "Note de frais" (déclarer le prix d'un 1er restaurant) -----
-Minimalist flat vector icon, single centered subject, clean geometric rounded
-shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
-royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
-green background (#00B140), square 1:1. Subject: a small receipt slip clipped by
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a small receipt slip clipped by
 an orange paperclip onto a sheet of paper, the receipt tilted at a slight angle
 over the sheet, both with a few blank ruled lines — a lunch receipt filed as a
 first expense claim.
 
 --- addition — "L'addition !" (déclarer le prix de 5 restaurants) --------------
-Minimalist flat vector icon, single centered subject, clean geometric rounded
-shapes, thick uniform strokes, subtle soft depth, strict duotone palette (deep
-royal blue #113894 primary + warm orange #EA580C accent), no text, solid pure
-green background (#00B140), square 1:1. Subject: a small restaurant bill tray
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a small restaurant bill tray
 (shallow rounded dish seen at a slight angle) holding a folded stack of several
 receipts, with a coin balanced on top — the moment the bill arrives at the table.
