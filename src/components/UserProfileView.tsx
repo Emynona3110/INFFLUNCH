@@ -301,7 +301,7 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
                           onClick={() => setOpened(def)}
                           aria-label={`${def.title}, obtenu le ${formatDate(unlocked_at)}`}
                           className={cn(
-                            "flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl border border-border p-1.5 text-2xl outline-none transition hover:border-primary/40 focus-visible:ring-2 focus-visible:ring-primary/40 sm:h-14 sm:w-14 sm:p-2 sm:text-3xl",
+                            "flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl border border-border p-0.5 text-2xl outline-none transition hover:border-primary/40 focus-visible:ring-2 focus-visible:ring-primary/40 sm:h-14 sm:w-14 sm:p-1 sm:text-3xl",
                             known
                               ? cn(
                                   "bg-background",
