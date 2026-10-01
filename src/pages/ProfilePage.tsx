@@ -1,7 +1,7 @@
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { FiArrowLeft } from "react-icons/fi";
+import BackLink from "@/components/BackLink";
 import UserProfileView from "@/components/UserProfileView";
 import PageNotFound from "@/pages/PageNotFound";
 import useSession from "@/hooks/useSession";
@@ -15,7 +15,6 @@ import { isUuid } from "@/utils/profilePath";
  */
 const ProfilePage = () => {
   const { handle } = useParams<{ handle: string }>();
-  const navigate = useNavigate();
   const { sessionData } = useSession();
 
   // Pseudo → id via la table users (lisible par tout utilisateur connecté).
@@ -58,13 +57,7 @@ const ProfilePage = () => {
       className="tw-scope mx-auto w-full max-w-2xl"
     >
       {/* Retour là d'où l'on vient (un avis, une photo, une tablée…). */}
-      <button
-        type="button"
-        onClick={() => navigate(-1)}
-        className="mb-4 inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-muted-foreground transition hover:text-primary"
-      >
-        <FiArrowLeft className="h-4 w-4" /> Retour
-      </button>
+      <BackLink fallbackTo="/" fallbackLabel="Accueil" className="mb-4" />
 
       <div className="space-y-3 sm:space-y-6">
         <UserProfileView userId={userId} />

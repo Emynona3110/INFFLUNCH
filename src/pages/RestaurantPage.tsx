@@ -35,6 +35,7 @@ import TopBadge, { topRankOf } from "@/components/TopBadge";
 import ReviewForm from "@/components/ReviewForm";
 import ReviewItem from "@/components/ReviewItem";
 import Stars from "@/components/Stars";
+import BackLink from "@/components/BackLink";
 import PriceTag from "@/components/PriceTag";
 import PriceReportDialog from "@/components/PriceReportDialog";
 import useMyPriceReport from "@/hooks/useMyPriceReport";
@@ -208,14 +209,12 @@ const RestaurantPage = () => {
       transition={{ duration: 0.35 }}
       className="tw-scope mx-auto max-w-[1100px] pb-4"
     >
-      {/* Retour */}
-      <button
-        type="button"
-        onClick={() => navigate("/restaurants")}
-        className="mb-3 inline-flex sm:mb-4 items-center gap-2 text-sm font-medium text-muted-foreground transition hover:text-primary"
-      >
-        <FiArrowLeft className="h-4 w-4" /> Tous les restaurants
-      </button>
+      {/* Retour là d'où l'on vient : une tablée du midi, un avis, la grille… */}
+      <BackLink
+        fallbackTo="/restaurants"
+        fallbackLabel="Tous les restaurants"
+        className="mb-3 sm:mb-4"
+      />
 
       {/* Hero */}
       <div className="relative h-[220px] overflow-hidden rounded-card border border-border sm:h-[300px] md:h-[380px]">
