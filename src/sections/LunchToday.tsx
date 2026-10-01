@@ -14,6 +14,7 @@ import useLunchToday, {
 } from "@/hooks/useLunchToday";
 import LunchPricePrompt from "@/components/LunchPricePrompt";
 import OrbitDashes from "@/components/OrbitDashes";
+import RollingNumber from "@/components/RollingNumber";
 import useUnpricedLunches from "@/hooks/useUnpricedLunches";
 import { useLateLunchConfirm } from "@/components/LateLunchConfirm";
 import useRestaurants from "@/hooks/useRestaurants";
@@ -54,17 +55,25 @@ const spring = { type: "spring" as const, stiffness: 380, damping: 30 };
  * Des DURÉES et non un ressort : un ressort n'a pas de fin nette, on ne peut
  * pas caler le second temps sur la fin du premier.
  */
-const PROMPT_SLIDE = 0.3;
+const PROMPT_SLIDE = 0.34;
 const PROMPT_FADE = 0.18;
 
+/**
+ * Lent, rapide, lent. Ce sont les tuiles du dessous qu'on regarde pendant que
+ * la hauteur s'ouvre, et une vitesse constante leur donnait l'air d'être
+ * poussées par un vérin : elles démarrent et s'arrêtent maintenant en douceur,
+ * l'essentiel du chemin se faisant au milieu.
+ */
+const EASE_IN_OUT: [number, number, number, number] = [0.65, 0, 0.35, 1];
+
 const promptEnter = {
-  height: { duration: PROMPT_SLIDE, ease: "easeOut" as const },
+  height: { duration: PROMPT_SLIDE, ease: EASE_IN_OUT },
   opacity: { duration: PROMPT_FADE, delay: PROMPT_SLIDE },
 };
 
 const promptExit = {
   opacity: { duration: PROMPT_FADE },
-  height: { duration: PROMPT_SLIDE, ease: "easeIn" as const, delay: PROMPT_FADE },
+  height: { duration: PROMPT_SLIDE, ease: EASE_IN_OUT, delay: PROMPT_FADE },
 };
 
 /**
@@ -314,18 +323,17 @@ const LunchToday = () => {
           <p className="mb-0 mt-0.5 text-[13px] text-foreground/55 sm:text-sm">{todayLabel()}</p>
         </div>
 
+        {/* `items-end` et non `items-baseline` : une boîte qui rogne son
+            dépassement (le défilé du chiffre) pose sa baseline sur son bord
+            bas, le mot se serait désaligné. Les deux `leading-none` font le
+            reste. */}
         {registered.length > 0 && (
-          <div className="flex shrink-0 items-baseline gap-1.5">
-            <motion.span
-              key={registered.length}
-              initial={{ scale: 0.6, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={spring}
+          <div className="flex shrink-0 items-end gap-1.5">
+            <RollingNumber
+              value={registered.length}
               className="font-display text-2xl font-extrabold leading-none text-primary sm:text-3xl"
-            >
-              {registered.length}
-            </motion.span>
-            <span className="text-sm text-foreground/55">
+            />
+            <span className="text-sm leading-none text-foreground/55">
               inscrit{registered.length > 1 ? "s" : ""}
             </span>
           </div>
@@ -603,15 +611,11 @@ const LunchToday = () => {
                       )}
                     />
                     {/* Nombre de convives, en pastille sur la vignette. */}
-                    <motion.span
-                      key={people.length}
-                      initial={{ scale: 0.5, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={spring}
-                      className="absolute bottom-0.5 right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-bold text-primary-foreground shadow sm:bottom-1 sm:right-1 sm:h-6 sm:min-w-6 sm:px-1.5 sm:text-xs"
-                    >
-                      {people.length}
-                    </motion.span>
+                    {/* Même molette que le compteur d'inscrits : on voit
+                        qu'un convive arrive ou s'en va. */}
+                    <span className="absolute bottom-0.5 right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-bold text-primary-foreground shadow sm:bottom-1 sm:right-1 sm:h-6 sm:min-w-6 sm:px-1.5 sm:text-xs">
+                      <RollingNumber value={people.length} />
+                    </span>
                   </div>
 
                   <div className="min-w-0 flex-1">
