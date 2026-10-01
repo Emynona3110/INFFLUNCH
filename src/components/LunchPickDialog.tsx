@@ -36,8 +36,16 @@ const LunchPickDialog = ({
   }, [restaurants, search]);
 
   return (
-    <Dialog open={open} onClose={onClose} className="max-w-lg overflow-hidden">
-      <DialogTitle>Où déjeunes-tu aujourd'hui ?</DialogTitle>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      className="max-w-lg overflow-hidden"
+      showClose
+    >
+      {/* Marge à droite : la croix de fermeture. */}
+      <DialogTitle>
+        <span className="mr-8 block">Où déjeunes-tu aujourd'hui ?</span>
+      </DialogTitle>
 
       <div className="mt-4">
         <div className="relative">

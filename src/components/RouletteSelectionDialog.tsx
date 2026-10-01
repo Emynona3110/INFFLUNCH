@@ -37,8 +37,16 @@ const RouletteSelectionDialog = ({
   const deselectAll = () => onExcludedChange(new Set(pool.map((r) => r.id)));
 
   return (
-    <Dialog open={open} onClose={onClose} className="max-w-lg overflow-hidden">
-      <DialogTitle>Restaurants de la roue</DialogTitle>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      className="max-w-lg overflow-hidden"
+      showClose
+    >
+      {/* Marge à droite : la croix de fermeture. */}
+      <DialogTitle>
+        <span className="mr-8 block">Restaurants de la roue</span>
+      </DialogTitle>
 
       <div className="mt-4">
         <div className="mb-2 flex items-center justify-between text-sm">

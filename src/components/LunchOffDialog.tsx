@@ -42,8 +42,16 @@ const LunchOffDialog = ({ open, onClose, current, onPick }: Props) => {
   ];
 
   return (
-    <Dialog open={open} onClose={onClose} className="max-w-md overflow-hidden">
-      <DialogTitle>Tu ne vas pas au restaurant ?</DialogTitle>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      className="max-w-md overflow-hidden"
+      showClose
+    >
+      {/* Marge à droite : la croix de fermeture. */}
+      <DialogTitle>
+        <span className="mr-8 block">Tu ne vas pas au restaurant ?</span>
+      </DialogTitle>
 
       <div className="mt-4 flex flex-col gap-2">
         {options.map(({ reason, icon: Icon, label, hint }) => (
