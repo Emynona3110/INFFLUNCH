@@ -139,7 +139,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: "paparazzi_pause",
     title: "Pizzarazzi",
-    condition: "Ajouter 20 photos",
+    condition: "Ajouter 15 photos",
     icon: "🍕",
     image: "/achievements/pizzarazzi.svg",
   },
@@ -295,7 +295,7 @@ export const ACHIEVEMENT_GOALS: Partial<
   plume_gastronomique: { metric: "reviews", goal: 20 },
   premiere_photo: { metric: "photos", goal: 1 },
   objectif_midi: { metric: "photos", goal: 5 },
-  paparazzi_pause: { metric: "photos", goal: 20 },
+  paparazzi_pause: { metric: "photos", goal: 15 },
   note_de_frais: { metric: "prices", goal: 1 },
   addition: { metric: "prices", goal: 5 },
   premiere_reaction: { metric: "reactionsGivenDistinct", goal: 1 },
