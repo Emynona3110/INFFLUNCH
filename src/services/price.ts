@@ -45,6 +45,41 @@ export const formatPriceRange = (p: PriceRange): string =>
 export const priceRangeHint = (p: PriceRange): string =>
   `Prix du midi, par personne — d'après ${p.count} collègue${p.count > 1 ? "s" : ""}`;
 
+/**
+ * Montants proposés en un tap, pour éviter d'ouvrir un pavé numérique : c'est
+ * le clavier, pas la question, qui décourage la déclaration.
+ *
+ * Quand le restaurant a déjà une fourchette, on propose ses deux bornes et son
+ * milieu — les montants que les collègues ont réellement payés. Sinon, trois
+ * repères du marché local (le midi tient entre 10 et 25 €, cf. l'en-tête de
+ * sql/2026-09-28_restaurant_prices.sql).
+ *
+ * ⚠️ Effet d'ancrage assumé : proposer la médiane actuelle attire les nouvelles
+ * déclarations vers elle, donc fige un peu la fourchette. C'est pourquoi la
+ * saisie libre reste toujours offerte à côté des pastilles.
+ */
+export const DEFAULT_QUICK_PRICES = [12, 15, 20];
+
+/** Écart appliqué de part et d'autre d'une fourchette plate (une seule valeur
+ *  connue) : sans lui, on n'aurait qu'une pastille à proposer. */
+const FLAT_RANGE_SPREAD = 2;
+
+export const quickPriceSuggestions = (r: PriceFields): number[] => {
+  const price = effectivePriceRange(r);
+  if (!price) return DEFAULT_QUICK_PRICES;
+
+  const { low, high } = price;
+  if (low === high) {
+    return [low - FLAT_RANGE_SPREAD, low, low + FLAT_RANGE_SPREAD].filter(
+      (v) => v >= 1,
+    );
+  }
+  // Le milieu peut tomber sur une borne (fourchette de 1 €) : on dédoublonne.
+  return [...new Set([low, Math.round((low + high) / 2), high])].sort(
+    (a, b) => a - b,
+  );
+};
+
 /** Bornes du curseur de filtre, en euros par personne. */
 export const PRICE_FILTER_MIN = 0;
 export const PRICE_FILTER_MAX = 50;

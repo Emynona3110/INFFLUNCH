@@ -670,6 +670,7 @@ const RestaurantPage = () => {
         onClose={() => setPriceOpen(false)}
         restaurantId={restaurant.id}
         restaurantName={restaurant.name}
+        priceFields={restaurant}
       />
 
       {isAdmin && (

@@ -2,7 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { FiTrash2 } from "react-icons/fi";
 import { toast } from "@/lib/toast";
 import useMyPriceReport from "@/hooks/useMyPriceReport";
-import { formatAmount } from "@/services/price";
+import PriceQuickPicks from "@/components/PriceQuickPicks";
+import {
+  PriceFields,
+  formatAmount,
+  quickPriceSuggestions,
+} from "@/services/price";
 import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +17,9 @@ interface Props {
   onClose: () => void;
   restaurantId: number;
   restaurantName: string;
+  /** Colonnes de prix du resto : elles calent les montants proposés en un tap.
+   *  Absentes = on propose les repères du marché local. */
+  priceFields?: PriceFields;
 }
 
 const MIN_AMOUNT = 1;
@@ -41,16 +49,13 @@ const EuroInput = ({
   value,
   onChange,
   onEnter,
-  autoFocus,
 }: {
   value: string;
   onChange: (value: string) => void;
   onEnter?: () => void;
-  autoFocus?: boolean;
 }) => (
   <div className="relative">
     <Input
-      autoFocus={autoFocus}
       inputMode="decimal"
       value={value}
       onChange={(e) => onChange(clean(e.target.value))}
@@ -82,6 +87,7 @@ export default function PriceReportDialog({
   onClose,
   restaurantId,
   restaurantName,
+  priceFields,
 }: Props) {
   const { report, save, remove, saving } = useMyPriceReport(restaurantId);
   const [min, setMin] = useState("");
@@ -108,10 +114,21 @@ export default function PriceReportDialog({
     setMax(report && report.max !== report.min ? formatAmount(report.max) : "");
   }, [isOpen, report]);
 
+  // Montants en un tap : les bornes déjà déclarées par les collègues quand
+  // elles existent. Le tap remplit la borne basse et vide la haute — un seul
+  // chiffre, ce que le dialog appelle « déclaration à un montant ».
+  const quickValues = quickPriceSuggestions(
+    priceFields ?? { price_low: null, price_high: null, price_count: 0 },
+  );
+
   const minValue = parse(min);
   const maxValue = max.trim() === "" ? minValue : parse(max);
   const minFilled = !Number.isNaN(minValue);
   const inBounds = (v: number) => v >= MIN_AMOUNT && v <= MAX_AMOUNT;
+  // Pastille allumée : une déclaration « à un montant » qui tombe pile sur
+  // l'une des suggestions. Dès qu'une borne haute est saisie, plus de pastille.
+  const quickSelected =
+    max.trim() === "" && !Number.isNaN(minValue) ? minValue : null;
   const valid =
     minFilled &&
     !Number.isNaN(maxValue) &&
@@ -182,12 +199,28 @@ export default function PriceReportDialog({
         voit tes montants : ils servent à calculer la fourchette du restaurant.
       </p>
 
+      {/* Les pastilles AVANT les champs : sur mobile, c'est la sortie sans
+          clavier. Le champ du dessous n'a donc pas d'autofocus — il ouvrait le
+          pavé numérique par-dessus les montants qu'on vient proposer. */}
+      <div className="mt-4 flex flex-col gap-1.5">
+        <span className="text-sm font-medium text-foreground">En un tap</span>
+        <PriceQuickPicks
+          values={quickValues}
+          selected={quickSelected}
+          disabled={saving}
+          onPick={(value) => {
+            setMin(formatAmount(value));
+            setMax("");
+          }}
+        />
+      </div>
+
       <div className="mt-4 flex flex-col gap-3">
         <label className="flex flex-col gap-1.5">
           <span className="text-sm font-medium text-foreground">
             D'habitude je paie
           </span>
-          <EuroInput autoFocus value={min} onChange={setMin} />
+          <EuroInput value={min} onChange={setMin} />
         </label>
         <label className="flex flex-col gap-1.5">
           <span className="text-sm font-medium text-foreground">
