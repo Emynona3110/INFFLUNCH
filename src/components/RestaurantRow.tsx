@@ -112,8 +112,11 @@ const RestaurantRow = ({
             </span>
           )}
           {/* Prix du midi : à la suite de la note sur mobile — sur desktop il
-              part à droite, avec la distance (voir plus bas). */}
-          <PriceTag restaurant={restaurant} className="sm:hidden" />
+              part à droite, avec la distance (voir plus bas). `text-xs` comme
+              la note : la pastille héritait du `text-sm` de la ligne, et les
+              deux points de plus suffisaient, sur un écran étroit, à la faire
+              passer seule à la ligne suivante. */}
+          <PriceTag restaurant={restaurant} className="text-xs sm:hidden" />
         </div>
 
         {tags.length > 0 && (
