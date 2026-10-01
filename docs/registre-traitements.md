@@ -1,6 +1,6 @@
 # Registre des activités de traitement — INFFLUNCH
 
-Tenu au titre de l'art. 30 RGPD (modèle simplifié CNIL). Dernière mise à jour : 2026-09-19.
+Tenu au titre de l'art. 30 RGPD (modèle simplifié CNIL). Dernière mise à jour : 2026-10-01.
 
 **Responsable du traitement** : Lucas Lambrechts (« LLS », éditeur non professionnel, initiative personnelle) — contact@infflunch.com. Pas de DPO, pas de représentant.
 **Sous-traitants** : Supabase Inc. (base, auth, storage — eu-west-1, Irlande) · Render Services, Inc. (hébergement statique, États-Unis) · Cloudflare (Turnstile, page d'inscription) · IONOS (domaine + redirection de `contact@infflunch.com` vers la boîte pro de l'éditeur, UE).
@@ -26,13 +26,13 @@ Tenu au titre de l'art. 30 RGPD (modèle simplifié CNIL). Dernière mise à jou
 
 | | |
 |---|---|
-| Finalité | Permettre aux collaborateurs de noter et commenter les restaurants, partager photos et menus, indiquer où ils déjeunent, déclarer ce qu'ils dépensent dans un restaurant pour en déduire une fourchette de prix, débloquer des succès (gamification) |
+| Finalité | Permettre aux collaborateurs de noter et commenter les restaurants, partager photos et menus, indiquer où ils déjeunent, déclarer ce qu'ils dépensent dans un restaurant pour en déduire une fourchette de prix (le site réclame ce prix après un déjeuner déclaré, dans les six jours), débloquer des succès (gamification) |
 | Base légale | Exécution du service demandé (6.1.b) |
 | Personnes concernées | Collaborateurs disposant d'un compte |
 | Données | Note 1-5 + commentaire, votes sur avis, réactions emoji, photos (WebP, attribution auteur), menus (lien/pdf/image), favoris, choix « je déjeune où » (resto + date, ou à défaut « pas de restaurant » / « pas sur site » — jamais le motif de l'absence), succès débloqués, prix déclarés (deux montants en euros — habituel et maximum —, 1 déclaration par personne et par restaurant), horodatages |
 | Tables | `reviews`, `review_votes`, `reactions`, `restaurant_photos`, `restaurant_menus`, `favorites`, `lunch_plans`, `restaurant_prices`, `user_achievements` ; bucket `restaurant-photos` |
 | Destinataires | Tous les collaborateurs connectés ; modération admin. Exception : les prix déclarés ne sont lisibles que par leur auteur et les admins (RLS) — les autres ne voient que la fourchette agrégée du restaurant et le nombre de contributeurs |
-| Conservation | Durée de vie du compte (suppression en cascade) ; `lunch_plans` du jour uniquement |
+| Conservation | Durée de vie du compte (suppression en cascade). `lunch_plans` conserve l'historique des midis déclarés — il sert à la série de midis (succès « Flambé »), au compteur du profil, et à réclamer le prix d'un déjeuner des six derniers jours |
 | Sécurité | RLS own-write / admin-delete ; RLS own-read sur `restaurant_prices` ; 1 photo par personne et par resto ; contrôle qualité image ; fourchettes de prix calculées par trigger côté serveur (non falsifiables) |
 
 ## Fiche 3 — Demandes, suggestions et notifications
@@ -52,7 +52,7 @@ Tenu au titre de l'art. 30 RGPD (modèle simplifié CNIL). Dernière mise à jou
 
 ## Traitements exclus / non mis en œuvre
 - Aucune mesure d'audience, aucun cookie publicitaire, aucun profilage.
-- Stockage local navigateur (session, thème, viewMode, nouveautés vues, dernier onglet) : traceurs strictement nécessaires, exemptés de consentement.
+- Stockage local navigateur (session, thème, viewMode, nouveautés vues, dernier onglet, relances de prix écartées — clé préfixée par l'identifiant du compte, jamais transmise au serveur) : traceurs strictement nécessaires, exemptés de consentement.
 - Aucune donnée sensible (art. 9), aucun mineur, aucune décision automatisée.
 
 ## Journal des demandes d'exercice de droits

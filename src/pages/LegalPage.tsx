@@ -26,7 +26,7 @@ const EDITOR_NAME = "LLS";
  * seuls collègues connectés — les personnes concernées au sens du RGPD. Le
  * public (et le bundle JS) ne voit que le pseudonyme : anonymat LCEN préservé.
  */
-const LAST_UPDATE = "19 septembre 2026";
+const LAST_UPDATE = "1er octobre 2026";
 
 const HOST = {
   name: "Render Services, Inc.",
@@ -298,7 +298,8 @@ const Confidentialite = () => {
           d'audience. Seuls des éléments strictement nécessaires sont
           enregistrés dans ton navigateur : jeton de session (connexion), thème
           clair/sombre, mode d'affichage, éléments déjà consultés (nouveautés,
-          succès), dernier onglet ouvert. Ils ne nécessitent pas de
+          succès), dernier onglet ouvert, et les demandes de prix que tu as
+          écartées (pour ne pas te les reposer). Ils ne nécessitent pas de
           consentement.
         </p>
       </Section>
