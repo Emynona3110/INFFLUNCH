@@ -131,7 +131,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: "objectif_midi",
-    title: "Influenceur culinaire",
+    title: "Inffluenceur",
     condition: "Ajouter 5 photos",
     icon: "🤳",
     image: "/achievements/influenceur_culinaire.svg",
