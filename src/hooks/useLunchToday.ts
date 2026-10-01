@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import useSession from "./useSession";
 import supabaseClient from "../services/supabaseClient";
 import useAchievements from "./useAchievements";
+import { clearLunchPriceSkip } from "../services/lunchPriceSkip";
 
 /** Pourquoi on ne mange pas au restaurant : présent sur site mais déjeunant
  *  autrement (gamelle, plat apporté, resto de son côté), ou absent du site.
@@ -47,6 +48,16 @@ const parisHour = () =>
       hour: "2-digit",
     })
   );
+
+/** Heure (Paris) à partir de laquelle le midi est joué : on ne demande plus où
+ *  l'on va, on demande combien ça a coûté, et toute modification du jour
+ *  devient suspecte (fausse manœuvre) plutôt que normale. */
+export const LUNCH_CUTOFF_HOUR = 14;
+
+/** Le déjeuner du jour est passé. Lu au rendu, pas réactif : à 14 h pile, le
+ *  basculement attend la prochaine interaction — personne ne regarde l'écran
+ *  en espérant qu'il change tout seul. */
+export const isAfterLunch = () => parisHour() >= LUNCH_CUTOFF_HOUR;
 
 /* ---------------------------- canal Realtime ----------------------------- */
 // Le hook est monté par la page /dejeuner, la fiche resto et chaque card : on
@@ -169,11 +180,35 @@ const useLunchToday = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, queryClient, day]);
 
+  /**
+   * Retire du cache la relance de prix du JOUR, sans attendre le réseau.
+   *
+   * Sans cela, annuler son midi laissait la relance à l'écran le temps de
+   * l'aller-retour (TanStack sert les anciennes données pendant un refetch) :
+   * l'encart se rétablissait d'abord, la relance ne partait qu'un tiers de
+   * seconde plus tard, et l'écran bougeait en deux temps. Les deux blocs
+   * glissent maintenant ensemble, et `invalidate` repose ensuite la bonne
+   * relance s'il y en a une (nouveau restaurant déclaré).
+   *
+   * Typé sur place : useUnpricedLunches importe ce fichier, lui emprunter son
+   * type refermerait le cycle.
+   */
+  const dropTodayPriceAsk = () => {
+    queryClient.setQueryData<{ restaurantId: number; day: string }[]>(
+      ["unpriced-lunches", userId],
+      (prev) => (prev ?? []).filter((l) => l.day !== day)
+    );
+  };
+
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey });
     // Série de midis (succès « Flambé ») et compteur du profil.
     queryClient.invalidateQueries({ queryKey: ["achievement-metrics"] });
     queryClient.invalidateQueries({ queryKey: ["public-profile", userId] });
+    // Relances de prix : déclarer un restaurant à 18 h crée aussitôt un midi à
+    // chiffrer, le retirer fait disparaître la relance. Sans cette ligne, la
+    // page du midi attendrait l'expiration du cache pour s'en apercevoir.
+    queryClient.invalidateQueries({ queryKey: ["unpriced-lunches"] });
   };
 
   // Une déclaration, deux formes : un restaurant, ou une absence de restaurant
@@ -197,6 +232,14 @@ const useLunchToday = () => {
       if (error) throw new Error(error.message);
     },
     onSuccess: (_data, plan) => {
+      // Redéclarer un déjeuner ici lève le refus posé sur la relance de prix :
+      // on a pu annuler son midi, puis revenir dans ce restaurant — à ce
+      // moment-là, la question du prix se pose de nouveau. Fermer la relance
+      // voulait dire « pas celle-là », pas « plus jamais pour ce resto ».
+      if (plan.restaurantId != null) {
+        clearLunchPriceSkip(userId, plan.restaurantId);
+      }
+      dropTodayPriceAsk();
       invalidate();
       // Succès secret « Speedrunner » : un restaurant (pas « pas au resto »)
       // choisi avant 8 h, heure de Paris.
@@ -213,7 +256,10 @@ const useLunchToday = () => {
         .match({ user_id: userId, day });
       if (error) throw new Error(error.message);
     },
-    onSuccess: invalidate,
+    onSuccess: () => {
+      dropTodayPriceAsk();
+      invalidate();
+    },
   });
 
   /** Participants groupés par restaurant, dans l'ordre d'arrivée. */

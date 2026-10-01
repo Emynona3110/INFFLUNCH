@@ -44,6 +44,8 @@ const useMyPriceReport = (restaurantId: number | undefined) => {
     // Paliers « Note de frais » / « L'addition ! » : comptés en base, donc
     // relus tout de suite pour que le succès tombe dans la foulée.
     queryClient.invalidateQueries({ queryKey: ["achievement-metrics"] });
+    // Relances de prix de la page du midi : ce resto n'en fait plus partie.
+    queryClient.invalidateQueries({ queryKey: ["unpriced-lunches"] });
   };
 
   const saveMutation = useMutation({

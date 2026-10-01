@@ -498,3 +498,38 @@ input:-webkit-autofill:active {
     display: none;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Tirets en orbite : contour d'un encart QUI ATTEND UNE ACTION (choisir son
+   midi, donner un prix). Remplace un pointillé figé, qui ne se remarquait pas.
+
+   Un seul tracé SVG : les tirets suivent le contour, coins arrondis compris,
+   là où quatre dégradés de fond se seraient arrêtés net dans les angles.
+
+   ⚠️ Le motif et la durée sont POSÉS PAR LE COMPOSANT (OrbitDashes) : il mesure
+   le contour pour qu'un nombre entier de tirets en fasse le tour, sinon le
+   motif se referme sur un tiret tronqué. L'animation décale d'exactement un
+   motif, donc sa boucle non plus ne se voit pas. Les valeurs ci-dessous ne
+   servent que le temps de la première mesure.
+
+   Rien de tout cela n'occupe de place : le svg est en position absolue et
+   l'encart garde sa bordure (transparente).
+--------------------------------------------------------------------------- */
+.orbit-dashes > rect {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: var(--orbit-width, 2px);
+  stroke-linecap: butt;
+  stroke-dasharray: var(--orbit-dash, 7px) var(--orbit-gap, 5px);
+  animation: orbit-dashes var(--orbit-dur, 1.7s) linear infinite;
+}
+@keyframes orbit-dashes {
+  to {
+    stroke-dashoffset: calc(-1 * var(--orbit-period, 12px));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .orbit-dashes > rect {
+    animation: none;
+  }
+}

@@ -12,6 +12,7 @@ import useChangelogSeen from "../hooks/useChangelogSeen";
 import useAchievementsSeen from "../hooks/useAchievementsSeen";
 import useFeedbackSeen from "../hooks/useFeedbackSeen";
 import useLunchToday, { isWeekend } from "../hooks/useLunchToday";
+import useUnpricedLunches from "../hooks/useUnpricedLunches";
 import {
   buildUserSections,
   defaultRestaurantFilters,
@@ -59,7 +60,14 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
   // chargement, sinon elle clignote à chaque arrivée sur l'app.
   const { hasPlan, loading: lunchLoading } = useLunchToday();
   // Le week-end, la question ne se pose pas.
-  const lunchPending = !lunchLoading && !hasPlan && !isWeekend();
+  const lunchUndeclared = !lunchLoading && !hasPlan && !isWeekend();
+  // L'autre raison de passer par la page du midi : un prix réclamé pour un
+  // déjeuner récent. Même onglet, donc même puce — c'est la page qui dira
+  // laquelle des deux choses est en attente. La règle d'« échéance » (après
+  // 14 h pour le jour même) vit dans le hook, pour que la puce et le bloc de
+  // la page s'allument ensemble.
+  const { pending: pricePending } = useUnpricedLunches();
+  const lunchPending = lunchUndeclared || pricePending;
 
   // Report des puces sur l'icône d'onglet du navigateur (et sur l'icône
   // d'application en PWA installée) : une seule pastille, dès qu'au moins une

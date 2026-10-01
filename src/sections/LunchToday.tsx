@@ -12,6 +12,10 @@ import useLunchToday, {
   LunchOffReason,
   LunchParticipant,
 } from "@/hooks/useLunchToday";
+import LunchPricePrompt from "@/components/LunchPricePrompt";
+import OrbitDashes from "@/components/OrbitDashes";
+import useUnpricedLunches from "@/hooks/useUnpricedLunches";
+import { useLateLunchConfirm } from "@/components/LateLunchConfirm";
 import useRestaurants from "@/hooks/useRestaurants";
 import { defaultRestaurantFilters } from "@/pages/UserPage";
 import AuthorButton from "@/components/AuthorButton";
@@ -34,6 +38,34 @@ const todayLabel = () => {
 
 /** Ressort commun à toutes les animations de la page. */
 const spring = { type: "spring" as const, stiffness: 380, damping: 30 };
+
+// Pas d'animation `layout` sur cette page : les tuiles sont déjà déplacées par
+// le flux quand la relance ouvre ou referme sa hauteur. Leur en donner une
+// ajoutait un second ressort sur le même mouvement, et toute la page
+// tremblait. Le flux suffit, et il ne peut pas se désaccorder avec lui-même.
+
+/**
+ * Relance : les deux temps ne se jouent jamais ensemble.
+ *
+ * À l'ouverture, la hauteur se fait d'abord — les tuiles du dessous s'écartent
+ * sur un bloc encore invisible — et le contenu n'apparaît qu'une fois la place
+ * prise. À la fermeture, l'inverse : il s'efface, puis la page se referme.
+ *
+ * Des DURÉES et non un ressort : un ressort n'a pas de fin nette, on ne peut
+ * pas caler le second temps sur la fin du premier.
+ */
+const PROMPT_SLIDE = 0.3;
+const PROMPT_FADE = 0.18;
+
+const promptEnter = {
+  height: { duration: PROMPT_SLIDE, ease: "easeOut" as const },
+  opacity: { duration: PROMPT_FADE, delay: PROMPT_SLIDE },
+};
+
+const promptExit = {
+  opacity: { duration: PROMPT_FADE },
+  height: { duration: PROMPT_SLIDE, ease: "easeIn" as const, delay: PROMPT_FADE },
+};
 
 /**
  * Ligne « hors restaurant » : même gabarit qu'une tablée, mais sans image, sans
@@ -211,6 +243,30 @@ const LunchToday = () => {
   const myRestaurantName =
     myRestaurant?.name ?? (restaurantsLoading ? null : "Restaurant inconnu");
 
+  // Icône de l'encart. Dérivée une fois, avec une clé : c'est elle qui permet
+  // de fondre une icône dans l'autre au changement d'état.
+  const statusIcon = awayToday
+    ? { key: "away", Icon: LuMapPinOff }
+    : skipsRestaurant
+      ? { key: "on-site", Icon: LuSandwich }
+      : weekendOff
+        ? { key: "weekend", Icon: LuUtensilsCrossed }
+        : { key: "open", Icon: LuUtensils };
+
+  // Prix à réclamer : mes déjeuners récents jamais chiffrés. Le midi du JOUR
+  // n'y entre qu'après 14 h (avant, le repas n'a pas eu lieu) ; les jours
+  // précédents, eux, sont toujours bons à prendre. Un restaurant absent de la
+  // liste (supprimé, ou « test » pour un non-admin) est ignoré : c'est lui qui
+  // porte les montants proposés.
+  const { lunches: unpricedLunches, skip: skipPriceAsk } = useUnpricedLunches();
+  const priceToAsk = useMemo(() => {
+    for (const lunch of unpricedLunches) {
+      const restaurant = restById.get(lunch.restaurantId);
+      if (restaurant) return { restaurant, day: lunch.day };
+    }
+    return null;
+  }, [unpricedLunches, restById]);
+
   const guard = async (action: () => Promise<unknown>) => {
     try {
       await action();
@@ -224,10 +280,19 @@ const LunchToday = () => {
     }
   };
 
-  const join = (restaurantId: number) => guard(() => setLunch(restaurantId));
+  // Passé 14 h, écraser un midi déjà déclaré demande confirmation : à cette
+  // heure-là c'est presque toujours le pouce qui a ripé (« Rejoindre » est sur
+  // chaque tablée), et tout retirer coupe la série de midis déclarés.
+  const { confirmLateChange, lateLunchDialog } = useLateLunchConfirm();
+
+  const join = (restaurantId: number) =>
+    confirmLateChange("switch", hasPlan, () =>
+      guard(() => setLunch(restaurantId))
+    );
   /** « Je ne mange pas au resto », en disant lequel des deux cas. */
-  const skip = (reason: LunchOffReason) => guard(() => setLunchOff(reason));
-  const leave = () => guard(() => clearLunch());
+  const skip = (reason: LunchOffReason) =>
+    confirmLateChange("off", hasPlan, () => guard(() => setLunchOff(reason)));
+  const leave = () => confirmLateChange("clear", hasPlan, () => guard(() => clearLunch()));
 
   return (
     <motion.div
@@ -279,33 +344,85 @@ const LunchToday = () => {
         </div>
       ) : (
       <div
-        className={cn(
-          "mb-3 sm:mb-6 flex flex-wrap items-center justify-between gap-2.5 rounded-card px-3 py-2.5 sm:gap-3 sm:px-5 sm:py-4 transition-colors",
-          hasPlan
-            ? "border border-border bg-gradient-to-r from-primary/10 to-transparent"
-            : weekendOff
-              ? "border border-border bg-card"
-              : "border border-dashed border-primary/40 bg-card"
-        )}
+        // Desktop : UNE SEULE LIGNE, quel que soit l'état (`sm:flex-nowrap`).
+        // Les boutons passaient à la ligne quand le texte était long (« Tu n'as
+        // pas encore choisi… » + deux boutons), et l'encart changeait de
+        // hauteur d'un état à l'autre : mieux vaut supprimer le
+        // redimensionnement que l'animer. Le groupe de boutons garde sa taille
+        // (`shrink-0`), c'est le texte qui se partage ce qui reste — sa boîte
+        // fait déjà deux lignes de haut (h-12), il y tient.
+        className="relative mb-3 sm:mb-6 flex flex-wrap items-center justify-between gap-2.5 rounded-card bg-card px-3 py-2.5 sm:flex-nowrap sm:gap-3 sm:px-5 sm:py-4"
       >
-        <div className="flex min-w-0 items-center gap-3">
+        {/* Les trois habillages de l'encart (attente, choisi, week-end) sont
+            des COUCHES superposées dont on croise l'opacité, et non des
+            classes qu'on échange : un `bg-gradient` est une image de fond, elle
+            ne se transitionne pas en CSS — le fond sautait d'un état à l'autre.
+            Chaque couche porte sa bordure complète, donc le conteneur n'en a
+            aucune : deux bordures superposées se verraient l'une derrière
+            l'autre. */}
+        {[
+          {
+            // En attente d'un choix : des points qui tournent lentement, bien
+            // plus visibles qu'un pointillé figé. Ils ne prennent pas de place
+            // (tracé en position absolue), la couche n'a donc pas de bordure.
+            key: "waiting",
+            on: !hasPlan && !weekendOff,
+            className: "",
+            content: <OrbitDashes />,
+          },
+          {
+            key: "neutral",
+            on: weekendOff,
+            className: "border border-border",
+            content: null,
+          },
+          {
+            key: "chosen",
+            on: hasPlan,
+            className:
+              "border border-border bg-gradient-to-r from-primary/10 to-transparent",
+            content: null,
+          },
+        ].map((layer) => (
+          <motion.span
+            key={layer.key}
+            aria-hidden
+            initial={false}
+            animate={{ opacity: layer.on ? 1 : 0 }}
+            transition={{ duration: 0.25 }}
+            className={cn(
+              "pointer-events-none absolute inset-0 rounded-card",
+              layer.className
+            )}
+          >
+            {layer.content}
+          </motion.span>
+        ))}
+        <div className="relative flex min-w-0 items-center gap-3">
           <span
             className={cn(
-              "flex h-9 w-9 shrink-0 items-center justify-center rounded-full sm:h-10 sm:w-10",
+              // Fond et couleur d'icône, eux, se transitionnent très bien en
+              // CSS : le bleu pâle vire au bleu plein sans palier.
+              "flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors duration-300 sm:h-10 sm:w-10",
               hasPlan
                 ? "bg-primary text-primary-foreground"
                 : "bg-primary/10 text-primary"
             )}
           >
-            {awayToday ? (
-              <LuMapPinOff className="h-5 w-5" />
-            ) : skipsRestaurant ? (
-              <LuSandwich className="h-5 w-5" />
-            ) : weekendOff ? (
-              <LuUtensilsCrossed className="h-5 w-5" />
-            ) : (
-              <LuUtensils className="h-5 w-5" />
-            )}
+            {/* L'icône, elle, est remplacée : couverts, couverts croisés,
+                sandwich, point barré. Un fondu court évite le clignotement. */}
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.span
+                key={statusIcon.key}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.15 }}
+                className="flex"
+              >
+                <statusIcon.Icon className="h-5 w-5" />
+              </motion.span>
+            </AnimatePresence>
           </span>
           <div className="flex h-11 min-w-0 flex-col justify-center sm:h-12">
             {skipsRestaurant ? (
@@ -346,40 +463,86 @@ const LunchToday = () => {
             week-end, aucun conteneur : un bloc `w-full` vide passerait quand
             même à la ligne et ajouterait le `gap` sous le texte. */}
         {weekendOff ? null : (
-          <div className="flex w-full shrink-0 items-center gap-2 sm:w-auto">
-            {hasPlan ? (
-              <Button
-                variant="outline"
-                onClick={leave}
-                loading={saving}
-                className="flex-1 sm:flex-none"
+          <div className="relative flex w-full shrink-0 items-center gap-2 sm:w-auto">
+            {/* « Retirer » remplace « Choisir / Pas de resto » : `mode="wait"`
+                pour que les deux jeux ne se chevauchent pas, et un fondu court
+                — c'est un bouton sous le doigt, pas une tuile. */}
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={hasPlan ? "cancel" : "choose"}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+                className="flex w-full items-center gap-2 sm:w-auto"
               >
-                Annuler
-              </Button>
-            ) : (
-              <>
-                <Button
-                  onClick={() => setPickOpen(true)}
-                  disabled={saving || restaurantsLoading}
-                  className="flex-1 sm:flex-none"
-                >
-                  <span className="sm:hidden">Choisir un resto</span>
-                  <span className="hidden sm:inline">Choisir un restaurant</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setOffOpen(true)}
-                  disabled={saving}
-                  className="flex-1 sm:flex-none"
-                >
-                  Pas de resto
-                </Button>
-              </>
-            )}
+                {hasPlan ? (
+                  <Button
+                    variant="outline"
+                    onClick={leave}
+                    loading={saving}
+                    className="flex-1 sm:flex-none"
+                  >
+                    Retirer
+                  </Button>
+                ) : (
+                  <>
+                    <Button
+                      onClick={() => setPickOpen(true)}
+                      disabled={saving || restaurantsLoading}
+                      className="flex-1 sm:flex-none"
+                    >
+                      <span className="sm:hidden">Choisir</span>
+                      <span className="hidden sm:inline">
+                        Choisir un restaurant
+                      </span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setOffOpen(true)}
+                      disabled={saving}
+                      className="flex-1 sm:flex-none"
+                    >
+                      Pas de resto
+                    </Button>
+                  </>
+                )}
+              </motion.div>
+            </AnimatePresence>
           </div>
         )}
       </div>
       )}
+
+      {/* Une fois le déjeuner passé, la question n'est plus « où vas-tu » mais
+          « combien ça a coûté ». On rattrape aussi les midis des jours
+          précédents : beaucoup ne repassent que le lendemain. Une seule
+          relance à la fois, la plus récente — la suivante prendra sa place une
+          fois celle-ci traitée. */}
+      {/* `overflow-hidden` : la hauteur animée rogne le bloc pendant qu'il
+          s'ouvre, et la marge basse du bloc est comprise dans la mesure (le
+          dépassement crée un contexte de formatage, les marges ne s'échappent
+          pas). Les tuiles du dessous suivent donc le flux, en glissant.
+          `mode="wait"` : quand une relance en remplace une autre (resto
+          chiffré, midi suivant), la première part avant que la seconde
+          n'arrive — sinon les deux se chevauchent le temps du fondu. */}
+      <AnimatePresence initial={false} mode="wait">
+        {!loading && priceToAsk && (
+          <motion.div
+            key={`${priceToAsk.restaurant.id}-${priceToAsk.day}`}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto", transition: promptEnter }}
+            exit={{ opacity: 0, height: 0, transition: promptExit }}
+            className="overflow-hidden"
+          >
+            <LunchPricePrompt
+              restaurant={priceToAsk.restaurant}
+              day={priceToAsk.day}
+              onSkip={() => skipPriceAsk(priceToAsk.restaurant.id)}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Tablées du jour. */}
       {loading ? (
@@ -421,8 +584,12 @@ const LunchToday = () => {
                   className={cn(
                     "group flex cursor-pointer select-none items-center gap-3 overflow-hidden p-2.5 transition sm:rounded-card sm:bg-card sm:gap-4 sm:p-3 sm:hover:-translate-y-0.5 sm:hover:shadow-[0_14px_34px_-16px_rgba(2,8,40,0.30)]",
                     // Ma tablée : fond teinté sur mobile, anneau sur desktop.
+                    // Elle garde une bordure (transparente) : sans elle, elle
+                    // mesurait 2 px de moins que les autres — l'anneau est une
+                    // ombre, il ne prend pas de place — et rejoindre une
+                    // tablée décalait la liste.
                     mine
-                      ? "bg-primary/5 sm:bg-card sm:ring-2 sm:ring-primary"
+                      ? "bg-primary/5 sm:border sm:border-transparent sm:bg-card sm:ring-2 sm:ring-primary"
                       : "sm:border sm:border-border"
                   )}
                 >
@@ -563,6 +730,8 @@ const LunchToday = () => {
           skip(reason);
         }}
       />
+
+      {lateLunchDialog}
     </motion.div>
   );
 };
