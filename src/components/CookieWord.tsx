@@ -6,9 +6,17 @@ import useAchievements from "@/hooks/useAchievements";
  *  la dernière l'avale. */
 const BITES = 5;
 
-/** Image du cookie (PNG fond transparent, recadré au carré, 640 px : deux
- *  fois la taille d'affichage maximale, net sur écran dense). */
-const COOKIE_SRC = "/easter/cookie.png";
+/**
+ * Image du cookie : fond transparent, carrée, 640 px — deux fois la taille
+ * d'affichage maximale, donc nette sur écran dense. WebP : la photo est trop
+ * texturée pour le PNG, qui pesait 800 ko contre 120.
+ *
+ * ⚠️ En changer demande de garder le MÊME cadrage : cookie centré, occupant
+ * 98,8 % du carré. Les morsures ci-dessous sont posées en pourcentage de
+ * l'image — un cookie plus petit ou décalé dans son cadre, et elles tombent à
+ * côté.
+ */
+const COOKIE_SRC = "/easter/cookie.webp";
 
 /** Morsures successives : centre et rayon en % de l'image, et `dir` la
  *  direction (degrés, 90 = vers le bas) dans laquelle les dents s'enfoncent.
