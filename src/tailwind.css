@@ -533,3 +533,84 @@ input:-webkit-autofill:active {
     animation: none;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Contour des succès RARES (obtenus par moins de RARE_PERCENT % des
+   collègues), façon Steam : un anneau doré qui tourne autour de la case.
+   Posé sur la case de l'icône, seulement si le visiteur l'a lui-même.
+
+   L'anneau est une vraie BORDURE de 2px (le navigateur en cale l'épaisseur
+   sur les pixels de l'écran, donc identique sur les quatre côtés), peinte
+   d'un dégradé conique puis masquée hors bordure : le fond des images
+   transparentes reste intact. Elle recouvre la bordure grise de la case.
+   L'angle est une propriété enregistrée, sans quoi le dégradé ne tournerait
+   pas.
+--------------------------------------------------------------------------- */
+@property --rare-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+.rare-aura {
+  position: relative;
+  border-color: transparent;
+}
+.rare-aura::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: 1;
+  border: 2px solid transparent;
+  border-radius: inherit;
+  background: conic-gradient(
+      from var(--rare-angle),
+      #f59e0b,
+      #fff7cc,
+      #fbbf24,
+      #b45309,
+      #fde68a,
+      #f59e0b
+    )
+    border-box;
+  -webkit-mask:
+    linear-gradient(#000 0 0) padding-box,
+    linear-gradient(#000 0 0) border-box;
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: rare-spin 3.5s linear infinite;
+}
+@keyframes rare-spin {
+  to {
+    --rare-angle: 360deg;
+  }
+}
+/* Même or sur du texte (« x % des collègues… » dans la fiche d'un succès
+   rare) : le dégradé défile à travers les lettres. Teintes plus sombres que
+   l'anneau, pour rester lisibles sur fond clair. */
+.rare-text {
+  background: linear-gradient(
+      90deg,
+      #b45309,
+      #f59e0b,
+      #fcd34d,
+      #d97706,
+      #b45309
+    )
+    0 0 / 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: rare-sweep 3.5s linear infinite;
+}
+@keyframes rare-sweep {
+  to {
+    background-position: -200% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rare-aura::before,
+  .rare-text {
+    animation: none;
+  }
+}

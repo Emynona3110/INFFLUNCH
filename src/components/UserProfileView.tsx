@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiCamera, FiStar, FiAward, FiLock } from "react-icons/fi";
 import { LuFlame, LuUtensils } from "react-icons/lu";
-import { FLAMBE_STREAK } from "@/data/achievements";
+import { FLAMBE_STREAK, RARE_PERCENT } from "@/data/achievements";
 import { Card } from "@/components/ui/card";
 import { Tooltip } from "@/components/ui/tooltip";
 import Avatar from "@/components/Avatar";
@@ -324,6 +324,10 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
                                   !def.image && "bg-primary/10",
                                 )
                               : "bg-muted/40 text-muted-foreground",
+                            // Rare : aura dorée, que le visiteur l'ait ou non.
+                            statsReady &&
+                              (percentById[def.id] ?? 0) < RARE_PERCENT &&
+                              "rare-aura",
                           )}
                         >
                           {!known ? (
@@ -496,6 +500,8 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
         onClose={() => setOpened(null)}
         achievement={opened}
         unlocked={!!opened && (isMe || mine.includes(opened.id))}
+        // Ouverte depuis la grille : la personne du profil l'a forcément.
+        owned
         condition={
           opened ? (opened.condition ?? secretConditions[opened.id]) : undefined
         }

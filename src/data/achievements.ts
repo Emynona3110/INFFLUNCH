@@ -82,6 +82,10 @@ export interface Achievement {
  *  (déblocage dans useAchievementTriggers, flammes sur la pp du profil). */
 export const FLAMBE_STREAK = 5;
 
+/** En dessous de ce pourcentage d'obtention, un succès est rare : son icône
+ *  porte une aura dorée (classe `rare-aura`) chez ceux qui l'ont. */
+export const RARE_PERCENT = 10;
+
 export const ACHIEVEMENTS: Achievement[] = [
   // — Avis —
   {

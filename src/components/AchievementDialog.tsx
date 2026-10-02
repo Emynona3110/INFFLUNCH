@@ -3,7 +3,7 @@ import { Dialog } from "@/components/ui/dialog";
 import Avatar from "@/components/Avatar";
 import AuthorButton from "@/components/AuthorButton";
 import useAchievementHolders from "@/hooks/useAchievementHolders";
-import { Achievement } from "@/data/achievements";
+import { Achievement, RARE_PERCENT } from "@/data/achievements";
 import { formatAuthorName } from "@/utils/authorName";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +13,10 @@ interface Props {
   achievement: Achievement | null;
   /** Le visiteur l'a lui-même obtenu : icône en couleur, condition révélée. */
   unlocked: boolean;
+  /** La personne dont on regarde le succès l'a (profil d'un collègue) : un
+   *  succès rare y prend son or même si le visiteur ne l'a pas. Par défaut,
+   *  celui du visiteur (`unlocked`). */
+  owned?: boolean;
   /** Condition telle qu'on peut la montrer (celle du catalogue, ou celle d'un
    *  secret déjà débloqué). Absente = « Succès secret ». */
   condition?: string;
@@ -42,6 +46,7 @@ const AchievementDialog = ({
   onClose,
   achievement,
   unlocked,
+  owned = unlocked,
   condition,
   percent,
   progress,
@@ -62,10 +67,11 @@ const AchievementDialog = ({
       className="max-w-sm"
       showClose
     >
-      <div className="flex items-center gap-3 pr-8">
+      {/* L'illustration en grand, au-dessus du titre : c'est la récompense. */}
+      <div className="flex flex-col items-center text-center">
         <div
           className={cn(
-            "flex h-14 w-14 shrink-0 items-center justify-center rounded-xl text-3xl",
+            "flex h-36 w-36 shrink-0 items-center justify-center rounded-2xl text-7xl",
             unlocked && !a.image && "bg-primary/10",
             !unlocked && "bg-muted/40 text-muted-foreground",
           )}
@@ -77,27 +83,32 @@ const AchievementDialog = ({
               a.icon
             )
           ) : (
-            <FiLock className="h-7 w-7" />
+            <FiLock className="h-14 w-14" />
           )}
         </div>
-        <div className="min-w-0">
-          <div
-            role="heading"
-            aria-level={2}
-            className="font-display text-lg font-bold leading-tight text-card-foreground"
-          >
-            {a.title}
-          </div>
-          <p className="m-0 mt-0.5 text-sm leading-snug text-foreground/55">
-            {revealed && condition ? condition : "Succès secret"}
-          </p>
+        <div
+          role="heading"
+          aria-level={2}
+          className="mt-3 font-display text-xl font-bold leading-tight text-card-foreground"
+        >
+          {a.title}
         </div>
+        <p className="m-0 mt-0.5 text-sm leading-snug text-foreground/55">
+          {revealed && condition ? condition : "Succès secret"}
+        </p>
       </div>
 
       {/* Rareté façon Steam : la part de l'équipe qui l'a. */}
       {percent !== undefined && (
-        <p className="m-0 mt-3 text-xs text-foreground/45">
-          {percent.toFixed(1)} % des collègues l'ont débloqué
+        <p className="m-0 mt-2 text-center text-xs text-foreground/45">
+          {/* Rare et obtenu : le même or que le contour. */}
+          <span
+            className={cn(
+              owned && percent < RARE_PERCENT && "rare-text font-semibold",
+            )}
+          >
+            {percent.toFixed(1)} % des collègues l'ont débloqué
+          </span>
         </p>
       )}
 
@@ -144,7 +155,7 @@ const AchievementDialog = ({
           </p>
         ) : (
           /* Longue liste : c'est elle qui défile, pas la popup. */
-          <ul className="m-0 mt-2 max-h-[40dvh] list-none space-y-1.5 overflow-y-auto p-0">
+          <ul className="m-0 mt-2 max-h-[30dvh] list-none space-y-1.5 overflow-y-auto p-0">
             {holders.data.map((h) => (
               <li key={h.user_id} className="flex items-center gap-2.5">
                 <Avatar email={h.email} avatarPath={h.avatar_path} size={28} />

@@ -13,6 +13,7 @@ import {
   ACHIEVEMENTS_BY_ID,
   ACHIEVEMENT_GOALS,
   AchievementId,
+  RARE_PERCENT,
 } from "@/data/achievements";
 import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
@@ -172,6 +173,10 @@ const AchievementsGallery = () => {
                         // occupent tout l'espace sans fond.
                         unlocked && !a.image && "bg-primary/10",
                         !unlocked && "text-muted-foreground",
+                        unlocked &&
+                          statsReady &&
+                          percent < RARE_PERCENT &&
+                          "rare-aura",
                       )}
                     >
                       {/* Image visible seulement une fois débloqué (verrouillé =
