@@ -13,20 +13,21 @@ export type AchievementId =
   | "berger_dun_jour"
   | "gourou_du_troupeau"
   // Avis
-  | "premier_avis"
-  | "critique_confirme"
+  | "critique_en_herbe"
+  | "palais_aguerri"
   | "plume_gastronomique"
   // Photos
-  | "premiere_photo"
-  | "objectif_midi"
-  | "paparazzi_pause"
+  | "photographe"
+  | "inffluenceur"
+  | "pizzarazzi"
   // Réactions
-  | "premiere_reaction"
+  | "petit_geste"
   | "public_conquis"
   | "approuve"
+  | "gouts_et_couleurs"
   // Prix déclarés
-  | "note_de_frais"
   | "addition"
+  | "gardez_la_monnaie"
   // Favoris
   | "quinte_gagnant"
   // Roulette (Surprise du midi)
@@ -41,8 +42,9 @@ export type AchievementId =
   // Méta / assiduité
   | "fidele_au_poste"
   | "flambe"
-  | "speedrunner"
-  | "troupeau_complet";
+  | "sprinter"
+  | "retardataire"
+  | "completionniste";
 
 export interface Achievement {
   id: AchievementId;
@@ -71,7 +73,7 @@ export interface Achievement {
 
 /** Palier du succès « Flambé » : jours ouvrés d'affilée avec un midi déclaré
  *  (déblocage dans useAchievementTriggers, flammes sur la pp du profil). */
-export const FLAMBE_STREAK = 10;
+export const FLAMBE_STREAK = 5;
 
 export const ACHIEVEMENTS: Achievement[] = [
   // — Easter egg mouton (Beeeh) —
@@ -99,7 +101,7 @@ export const ACHIEVEMENTS: Achievement[] = [
 
   // — Avis —
   {
-    id: "premier_avis",
+    id: "critique_en_herbe",
     title: "Critique en herbe",
     condition: "Publier un premier avis",
     icon: "📝",
@@ -107,7 +109,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     image: "/achievements/critique_en_herbe.svg",
   },
   {
-    id: "critique_confirme",
+    id: "palais_aguerri",
     title: "Palais aguerri",
     condition: "Publier 5 avis",
     icon: "👅",
@@ -123,21 +125,21 @@ export const ACHIEVEMENTS: Achievement[] = [
 
   // — Photos —
   {
-    id: "premiere_photo",
-    title: "Apprenti photographe",
+    id: "photographe",
+    title: "Photographe",
     condition: "Ajouter une première photo",
     icon: "📷",
-    image: "/achievements/apprenti_photographe.svg",
+    image: "/achievements/photographe.svg",
   },
   {
-    id: "objectif_midi",
+    id: "inffluenceur",
     title: "Inffluenceur",
     condition: "Ajouter 5 photos",
     icon: "🤳",
-    image: "/achievements/influenceur_culinaire.svg",
+    image: "/achievements/inffluenceur.svg",
   },
   {
-    id: "paparazzi_pause",
+    id: "pizzarazzi",
     title: "Pizzarazzi",
     condition: "Ajouter 15 photos",
     icon: "🍕",
@@ -146,23 +148,23 @@ export const ACHIEVEMENTS: Achievement[] = [
 
   // — Prix déclarés —
   {
-    id: "note_de_frais",
-    title: "Note de frais",
-    condition: "Déclarer le prix d'un premier restaurant",
-    icon: "🧾",
-    image: "/achievements/note_de_frais.svg",
-  },
-  {
     id: "addition",
     title: "L'addition !",
-    condition: "Déclarer le prix de 5 restaurants",
-    icon: "💳",
+    condition: "Déclarer le prix d'un premier restaurant",
+    icon: "🧾",
     image: "/achievements/addition.svg",
+  },
+  {
+    id: "gardez_la_monnaie",
+    title: "Gardez la monnaie",
+    condition: "Déclarer le prix de 5 restaurants",
+    icon: "💸",
+    image: "/achievements/gardez_la_monnaie.svg",
   },
 
   // — Réactions —
   {
-    id: "premiere_reaction",
+    id: "petit_geste",
     title: "Petit geste",
     condition: "Réagir à une photo",
     icon: "👍",
@@ -181,6 +183,13 @@ export const ACHIEVEMENTS: Achievement[] = [
     condition: "Recevoir 5 réactions sur vos photos",
     icon: "❤️",
     image: "/achievements/approuve.svg",
+  },
+  {
+    id: "gouts_et_couleurs",
+    title: "Goûts et couleurs",
+    icon: "🎨",
+    image: "/achievements/gouts_et_couleurs.svg",
+    secret: true,
   },
 
   // — Favoris —
@@ -267,14 +276,21 @@ export const ACHIEVEMENTS: Achievement[] = [
     image: "/achievements/flambe.svg",
   },
   {
-    id: "speedrunner",
-    title: "Speedrunner",
+    id: "sprinter",
+    title: "Sprinter",
     icon: "⏱️",
-    image: "/achievements/speedrunner.svg",
+    image: "/achievements/sprinter.svg",
     secret: true,
   },
   {
-    id: "troupeau_complet",
+    id: "retardataire",
+    title: "Retardataire",
+    icon: "🐌",
+    image: "/achievements/retardataire.svg",
+    secret: true,
+  },
+  {
+    id: "completionniste",
     title: "Complétionniste",
     condition: "Débloquer tous les autres succès",
     icon: "🏆",
@@ -290,17 +306,18 @@ export const ACHIEVEMENTS: Achievement[] = [
 export const ACHIEVEMENT_GOALS: Partial<
   Record<AchievementId, { metric: keyof AchievementMetrics; goal: number }>
 > = {
-  premier_avis: { metric: "reviews", goal: 1 },
-  critique_confirme: { metric: "reviews", goal: 5 },
+  critique_en_herbe: { metric: "reviews", goal: 1 },
+  palais_aguerri: { metric: "reviews", goal: 5 },
   plume_gastronomique: { metric: "reviews", goal: 20 },
-  premiere_photo: { metric: "photos", goal: 1 },
-  objectif_midi: { metric: "photos", goal: 5 },
-  paparazzi_pause: { metric: "photos", goal: 15 },
-  note_de_frais: { metric: "prices", goal: 1 },
-  addition: { metric: "prices", goal: 5 },
-  premiere_reaction: { metric: "reactionsGivenDistinct", goal: 1 },
+  photographe: { metric: "photos", goal: 1 },
+  inffluenceur: { metric: "photos", goal: 5 },
+  pizzarazzi: { metric: "photos", goal: 15 },
+  addition: { metric: "prices", goal: 1 },
+  gardez_la_monnaie: { metric: "prices", goal: 5 },
+  petit_geste: { metric: "reactionsGivenDistinct", goal: 1 },
   public_conquis: { metric: "reactionsGivenDistinct", goal: 20 },
   approuve: { metric: "reactionsReceived", goal: 5 },
+  gouts_et_couleurs: { metric: "reactionEmojisDistinct", goal: 3 },
   quinte_gagnant: { metric: "favorites", goal: 5 },
   fidele_au_poste: { metric: "loginStreak", goal: 5 },
   flambe: { metric: "lunchStreak", goal: FLAMBE_STREAK },

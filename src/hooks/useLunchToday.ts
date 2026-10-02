@@ -39,7 +39,7 @@ export const isWeekend = () => {
   return day === "Sat" || day === "Sun";
 };
 
-/** Heure courante à Paris (0-23), pour le succès « Speedrunner ». */
+/** Heure courante à Paris (0-23), pour les succès « Sprinter » / « Retardataire ». */
 const parisHour = () =>
   Number(
     new Date().toLocaleTimeString("en-US", {
@@ -48,6 +48,10 @@ const parisHour = () =>
       hour: "2-digit",
     })
   );
+
+/** Heure (Paris) avant laquelle déclarer son midi vaut le succès « Sprinter ».
+ *  Son pendant tardif est LUNCH_CUTOFF_HOUR (succès « Retardataire »). */
+const SPRINTER_HOUR = 10;
 
 /** Heure (Paris) à partir de laquelle le midi est joué : on ne demande plus où
  *  l'on va, on demande combien ça a coûté, et toute modification du jour
@@ -241,9 +245,13 @@ const useLunchToday = () => {
       }
       dropTodayPriceAsk();
       invalidate();
-      // Succès secret « Speedrunner » : un restaurant (pas « pas au resto »)
-      // choisi avant 8 h, heure de Paris.
-      if (plan.restaurantId != null && parisHour() < 8) unlock("speedrunner");
+      // Succès secrets des deux extrêmes de la journée : un RESTAURANT (pas
+      // « pas au resto ») choisi très tôt ou après que le déjeuner soit passé.
+      // Heure de Paris ; « après 14 h » = le seuil du midi (isAfterLunch).
+      if (plan.restaurantId != null) {
+        if (parisHour() < SPRINTER_HOUR) unlock("sprinter");
+        else if (isAfterLunch()) unlock("retardataire");
+      }
     },
   });
 

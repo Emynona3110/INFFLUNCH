@@ -41,7 +41,7 @@ const useMyPriceReport = (restaurantId: number | undefined) => {
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey });
     queryClient.invalidateQueries({ queryKey: ["restaurants"] });
-    // Paliers « Note de frais » / « L'addition ! » : comptés en base, donc
+    // Paliers « L'addition ! » / « Gardez la monnaie » : comptés en base, donc
     // relus tout de suite pour que le succès tombe dans la foulée.
     queryClient.invalidateQueries({ queryKey: ["achievement-metrics"] });
     // Relances de prix de la page du midi : ce resto n'en fait plus partie.

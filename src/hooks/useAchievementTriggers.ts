@@ -32,10 +32,10 @@ const useAchievementTriggers = () => {
     // Complétionniste : tous les AUTRES succès débloqués. Se ré-évalue à chaque
     // changement de unlockedIds (l'unlock invalide la requête achievements).
     const others = ACHIEVEMENTS.map((a) => a.id).filter(
-      (id) => id !== "troupeau_complet"
+      (id) => id !== "completionniste"
     );
     if (others.every((id) => unlockedIds.includes(id))) {
-      unlock("troupeau_complet");
+      unlock("completionniste");
     }
     // unlockedIds est capturé ; on dépend de sa version stable (unlockedKey).
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -97,7 +97,7 @@ survit pas à la vectorisation en trois aplats.
 /imagine prompt: Very simple minimalist flat vector icon, single centered subject, few large clean geometric rounded shapes, thick uniform royal blue outlines (#113894), flat shading only, mostly off-white fills with one small warm orange accent, strict three-colour palette (deep royal blue #113894, warm orange #EA580C, off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a wise sheep guru wearing a tiny halo and a pointed sage hat, serene expression. --ar 1:1 --style raw --v 7 --sref https://infflunch.com/achievements/ref/ref-calendrier-flamme.png https://infflunch.com/achievements/ref/ref-mouton-sorcier.png https://infflunch.com/achievements/ref/ref-plume-toque.png https://infflunch.com/achievements/ref/ref-fer-a-cheval.png https://infflunch.com/achievements/ref/ref-chronometre.png https://infflunch.com/achievements/ref/ref-de.png https://infflunch.com/achievements/ref/ref-mouton-ble.png https://infflunch.com/achievements/ref/ref-miroir.png --sw 100 --no black outlines, black strokes, gradient, texture, grain, photorealism, 3d render, isometric, perspective, drop shadow, glow, highlights, scenery, background objects, frame, border, multiple subjects, lettering, watermark, fine detail, hatching
 ```
 
-### premier_avis — « Critique en herbe »
+### critique_en_herbe — « Critique en herbe »
 
 *1er avis*
 
@@ -105,7 +105,7 @@ survit pas à la vectorisation en trois aplats.
 /imagine prompt: Very simple minimalist flat vector icon, single centered subject, few large clean geometric rounded shapes, thick uniform royal blue outlines (#113894), flat shading only, mostly off-white fills with one small warm orange accent, strict three-colour palette (deep royal blue #113894, warm orange #EA580C, off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a pencil with a small sprouting green-blue leaf, next to a single review star. --ar 1:1 --style raw --v 7 --sref https://infflunch.com/achievements/ref/ref-calendrier-flamme.png https://infflunch.com/achievements/ref/ref-mouton-sorcier.png https://infflunch.com/achievements/ref/ref-plume-toque.png https://infflunch.com/achievements/ref/ref-fer-a-cheval.png https://infflunch.com/achievements/ref/ref-chronometre.png https://infflunch.com/achievements/ref/ref-de.png https://infflunch.com/achievements/ref/ref-mouton-ble.png https://infflunch.com/achievements/ref/ref-miroir.png --sw 100 --no black outlines, black strokes, gradient, texture, grain, photorealism, 3d render, isometric, perspective, drop shadow, glow, highlights, scenery, background objects, frame, border, multiple subjects, lettering, watermark, fine detail, hatching
 ```
 
-### critique_confirme — « Palais aguerri »
+### palais_aguerri — « Palais aguerri »
 
 *10 avis*
 
@@ -121,7 +121,7 @@ survit pas à la vectorisation en trois aplats.
 /imagine prompt: Very simple minimalist flat vector icon, single centered subject, few large clean geometric rounded shapes, thick uniform royal blue outlines (#113894), flat shading only, mostly off-white fills with one small warm orange accent, strict three-colour palette (deep royal blue #113894, warm orange #EA580C, off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: an elegant writing quill pen dipped over a chef's toque, with one shining star. --ar 1:1 --style raw --v 7 --sref https://infflunch.com/achievements/ref/ref-calendrier-flamme.png https://infflunch.com/achievements/ref/ref-mouton-sorcier.png https://infflunch.com/achievements/ref/ref-plume-toque.png https://infflunch.com/achievements/ref/ref-fer-a-cheval.png https://infflunch.com/achievements/ref/ref-chronometre.png https://infflunch.com/achievements/ref/ref-de.png https://infflunch.com/achievements/ref/ref-mouton-ble.png https://infflunch.com/achievements/ref/ref-miroir.png --sw 100 --no black outlines, black strokes, gradient, texture, grain, photorealism, 3d render, isometric, perspective, drop shadow, glow, highlights, scenery, background objects, frame, border, multiple subjects, lettering, watermark, fine detail, hatching
 ```
 
-### premiere_photo — « Apprenti photographe »
+### photographe — « Photographe »
 
 *1re photo*
 
@@ -129,7 +129,7 @@ survit pas à la vectorisation en trois aplats.
 /imagine prompt: Very simple minimalist flat vector icon, single centered subject, few large clean geometric rounded shapes, thick uniform royal blue outlines (#113894), flat shading only, mostly off-white fills with one small warm orange accent, strict three-colour palette (deep royal blue #113894, warm orange #EA580C, off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a plate of food surrounded by a ring light, with a couple of small like bubbles. --ar 1:1 --style raw --v 7 --sref https://infflunch.com/achievements/ref/ref-calendrier-flamme.png https://infflunch.com/achievements/ref/ref-mouton-sorcier.png https://infflunch.com/achievements/ref/ref-plume-toque.png https://infflunch.com/achievements/ref/ref-fer-a-cheval.png https://infflunch.com/achievements/ref/ref-chronometre.png https://infflunch.com/achievements/ref/ref-de.png https://infflunch.com/achievements/ref/ref-mouton-ble.png https://infflunch.com/achievements/ref/ref-miroir.png --sw 100 --no black outlines, black strokes, gradient, texture, grain, photorealism, 3d render, isometric, perspective, drop shadow, glow, highlights, scenery, background objects, frame, border, multiple subjects, lettering, watermark, fine detail, hatching
 ```
 
-### objectif_midi — « Influenceur culinaire »
+### inffluenceur — « Inffluenceur »
 
 *10 photos*
 
@@ -137,7 +137,7 @@ survit pas à la vectorisation en trois aplats.
 /imagine prompt: Very simple minimalist flat vector icon, single centered subject, few large clean geometric rounded shapes, thick uniform royal blue outlines (#113894), flat shading only, mostly off-white fills with one small warm orange accent, strict three-colour palette (deep royal blue #113894, warm orange #EA580C, off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a fan / spread of several overlapping Polaroid photos of food dishes, one small sparkle. --ar 1:1 --style raw --v 7 --sref https://infflunch.com/achievements/ref/ref-calendrier-flamme.png https://infflunch.com/achievements/ref/ref-mouton-sorcier.png https://infflunch.com/achievements/ref/ref-plume-toque.png https://infflunch.com/achievements/ref/ref-fer-a-cheval.png https://infflunch.com/achievements/ref/ref-chronometre.png https://infflunch.com/achievements/ref/ref-de.png https://infflunch.com/achievements/ref/ref-mouton-ble.png https://infflunch.com/achievements/ref/ref-miroir.png --sw 100 --no black outlines, black strokes, gradient, texture, grain, photorealism, 3d render, isometric, perspective, drop shadow, glow, highlights, scenery, background objects, frame, border, multiple subjects, lettering, watermark, fine detail, hatching
 ```
 
-### paparazzi_pause — « Pizzarazzi »
+### pizzarazzi — « Pizzarazzi »
 
 *50 photos*
 
@@ -145,7 +145,7 @@ survit pas à la vectorisation en trois aplats.
 /imagine prompt: Very simple minimalist flat vector icon, single centered subject, few large clean geometric rounded shapes, thick uniform royal blue outlines (#113894), flat shading only, mostly off-white fills with one small warm orange accent, strict three-colour palette (deep royal blue #113894, warm orange #EA580C, off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a pizza slice merged with a camera lens, playful flash sparkles around it. --ar 1:1 --style raw --v 7 --sref https://infflunch.com/achievements/ref/ref-calendrier-flamme.png https://infflunch.com/achievements/ref/ref-mouton-sorcier.png https://infflunch.com/achievements/ref/ref-plume-toque.png https://infflunch.com/achievements/ref/ref-fer-a-cheval.png https://infflunch.com/achievements/ref/ref-chronometre.png https://infflunch.com/achievements/ref/ref-de.png https://infflunch.com/achievements/ref/ref-mouton-ble.png https://infflunch.com/achievements/ref/ref-miroir.png --sw 100 --no black outlines, black strokes, gradient, texture, grain, photorealism, 3d render, isometric, perspective, drop shadow, glow, highlights, scenery, background objects, frame, border, multiple subjects, lettering, watermark, fine detail, hatching
 ```
 
-### premiere_reaction — « Petit geste »
+### petit_geste — « Petit geste »
 
 *1re réaction*
 
@@ -185,7 +185,7 @@ survit pas à la vectorisation en trois aplats.
 /imagine prompt: Very simple minimalist flat vector icon, single centered subject, few large clean geometric rounded shapes, thick uniform royal blue outlines (#113894), flat shading only, mostly off-white fills with one small warm orange accent, strict three-colour palette (deep royal blue #113894, warm orange #EA580C, off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a calendar showing a streak of five checked days, with a small orange flame. --ar 1:1 --style raw --v 7 --sref https://infflunch.com/achievements/ref/ref-calendrier-flamme.png https://infflunch.com/achievements/ref/ref-mouton-sorcier.png https://infflunch.com/achievements/ref/ref-plume-toque.png https://infflunch.com/achievements/ref/ref-fer-a-cheval.png https://infflunch.com/achievements/ref/ref-chronometre.png https://infflunch.com/achievements/ref/ref-de.png https://infflunch.com/achievements/ref/ref-mouton-ble.png https://infflunch.com/achievements/ref/ref-miroir.png --sw 100 --no black outlines, black strokes, gradient, texture, grain, photorealism, 3d render, isometric, perspective, drop shadow, glow, highlights, scenery, background objects, frame, border, multiple subjects, lettering, watermark, fine detail, hatching
 ```
 
-### troupeau_complet — « Complétionniste »
+### completionniste — « Complétionniste »
 
 *tous les autres succès*
 
@@ -203,7 +203,7 @@ survit pas à la vectorisation en trois aplats.
 
 ### indecis — « Indécis »
 
-*lancer la roue 5 fois, succès secret*
+*lancer la roue 3 fois, succès secret*
 
 ```
 /imagine prompt: Very simple minimalist flat vector icon, single centered subject, few large clean geometric rounded shapes, thick uniform royal blue outlines (#113894), flat shading only, mostly off-white fills with one small warm orange accent, strict three-colour palette (deep royal blue #113894, warm orange #EA580C, off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a balance scale with two hanging pans, level and perfectly balanced, with a small floating orange question mark above the central pivot, unable to choose between options. --ar 1:1 --style raw --v 7 --sref https://infflunch.com/achievements/ref/ref-calendrier-flamme.png https://infflunch.com/achievements/ref/ref-mouton-sorcier.png https://infflunch.com/achievements/ref/ref-plume-toque.png https://infflunch.com/achievements/ref/ref-fer-a-cheval.png https://infflunch.com/achievements/ref/ref-chronometre.png https://infflunch.com/achievements/ref/ref-de.png https://infflunch.com/achievements/ref/ref-mouton-ble.png https://infflunch.com/achievements/ref/ref-miroir.png --sw 100 --no black outlines, black strokes, gradient, texture, grain, photorealism, 3d render, isometric, perspective, drop shadow, glow, highlights, scenery, background objects, frame, border, multiple subjects, lettering, watermark, fine detail, hatching
@@ -249,14 +249,21 @@ survit pas à la vectorisation en trois aplats.
 /imagine prompt: Very simple minimalist flat vector icon, single centered subject, few large clean geometric rounded shapes, thick uniform royal blue outlines (#113894), flat shading only, mostly off-white fills with one small warm orange accent, strict three-colour palette (deep royal blue #113894, warm orange #EA580C, off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a flambéed dish, a small skillet or shallow pan seen from the side with a tall lively flame bursting upward from it, a couple of tiny sparks rising above the flame, the pan and handle in blue, the flame in orange, a dish set alight at the table. --ar 1:1 --style raw --v 7 --sref https://infflunch.com/achievements/ref/ref-calendrier-flamme.png https://infflunch.com/achievements/ref/ref-mouton-sorcier.png https://infflunch.com/achievements/ref/ref-plume-toque.png https://infflunch.com/achievements/ref/ref-fer-a-cheval.png https://infflunch.com/achievements/ref/ref-chronometre.png https://infflunch.com/achievements/ref/ref-de.png https://infflunch.com/achievements/ref/ref-mouton-ble.png https://infflunch.com/achievements/ref/ref-miroir.png --sw 100 --no black outlines, black strokes, gradient, texture, grain, photorealism, 3d render, isometric, perspective, drop shadow, glow, highlights, scenery, background objects, frame, border, multiple subjects, lettering, watermark, fine detail, hatching
 ```
 
-### speedrunner — « Speedrunner »
+### sprinter — « Sprinter »
 
-*choisir son restaurant du midi avant 8 h*
+*choisir son restaurant du midi avant 10 h*
 
 ```
 /imagine prompt: Very simple minimalist flat vector icon, single centered subject, few large clean geometric rounded shapes, thick uniform royal blue outlines (#113894), flat shading only, mostly off-white fills with one small warm orange accent, strict three-colour palette (deep royal blue #113894, warm orange #EA580C, off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a stopwatch with its button pressed, the hand frozen very early on the dial, with two or three horizontal speed lines trailing off to the left, and a small rising sun peeking behind the top of the watch, a record set at dawn. --ar 1:1 --style raw --v 7 --sref https://infflunch.com/achievements/ref/ref-calendrier-flamme.png https://infflunch.com/achievements/ref/ref-mouton-sorcier.png https://infflunch.com/achievements/ref/ref-plume-toque.png https://infflunch.com/achievements/ref/ref-fer-a-cheval.png https://infflunch.com/achievements/ref/ref-chronometre.png https://infflunch.com/achievements/ref/ref-de.png https://infflunch.com/achievements/ref/ref-mouton-ble.png https://infflunch.com/achievements/ref/ref-miroir.png --sw 100 --no black outlines, black strokes, gradient, texture, grain, photorealism, 3d render, isometric, perspective, drop shadow, glow, highlights, scenery, background objects, frame, border, multiple subjects, lettering, watermark, fine detail, hatching
 ```
 
+### retardataire — « Retardataire »
+
+*choisir son restaurant du midi après 14 h*
+
+```
+/imagine prompt: Very simple minimalist flat vector icon, single centered subject, few large clean geometric rounded shapes, thick uniform royal blue outlines (#113894), flat shading only, mostly off-white fills with one small warm orange accent, strict three-colour palette (deep royal blue #113894, warm orange #EA580C, off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a snail carrying a domed restaurant cloche on its back instead of a shell, crawling slowly to the right with a short orange trail behind it, arriving long after everyone has eaten. --ar 1:1 --style raw --v 7 --sref https://infflunch.com/achievements/ref/ref-calendrier-flamme.png https://infflunch.com/achievements/ref/ref-mouton-sorcier.png https://infflunch.com/achievements/ref/ref-plume-toque.png https://infflunch.com/achievements/ref/ref-fer-a-cheval.png https://infflunch.com/achievements/ref/ref-chronometre.png https://infflunch.com/achievements/ref/ref-de.png https://infflunch.com/achievements/ref/ref-mouton-ble.png https://infflunch.com/achievements/ref/ref-miroir.png --sw 100 --no black outlines, black strokes, gradient, texture, grain, photorealism, 3d render, isometric, perspective, drop shadow, glow, highlights, scenery, background objects, frame, border, multiple subjects, lettering, watermark, fine detail, hatching
+```
 ### cookie — « Cookie »
 
 *manger le seul cookie du site*
@@ -265,20 +272,20 @@ survit pas à la vectorisation en trois aplats.
 /imagine prompt: Very simple minimalist flat vector icon, single centered subject, few large clean geometric rounded shapes, thick uniform royal blue outlines (#113894), flat shading only, mostly off-white fills with one small warm orange accent, strict three-colour palette (deep royal blue #113894, warm orange #EA580C, off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a round chocolate-chip cookie being eaten from the top down, its whole upper half is gone, replaced by a scalloped bite edge (rows of small rounded tooth marks), only the lower half remains, with a few crumbs tumbling down below it, the one and only cookie a cookie-free website ever had. --ar 1:1 --style raw --v 7 --sref https://infflunch.com/achievements/ref/ref-calendrier-flamme.png https://infflunch.com/achievements/ref/ref-mouton-sorcier.png https://infflunch.com/achievements/ref/ref-plume-toque.png https://infflunch.com/achievements/ref/ref-fer-a-cheval.png https://infflunch.com/achievements/ref/ref-chronometre.png https://infflunch.com/achievements/ref/ref-de.png https://infflunch.com/achievements/ref/ref-mouton-ble.png https://infflunch.com/achievements/ref/ref-miroir.png --sw 100 --no black outlines, black strokes, gradient, texture, grain, photorealism, 3d render, isometric, perspective, drop shadow, glow, highlights, scenery, background objects, frame, border, multiple subjects, lettering, watermark, fine detail, hatching
 ```
 
-### note_de_frais — « Note de frais »
+### addition — « L'addition ! »
 
 *déclarer le prix d'un 1er restaurant*
 
 ```
-/imagine prompt: Very simple minimalist flat vector icon, single centered subject, few large clean geometric rounded shapes, thick uniform royal blue outlines (#113894), flat shading only, mostly off-white fills with one small warm orange accent, strict three-colour palette (deep royal blue #113894, warm orange #EA580C, off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a small receipt slip clipped by an orange paperclip onto a sheet of paper, the receipt tilted at a slight angle over the sheet, both with a few blank ruled lines, a lunch receipt filed as a first expense claim. --ar 1:1 --style raw --v 7 --sref https://infflunch.com/achievements/ref/ref-calendrier-flamme.png https://infflunch.com/achievements/ref/ref-mouton-sorcier.png https://infflunch.com/achievements/ref/ref-plume-toque.png https://infflunch.com/achievements/ref/ref-fer-a-cheval.png https://infflunch.com/achievements/ref/ref-chronometre.png https://infflunch.com/achievements/ref/ref-de.png https://infflunch.com/achievements/ref/ref-mouton-ble.png https://infflunch.com/achievements/ref/ref-miroir.png --sw 100 --no black outlines, black strokes, gradient, texture, grain, photorealism, 3d render, isometric, perspective, drop shadow, glow, highlights, scenery, background objects, frame, border, multiple subjects, lettering, watermark, fine detail, hatching
+/imagine prompt: Very simple minimalist flat vector icon, single centered subject, few large clean geometric rounded shapes, thick uniform royal blue outlines (#113894), flat shading only, mostly off-white fills with one small warm orange accent, strict three-colour palette (deep royal blue #113894, warm orange #EA580C, off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a small restaurant bill tray (shallow rounded dish seen at a slight angle) holding a folded stack of several receipts, with a coin balanced on top, the moment the bill arrives at the table. --ar 1:1 --style raw --v 7 --sref https://infflunch.com/achievements/ref/ref-calendrier-flamme.png https://infflunch.com/achievements/ref/ref-mouton-sorcier.png https://infflunch.com/achievements/ref/ref-plume-toque.png https://infflunch.com/achievements/ref/ref-fer-a-cheval.png https://infflunch.com/achievements/ref/ref-chronometre.png https://infflunch.com/achievements/ref/ref-de.png https://infflunch.com/achievements/ref/ref-mouton-ble.png https://infflunch.com/achievements/ref/ref-miroir.png --sw 100 --no black outlines, black strokes, gradient, texture, grain, photorealism, 3d render, isometric, perspective, drop shadow, glow, highlights, scenery, background objects, frame, border, multiple subjects, lettering, watermark, fine detail, hatching
 ```
 
-### addition — « L'addition ! »
+### gardez_la_monnaie — « Gardez la monnaie »
 
 *déclarer le prix de 5 restaurants*
 
 ```
-/imagine prompt: Very simple minimalist flat vector icon, single centered subject, few large clean geometric rounded shapes, thick uniform royal blue outlines (#113894), flat shading only, mostly off-white fills with one small warm orange accent, strict three-colour palette (deep royal blue #113894, warm orange #EA580C, off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a small restaurant bill tray (shallow rounded dish seen at a slight angle) holding a folded stack of several receipts, with a coin balanced on top, the moment the bill arrives at the table. --ar 1:1 --style raw --v 7 --sref https://infflunch.com/achievements/ref/ref-calendrier-flamme.png https://infflunch.com/achievements/ref/ref-mouton-sorcier.png https://infflunch.com/achievements/ref/ref-plume-toque.png https://infflunch.com/achievements/ref/ref-fer-a-cheval.png https://infflunch.com/achievements/ref/ref-chronometre.png https://infflunch.com/achievements/ref/ref-de.png https://infflunch.com/achievements/ref/ref-mouton-ble.png https://infflunch.com/achievements/ref/ref-miroir.png --sw 100 --no black outlines, black strokes, gradient, texture, grain, photorealism, 3d render, isometric, perspective, drop shadow, glow, highlights, scenery, background objects, frame, border, multiple subjects, lettering, watermark, fine detail, hatching
+/imagine prompt: Very simple minimalist flat vector icon, single centered subject, few large clean geometric rounded shapes, thick uniform royal blue outlines (#113894), flat shading only, mostly off-white fills with one small warm orange accent, strict three-colour palette (deep royal blue #113894, warm orange #EA580C, off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a hand holding out a small fan of folded banknotes, pushed forward towards the viewer, with two coins left behind on a flat surface below, paying without waiting for the change. --ar 1:1 --style raw --v 7 --sref https://infflunch.com/achievements/ref/ref-calendrier-flamme.png https://infflunch.com/achievements/ref/ref-mouton-sorcier.png https://infflunch.com/achievements/ref/ref-plume-toque.png https://infflunch.com/achievements/ref/ref-fer-a-cheval.png https://infflunch.com/achievements/ref/ref-chronometre.png https://infflunch.com/achievements/ref/ref-de.png https://infflunch.com/achievements/ref/ref-mouton-ble.png https://infflunch.com/achievements/ref/ref-miroir.png --sw 100 --no black outlines, black strokes, gradient, texture, grain, photorealism, 3d render, isometric, perspective, drop shadow, glow, highlights, scenery, background objects, frame, border, multiple subjects, lettering, watermark, fine detail, hatching
 ```
 
 ## Après génération
@@ -291,27 +298,32 @@ survit pas à la vectorisation en trois aplats.
 5. Nommer par l'**id** (colonne de gauche ci-dessous) et mettre `image:` à jour
    dans `src/data/achievements.ts`.
 
-## Annexe — id / titre / fichier actuel
+## Annexe — id / titre / fichier
 
-Les fichiers portent aujourd'hui le **titre**, pas l'id (`critique_en_herbe.svg`
-pour `premier_avis`). En repartant de zéro, tout nommer par l'id.
+**Règle (2026-10-02)** : un succès porte UN seul nom. L'id est le titre en
+kebab/snake sans accent, et le fichier d'icône est `{id}.svg`. Les anciens ids
+hérités d'un autre intitulé (`premier_avis` pour « Critique en herbe »,
+`troupeau_complet` pour « Complétionniste »…) ont été alignés, en base comme
+dans le code. Renommer un succès = renommer son id, son fichier, et ajouter un
+`update public.user_achievements` au script SQL du jour.
 
-| ID | Titre | Fichier actuel |
+| ID | Titre | Fichier |
 |---|---|---|
 | `anti_panurgisme` | Anti-panurgisme | `anti_panurgisme.svg` |
 | `berger_dun_jour` | Berger d'un jour | `berger_dun_jour.svg` |
 | `gourou_du_troupeau` | Gourou du troupeau | `gourou_du_troupeau.svg` |
-| `premier_avis` | Critique en herbe | `critique_en_herbe.svg` |
-| `critique_confirme` | Palais aguerri | `palais_aguerri.svg` |
+| `critique_en_herbe` | Critique en herbe | `critique_en_herbe.svg` |
+| `palais_aguerri` | Palais aguerri | `palais_aguerri.svg` |
 | `plume_gastronomique` | Plume gastronomique | `plume_gastronomique.svg` |
-| `premiere_photo` | Apprenti photographe | `apprenti_photographe.svg` |
-| `objectif_midi` | Influenceur culinaire | `influenceur_culinaire.svg` |
-| `paparazzi_pause` | Pizzarazzi | `pizzarazzi.svg` |
-| `note_de_frais` | Note de frais | `note_de_frais.svg` |
+| `photographe` | Photographe | `photographe.svg` |
+| `inffluenceur` | Inffluenceur | `inffluenceur.svg` |
+| `pizzarazzi` | Pizzarazzi | `pizzarazzi.svg` |
 | `addition` | L'addition ! | `addition.svg` |
-| `premiere_reaction` | Petit geste | `petit_geste.svg` |
+| `gardez_la_monnaie` | Gardez la monnaie | `gardez_la_monnaie.svg` |
+| `petit_geste` | Petit geste | `petit_geste.svg` |
 | `public_conquis` | Public conquis | `public_conquis.svg` |
 | `approuve` | Approuvé | `approuve.svg` |
+| `gouts_et_couleurs` | Goûts et couleurs | `gouts_et_couleurs.svg` (fournie : meme du chat devant l'assiette) |
 | `quinte_gagnant` | Quinté gagnant | `quinte_gagnant.svg` |
 | `gambling` | Gambling | `gambling.svg` |
 | `indecis` | Indécis | `indecis.svg` |
@@ -322,7 +334,8 @@ pour `premier_avis`). En repartant de zéro, tout nommer par l'id.
 | `cookie` | Cookie | `cookie.svg` |
 | `fidele_au_poste` | Fidèle au poste | `fidele_au_poste.svg` |
 | `flambe` | Flambé | `flambe.svg` |
-| `speedrunner` | Speedrunner | `speedrunner.svg` |
-| `troupeau_complet` | Complétionniste | `completionniste.svg` |
+| `sprinter` | Sprinter | `sprinter.svg` |
+| `retardataire` | Retardataire | `retardataire.svg` |
+| `completionniste` | Complétionniste | `completionniste.svg` |
 
 26 succès.

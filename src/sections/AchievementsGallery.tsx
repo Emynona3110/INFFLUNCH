@@ -71,7 +71,7 @@ const AchievementsGallery = () => {
   const progressOf = (id: AchievementId) => {
     const goal = ACHIEVEMENT_GOALS[id];
     if (goal && metrics) return { value: metrics[goal.metric], goal: goal.goal };
-    if (id === "troupeau_complet") {
+    if (id === "completionniste") {
       const others = ACHIEVEMENTS.filter((a) => a.id !== id);
       return {
         value: others.filter((a) => unlockedIds.includes(a.id)).length,

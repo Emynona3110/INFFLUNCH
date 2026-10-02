@@ -10,6 +10,8 @@ export interface AchievementMetrics {
   prices: number;
   /** Nombre de photos DIFFÉRENTES sur lesquelles l'utilisateur a réagi. */
   reactionsGivenDistinct: number;
+  /** Emojis DIFFÉRENTS que l'utilisateur a posés (photos ET avis confondus). */
+  reactionEmojisDistinct: number;
   /** Réactions reçues (par d'autres) sur les photos de l'utilisateur. */
   reactionsReceived: number;
   /** Jours de connexion consécutifs (renvoyé par touch_login). */
@@ -55,15 +57,21 @@ const useAchievementMetrics = () => {
           .eq("user_id", userId),
       ]);
 
-      // Réactions données par l'utilisateur, sur des photos (distinct par
-      // cible). Ses propres photos comptent : « Narcisse » y invite.
+      // Réactions données par l'utilisateur, en une requête pour deux mesures :
+      // les PHOTOS distinctes sur lesquelles il a réagi (ses propres photos
+      // comptent : « Narcisse » y invite), et les EMOJIS distincts qu'il a
+      // posés — ceux-là sur les avis aussi, réagir reste réagir.
       const { data: given } = await supabaseClient
         .from("reactions")
-        .select("target_id")
-        .eq("target_type", "photo")
+        .select("target_type, target_id, emoji")
         .eq("user_id", userId);
       const reactionsGivenDistinct = new Set(
-        (given ?? []).map((r) => r.target_id as number),
+        (given ?? [])
+          .filter((r) => r.target_type === "photo")
+          .map((r) => r.target_id as number),
+      ).size;
+      const reactionEmojisDistinct = new Set(
+        (given ?? []).map((r) => r.emoji as string),
       ).size;
 
       // Réactions reçues sur MES photos (par d'autres utilisateurs).
@@ -96,6 +104,7 @@ const useAchievementMetrics = () => {
         favorites: favorites.count ?? 0,
         prices: prices.count ?? 0,
         reactionsGivenDistinct,
+        reactionEmojisDistinct,
         reactionsReceived,
         loginStreak: (streak as number | null) ?? 0,
         lunchStreak: (lunchStreak as number | null) ?? 0,
