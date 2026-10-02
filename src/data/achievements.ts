@@ -83,29 +83,6 @@ export interface Achievement {
 export const FLAMBE_STREAK = 5;
 
 export const ACHIEVEMENTS: Achievement[] = [
-  // — Easter egg mouton (Beeeh) —
-  {
-    id: "anti_panurgisme",
-    title: "Anti-panurgisme",
-    icon: "🐑",
-    image: "/achievements/anti_panurgisme.svg",
-    secret: true,
-  },
-  {
-    id: "berger_dun_jour",
-    title: "Berger d'un jour",
-    icon: "🌾",
-    image: "/achievements/berger_dun_jour.svg",
-    secret: true,
-  },
-  {
-    id: "gourou_du_troupeau",
-    title: "Gourou du troupeau",
-    icon: "🧙",
-    image: "/achievements/gourou_du_troupeau.svg",
-    secret: true,
-  },
-
   // — Avis —
   {
     id: "critique_en_herbe",
@@ -231,6 +208,36 @@ export const ACHIEVEMENTS: Achievement[] = [
     secret: true,
   },
 
+  // — Méta / assiduité —
+  {
+    id: "fidele_au_poste",
+    title: "Fidèle au poste",
+    condition: "Se connecter 5 jours d'affilée",
+    icon: "📅",
+    image: "/achievements/fidele_au_poste.svg",
+  },
+  {
+    id: "flambe",
+    title: "Flambé",
+    condition: `Déclarer son midi ${FLAMBE_STREAK} jours ouvrés d'affilée`,
+    icon: "🔥",
+    image: "/achievements/flambe.svg",
+  },
+  {
+    id: "sprinter",
+    title: "Sprinter",
+    icon: "⏱️",
+    image: "/achievements/sprinter.svg",
+    secret: true,
+  },
+  {
+    id: "retardataire",
+    title: "Retardataire",
+    icon: "🐌",
+    image: "/achievements/retardataire.svg",
+    secret: true,
+  },
+
   // — Easter eggs divers —
   {
     // Jacquouille et l'interrupteur (Les Visiteurs) : « Le jour, la nuit… »
@@ -267,35 +274,30 @@ export const ACHIEVEMENTS: Achievement[] = [
     secret: true,
   },
 
-  // — Méta / assiduité —
+  // — Easter egg mouton (Beeeh) —
   {
-    id: "fidele_au_poste",
-    title: "Fidèle au poste",
-    condition: "Se connecter 5 jours d'affilée",
-    icon: "📅",
-    image: "/achievements/fidele_au_poste.svg",
-  },
-  {
-    id: "flambe",
-    title: "Flambé",
-    condition: `Déclarer son midi ${FLAMBE_STREAK} jours ouvrés d'affilée`,
-    icon: "🔥",
-    image: "/achievements/flambe.svg",
-  },
-  {
-    id: "sprinter",
-    title: "Sprinter",
-    icon: "⏱️",
-    image: "/achievements/sprinter.svg",
+    id: "anti_panurgisme",
+    title: "Anti-panurgisme",
+    icon: "🐑",
+    image: "/achievements/anti_panurgisme.svg",
     secret: true,
   },
   {
-    id: "retardataire",
-    title: "Retardataire",
-    icon: "🐌",
-    image: "/achievements/retardataire.svg",
+    id: "berger_dun_jour",
+    title: "Berger d'un jour",
+    icon: "🌾",
+    image: "/achievements/berger_dun_jour.svg",
     secret: true,
   },
+  {
+    id: "gourou_du_troupeau",
+    title: "Gourou du troupeau",
+    icon: "🧙",
+    image: "/achievements/gourou_du_troupeau.svg",
+    secret: true,
+  },
+
+  // — Complétionniste —
   {
     id: "completionniste",
     title: "Complétionniste",

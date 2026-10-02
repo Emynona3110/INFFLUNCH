@@ -159,8 +159,14 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
     .map((a) => ({ ...a, def: ACHIEVEMENTS_BY_ID[a.achievement_id] }))
     // Un succès retiré du catalogue ne doit pas faire planter la page.
     .filter((a) => a.def)
-    // Le dernier décroché en tête.
-    .sort((a, b) => b.unlocked_at.localeCompare(a.unlocked_at));
+    // Dans l'ordre du catalogue.
+    .sort(
+      (a, b) => ACHIEVEMENTS.indexOf(a.def) - ACHIEVEMENTS.indexOf(b.def),
+    );
+  // Une case par succès du catalogue, vide (null) si la personne ne l'a pas.
+  const slots = ACHIEVEMENTS.map(
+    (def) => unlocked.find((a) => a.def === def) ?? null,
+  );
 
   // Tous ses avis, note seule comprise (comme sur une fiche).
   const visibleReviews = reviews.data ?? [];
@@ -268,14 +274,24 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
               </p>
             ) : (
               /* Mobile : bandeau horizontal à défilement libre.
-               Desktop : rangée centrée, titre en infobulle. */
+               Desktop : grille de 10 par ligne sur toute la largeur, titre en
+               infobulle. */
               <ul
                 // Le défilement du bandeau ne doit pas passer pour un balayage
                 // de changement d'onglet (Mon compte) : cf. useSwipeTabs.
                 data-no-swipe
-                className="m-0 flex list-none gap-2 overflow-x-auto p-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap sm:justify-center sm:gap-2 sm:overflow-visible sm:p-0"
+                className="m-0 flex list-none gap-2 overflow-x-auto p-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:grid sm:grid-cols-10 sm:gap-2 sm:overflow-visible sm:p-0"
               >
-                {unlocked.map(({ def, unlocked_at }) => {
+                {slots.map((slot, i) => {
+                  // Succès que la personne n'a pas encore : cadre vide, à sa
+                  // place dans le catalogue.
+                  if (!slot)
+                    return (
+                      <li key={`vide-${i}`} aria-hidden className="shrink-0">
+                        <div className="h-12 w-12 rounded-xl border border-dashed border-border bg-muted/40 sm:aspect-square sm:h-auto sm:w-full" />
+                      </li>
+                    );
+                  const { def, unlocked_at } = slot;
                   // Même règle que la galerie : l'image seulement si le visiteur
                   // l'a aussi, sinon cadenas. Le reste tient dans l'infobulle —
                   // titre et date d'obtention — pour une rangée légère.
@@ -301,7 +317,7 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
                           onClick={() => setOpened(def)}
                           aria-label={`${def.title}, obtenu le ${formatDate(unlocked_at)}`}
                           className={cn(
-                            "flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl border border-border p-0.5 text-2xl outline-none transition hover:border-primary/40 focus-visible:ring-2 focus-visible:ring-primary/40 sm:h-14 sm:w-14 sm:p-1 sm:text-3xl",
+                            "flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl border border-border p-0.5 text-2xl outline-none transition hover:border-primary/40 focus-visible:ring-2 focus-visible:ring-primary/40 sm:aspect-square sm:h-auto sm:w-full sm:p-1 sm:text-3xl",
                             known
                               ? cn(
                                   "bg-background",

@@ -29,7 +29,7 @@ using (
 insert into public.achievement_secrets (id, condition) values
   ('anti_panurgisme',    'Vous avez trouvé un mouton'),
   ('berger_dun_jour',    'Nourrir un mouton'),
-  ('gourou_du_troupeau', 'Nourrir un mouton 20 fois d''affilée'),
+  ('gourou_du_troupeau', 'Nourrir un mouton 10 fois d''affilée'),
   ('indecis',            'Lancer la roue 5 fois de suite'),
   ('de_pipe',            'Lancer la roue avec un seul restaurant'),
   ('jour_nuit',          'Basculer le thème 8 fois d''affilée'),
