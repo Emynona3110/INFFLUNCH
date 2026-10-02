@@ -16,13 +16,15 @@ import {
  * fois le succès obtenu.
  */
 const useAchievementTriggers = () => {
-  const { unlock, unlockedIds } = useAchievements();
+  const { unlock, unlockedIds, resetOne, loading } = useAchievements();
   const { data: metrics } = useAchievementMetrics();
 
   const unlockedKey = unlockedIds.join(",");
 
   useEffect(() => {
-    if (!metrics) return;
+    // `loading` est capital : tant que la liste des débloqués n'est pas là, elle
+    // est vide, et le Complétionniste serait retiré à tort juste en dessous.
+    if (!metrics || loading) return;
 
     (Object.keys(ACHIEVEMENT_GOALS) as AchievementId[]).forEach((id) => {
       const { metric, goal } = ACHIEVEMENT_GOALS[id]!;
@@ -36,10 +38,17 @@ const useAchievementTriggers = () => {
     );
     if (others.every((id) => unlockedIds.includes(id))) {
       unlock("completionniste");
+    } else if (unlockedIds.includes("completionniste")) {
+      // SEULE exception à « un succès débloqué ne s'annule jamais » : le
+      // Complétionniste ne récompense pas une action mais un ÉTAT, « avoir tous
+      // les autres ». Le jour où un succès est ajouté au catalogue, cet état
+      // redevient faux, donc on le retire — et il reviendra, toast compris, dès
+      // que le nouveau succès sera décroché.
+      resetOne("completionniste").catch(() => {});
     }
     // unlockedIds est capturé ; on dépend de sa version stable (unlockedKey).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [metrics, unlockedKey, unlock]);
+  }, [metrics, unlockedKey, unlock, resetOne, loading]);
 };
 
 export default useAchievementTriggers;

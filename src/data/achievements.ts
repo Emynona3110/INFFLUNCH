@@ -4,6 +4,13 @@
 // dans le hook global `useAchievementTriggers` (paliers comptés en base).
 // Succès SECRET = pas de `condition` ici, mais une ligne dans la table
 // `achievement_secrets` (sql/2026-09-14_achievement_secrets.sql).
+//
+// RÈGLE DU JEU : un succès débloqué ne s'annule JAMAIS. Une seule exception,
+// `completionniste` : il récompense un état (« avoir tous les autres »), pas une
+// action, donc ajouter un succès ici le désactive chez celles et ceux qui
+// l'avaient — il revient dès que le nouveau est décroché. C'est
+// `useAchievementTriggers` qui le retire, et la RLS n'autorise la suppression
+// d'une ligne par son propriétaire que pour CE succès.
 
 import type { AchievementMetrics } from "@/hooks/useAchievementMetrics";
 
