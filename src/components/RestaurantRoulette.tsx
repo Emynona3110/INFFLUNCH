@@ -17,14 +17,6 @@ const SPIN_DURATION = 4.6; // durée du défilement (s)
 const RECENT_KEY = "rouletteRecent";
 const RECENT_MAX = 3; // on évite de retomber sur les N derniers tirés
 
-/** Lancers dans la même session qui valent le succès « Indécis ». */
-const INDECIS_SPINS = 3;
-
-// Nombre de lancers depuis le chargement de la page (succès « Indécis »).
-// Volontairement au niveau module : conservé au changement de vue, remis à zéro
-// au rechargement complet de la page.
-let sessionSpinCount = 0;
-
 const readRecent = (): number[] => {
   try {
     const raw = localStorage.getItem(RECENT_KEY);
@@ -155,9 +147,8 @@ const RestaurantRoulette = ({
     // Succès « Dé pipé » : lancer avec un seul resto, réduit volontairement
     // (d'autres restos existent mais ont été décochés).
     if (selectedPool.length === 1 && pool.length > 1) unlock("magritte");
-    // Succès « Indécis » : 3 lancers dans la même session (secret).
-    sessionSpinCount += 1;
-    if (sessionSpinCount >= INDECIS_SPINS) unlock("matrix");
+    // Succès « Choix cornélien » : lancer la roue entre deux restos (secret).
+    if (selectedPool.length === 2) unlock("matrix");
 
     setSpinKey((k) => k + 1);
     setPhase("spinning");

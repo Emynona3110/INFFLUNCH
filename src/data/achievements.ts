@@ -197,7 +197,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
   {
     id: "pokeball",
     title: "Dégustez-les tous",
-    condition: "Avoir 5 restaurants favoris",
+    condition: "Avoir 6 restaurants favoris",
     icon: "🥣",
     image: "/achievements/pokeball.svg",
   },
@@ -363,7 +363,7 @@ export const ACHIEVEMENT_GOALS: Partial<
   absolute_cinema: { metric: "reactionsGivenDistinct", goal: 20 },
   approuve: { metric: "reactionsReceived", goal: 5 },
   gouts_et_couleurs: { metric: "reactionEmojisDistinct", goal: 3 },
-  pokeball: { metric: "favorites", goal: 5 },
+  pokeball: { metric: "favorites", goal: 6 }, // une équipe Pokémon
   michael_scott: { metric: "loginStreak", goal: 5 },
   johnny_hallyday: { metric: "lunchStreak", goal: FLAMBE_STREAK },
 };
