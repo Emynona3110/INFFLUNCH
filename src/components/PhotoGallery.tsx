@@ -183,7 +183,6 @@ const PhotoGallery = ({
 
   // Les vignettes, identiques quel que soit l'agencement.
   const thumbnails = photos.map((photo) => {
-    const canDelete = !!onDelete && (isAdmin || photo.user_id === userId);
     const reactCounts = photoReactions.summaryFor(photo.id).counts;
     // Emojis uniques présents sur la photo, du plus fréquent au moins fréquent.
     const reactEntries = Object.entries(reactCounts)
@@ -249,16 +248,6 @@ const PhotoGallery = ({
               </span>
             )}
           </div>
-        )}
-        {canDelete && (
-          <HoldToDeleteButton
-            onConfirm={() => deletePhoto(photo)}
-            mobileConfirm="Supprimer la photo ?"
-            className="absolute right-1.5 top-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-black/55 text-white opacity-0 backdrop-blur-sm transition group-hover:opacity-100"
-            progressClassName="bg-destructive/70"
-          >
-            <FiTrash2 className="h-4 w-4" />
-          </HoldToDeleteButton>
         )}
       </div>
     );
@@ -409,11 +398,14 @@ const PhotoGallery = ({
               </div>
 
               {/* Descriptif en clair, sur toute la largeur. Le crayon
-                  n'apparaît que pour l'auteur. */}
+                  n'apparaît que pour l'auteur ; la corbeille (auteur ou
+                  admin) à sa droite — plus sur la vignette. */}
               {(() => {
                 // Seul l'auteur retouche sa légende (un admin peut encore le
                 // faire en base, pour la modération, mais pas d'ici).
                 const canEdit = !!onSetCaption && lightbox.user_id === userId;
+                const canDelete =
+                  !!onDelete && (isAdmin || lightbox.user_id === userId);
                 if (captionDraft !== null) {
                   return (
                     <div className="flex items-center gap-2">
@@ -442,11 +434,11 @@ const PhotoGallery = ({
                     </div>
                   );
                 }
-                if (!lightbox.caption && !canEdit) return null;
+                if (!lightbox.caption && !canEdit && !canDelete) return null;
                 return (
-                  // Sans descriptif, rien à lire : l'auteur n'a que le crayon,
-                  // les autres ne voient pas la ligne du tout.
-                  <div className="flex items-start gap-2">
+                  // Sans descriptif, rien à lire : l'auteur n'a que ses
+                  // boutons, les autres ne voient pas la ligne du tout.
+                  <div className="flex items-start gap-1">
                     {lightbox.caption && (
                       <p className="m-0 min-w-0 flex-1 whitespace-pre-wrap break-words text-sm text-foreground">
                         {lightbox.caption}
@@ -465,6 +457,16 @@ const PhotoGallery = ({
                       >
                         <FiEdit2 className="h-3.5 w-3.5" />
                       </button>
+                    )}
+                    {canDelete && (
+                      <HoldToDeleteButton
+                        onConfirm={() => deletePhoto(lightbox)}
+                        mobileConfirm="Supprimer la photo ?"
+                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                        progressClassName="bg-destructive/25"
+                      >
+                        <FiTrash2 className="h-3.5 w-3.5" />
+                      </HoldToDeleteButton>
                     )}
                   </div>
                 );
