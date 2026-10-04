@@ -4,6 +4,7 @@ import useSession from "./useSession";
 import supabaseClient from "../services/supabaseClient";
 import useAchievements from "./useAchievements";
 import { clearLunchPriceSkip } from "../services/lunchPriceSkip";
+import { COWABUNGA_TABLE } from "../data/achievements";
 
 /** Pourquoi on ne mange pas au restaurant : présent sur site mais déjeunant
  *  autrement (gamelle, plat apporté, resto de son côté), ou absent du site.
@@ -283,6 +284,18 @@ const useLunchToday = () => {
   }, [participants]);
 
   const myPlan = participants.find((p) => p.user_id === userId) ?? null;
+
+  // Succès secret « Cowabunga ! » : ma tablée du jour atteint quatre. Vérifié à
+  // chaque mise à jour des participants (Realtime compris) : peu importe qui
+  // arrive en dernier, chacun le décroche à sa prochaine visite. unlock est
+  // idempotent, l'appel répété ne coûte rien.
+  const myTable = myPlan?.restaurant_id != null
+    ? byRestaurant.get(myPlan.restaurant_id)?.length ?? 0
+    : 0;
+  useEffect(() => {
+    if (myTable >= COWABUNGA_TABLE) unlock("cowabunga");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [myTable]);
 
   return {
     participants,

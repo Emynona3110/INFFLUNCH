@@ -6,6 +6,7 @@ import useFeedback, { Feedback } from "@/hooks/useFeedback";
 import useAdminNotes from "@/hooks/useAdminNotes";
 import useIsAdmin from "@/hooks/useIsAdmin";
 import useSession from "@/hooks/useSession";
+import useAchievements from "@/hooks/useAchievements";
 import {
   FEEDBACK_TYPES,
   FeedbackType,
@@ -60,6 +61,7 @@ const FeedbackDialog = ({ isOpen, onClose, item }: Props) => {
   const notes = useAdminNotes(false);
   const { sessionData } = useSession();
   const userId = sessionData?.user?.id;
+  const { unlock } = useAchievements();
   // Seule une NOUVELLE demande d'admin court-circuite : corriger une demande
   // existante reste une correction de demande.
   const toBacklog = isAdmin && !item;
@@ -79,12 +81,15 @@ const FeedbackDialog = ({ isOpen, onClose, item }: Props) => {
   // Formulaire vierge à chaque ouverture.
   useEffect(() => {
     if (!isOpen) return;
+    // Succès secret « Pas de sushi » : avoir ouvert la fenêtre une fois.
+    unlock("pas_de_sushi");
     setType(item?.type ?? null);
     setMessage(item?.message ?? "");
     setImages((prev) => {
       revokeAttached(prev);
       return fromStored(item?.images);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, item]);
 
   // Rien n'a bougé : inutile d'écrire en base (l'update ferait ressortir du

@@ -46,11 +46,13 @@ export type AchievementId =
   | "narcisse"
   | "shooting_stars"
   | "cookie"
+  | "pas_de_sushi"
   // Méta / assiduité
   | "fidele_au_poste"
   | "flambe"
   | "sprinter"
   | "retardataire"
+  | "cowabunga"
   | "completionniste";
 
 export interface Achievement {
@@ -76,17 +78,27 @@ export interface Achievement {
    * easter eggs. Les succès normaux se révèlent grisés avant déblocage.
    */
   secret?: boolean;
+  /**
+   * Désactivé : gardé dans le fichier (pour le réactiver d'une ligne) mais
+   * absent de partout — galerie, profils, compteurs, Complétionniste — et
+   * plus jamais débloqué. Les obtentions déjà en base restent, invisibles.
+   */
+  disabled?: boolean;
 }
 
 /** Palier du succès « Flambé » : jours ouvrés d'affilée avec un midi déclaré
  *  (déblocage dans useAchievementTriggers, flammes sur la pp du profil). */
 export const FLAMBE_STREAK = 5;
 
+/** Tablée du midi (même restaurant, même jour), soi compris, qui vaut le
+ *  succès secret « Cowabunga ! » — quatre, comme les tortues. */
+export const COWABUNGA_TABLE = 4;
+
 /** En dessous de ce pourcentage d'obtention, un succès est rare : son icône
  *  porte une aura dorée (classe `rare-aura`) chez ceux qui l'ont. */
 export const RARE_PERCENT = 10;
 
-export const ACHIEVEMENTS: Achievement[] = [
+const ALL_ACHIEVEMENTS: Achievement[] = [
   // — Avis —
   {
     id: "critique_en_herbe",
@@ -132,6 +144,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     condition: "Ajouter 15 photos",
     icon: "🍕",
     image: "/achievements/pizzarazzi.svg",
+    disabled: true,
   },
 
   // — Prix déclarés —
@@ -171,6 +184,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     condition: "Recevoir 5 réactions sur vos photos",
     icon: "❤️",
     image: "/achievements/approuve.svg",
+    disabled: true,
   },
   {
     id: "gouts_et_couleurs",
@@ -241,6 +255,15 @@ export const ACHIEVEMENTS: Achievement[] = [
     image: "/achievements/retardataire.svg",
     secret: true,
   },
+  {
+    // Le cri des Tortues Ninja : déjeuner à au moins COWABUNGA_TABLE dans le
+    // même restaurant le même midi (useLunchToday).
+    id: "cowabunga",
+    title: "Cowabunga !",
+    icon: "🐢",
+    image: "/achievements/cowabunga.svg",
+    secret: true,
+  },
 
   // — Easter eggs divers —
   {
@@ -277,6 +300,15 @@ export const ACHIEVEMENTS: Achievement[] = [
     image: "/achievements/cookie.svg",
     secret: true,
   },
+  {
+    // « Pas de souci » : Némo couché sur son riz, en sushi. Ouvrir la fenêtre
+    // des demandes (FeedbackDialog) une première fois.
+    id: "pas_de_sushi",
+    title: "Pas de sushi",
+    icon: "🍣",
+    image: "/achievements/pas_de_sushi.svg",
+    secret: true,
+  },
 
   // — Easter egg mouton (Beeeh) —
   {
@@ -299,6 +331,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     icon: "🧙",
     image: "/achievements/gourou_du_troupeau.svg",
     secret: true,
+    disabled: true,
   },
 
   // — Complétionniste —
@@ -335,6 +368,9 @@ export const ACHIEVEMENT_GOALS: Partial<
   fidele_au_poste: { metric: "loginStreak", goal: 5 },
   flambe: { metric: "lunchStreak", goal: FLAMBE_STREAK },
 };
+
+/** Le catalogue en service : tout le reste du code ne voit que lui. */
+export const ACHIEVEMENTS = ALL_ACHIEVEMENTS.filter((a) => !a.disabled);
 
 export const ACHIEVEMENTS_BY_ID = Object.fromEntries(
   ACHIEVEMENTS.map((a) => [a.id, a])

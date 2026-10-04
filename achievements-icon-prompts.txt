@@ -363,3 +363,26 @@ strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
 off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a small restaurant bill tray
 (shallow rounded dish seen at a slight angle) holding a folded stack of several
 receipts, with a coin balanced on top — the moment the bill arrives at the table.
+
+================================================================================
+AJOUT 2026-10-04 — succès secrets Cowabunga ! et Pas de sushi
+================================================================================
+
+--- cowabunga — "Cowabunga !" (déjeuner à au moins 4 dans le même resto) -------
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: four
+cartoon ninja turtles seen from above, sitting around one big round pizza, each
+with a headband whose two ends flutter behind its head — a lunch table of four.
+
+--- pas_de_sushi — "Pas de sushi" (ouvrir la fenêtre des demandes) -----------
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a
+small cartoon clownfish (orange with white bands) lying on top of an oval block
+of rice like a nigiri sushi, relaxed and smiling, with a thin seaweed strip
+across its middle — "no worries" turned into "no sushi".

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import supabaseClient from "../services/supabaseClient";
 import useSession from "./useSession";
+import useRealtimeTable from "./useRealtimeTable";
 import { AchievementId, ACHIEVEMENTS_BY_ID } from "@/data/achievements";
 import { showAchievementToast } from "@/lib/achievementToast";
 
@@ -55,9 +56,26 @@ const useAchievements = () => {
   const unlockedRef = useRef<AchievementId[]>([]);
   unlockedRef.current = unlockedIds;
 
+  // Tout ce qu'un déblocage (ou un reverrouillage) change à l'écran : la
+  // galerie « Succès », les % de rareté, les conditions secrètes devenues
+  // lisibles, la section Succès des profils et la liste « Débloqué par » de
+  // la fiche d'un succès.
+  const refresh = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ["achievements", userId] });
+    queryClient.invalidateQueries({ queryKey: ["achievement-stats"] });
+    queryClient.invalidateQueries({ queryKey: ["achievement-secrets", userId] });
+    queryClient.invalidateQueries({ queryKey: ["public-profile"] });
+    queryClient.invalidateQueries({ queryKey: ["achievement-holders"] });
+  }, [queryClient, userId]);
+
+  // Temps réel : un succès débloqué sur un autre appareil (ou un autre onglet)
+  // apparaît aussi ici. La RLS ne livre que ses propres lignes.
+  useRealtimeTable("user_achievements", refresh, !!userId);
+
   const unlock = useCallback(
     async (id: AchievementId) => {
-      if (!userId) return;
+      // Hors catalogue (succès désactivé) : jamais débloqué.
+      if (!userId || !ACHIEVEMENTS_BY_ID[id]) return;
       const firedKey = `${userId}:${id}`;
       if (fired.has(firedKey) || unlockedRef.current.includes(id)) return;
       fired.add(firedKey);
@@ -79,13 +97,9 @@ const useAchievements = () => {
         showAchievementToast(achievement, () =>
           navigate("/mon-compte?tab=succes")
         );
-      queryClient.invalidateQueries({ queryKey: ["achievements", userId] });
-      // Le déblocage change aussi les % de rareté (on vient de s'y ajouter).
-      queryClient.invalidateQueries({ queryKey: ["achievement-stats"] });
-      // Un secret débloqué rend sa condition lisible.
-      queryClient.invalidateQueries({ queryKey: ["achievement-secrets", userId] });
+      refresh();
     },
-    [userId, queryClient, navigate]
+    [userId, navigate, refresh]
   );
 
   /**
@@ -104,11 +118,9 @@ const useAchievements = () => {
       if (error) throw new Error(error.message);
 
       fired.delete(`${userId}:${id}`);
-      queryClient.invalidateQueries({ queryKey: ["achievements", userId] });
-      queryClient.invalidateQueries({ queryKey: ["achievement-stats"] });
-      queryClient.invalidateQueries({ queryKey: ["achievement-secrets", userId] });
+      refresh();
     },
-    [userId, queryClient]
+    [userId, refresh]
   );
 
   return {
