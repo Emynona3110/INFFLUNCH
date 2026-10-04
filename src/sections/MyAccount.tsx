@@ -237,6 +237,8 @@ const MyAccount = () => {
           className="-mx-2.5 -my-3 h-[calc(100%+1.5rem)] overflow-hidden"
         >
           <div
+            // Seul le glissement latéral de la piste anime le changement : pas
+            // de fondu en montant sur les panneaux mobiles.
             className="flex h-full transition-transform duration-300 ease-out"
             style={{
               transform: `translateX(-${visibleTabs.findIndex((t) => t.key === active) * 100}%)`,
@@ -253,12 +255,8 @@ const MyAccount = () => {
               >
                 {/* Contenu au moins plein écran : le footer se cale en bas
                     quand l'onglet est court, sous le contenu sinon. */}
-                <div className="flex-1 shrink-0">
-                  {visited.has(t.key) && (
-                    <PageReveal className="space-y-3">
-                      {renderTab(t.key)}
-                    </PageReveal>
-                  )}
+                <div className="flex-1 shrink-0 space-y-3">
+                  {visited.has(t.key) && renderTab(t.key)}
                 </div>
                 <Footer />
               </div>
