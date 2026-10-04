@@ -74,6 +74,6 @@ dans le code. Renommer un succès = renommer son id, son fichier, et ajouter un
 | `johnny_hallyday` | Tout feu tout flamme | `johnny_hallyday.svg` |
 | `flash` | Premier arrivé, premier servi | `flash.svg` |
 | `mister_bean` | Mieux vaut tard que jamais | `mister_bean.svg` |
-| `gatsby` | La cerise sur le gâteau | `gatsby.svg` |
+| `gatsby` | Le bouquet final | `gatsby.svg` |
 
 26 succès.

@@ -336,7 +336,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
   // — Complétionniste —
   {
     id: "gatsby",
-    title: "La cerise sur le gâteau",
+    title: "Le bouquet final",
     condition: "Débloquer tous les autres succès",
     icon: "🥂",
     image: "/achievements/gatsby.svg",
