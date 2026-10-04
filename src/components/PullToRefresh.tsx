@@ -90,7 +90,10 @@ const PullToRefresh = ({ scrollRef, children }: Props) => {
   const dragging = startY.current != null;
 
   return (
-    <div className="relative">
+    // Colonne flex jusqu'aux enfants : un enfant `flex-1` (le mouton de la
+    // fiche resto inconnue) remplit encore la hauteur et peut se centrer.
+    // `w-full` sur les enfants : en flex, un `mx-auto` sans largeur rétrécirait.
+    <div className="relative flex flex-1 flex-col">
       {/* Indicateur : centré au-dessus du contenu, apparaît avec le tirage. */}
       <div
         aria-hidden
@@ -113,6 +116,7 @@ const PullToRefresh = ({ scrollRef, children }: Props) => {
       </div>
 
       <div
+        className="flex flex-1 flex-col [&>*]:w-full"
         style={{
           transform: pull ? `translateY(${pull}px)` : undefined,
           transition: dragging ? "none" : "transform 200ms",

@@ -50,6 +50,7 @@ dans le code. Renommer un succès = renommer son id, son fichier, et ajouter un
 | `petit_prince` | Dessine-moi un mouton | `petit_prince.svg` |
 | `minecraft` | Revenons à nos moutons | `minecraft.svg` |
 | `gourou_du_troupeau` | Gourou du troupeau | `gourou_du_troupeau.svg` |
+| `seigneur_des_anneaux` | Le Seigneur des agneaux | `seigneur_des_anneaux.svg` |
 | `ratatouille` | La main à la pâte | `ratatouille.svg` |
 | `death_note` | Rayer de la carte | `death_note.svg` |
 | `naruto` | Ramen ta science | `naruto.svg` |

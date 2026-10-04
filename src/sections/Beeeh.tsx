@@ -5,6 +5,14 @@ import useAchievements from "@/hooks/useAchievements";
 /** Nombre de nourritures consécutives (sans quitter la page) pour le gourou. */
 const GOUROU_STREAK = 10;
 
+/** Chance qu'un clic fasse tomber l'Anneau unique au lieu d'une nourriture
+ *  (succès « Le Seigneur des agneaux »). Jamais au premier clic : le premier
+ *  objet est toujours une nourriture (« Revenons à nos moutons »). L'anneau est
+ *  unique : plus jamais une fois le succès obtenu, ni deux à l'écran. */
+const RING_CHANCE = 1 / 100;
+/** TEST : force l'anneau au deuxième clic. À repasser à false avant la mise en ligne. */
+const RING_TEST = true;
+
 /** Emojis liés à la nourriture (hors fruits) qui tombent. */
 const FOOD_EMOJIS = [
   // Pains & boulangerie
@@ -22,7 +30,13 @@ const LAYOUT_MAX = 1200;
 const EMOJI_SIZE = 40;
 const MAX_EMOJIS = 30;
 
-type FallingItem = { id: number; emoji: string; left: number; duration: number };
+type FallingItem = {
+  id: number;
+  emoji: string;
+  left: number;
+  duration: number;
+  ring?: boolean;
+};
 
 const Beeeh = () => {
   const beehRef = useRef<HTMLAudioElement | null>(null);
@@ -31,8 +45,10 @@ const Beeeh = () => {
   const idRef = useRef(0);
   const wobblingRef = useRef(false);
   const streakRef = useRef(0);
+  const spawnCountRef = useRef(0);
   const [items, setItems] = useState<FallingItem[]>([]);
-  const { unlock } = useAchievements();
+  const { unlock, unlockedIds } = useAchievements();
+  const hasRing = unlockedIds.includes("seigneur_des_anneaux");
 
   // Succès « Dessine-moi un mouton » : avoir trouvé le mouton (afficher cette page).
   useEffect(() => {
@@ -43,16 +59,22 @@ const Beeeh = () => {
     const layoutW = Math.min(window.innerWidth, LAYOUT_MAX);
     const margin = (window.innerWidth - layoutW) / 2;
     const left = margin + Math.random() * Math.max(0, layoutW - EMOJI_SIZE);
-    const next: FallingItem = {
-      id: idRef.current++,
-      emoji: FOOD_EMOJIS[Math.floor(Math.random() * FOOD_EMOJIS.length)],
-      left,
-      duration: 6 + Math.random() * 2,
-    };
-    // Plafond de 10 emojis : au-delà on ne spawn plus, le temps que ceux en
-    // chute disparaissent.
-    setItems((prev) => (prev.length >= MAX_EMOJIS ? prev : [...prev, next]));
-  }, []);
+    spawnCountRef.current += 1;
+    const rollRing =
+      !hasRing &&
+      spawnCountRef.current > 1 &&
+      ((RING_TEST && spawnCountRef.current === 2) || Math.random() < RING_CHANCE);
+    const food = FOOD_EMOJIS[Math.floor(Math.random() * FOOD_EMOJIS.length)];
+    const id = idRef.current++;
+    const duration = 6 + Math.random() * 2;
+    // Plafond de MAX_EMOJIS : au-delà on ne spawn plus, le temps que ceux en
+    // chute disparaissent. Un anneau déjà en chute → nourriture à la place.
+    setItems((prev) => {
+      if (prev.length >= MAX_EMOJIS) return prev;
+      const ring = rollRing && !prev.some((it) => it.ring);
+      return [...prev, { id, left, duration, ring, emoji: ring ? "💍" : food }];
+    });
+  }, [hasRing]);
 
   const removeItem = useCallback((id: number) => {
     setItems((prev) => prev.filter((it) => it.id !== id));
@@ -77,6 +99,13 @@ const Beeeh = () => {
       transition: { duration: 1 },
     });
     wobblingRef.current = false;
+  };
+
+  // Clic sur l'Anneau unique : pas une nourriture, il ne compte ni ne casse le
+  // streak. Le mouton ne le mange pas, il le garde (« mon précieux »).
+  const handleCatchRing = (id: number) => {
+    removeItem(id);
+    unlock("seigneur_des_anneaux");
   };
 
   // Clic sur un emoji en chute : il disparaît, son de croquage, le mouton "mange".
@@ -129,7 +158,7 @@ const Beeeh = () => {
             <motion.button
               key={item.id}
               type="button"
-              aria-label={`Manger ${item.emoji}`}
+              aria-label={item.ring ? "Attraper l'Anneau unique" : `Manger ${item.emoji}`}
               className="pointer-events-auto absolute top-0 cursor-pointer select-none border-0 bg-transparent p-0 leading-none"
               style={{ left: item.left, fontSize: EMOJI_SIZE }}
               initial={{ y: 0, rotate: 0, opacity: 1 }}
@@ -142,7 +171,9 @@ const Beeeh = () => {
                 },
               }}
               exit={{ scale: 0, opacity: 0, transition: { duration: 0.15 } }}
-              onClick={() => handleEatEmoji(item.id)}
+              onClick={() =>
+                item.ring ? handleCatchRing(item.id) : handleEatEmoji(item.id)
+              }
               onAnimationComplete={() => removeItem(item.id)}
             >
               {item.emoji}

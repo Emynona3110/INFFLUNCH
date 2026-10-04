@@ -19,6 +19,7 @@ export type AchievementId =
   | "petit_prince"
   | "minecraft"
   | "gourou_du_troupeau"
+  | "seigneur_des_anneaux"
   // Avis
   | "ratatouille"
   | "naruto"
@@ -331,6 +332,15 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     image: "/achievements/gourou_du_troupeau.svg",
     secret: true,
     disabled: true,
+  },
+  {
+    // « Le Seigneur des agneaux » : 1 chance sur 100 que le mouton fasse tomber
+    // l'Anneau unique au lieu d'une nourriture ; il faut l'attraper.
+    id: "seigneur_des_anneaux",
+    title: "Le Seigneur des agneaux",
+    icon: "💍",
+    image: "/achievements/seigneur_des_anneaux.svg",
+    secret: true,
   },
 
   // — Complétionniste —
