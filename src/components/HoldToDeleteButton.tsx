@@ -23,6 +23,8 @@ interface Props {
    * l'appelant enchaîne déjà sur sa propre confirmation).
    */
   mobileConfirm?: string | false;
+  /** Popup de validation aussi sur desktop (pas seulement sur mobile). */
+  confirmAlways?: boolean;
 }
 
 /**
@@ -39,6 +41,7 @@ const HoldToDeleteButton = ({
   disabled,
   title = "Maintenir pour supprimer",
   mobileConfirm = "Supprimer cet élément ?",
+  confirmAlways = false,
 }: Props) => {
   const [holding, setHolding] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -71,7 +74,7 @@ const HoldToDeleteButton = ({
     timer.current = setTimeout(async () => {
       timer.current = null;
       setHolding(false);
-      if (isMobile && mobileConfirm !== false) setAsking(true);
+      if ((isMobile || confirmAlways) && mobileConfirm !== false) setAsking(true);
       else await run();
     }, holdMs);
   };

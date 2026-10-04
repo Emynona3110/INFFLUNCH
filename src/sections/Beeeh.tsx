@@ -11,7 +11,7 @@ const GOUROU_STREAK = 10;
  *  unique : plus jamais une fois le succès obtenu, ni deux à l'écran. */
 const RING_CHANCE = 1 / 100;
 /** TEST : force l'anneau au deuxième clic. À repasser à false avant la mise en ligne. */
-const RING_TEST = true;
+const RING_TEST = false;
 
 /** Emojis liés à la nourriture (hors fruits) qui tombent. */
 const FOOD_EMOJIS = [

@@ -273,6 +273,7 @@ const AchievementsGallery = () => {
                       <HoldToDeleteButton
                         onConfirm={() => handleReset(a.id)}
                         mobileConfirm="Reverrouiller ce succès ?"
+                        confirmAlways
                         aria-label="Maintenir pour reverrouiller ce succès"
                         className="relative z-[1] flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:text-destructive"
                         progressClassName="bg-destructive/15"
