@@ -132,7 +132,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: "salt_bae",
-    title: "Grain de sel",
+    title: "Ton grain de sel",
     condition: "Ajouter 5 photos",
     icon: "🧂",
     image: "/achievements/salt_bae.svg",
@@ -149,7 +149,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
   {
     id: "take_my_money",
     title: "Gardez la monnaie",
-    condition: "Déclarer le prix d'un premier restaurant",
+    condition: "Déclarer le prix d'un restaurant",
     icon: "💸",
     image: "/achievements/take_my_money.svg",
   },
@@ -338,7 +338,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
   {
     id: "gatsby",
     title: "Le bouquet final",
-    condition: "Débloquer tous les autres succès",
+    condition: "Débloquer tous les succès",
     icon: "🥂",
     image: "/achievements/gatsby.svg",
   },
