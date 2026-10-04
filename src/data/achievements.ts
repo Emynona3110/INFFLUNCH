@@ -143,7 +143,6 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     condition: "Ajouter 15 photos",
     icon: "🍕",
     image: "/achievements/louvre.svg",
-    disabled: true,
   },
 
   // — Prix déclarés —
@@ -185,7 +184,6 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     condition: "Recevoir 5 réactions sur vos photos",
     icon: "❤️",
     image: "/achievements/brent_rambo.svg",
-    disabled: true,
   },
   {
     id: "gouts_et_couleurs",
