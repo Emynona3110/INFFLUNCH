@@ -275,7 +275,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: "johnny_bravo",
-    title: "Jamais mieux servi que par soi-même",
+    title: "Man, I'm pretty!",
     icon: "🪞",
     image: "/achievements/johnny_bravo.svg",
     secret: true,

@@ -472,7 +472,7 @@ const PhotoGallery = ({
               <EmojiReactions
                 summary={photoReactions.summaryFor(lightbox.id)}
                 onToggle={(emoji) => {
-                  // Succès « Jamais mieux servi que par soi-même » : AJOUTER une réaction sur sa propre
+                  // Succès « Man, I'm pretty! » : AJOUTER une réaction sur sa propre
                   // photo (pas la retirer).
                   if (
                     lightbox.user_id === userId &&

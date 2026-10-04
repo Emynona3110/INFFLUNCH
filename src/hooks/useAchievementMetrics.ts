@@ -59,7 +59,7 @@ const useAchievementMetrics = () => {
 
       // Réactions données par l'utilisateur, en une requête pour deux mesures :
       // les PHOTOS distinctes sur lesquelles il a réagi (ses propres photos
-      // comptent : « Jamais mieux servi que par soi-même » y invite), et les EMOJIS distincts qu'il a
+      // comptent : « Man, I'm pretty! » y invite), et les EMOJIS distincts qu'il a
       // posés — ceux-là sur les avis aussi, réagir reste réagir.
       const { data: given } = await supabaseClient
         .from("reactions")

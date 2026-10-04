@@ -67,7 +67,7 @@ dans le code. Renommer un succès = renommer son id, son fichier, et ajouter un
 | `matrix` | Choix cornélien | `matrix.svg` |
 | `magritte` | Dé pipé | `magritte.svg` |
 | `jacquouille` | Jour ! Nuit ! Jour ! Nuit ! | `jacquouille.svg` |
-| `johnny_bravo` | Jamais mieux servi que par soi-même | `johnny_bravo.svg` |
+| `johnny_bravo` | Man, I'm pretty! | `johnny_bravo.svg` |
 | `shooting_stars` | Étoiles filantes | `shooting_stars.svg` |
 | `cookie_clicker` | Cookie Clicker | `cookie_clicker.svg` |
 | `michael_scott` | Fidèle au poste | `michael_scott.svg` |
