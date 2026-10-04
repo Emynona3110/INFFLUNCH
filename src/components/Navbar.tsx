@@ -147,10 +147,10 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
                   // Données de l'onglet chargées dès le survol.
                   onMouseEnter={() => prefetchSection(item.path)}
                   className={cn(
-                    "relative flex h-full cursor-pointer items-center border-b-2 text-lg transition",
+                    "relative flex h-full cursor-pointer items-center text-lg transition",
                     isActive
-                      ? "border-primary text-primary"
-                      : "border-transparent text-foreground/50 hover:text-foreground",
+                      ? "text-primary"
+                      : "text-foreground/50 hover:text-foreground",
                   )}
                 >
                   {/* Calque fantôme gras : réserve la largeur → pas de saut d'1px.
@@ -180,6 +180,15 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
                       />
                     )}
                   </span>
+                  {/* Trait de l'onglet actif (3px) : un seul trait partagé
+                      (`layoutId`) qui glisse d'un onglet à l'autre. */}
+                  {isActive && (
+                    <motion.span
+                      layoutId="navbar-underline"
+                      className="absolute inset-x-0 bottom-0 h-[3px] bg-primary"
+                      transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                    />
+                  )}
                 </button>
               </div>
             );

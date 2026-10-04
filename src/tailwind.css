@@ -621,12 +621,20 @@ input:-webkit-autofill:active {
 /* Photos marquées `data-fade` : invisibles tant qu'elles chargent, puis
    fondu à l'arrivée plutôt qu'un passage brusque du vide à l'image — y compris
    avec « réduire les animations » (choix assumé). `data-loaded` est posé par
-   main.tsx. Transition sur l'opacité ET la transformation : le zoom au survol
-   des cartes (`transition-transform`, 300 ms) est conservé. */
+   main.tsx. Transition sur l'opacité ET les propriétés de transformation :
+   Tailwind 4 zoome via `scale` (pas `transform`) — les omettre cassait le
+   zoom adouci au survol des cartes (`transition-transform`, 300 ms). */
 img[data-fade] {
-  transition-property: opacity, transform;
+  transition-property: opacity, transform, translate, scale, rotate;
   transition-duration: 0.3s;
-  transition-timing-function: ease-out;
+  /* Une courbe par propriété, dans l'ordre : ease-out pour le fondu, celle de
+     Tailwind (`transition-transform`) pour le zoom, comme avant. */
+  transition-timing-function:
+    ease-out,
+    var(--tw-ease, var(--default-transition-timing-function)),
+    var(--tw-ease, var(--default-transition-timing-function)),
+    var(--tw-ease, var(--default-transition-timing-function)),
+    var(--tw-ease, var(--default-transition-timing-function));
 }
 img[data-fade]:not([data-loaded]) {
   opacity: 0;

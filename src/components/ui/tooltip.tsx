@@ -29,7 +29,11 @@ export function Tooltip({ label, children, side = "top", keepOnClick }: TooltipP
   // gardent l'ouverture au tap.
   if (isTouch && !keepOnClick) return <>{children}</>;
   return (
-    <TooltipPrimitive.Provider delayDuration={150}>
+    // `disableHoverableContent` + `pointer-events-none` : la bulle n'est que de
+    // l'info. Survolable, elle restait ouverte sous la souris et masquait ce
+    // qu'elle recouvre (le succès du dessus, sur un profil, n'était plus
+    // cliquable).
+    <TooltipPrimitive.Provider delayDuration={150} disableHoverableContent>
       <TooltipPrimitive.Root open={isTouch ? open : undefined}>
         <TooltipPrimitive.Trigger
           asChild
@@ -54,7 +58,7 @@ export function Tooltip({ label, children, side = "top", keepOnClick }: TooltipP
               if (isTouch) setOpen(false);
               else if (keepOnClick) e.preventDefault();
             }}
-            className="z-[1200] select-none rounded-md bg-foreground px-2.5 py-1 font-sans text-xs font-medium text-background shadow-md animate-[tooltip-in_120ms_ease-out]"
+            className="pointer-events-none z-[1200] select-none rounded-md bg-foreground px-2.5 py-1 font-sans text-xs font-medium text-background shadow-md animate-[tooltip-in_120ms_ease-out]"
           >
             {label}
           </TooltipPrimitive.Content>
