@@ -61,7 +61,7 @@ dans le code. Renommer un succès = renommer son id, son fichier, et ajouter un
 | `brent_rambo` | Coup de pouce | `brent_rambo.svg` |
 | `absolute_cinema` | Du grand art | `absolute_cinema.svg` |
 | `jules_cesar` | Veni, vidi, amavi | `jules_cesar.svg` |
-| `gouts_et_couleurs` | Goûts et couleurs | `gouts_et_couleurs.svg` (fournie : meme du chat devant l'assiette) |
+| `gouts_et_couleurs` | Les goûts et les couleurs | `gouts_et_couleurs.svg` (fournie : meme du chat devant l'assiette) |
 | `pokeball` | Dégustez-les tous | `pokeball.svg` |
 | `new_vegas` | Faites vos jeux | `new_vegas.svg` |
 | `matrix` | Choix cornélien | `matrix.svg` |

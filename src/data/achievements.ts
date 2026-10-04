@@ -117,7 +117,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
   {
     id: "naruto",
     title: "Ramen ta science",
-    condition: "Publier 20 avis",
+    condition: "Publier 15 avis",
     icon: "🍜",
     image: "/achievements/naruto.svg",
   },
@@ -156,7 +156,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
   {
     id: "stonks",
     title: "Du beurre dans les épinards",
-    condition: "Déclarer le prix de 5 restaurants",
+    condition: "Déclarer le prix de 10 restaurants",
     icon: "📈",
     image: "/achievements/stonks.svg",
   },
@@ -174,7 +174,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
   {
     id: "absolute_cinema",
     title: "Du grand art",
-    condition: "Réagir à 20 photos différentes",
+    condition: "Réagir à 10 photos différentes",
     icon: "🎬",
     image: "/achievements/absolute_cinema.svg",
   },
@@ -187,7 +187,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: "gouts_et_couleurs",
-    title: "Goûts et couleurs",
+    title: "Les goûts et les couleurs",
     icon: "🎨",
     image: "/achievements/gouts_et_couleurs.svg",
     secret: true,
@@ -354,14 +354,14 @@ export const ACHIEVEMENT_GOALS: Partial<
 > = {
   ratatouille: { metric: "reviews", goal: 1 },
   death_note: { metric: "reviews", goal: 5 },
-  naruto: { metric: "reviews", goal: 20 },
+  naruto: { metric: "reviews", goal: 15 },
   duck_face: { metric: "photos", goal: 1 },
   salt_bae: { metric: "photos", goal: 5 },
   louvre: { metric: "photos", goal: 15 },
   take_my_money: { metric: "prices", goal: 1 },
-  stonks: { metric: "prices", goal: 5 },
+  stonks: { metric: "prices", goal: 10 },
   jules_cesar: { metric: "reactionsGivenDistinct", goal: 1 },
-  absolute_cinema: { metric: "reactionsGivenDistinct", goal: 20 },
+  absolute_cinema: { metric: "reactionsGivenDistinct", goal: 10 },
   brent_rambo: { metric: "reactionsReceived", goal: 5 },
   gouts_et_couleurs: { metric: "reactionEmojisDistinct", goal: 3 },
   pokeball: { metric: "favorites", goal: 6 }, // une équipe Pokémon
