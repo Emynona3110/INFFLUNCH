@@ -2,9 +2,6 @@ import { motion, useAnimation, AnimatePresence } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import useAchievements from "@/hooks/useAchievements";
 
-/** Nombre de nourritures consécutives (sans quitter la page) pour le gourou. */
-const GOUROU_STREAK = 10;
-
 /** Chance qu'un clic fasse tomber l'Anneau unique au lieu d'une nourriture
  *  (succès « Le Seigneur des agneaux »). Jamais au premier clic : le premier
  *  objet est toujours une nourriture (« Revenons à nos moutons »). L'anneau est
@@ -118,11 +115,10 @@ const Beeeh = () => {
       transition: { duration: 0.9, ease: "easeInOut" },
     });
 
-    // Succès nourriture. Le streak se remet à zéro en quittant la page (le ref
-    // est recréé au prochain montage) → « 10 fois d'affilée ».
+    // Succès nourriture : dès la première (le compteur repart à zéro en
+    // quittant la page, le ref étant recréé au prochain montage).
     streakRef.current += 1;
     if (streakRef.current === 1) unlock("minecraft");
-    if (streakRef.current >= GOUROU_STREAK) unlock("gourou_du_troupeau");
   };
 
   const handleImageLoad = () => {

@@ -29,7 +29,9 @@ begin
       ('inffluenceur',        'salt_bae'),
       ('addition',            'take_my_money'),
       ('gardez_la_monnaie',   'stonks'),
-      ('petit_geste',         'brent_rambo'),
+      -- 2026-10-05 : « réagir à une photo » est devenu jules_cesar
+      -- (brent_rambo désigne désormais « 5 réactions reçues »).
+      ('petit_geste',         'jules_cesar'),
       ('public_conquis',      'absolute_cinema'),
       ('quinte_gagnant',      'pokeball'),
       ('gambling',            'new_vegas'),

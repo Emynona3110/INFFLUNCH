@@ -18,7 +18,6 @@ export type AchievementId =
   // Easter egg mouton (Beeeh)
   | "petit_prince"
   | "minecraft"
-  | "gourou_du_troupeau"
   | "seigneur_des_anneaux"
   // Avis
   | "ratatouille"
@@ -27,11 +26,11 @@ export type AchievementId =
   // Photos
   | "duck_face"
   | "salt_bae"
-  | "pizzarazzi"
+  | "louvre"
   // Réactions
   | "brent_rambo"
   | "absolute_cinema"
-  | "approuve"
+  | "jules_cesar"
   | "gouts_et_couleurs"
   // Prix déclarés
   | "take_my_money"
@@ -139,11 +138,11 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     image: "/achievements/salt_bae.svg",
   },
   {
-    id: "pizzarazzi",
-    title: "Pizzarazzi",
+    id: "louvre",
+    title: "La cerise sur le gâteau",
     condition: "Ajouter 15 photos",
     icon: "🍕",
-    image: "/achievements/pizzarazzi.svg",
+    image: "/achievements/louvre.svg",
     disabled: true,
   },
 
@@ -165,11 +164,13 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
 
   // — Réactions —
   {
-    id: "brent_rambo",
-    title: "Coup de pouce",
+    // Échangé le 2026-10-05 avec brent_rambo (illustration + titre + id) :
+    // l'obtention suit la CONDITION. Cf. sql/2026-10-05_succes_louvre_cesar.sql.
+    id: "jules_cesar",
+    title: "Veni, vidi, amavi",
     condition: "Réagir à une photo",
     icon: "👍",
-    image: "/achievements/brent_rambo.svg",
+    image: "/achievements/jules_cesar.svg",
   },
   {
     id: "absolute_cinema",
@@ -179,11 +180,11 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     image: "/achievements/absolute_cinema.svg",
   },
   {
-    id: "approuve",
-    title: "Approuvé",
+    id: "brent_rambo",
+    title: "Coup de pouce",
     condition: "Recevoir 5 réactions sur vos photos",
     icon: "❤️",
-    image: "/achievements/approuve.svg",
+    image: "/achievements/brent_rambo.svg",
     disabled: true,
   },
   {
@@ -326,14 +327,6 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     secret: true,
   },
   {
-    id: "gourou_du_troupeau",
-    title: "Gourou du troupeau",
-    icon: "🧙",
-    image: "/achievements/gourou_du_troupeau.svg",
-    secret: true,
-    disabled: true,
-  },
-  {
     // « Le Seigneur des agneaux » : 1 chance sur 100 que le mouton fasse tomber
     // l'Anneau unique au lieu d'une nourriture ; il faut l'attraper.
     id: "seigneur_des_anneaux",
@@ -366,12 +359,12 @@ export const ACHIEVEMENT_GOALS: Partial<
   naruto: { metric: "reviews", goal: 20 },
   duck_face: { metric: "photos", goal: 1 },
   salt_bae: { metric: "photos", goal: 5 },
-  pizzarazzi: { metric: "photos", goal: 15 },
+  louvre: { metric: "photos", goal: 15 },
   take_my_money: { metric: "prices", goal: 1 },
   stonks: { metric: "prices", goal: 5 },
-  brent_rambo: { metric: "reactionsGivenDistinct", goal: 1 },
+  jules_cesar: { metric: "reactionsGivenDistinct", goal: 1 },
   absolute_cinema: { metric: "reactionsGivenDistinct", goal: 20 },
-  approuve: { metric: "reactionsReceived", goal: 5 },
+  brent_rambo: { metric: "reactionsReceived", goal: 5 },
   gouts_et_couleurs: { metric: "reactionEmojisDistinct", goal: 3 },
   pokeball: { metric: "favorites", goal: 6 }, // une équipe Pokémon
   michael_scott: { metric: "loginStreak", goal: 5 },
@@ -396,7 +389,8 @@ const ACHIEVEMENT_ALIASES: Record<string, AchievementId> = {
   inffluenceur: "salt_bae",
   addition: "take_my_money",
   gardez_la_monnaie: "stonks",
-  petit_geste: "brent_rambo",
+  // Réagir à une photo : brent_rambo jusqu'au 2026-10-05, puis jules_cesar.
+  petit_geste: "jules_cesar",
   public_conquis: "absolute_cinema",
   quinte_gagnant: "pokeball",
   gambling: "new_vegas",
@@ -413,6 +407,9 @@ const ACHIEVEMENT_ALIASES: Record<string, AchievementId> = {
   anti_panurgisme: "petit_prince",
   berger_dun_jour: "minecraft",
   completionniste: "gatsby",
+  // sql/2026-10-05_succes_louvre_cesar.sql
+  pizzarazzi: "louvre",
+  approuve: "brent_rambo",
 };
 
 /** L'id actuel d'un id lu en base (ancien ou non). */
