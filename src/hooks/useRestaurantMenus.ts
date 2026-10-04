@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import supabaseClient from "../services/supabaseClient";
 import { compressImage } from "../utils/imageCompress";
 import { PHOTOS_BUCKET, menuPathBase } from "../services/storagePaths";
@@ -26,18 +31,11 @@ export interface RestaurantMenu {
 const publicUrl = (path: string) =>
   supabaseClient.storage.from(PHOTOS_BUCKET).getPublicUrl(path).data.publicUrl;
 
-/**
- * Menus d'un restaurant (collaboratif), multi-formats : lien web, PDF, ou image.
- * Calqué sur useRestaurantPhotos : binaires (pdf/image) dans le bucket Storage
- * (sous-dossier {slug}/menu/), la table ne porte que des métadonnées. Pas de FK
- * directe vers public.users → jointure manuelle pour l'email de l'auteur.
- */
-const useRestaurantMenus = (restaurantId: number | undefined, slug?: string) => {
-  const queryClient = useQueryClient();
-  const key = ["restaurant-menus", restaurantId];
-
-  const query = useQuery<RestaurantMenu[], Error>({
-    queryKey: key,
+/** Menus d'un restaurant : options partagées par le hook et le préchargement au
+ *  survol (usePrefetch). */
+export const restaurantMenusQueryOptions = (restaurantId: number | undefined) =>
+  queryOptions<RestaurantMenu[], Error>({
+    queryKey: ["restaurant-menus", restaurantId],
     enabled: !!restaurantId,
     queryFn: async () => {
       const { data, error } = await supabaseClient
@@ -73,6 +71,18 @@ const useRestaurantMenus = (restaurantId: number | undefined, slug?: string) => 
       }));
     },
   });
+
+/**
+ * Menus d'un restaurant (collaboratif), multi-formats : lien web, PDF, ou image.
+ * Calqué sur useRestaurantPhotos : binaires (pdf/image) dans le bucket Storage
+ * (sous-dossier {slug}/menu/), la table ne porte que des métadonnées. Pas de FK
+ * directe vers public.users → jointure manuelle pour l'email de l'auteur.
+ */
+const useRestaurantMenus = (restaurantId: number | undefined, slug?: string) => {
+  const queryClient = useQueryClient();
+  const key = ["restaurant-menus", restaurantId];
+
+  const query = useQuery(restaurantMenusQueryOptions(restaurantId));
 
   const add = useMutation({
     mutationFn: async ({

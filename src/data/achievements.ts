@@ -157,7 +157,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: "stonks",
-    title: "Beurre dans les épinards",
+    title: "Du beurre dans les épinards",
     condition: "Déclarer le prix de 5 restaurants",
     icon: "📈",
     image: "/achievements/stonks.svg",

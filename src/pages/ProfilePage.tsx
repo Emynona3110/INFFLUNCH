@@ -1,6 +1,5 @@
 import { Navigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { motion } from "framer-motion";
 import BackLink from "@/components/BackLink";
 import UserProfileView from "@/components/UserProfileView";
 import PageNotFound from "@/pages/PageNotFound";
@@ -50,10 +49,7 @@ const ProfilePage = () => {
     return <Navigate to="/mon-compte" state={{ tab: "profil" }} replace />;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+    <div
       className="tw-scope mx-auto w-full max-w-2xl"
     >
       {/* Retour là d'où l'on vient (un avis, une photo, une tablée…). */}
@@ -62,7 +58,7 @@ const ProfilePage = () => {
       <div className="space-y-3 sm:space-y-6">
         <UserProfileView userId={userId} />
       </div>
-    </motion.div>
+    </div>
   );
 };
 

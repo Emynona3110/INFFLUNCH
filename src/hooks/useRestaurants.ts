@@ -30,6 +30,7 @@ export type Restaurant = {
   price_ref: number | null;
 };
 
+import { useQueryClient } from "@tanstack/react-query";
 import useSupabaseQuery from "./useSupabaseQuery";
 import { slugify } from "../utils/slugify";
 import supabaseClient from "../services/supabaseClient";
@@ -134,8 +135,26 @@ const useRestaurants = (restaurantFilters: RestaurantFilters) => {
     !isPriceFilterActive(priceRange) &&
     searchText === "";
 
+  const queryClient = useQueryClient();
   return useSupabaseQuery<Restaurant>(queryKey, buildQuery, {
     enabled: !sessionLoading,
+    // Fiche : le resto est déjà dans une liste en cache (grille) → affiché
+    // aussitôt, sans attendre le réseau. Marqué périmé (date 0) : la fiche le
+    // relit tout de même en arrière-plan.
+    ...(slug
+      ? {
+          initialData: () => {
+            for (const [, list] of queryClient.getQueriesData<Restaurant[]>({
+              queryKey: ["restaurants"],
+            })) {
+              const hit = list?.find((r) => r.slug === slug);
+              if (hit) return [hit];
+            }
+            return undefined;
+          },
+          initialDataUpdatedAt: 0,
+        }
+      : {}),
     ...(isDefaultList ? { staleTime: Infinity, gcTime: Infinity } : {}),
   });
 };

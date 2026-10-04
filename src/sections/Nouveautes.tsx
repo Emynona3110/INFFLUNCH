@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef } from "react";
-import { motion } from "framer-motion";
 import { changelog, ChangelogEntry } from "@/data/changelog";
 import useChangelogSeen from "@/hooks/useChangelogSeen";
 import { Card } from "@/components/ui/card";
@@ -51,10 +50,7 @@ const Nouveautes = () => {
   }, [markSeen]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35 }}
+    <div
       className="tw-scope mx-auto w-full max-w-2xl"
     >
       {/* Frise : rail + nœuds. rail et nœuds partagent la même origine
@@ -108,7 +104,7 @@ const Nouveautes = () => {
           ))}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 

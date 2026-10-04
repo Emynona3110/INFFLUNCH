@@ -76,6 +76,7 @@ const FeedbackImages = ({ paths, compact = false, className }: Props) => {
                 src={feedbackImageUrl(path)}
                 alt=""
                 loading="lazy"
+                data-fade
                 className="h-full w-full object-cover"
               />
             </button>

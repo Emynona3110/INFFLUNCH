@@ -603,6 +603,8 @@ const LunchToday = () => {
                 >
                   <div className="relative h-12 w-16 shrink-0 overflow-hidden rounded-lg sm:h-16 sm:w-24">
                     <img
+                      loading="lazy"
+                      data-fade
                       src={restaurant.image || noImage}
                       alt=""
                       className={cn(

@@ -181,6 +181,7 @@ const RestaurantMenus = ({
                 src={menu.href}
                 alt=""
                 loading="lazy"
+                data-fade
                 className="h-12 w-12 shrink-0 rounded-lg object-cover ring-1 ring-border"
               />
             ) : (

@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import usePrefetch from "@/hooks/usePrefetch";
 import { FaStar } from "react-icons/fa";
 import { FiEdit2 } from "react-icons/fi";
 import { HiOutlineLocationMarker } from "react-icons/hi";
@@ -23,6 +24,9 @@ interface Props {
   onLikeToggle: (liked: boolean) => Promise<void>;
   /** Fourni uniquement pour les admins : ouvre le dialog d'édition. */
   onEdit?: () => void;
+  /** Visible dès l'ouverture (premières cartes) : image chargée tout de
+   *  suite et en priorité, jamais à la demande — sinon elle part en dernier. */
+  priority?: boolean;
 }
 
 export function Stars({ rating }: { rating: number }) {
@@ -57,8 +61,10 @@ const RestaurantCardTW = ({
   liked,
   onLikeToggle,
   onEdit,
+  priority = false,
 }: Props) => {
   const navigate = useNavigate();
+  const { prefetchRestaurant } = usePrefetch();
 
   const topRank = topRankOf(topRated, restaurant.id);
   const visibleBadges = orderBadges(restaurant.badges);
@@ -71,11 +77,17 @@ const RestaurantCardTW = ({
   return (
     <article
       onClick={() => navigate(`/restaurant/${restaurant.slug}`)}
+      // Données de la fiche chargées dès l'intention de clic.
+      onMouseEnter={() => prefetchRestaurant(restaurant.id)}
+      onTouchStart={() => prefetchRestaurant(restaurant.id)}
       className="group flex h-full cursor-pointer select-none flex-col overflow-hidden rounded-card border border-border bg-card shadow-[0_10px_30px_-12px_rgba(2,8,40,0.22)] transition duration-200 transform-gpu [backface-visibility:hidden] hover:-translate-y-1 hover:shadow-[0_18px_44px_-14px_rgba(2,8,40,0.30)]"
     >
       {/* Image */}
       <div className="relative h-32 overflow-hidden sm:h-48">
         <img
+          loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : "auto"}
+          data-fade
           src={restaurant.image ?? noImage}
           alt={restaurant.name}
           className={cn(

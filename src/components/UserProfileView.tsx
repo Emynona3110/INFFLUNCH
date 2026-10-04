@@ -30,6 +30,7 @@ import {
 } from "@/data/achievements";
 import { formatAuthorName } from "@/utils/authorName";
 import { cn } from "@/lib/utils";
+import RareRing from "@/components/RareRing";
 import {
   SECTION,
   SECTION_HEAD,
@@ -331,10 +332,14 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
                               "rare-aura",
                           )}
                         >
+                          {statsReady &&
+                            (percentById[def.id] ?? 0) < RARE_PERCENT && <RareRing />}
                           {!known ? (
                             <FiLock className="h-7 w-7" />
                           ) : def.image ? (
                             <img
+                              loading="lazy"
+                              data-fade
                               src={def.image}
                               alt=""
                               className="h-full w-full object-contain"
@@ -453,6 +458,8 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
                           style={{ height: size, width: size }}
                         >
                           <img
+                            loading="lazy"
+                            data-fade
                             src={r.restaurant?.image ?? noImage}
                             alt=""
                             className="h-full w-full object-cover"

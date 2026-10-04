@@ -20,6 +20,7 @@ import {
 } from "../pages/UserPage";
 import { cn } from "@/lib/utils";
 import { setFaviconBadge } from "@/lib/faviconBadge";
+import usePrefetch from "@/hooks/usePrefetch";
 
 interface NavbarProps {
   page: string;
@@ -28,6 +29,7 @@ interface NavbarProps {
 }
 
 const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
+  const { prefetchSection } = usePrefetch();
   const [menuOpen, setMenuOpen] = useState(false);
   // Réglages du compte (pp, thème, mdp, déconnexion) : popup via le rouage.
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -81,10 +83,10 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
 
   // Couleur de la puce d'un onglet (null si rien à signaler).
   const dotFor = (path: string): string | null => {
-    if (path === "admin" && adminPending > 0) return "bg-[#f79220]";
-    if (path === "nouveautes" && hasUnseen) return "bg-primary";
-    if (path === "dejeuner" && lunchPending) return "bg-primary";
-    if (path === "mon-compte" && myAccountDot) return "bg-primary";
+    if (path === "admin" && adminPending > 0) return "bg-[#ea580c]";
+    if (path === "nouveautes" && hasUnseen) return "bg-[#ea580c]";
+    if (path === "dejeuner" && lunchPending) return "bg-[#ea580c]";
+    if (path === "mon-compte" && myAccountDot) return "bg-[#ea580c]";
     return null;
   };
   // Mobile : libellé de l'onglet courant (fiche resto = Restaurants ; profil
@@ -142,6 +144,8 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
                 <button
                   type="button"
                   onClick={() => setPage(item.path)}
+                  // Données de l'onglet chargées dès le survol.
+                  onMouseEnter={() => prefetchSection(item.path)}
                   className={cn(
                     "relative flex h-full cursor-pointer items-center border-b-2 text-lg transition",
                     isActive
@@ -149,8 +153,10 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
                       : "border-transparent text-foreground/50 hover:text-foreground",
                   )}
                 >
-                  {/* Calque fantôme gras : réserve la largeur → pas de saut d'1px */}
-                  <span className="grid">
+                  {/* Calque fantôme gras : réserve la largeur → pas de saut d'1px.
+                      La puce s'accroche au libellé (coin haut-droit, juste
+                      au-delà du texte), pas à toute la hauteur de la barre. */}
+                  <span className="relative grid">
                     <span
                       className={cn(
                         "col-start-1 row-start-1",
@@ -165,19 +171,15 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
                     >
                       {item.label}
                     </span>
+                    {dotFor(item.path) && (
+                      <span
+                        className={cn(
+                          "absolute -right-1.5 top-1 h-2 w-2 rounded-full ring-2 ring-card",
+                          dotFor(item.path),
+                        )}
+                      />
+                    )}
                   </span>
-                  {item.path === "admin" && adminPending > 0 && (
-                    <span className="absolute right-0 top-2.5 h-2.5 w-2.5 rounded-full bg-[#f79220] ring-2 ring-card" />
-                  )}
-                  {item.path === "nouveautes" && hasUnseen && (
-                    <span className="absolute right-0 top-2.5 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />
-                  )}
-                  {item.path === "dejeuner" && lunchPending && (
-                    <span className="absolute right-0 top-2.5 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />
-                  )}
-                  {item.path === "mon-compte" && myAccountDot && (
-                    <span className="absolute right-0 top-2.5 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />
-                  )}
                 </button>
               </div>
             );
@@ -236,6 +238,7 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
                         initial={{ opacity: 0, y: -6 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.04 * i, duration: 0.15 }}
+                        onTouchStart={() => prefetchSection(item.path)}
                         onClick={() => {
                           setPage(item.path);
                           setMenuOpen(false);

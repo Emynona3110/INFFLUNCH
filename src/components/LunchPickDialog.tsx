@@ -76,6 +76,8 @@ const LunchPickDialog = ({
               )}
             >
               <img
+                loading="lazy"
+                data-fade
                 src={r.image || noImage}
                 alt=""
                 className="h-9 w-12 shrink-0 rounded object-cover"

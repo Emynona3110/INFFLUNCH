@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import usePrefetch from "@/hooks/usePrefetch";
 import { FiEdit2 } from "react-icons/fi";
 import { HiOutlineLocationMarker } from "react-icons/hi";
 import { Restaurant } from "@/hooks/useRestaurants";
@@ -23,6 +24,9 @@ interface Props {
   onLikeToggle: (liked: boolean) => Promise<void>;
   /** Fourni uniquement pour les admins : ouvre le dialog d'édition. */
   onEdit?: () => void;
+  /** Visible dès l'ouverture (premières cartes) : image chargée tout de
+   *  suite et en priorité, jamais à la demande — sinon elle part en dernier. */
+  priority?: boolean;
 }
 
 /** Variante "ligne" de la card resto (mode liste). Mêmes infos, en horizontal. */
@@ -32,8 +36,10 @@ const RestaurantRow = ({
   liked,
   onLikeToggle,
   onEdit,
+  priority = false,
 }: Props) => {
   const navigate = useNavigate();
+  const { prefetchRestaurant } = usePrefetch();
 
   const topRank = topRankOf(topRated, restaurant.id);
   const visibleBadges = orderBadges(restaurant.badges);
@@ -58,11 +64,17 @@ const RestaurantRow = ({
   return (
     <article
       onClick={() => navigate(`/restaurant/${restaurant.slug}`)}
+      // Données de la fiche chargées dès l'intention de clic.
+      onMouseEnter={() => prefetchRestaurant(restaurant.id)}
+      onTouchStart={() => prefetchRestaurant(restaurant.id)}
       className="group flex cursor-pointer select-none items-stretch gap-2 overflow-hidden p-2 transition duration-200 sm:items-center sm:gap-4 sm:rounded-card sm:border sm:border-border sm:bg-card sm:p-3 sm:shadow-[0_8px_24px_-14px_rgba(2,8,40,0.22)] sm:hover:-translate-y-0.5 sm:hover:shadow-[0_14px_34px_-16px_rgba(2,8,40,0.30)]"
     >
       {/* Vignette */}
       <div className="relative hidden h-20 w-28 shrink-0 overflow-hidden rounded-lg sm:block">
         <img
+          loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : "auto"}
+          data-fade
           src={restaurant.image ?? noImage}
           alt={restaurant.name}
           className={cn(

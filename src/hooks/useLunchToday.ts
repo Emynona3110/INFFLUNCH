@@ -1,5 +1,10 @@
 import { useEffect, useMemo } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import useSession from "./useSession";
 import supabaseClient from "../services/supabaseClient";
 import useAchievements from "./useAchievements";
@@ -101,30 +106,11 @@ const closeChannel = () => {
   channel = null;
 };
 
-/**
- * « Qui déjeune où aujourd'hui » : la journée entière (≤ 100 lignes) est
- * chargée en une requête, puis groupée par restaurant. Une personne n'a qu'une
- * seule intention par jour (clé primaire user_id + day) : changer de
- * restaurant est un upsert, se retirer un delete.
- *
- * Une intention sans restaurant (`restaurant_id` null) veut dire « je ne mange
- * pas au resto ce midi », qualifiée par `off_reason` : « pas de restaurant »
- * (sur site, mais gamelle ou déjeuner de son côté) ou « pas sur site ».
- */
-const useLunchToday = () => {
-  const { sessionData } = useSession();
-  const userId = sessionData?.user?.id;
-  const queryClient = useQueryClient();
-  const { unlock } = useAchievements();
-  const day = parisDay();
-  const queryKey = ["lunch-today", day];
-
-  const { data: participants = [], isPending } = useQuery<
-    LunchParticipant[],
-    Error
-  >({
-    queryKey,
-    enabled: !!userId,
+/** Tablées du jour : options partagées par le hook et le préchargement au
+ *  survol de l'onglet (usePrefetch). */
+export const lunchTodayQueryOptions = (day: string) =>
+  queryOptions<LunchParticipant[], Error>({
+    queryKey: ["lunch-today", day],
     // Pas de rafraîchissement périodique : la liste ne bouge QUE lorsque
     // quelqu'un fait ou change son choix, et Realtime nous le dit déjà. Seul
     // filet conservé : un refetch au retour sur l'onglet, car le canal peut
@@ -167,6 +153,29 @@ const useLunchToday = () => {
         avatar_path: avatarById[r.user_id] ?? null,
       }));
     },
+  });
+
+/**
+ * « Qui déjeune où aujourd'hui » : la journée entière (≤ 100 lignes) est
+ * chargée en une requête, puis groupée par restaurant. Une personne n'a qu'une
+ * seule intention par jour (clé primaire user_id + day) : changer de
+ * restaurant est un upsert, se retirer un delete.
+ *
+ * Une intention sans restaurant (`restaurant_id` null) veut dire « je ne mange
+ * pas au resto ce midi », qualifiée par `off_reason` : « pas de restaurant »
+ * (sur site, mais gamelle ou déjeuner de son côté) ou « pas sur site ».
+ */
+const useLunchToday = () => {
+  const { sessionData } = useSession();
+  const userId = sessionData?.user?.id;
+  const queryClient = useQueryClient();
+  const { unlock } = useAchievements();
+  const day = parisDay();
+  const queryKey = ["lunch-today", day];
+
+  const { data: participants = [], isPending } = useQuery({
+    ...lunchTodayQueryOptions(day),
+    enabled: !!userId,
   });
 
   // Abonnement Realtime partagé : les avatars apparaissent sans recharger.

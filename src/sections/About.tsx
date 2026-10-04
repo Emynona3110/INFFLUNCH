@@ -1,13 +1,9 @@
-import { motion } from "framer-motion";
 import { FiArrowUpRight, FiMessageSquare } from "react-icons/fi";
 import { Card } from "@/components/ui/card";
 
 const About = () => {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35 }}
+    <div
       className="tw-scope flex w-full items-center justify-center sm:px-4"
     >
       <Card className="w-full max-w-2xl p-5 sm:p-8">
@@ -49,7 +45,7 @@ const About = () => {
           </p>
         </div>
       </Card>
-    </motion.div>
+    </div>
   );
 };
 

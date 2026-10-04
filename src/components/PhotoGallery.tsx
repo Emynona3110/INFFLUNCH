@@ -209,6 +209,7 @@ const PhotoGallery = ({
             src={photo.url}
             alt=""
             loading="lazy"
+            data-fade
             className={HOVER_ZOOM_IMG}
           />
         </button>
@@ -310,6 +311,8 @@ const PhotoGallery = ({
           dessous — rien ne recouvre la photo. */}
       {lightbox && (
         <div
+          // Pas de changement d'onglet au balayage (Mon compte) : cf. useSwipeTabs.
+          data-no-swipe
           className="fixed inset-0 z-[1000] flex flex-col bg-black/85"
           onClick={closeLightbox}
         >

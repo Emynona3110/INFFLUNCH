@@ -1,10 +1,10 @@
 import Footer from "@/components/Footer";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { createPortal } from "react-dom";
-import { AnimatePresence, motion } from "framer-motion";
 import useSession from "../hooks/useSession";
 import useAchievementsSeen from "../hooks/useAchievementsSeen";
+import { motion, useAnimationControls } from "framer-motion";
 import useRememberedTab from "@/hooks/useRememberedTab";
 import {
   MobileTabSwitcher,
@@ -12,6 +12,7 @@ import {
 } from "@/components/MobileTabSwitcher";
 import useMediaQuery from "@/hooks/useMediaQuery";
 import UserProfileView from "@/components/UserProfileView";
+import PageReveal from "@/components/PageReveal";
 import useIsAdmin from "../hooks/useIsAdmin";
 import AchievementsGallery from "./AchievementsGallery";
 import AdminNotes from "./AdminNotes";
@@ -31,6 +32,39 @@ const subTabs = [
 ] as const;
 
 type SubTabKey = (typeof subTabs)[number]["key"];
+
+/** Sous-onglet desktop gardé monté : masqué quand inactif, fondu en montant
+ *  à chaque retour. La toute première apparition est laissée à PageReveal. */
+const KeptTab = ({
+  active,
+  children,
+}: {
+  active: boolean;
+  children: React.ReactNode;
+}) => {
+  const controls = useAnimationControls();
+  // Monté au moment où il devient actif : ce premier passage est sauté.
+  const shown = useRef(false);
+  // Avant affichage : sinon une image à pleine opacité précède le fondu.
+  useLayoutEffect(() => {
+    if (!active) return;
+    if (!shown.current) {
+      shown.current = true;
+      return;
+    }
+    controls.set({ opacity: 0, y: 10 });
+    controls.start({
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.35, ease: "easeOut" },
+    });
+  }, [active, controls]);
+  return (
+    <motion.div animate={controls} className={active ? undefined : "hidden"}>
+      {children}
+    </motion.div>
+  );
+};
 
 const MyAccount = () => {
   const { sessionData } = useSession();
@@ -120,8 +154,9 @@ const MyAccount = () => {
     </>
   );
 
-  // Mobile : onglets déjà ouverts (les autres restent vides tant qu'on n'y
-  // est pas passé → pas de requêtes inutiles).
+  // Onglets déjà ouverts (les autres restent vides tant qu'on n'y est pas
+  // passé → pas de requêtes inutiles) : panneaux du pager mobile, onglets
+  // gardés montés sur desktop.
   const [visited, setVisited] = useState<Set<SubTabKey>>(
     () => new Set([active]),
   );
@@ -177,22 +212,19 @@ const MyAccount = () => {
       </div>
 
       {isDesktop ? (
-        /* Desktop : carte de la sous-section active, en fondu. Le conteneur
-           `relative` ancre l'élément sortant (mis en absolu par popLayout),
-           sinon il déborde du document et fait apparaître la barre native. */
-        <div className="relative overflow-hidden">
-          <AnimatePresence initial={false} mode="popLayout">
-            <motion.div
-              key={active}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              className="mx-auto w-full max-w-2xl space-y-6"
-            >
-              {renderTab(active)}
-            </motion.div>
-          </AnimatePresence>
+        /* Desktop : même transition qu'entre les onglets de la navbar —
+           l'ancienne sous-section disparaît aussitôt, la nouvelle apparaît en
+           fondu en montant. Les sous-onglets déjà ouverts restent montés
+           (masqués) : y revenir ne reconstruit rien, photos comprises. La
+           première ouverture attend ses données (PageReveal). */
+        <div className="mx-auto w-full max-w-2xl">
+          {visibleTabs
+            .filter((t) => t.key === active || visited.has(t.key))
+            .map((t) => (
+              <KeptTab key={t.key} active={t.key === active}>
+                <PageReveal className="space-y-6">{renderTab(t.key)}</PageReveal>
+              </KeptTab>
+            ))}
         </div>
       ) : (
         /* Mobile : pager façon appli native — chaque sous-onglet est une
@@ -221,8 +253,12 @@ const MyAccount = () => {
               >
                 {/* Contenu au moins plein écran : le footer se cale en bas
                     quand l'onglet est court, sous le contenu sinon. */}
-                <div className="flex-1 shrink-0 space-y-3">
-                  {visited.has(t.key) && renderTab(t.key)}
+                <div className="flex-1 shrink-0">
+                  {visited.has(t.key) && (
+                    <PageReveal className="space-y-3">
+                      {renderTab(t.key)}
+                    </PageReveal>
+                  )}
                 </div>
                 <Footer />
               </div>

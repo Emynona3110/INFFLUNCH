@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import supabaseClient from "../services/supabaseClient";
 
 export interface Review {
@@ -23,8 +23,8 @@ export interface Review {
  * Les agrégats (restaurants.rating/reviews) sont, eux, maintenus côté serveur
  * par trigger : ce hook ne sert qu'à lister/écrire les avis détaillés.
  */
-const useReviews = (restaurantId: number | undefined) =>
-  useQuery<Review[], Error>({
+export const reviewsQueryOptions = (restaurantId: number | undefined) =>
+  queryOptions<Review[], Error>({
     queryKey: ["reviews", restaurantId],
     enabled: !!restaurantId,
     queryFn: async () => {
@@ -68,5 +68,8 @@ const useReviews = (restaurantId: number | undefined) =>
       }));
     },
   });
+
+const useReviews = (restaurantId: number | undefined) =>
+  useQuery(reviewsQueryOptions(restaurantId));
 
 export default useReviews;

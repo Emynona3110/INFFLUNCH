@@ -27,6 +27,33 @@ const ThemedToaster = () => {
 // cache offline). Sans lui, pas d'abonnement possible.
 registerServiceWorker();
 
+// Fondu des photos à leur arrivée (cf. tailwind.css, img[data-fade]).
+// `load`/`error` ne remontent pas : on les capte en phase de capture. Une
+// image en erreur est aussi marquée, sinon elle resterait invisible.
+const markImageLoaded = (e: Event) => {
+  if (e.target instanceof HTMLImageElement) e.target.dataset.loaded = "";
+};
+document.addEventListener("load", markImageLoaded, true);
+document.addEventListener("error", markImageLoaded, true);
+// Image déjà en cache : React pose `src` AVANT d'insérer l'élément, elle peut
+// finir de charger hors du document — son `load` ne nous parvient jamais et
+// elle resterait blanche. On rattrape donc à l'insertion celles déjà prêtes.
+const markIfComplete = (img: HTMLImageElement) => {
+  if (img.complete && !("loaded" in img.dataset)) img.dataset.loaded = "";
+};
+new MutationObserver((mutations) => {
+  for (const m of mutations)
+    for (const node of m.addedNodes) {
+      if (!(node instanceof Element)) continue;
+      if (node instanceof HTMLImageElement && node.hasAttribute("data-fade"))
+        markIfComplete(node);
+      else
+        node
+          .querySelectorAll<HTMLImageElement>("img[data-fade]")
+          .forEach(markIfComplete);
+    }
+}).observe(document.documentElement, { childList: true, subtree: true });
+
 // Un chunk de l'ancien build a disparu après un déploiement : on recharge.
 window.addEventListener("vite:preloadError", () => location.reload());
 

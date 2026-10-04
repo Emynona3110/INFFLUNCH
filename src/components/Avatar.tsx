@@ -45,7 +45,13 @@ const Avatar = ({ email, avatarPath, size = 40, className }: Props) => {
           className
         )}
       >
-        <img src={url} alt="" className="h-full w-full object-cover" />
+        <img
+          src={url}
+          alt=""
+          loading="lazy"
+          data-fade
+          className="h-full w-full object-cover"
+        />
       </span>
     );
   }

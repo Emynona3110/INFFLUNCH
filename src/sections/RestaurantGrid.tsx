@@ -13,6 +13,7 @@ import RestaurantRow from "@/components/RestaurantRow";
 import RestaurantsMap from "@/components/RestaurantsMap";
 import RestaurantRoulette from "@/components/RestaurantRoulette";
 import RestaurantDialog from "@/admin/Dialogs/RestaurantDialog";
+import { FiChevronDown } from "react-icons/fi";
 
 interface RestaurantGridProps {
   restaurantFilters: RestaurantFilters;
@@ -24,6 +25,19 @@ interface RestaurantGridProps {
   rouletteWinnerId: number | null;
   onRouletteWinnerChange: (id: number | null) => void;
 }
+
+/** Cartes visibles dès l'ouverture (2 rangées de 3 au plus large) : leurs
+ *  images partent tout de suite, les suivantes à l'approche du scroll. */
+const PRIORITY_ITEMS = 6;
+
+/** Grille et liste : résultats affichés par tranches. Les données arrivent en
+ *  une fois (légères, et la carte, la roue, le tri en ont besoin entières) ;
+ *  ce sont les cartes et leurs photos qu'on ne construit qu'à la demande. */
+const PAGE_SIZE = 12;
+
+/** Tranches déjà dépliées, pour les mêmes filtres : survit au passage par une
+ *  fiche resto (retour sur la grille au même endroit), pas au rechargement. */
+let rememberedShown = { key: "", count: PAGE_SIZE };
 
 const CardSkeleton = () => (
   <div className="overflow-hidden rounded-card border border-border bg-card">
@@ -94,6 +108,41 @@ const RestaurantGrid = ({
     viewMode,
   });
 
+  // Nombre de résultats affichés : remis à une tranche dès que les filtres ou
+  // la recherche changent.
+  const shownKey = JSON.stringify([
+    listKey,
+    restaurantFilters.searchText,
+    restaurantFilters.priceRange,
+  ]);
+  const [shown, setShown] = useState(() =>
+    rememberedShown.key === shownKey
+      ? rememberedShown
+      : { key: shownKey, count: PAGE_SIZE },
+  );
+  const shownCount = shown.key === shownKey ? shown.count : PAGE_SIZE;
+  if (shown.key !== shownKey) setShown({ key: shownKey, count: PAGE_SIZE });
+  rememberedShown = { key: shownKey, count: shownCount };
+  const visibleData = filteredData.slice(0, shownCount);
+  const remaining = filteredData.length - visibleData.length;
+
+  // Lien discret plutôt qu'un bouton : texte grisé encadré de deux flèches.
+  const showMore = remaining > 0 && (
+    <div className="mt-4 flex justify-center sm:mt-6">
+      <button
+        type="button"
+        onClick={() =>
+          setShown({ key: shownKey, count: shownCount + PAGE_SIZE })
+        }
+        className="inline-flex cursor-pointer items-center gap-2 px-3 py-2 text-sm text-foreground/50 transition hover:text-foreground/80"
+      >
+        <FiChevronDown className="h-4 w-4" aria-hidden />
+        Afficher plus
+        <FiChevronDown className="h-4 w-4" aria-hidden />
+      </button>
+    </div>
+  );
+
   // Props communs aux cards/rows.
   const itemProps = (restaurant: Restaurant) => ({
     restaurant,
@@ -116,10 +165,14 @@ const RestaurantGrid = ({
 
   const renderContent = () => {
     if (error) {
-      return <p className="py-10 text-center text-destructive">Erreur : {error}</p>;
+      return (
+        <p className="py-10 text-center text-destructive">Erreur : {error}</p>
+      );
     }
     if (!isLoading && filteredData.length === 0) {
-      return <p className="py-10 text-center text-foreground/70">{emptyMessage}</p>;
+      return (
+        <p className="py-10 text-center text-foreground/70">{emptyMessage}</p>
+      );
     }
 
     // --- Carte globale ---
@@ -132,7 +185,9 @@ const RestaurantGrid = ({
         );
       }
       // Les restaurants fermés ne sont pas placés sur la carte.
-      return <RestaurantsMap restaurants={filteredData.filter((r) => !r.closed)} />;
+      return (
+        <RestaurantsMap restaurants={filteredData.filter((r) => !r.closed)} />
+      );
     }
 
     // --- Roue (Surprise du midi) ---
@@ -161,46 +216,73 @@ const RestaurantGrid = ({
       return (
         /* Mobile : lignes empilées dans un cadre de section (filets) ; desktop :
            tuiles espacées. */
-        <div key={listKey} className={cn(SECTION_BODY, "divide-y divide-border sm:flex sm:flex-col sm:gap-3 sm:divide-y-0")}>
-          {isLoading
-            ? Array.from({ length: 6 }, (_, i) => <RowSkeleton key={`s-${i}`} />)
-            : filteredData.map((restaurant, i) => (
-                <motion.div
-                  key={restaurant.id}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: Math.min(i * 0.04, 0.4) }}
-                >
-                  <RestaurantRow {...itemProps(restaurant)} />
-                </motion.div>
-              ))}
-        </div>
+        <>
+          <div
+            key={listKey}
+            className={cn(
+              SECTION_BODY,
+              "divide-y divide-border sm:flex sm:flex-col sm:gap-3 sm:divide-y-0",
+            )}
+          >
+            {isLoading
+              ? Array.from({ length: 6 }, (_, i) => (
+                  <RowSkeleton key={`s-${i}`} />
+                ))
+              : visibleData.map((restaurant, i) => (
+                  <motion.div
+                    key={restaurant.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    // Cascade comptée dans la tranche : la suivante démarre aussitôt.
+                    transition={{
+                      duration: 0.25,
+                      delay: Math.min((i % PAGE_SIZE) * 0.02, 0.12),
+                    }}
+                  >
+                    <RestaurantRow
+                      {...itemProps(restaurant)}
+                      priority={i < PRIORITY_ITEMS}
+                    />
+                  </motion.div>
+                ))}
+          </div>
+          {!isLoading && showMore}
+        </>
       );
     }
 
     // --- Grille (défaut, inchangée) ---
     return (
-      <div
-        key={listKey}
-        className="grid grid-flow-dense grid-cols-1 gap-2.5 sm:gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-3"
-      >
-        {isLoading
-          ? Array.from({ length: 6 }, (_, i) => (
-              <div key={`s-${i}`}>
-                <CardSkeleton />
-              </div>
-            ))
-          : filteredData.map((restaurant, i) => (
-              <motion.div
-                key={restaurant.id}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: Math.min(i * 0.05, 0.4) }}
-              >
-                <RestaurantCardTW {...itemProps(restaurant)} />
-              </motion.div>
-            ))}
-      </div>
+      <>
+        <div
+          key={listKey}
+          className="grid grid-flow-dense grid-cols-1 gap-2.5 sm:gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-3"
+        >
+          {isLoading
+            ? Array.from({ length: 6 }, (_, i) => (
+                <div key={`s-${i}`}>
+                  <CardSkeleton />
+                </div>
+              ))
+            : visibleData.map((restaurant, i) => (
+                <motion.div
+                  key={restaurant.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.25,
+                    delay: Math.min((i % PAGE_SIZE) * 0.03, 0.15),
+                  }}
+                >
+                  <RestaurantCardTW
+                    {...itemProps(restaurant)}
+                    priority={i < PRIORITY_ITEMS}
+                  />
+                </motion.div>
+              ))}
+        </div>
+        {!isLoading && showMore}
+      </>
     );
   };
 

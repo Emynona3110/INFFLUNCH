@@ -21,7 +21,9 @@ import AdminSection from "../sections/AdminSection";
 import AdminGuard from "../components/AdminGuard";
 import Layout from "../components/Layout";
 import ProfilePage from "./ProfilePage";
+import PageReveal from "../components/PageReveal";
 import useIsAdmin from "../hooks/useIsAdmin";
+import { cn } from "@/lib/utils";
 
 // Sections de la navbar selon le rôle. Les pages réservées aux admins vivent
 // sous /admin/* (garde unique AdminGuard) ; les autres sont à la racine.
@@ -76,7 +78,7 @@ const UserPage = () => {
   const sections = buildUserSections(isAdmin);
 
   const [restaurantFilters, setRestaurantFilters] = useState<RestaurantFilters>(
-    defaultRestaurantFilters
+    defaultRestaurantFilters,
   );
   // Mode d'affichage : on garde le choix de l'utilisateur d'une session à
   // l'autre (localStorage, comme le thème). À défaut de préférence enregistrée,
@@ -110,7 +112,7 @@ const UserPage = () => {
   // mémoire comme les filtres : survit au changement de vue, remis à zéro au
   // rechargement de la page. Modèle par exclusion → par défaut, tout participe.
   const [rouletteExcluded, setRouletteExcluded] = useState<Set<number>>(
-    new Set()
+    new Set(),
   );
   // Dernier restaurant tiré : conservé quand on quitte/revient sur la vue roue,
   // effacé dès que la sélection change.
@@ -126,8 +128,8 @@ const UserPage = () => {
   const isDetail = isRestaurantDetail || location.pathname.includes("/profil/");
   const currentPage = isDetail
     ? ""
-    : sections.find((section) => location.pathname.includes(section.path))
-        ?.path ?? sections[0].path;
+    : (sections.find((section) => location.pathname.includes(section.path))
+        ?.path ?? sections[0].path);
   // Onglet surligné : une fiche resto reste « dans » Restaurants, même si la
   // barre d'outils, elle, n'y est pas.
   const activeTab = isRestaurantDetail ? "restaurants" : currentPage;
@@ -181,35 +183,49 @@ const UserPage = () => {
         ) : undefined
       }
     >
-      <Routes>
-        <Route index element={<Navigate to="restaurants" replace />} />
-        <Route
-          path="restaurants"
-          element={
-            <RestaurantGrid
-              restaurantFilters={restaurantFilters}
-              viewMode={viewMode}
-              rouletteExcluded={rouletteExcluded}
-              onRouletteExcludedChange={handleRouletteExcludedChange}
-              rouletteWinnerId={rouletteWinnerId}
-              onRouletteWinnerChange={setRouletteWinnerId}
-            />
-          }
-        />
-        <Route path="dejeuner" element={<LunchToday />} />
-        {/* Compat : ancien chemin de l'onglet, renommé « Déjeuner ». */}
-        <Route path="midi" element={<Navigate to="/dejeuner" replace />} />
-        <Route path="restaurant/:slug" element={<RestaurantPage />} />
-        <Route path="profil/:handle" element={<ProfilePage />} />
-        <Route path="mon-compte" element={<MyAccount />} />
-        <Route path="a-propos" element={<About />} />
-        <Route path="nouveautes" element={<Nouveautes />} />
-        {/* Pages admin sous /admin/* derrière un garde unique. */}
-        <Route path="admin" element={<AdminGuard />}>
-          <Route index element={<AdminSection />} />
-        </Route>
-        <Route path="*" element={<PageNotFound />} />
-      </Routes>
+      {/* Chaque page n'apparaît qu'une fois ses données chargées (fondu en
+          montant) : remontée à chaque changement d'adresse. */}
+      <PageReveal
+        key={location.pathname}
+        className={
+          fillContent
+            ? "h-full"
+            : cn(
+                "flex w-full flex-1 shrink-0 flex-col",
+                centerContent && "items-center justify-center",
+              )
+        }
+      >
+        <Routes>
+          <Route index element={<Navigate to="restaurants" replace />} />
+          <Route
+            path="restaurants"
+            element={
+              <RestaurantGrid
+                restaurantFilters={restaurantFilters}
+                viewMode={viewMode}
+                rouletteExcluded={rouletteExcluded}
+                onRouletteExcludedChange={handleRouletteExcludedChange}
+                rouletteWinnerId={rouletteWinnerId}
+                onRouletteWinnerChange={setRouletteWinnerId}
+              />
+            }
+          />
+          <Route path="dejeuner" element={<LunchToday />} />
+          {/* Compat : ancien chemin de l'onglet, renommé « Déjeuner ». */}
+          <Route path="midi" element={<Navigate to="/dejeuner" replace />} />
+          <Route path="restaurant/:slug" element={<RestaurantPage />} />
+          <Route path="profil/:handle" element={<ProfilePage />} />
+          <Route path="mon-compte" element={<MyAccount />} />
+          <Route path="a-propos" element={<About />} />
+          <Route path="nouveautes" element={<Nouveautes />} />
+          {/* Pages admin sous /admin/* derrière un garde unique. */}
+          <Route path="admin" element={<AdminGuard />}>
+            <Route index element={<AdminSection />} />
+          </Route>
+          <Route path="*" element={<PageNotFound />} />
+        </Routes>
+      </PageReveal>
     </Layout>
   );
 };

@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import supabaseClient from "../services/supabaseClient";
 import { compressImage } from "../utils/imageCompress";
 import { PHOTOS_BUCKET, galleryPathBase } from "../services/storagePaths";
@@ -23,21 +28,11 @@ export interface RestaurantPhoto {
 const publicUrl = (path: string) =>
   supabaseClient.storage.from(PHOTOS_BUCKET).getPublicUrl(path).data.publicUrl;
 
-/**
- * Photos d'un restaurant (galerie collaborateurs), de la plus récente à la plus
- * ancienne. Les binaires vivent dans le bucket Storage ; la table
- * restaurant_photos ne porte que les métadonnées. Comme reviews, pas de FK
- * directe vers public.users → jointure manuelle pour l'email de l'auteur.
- */
-const useRestaurantPhotos = (
-  restaurantId: number | undefined,
-  slug?: string
-) => {
-  const queryClient = useQueryClient();
-  const key = ["restaurant-photos", restaurantId];
-
-  const query = useQuery<RestaurantPhoto[], Error>({
-    queryKey: key,
+/** Photos d'un restaurant : options partagées par le hook et le préchargement au
+ *  survol (usePrefetch). */
+export const restaurantPhotosQueryOptions = (restaurantId: number | undefined) =>
+  queryOptions<RestaurantPhoto[], Error>({
+    queryKey: ["restaurant-photos", restaurantId],
     enabled: !!restaurantId,
     queryFn: async () => {
       const { data, error } = await supabaseClient
@@ -70,6 +65,21 @@ const useRestaurantPhotos = (
       }));
     },
   });
+
+/**
+ * Photos d'un restaurant (galerie collaborateurs), de la plus récente à la plus
+ * ancienne. Les binaires vivent dans le bucket Storage ; la table
+ * restaurant_photos ne porte que les métadonnées. Comme reviews, pas de FK
+ * directe vers public.users → jointure manuelle pour l'email de l'auteur.
+ */
+const useRestaurantPhotos = (
+  restaurantId: number | undefined,
+  slug?: string
+) => {
+  const queryClient = useQueryClient();
+  const key = ["restaurant-photos", restaurantId];
+
+  const query = useQuery(restaurantPhotosQueryOptions(restaurantId));
 
   const upload = useMutation({
     mutationFn: async ({

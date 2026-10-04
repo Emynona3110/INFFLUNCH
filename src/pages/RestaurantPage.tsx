@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { motion } from "framer-motion";
 import { FaStar } from "react-icons/fa";
 import {
   FiArrowLeft,
@@ -203,10 +202,7 @@ const RestaurantPage = () => {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35 }}
+    <div
       className="tw-scope mx-auto max-w-[1100px] pb-4"
     >
       {/* Retour là d'où l'on vient : une tablée du midi, un avis, la grille… */}
@@ -221,6 +217,9 @@ const RestaurantPage = () => {
         <img
           src={restaurant.image ?? noImage}
           alt={restaurant.name}
+          // Image principale de la fiche : priorité haute.
+          fetchPriority="high"
+          data-fade
           className={cn(
             "h-full w-full object-cover",
             restaurant.closed && "grayscale",
@@ -710,7 +709,7 @@ const RestaurantPage = () => {
           />
         </>
       )}
-    </motion.div>
+    </div>
   );
 };
 

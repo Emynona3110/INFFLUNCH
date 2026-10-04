@@ -161,6 +161,8 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
                         <BsBan className="text-foreground opacity-30" />
                       ) : isImage ? (
                         <img
+                          loading="lazy"
+                          data-fade
                           src={value}
                           alt={col}
                           className="h-10 w-10 rounded-md object-cover"

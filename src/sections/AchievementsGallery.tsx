@@ -17,6 +17,7 @@ import {
 } from "@/data/achievements";
 import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
+import RareRing from "@/components/RareRing";
 import {
   SECTION,
   SECTION_HEAD,
@@ -179,11 +180,16 @@ const AchievementsGallery = () => {
                           "rare-aura",
                       )}
                     >
+                      {unlocked &&
+                        statsReady &&
+                        percent < RARE_PERCENT && <RareRing />}
                       {/* Image visible seulement une fois débloqué (verrouillé =
                         cadenas), même pour les succès non secrets. */}
                       {unlocked ? (
                         a.image ? (
                           <img
+                            loading="lazy"
+                            data-fade
                             src={a.image}
                             alt=""
                             className="h-full w-full object-contain"

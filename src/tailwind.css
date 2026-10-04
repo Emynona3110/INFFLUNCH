@@ -539,50 +539,53 @@ input:-webkit-autofill:active {
    collègues), façon Steam : un anneau doré qui tourne autour de la case.
    Posé sur la case de l'icône, seulement si le visiteur l'a lui-même.
 
-   L'anneau est une vraie BORDURE de 2px (le navigateur en cale l'épaisseur
-   sur les pixels de l'écran, donc identique sur les quatre côtés), peinte
-   d'un dégradé conique puis masquée hors bordure : le fond des images
-   transparentes reste intact. Elle recouvre la bordure grise de la case.
-   L'angle est une propriété enregistrée, sans quoi le dégradé ne tournerait
-   pas.
+   L'anneau est une bordure de 2px : un calque
+   `.rare-ring` (composant RareRing) masqué hors bordure, dont le contenu — un
+   grand carré peint d'un dégradé conique FIXE — tourne par `transform`. Seule
+   la carte graphique travaille : faire varier l'angle du dégradé (première
+   version) le faisait repeindre à chaque image par le processeur, illustration
+   du succès comprise — le profil ramait sur les machines modestes. Le fond des
+   images transparentes reste intact ; l'anneau recouvre la bordure grise.
 --------------------------------------------------------------------------- */
-@property --rare-angle {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: 0deg;
-}
 .rare-aura {
   position: relative;
   border-color: transparent;
 }
-.rare-aura::before {
-  content: "";
+.rare-ring {
   position: absolute;
   inset: -1px;
   z-index: 1;
+  /* Vraie BORDURE de 2px : le navigateur en cale l'épaisseur sur les pixels
+     de l'écran, identique sur les quatre côtés (un padding se décentrait).
+     Le masque ne garde que la bordure ; pas d'`overflow: hidden` (il rognerait
+     au bord intérieur de la bordure) : c'est le masque qui découpe le carré. */
   border: 2px solid transparent;
   border-radius: inherit;
-  background: conic-gradient(
-      from var(--rare-angle),
-      #f59e0b,
-      #fff7cc,
-      #fbbf24,
-      #b45309,
-      #fde68a,
-      #f59e0b
-    )
-    border-box;
   -webkit-mask:
     linear-gradient(#000 0 0) padding-box,
     linear-gradient(#000 0 0) border-box;
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
+}
+.rare-ring > span {
+  position: absolute;
+  /* Carré assez grand pour couvrir la case à toute rotation. */
+  inset: -50%;
+  background: conic-gradient(
+    #f59e0b,
+    #fff7cc,
+    #fbbf24,
+    #b45309,
+    #fde68a,
+    #f59e0b
+  );
+  will-change: transform;
   animation: rare-spin 3.5s linear infinite;
 }
 @keyframes rare-spin {
   to {
-    --rare-angle: 360deg;
+    transform: rotate(360deg);
   }
 }
 /* Même or sur du texte (« x % des collègues… » dans la fiche d'un succès
@@ -609,8 +612,22 @@ input:-webkit-autofill:active {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .rare-aura::before,
+  .rare-ring > span,
   .rare-text {
     animation: none;
   }
+}
+
+/* Photos marquées `data-fade` : invisibles tant qu'elles chargent, puis
+   fondu à l'arrivée plutôt qu'un passage brusque du vide à l'image — y compris
+   avec « réduire les animations » (choix assumé). `data-loaded` est posé par
+   main.tsx. Transition sur l'opacité ET la transformation : le zoom au survol
+   des cartes (`transition-transform`, 300 ms) est conservé. */
+img[data-fade] {
+  transition-property: opacity, transform;
+  transition-duration: 0.3s;
+  transition-timing-function: ease-out;
+}
+img[data-fade]:not([data-loaded]) {
+  opacity: 0;
 }
