@@ -1,5 +1,7 @@
 -- =============================================================================
 -- Dates d'obtention : recalage sur la source — 2026-10-02 (après coup)
+-- ⚠️ NE PLUS REJOUER depuis 2026-10-04 : il écrit des ids renommés depuis
+-- (cf. sql/2026-10-04_succes_renommage.sql).
 --
 -- Entre le déploiement et l'exécution de sql/2026-10-02_achievements.sql, le
 -- front a écrit des lignes que la fusion (qui ne tourne qu'UNE fois) n'a pas

@@ -6,7 +6,7 @@
 // `achievement_secrets` (sql/2026-09-14_achievement_secrets.sql).
 //
 // RÈGLE DU JEU : un succès débloqué ne s'annule JAMAIS. Une seule exception,
-// `completionniste` : il récompense un état (« avoir tous les autres »), pas une
+// `gatsby` : il récompense un état (« avoir tous les autres »), pas une
 // action, donc ajouter un succès ici le désactive chez celles et ceux qui
 // l'avaient — il revient dès que le nouveau est décroché. C'est
 // `useAchievementTriggers` qui le retire, et la RLS n'autorise la suppression
@@ -16,44 +16,44 @@ import type { AchievementMetrics } from "@/hooks/useAchievementMetrics";
 
 export type AchievementId =
   // Easter egg mouton (Beeeh)
-  | "anti_panurgisme"
-  | "berger_dun_jour"
+  | "petit_prince"
+  | "minecraft"
   | "gourou_du_troupeau"
   // Avis
-  | "critique_en_herbe"
-  | "palais_aguerri"
-  | "plume_gastronomique"
+  | "ratatouille"
+  | "naruto"
+  | "death_note"
   // Photos
-  | "photographe"
-  | "inffluenceur"
+  | "duck_face"
+  | "salt_bae"
   | "pizzarazzi"
   // Réactions
-  | "petit_geste"
-  | "public_conquis"
+  | "brent_rambo"
+  | "absolute_cinema"
   | "approuve"
   | "gouts_et_couleurs"
   // Prix déclarés
-  | "addition"
-  | "gardez_la_monnaie"
+  | "take_my_money"
+  | "stonks"
   // Favoris
-  | "quinte_gagnant"
+  | "pokeball"
   // Roulette (Surprise du midi)
-  | "gambling"
-  | "indecis"
-  | "de_pipe"
+  | "new_vegas"
+  | "matrix"
+  | "magritte"
   // Easter eggs divers
-  | "jour_nuit"
-  | "narcisse"
+  | "jacquouille"
+  | "johnny_bravo"
   | "shooting_stars"
-  | "cookie"
-  | "pas_de_sushi"
+  | "cookie_clicker"
+  | "nemo"
   // Méta / assiduité
-  | "fidele_au_poste"
-  | "flambe"
-  | "sprinter"
-  | "retardataire"
+  | "michael_scott"
+  | "johnny_hallyday"
+  | "flash"
+  | "mister_bean"
   | "cowabunga"
-  | "completionniste";
+  | "gatsby";
 
 export interface Achievement {
   id: AchievementId;
@@ -86,7 +86,7 @@ export interface Achievement {
   disabled?: boolean;
 }
 
-/** Palier du succès « Flambé » : jours ouvrés d'affilée avec un midi déclaré
+/** Palier du succès « Tout feu tout flamme » : jours ouvrés d'affilée avec un midi déclaré
  *  (déblocage dans useAchievementTriggers, flammes sur la pp du profil). */
 export const FLAMBE_STREAK = 5;
 
@@ -101,42 +101,41 @@ export const RARE_PERCENT = 10;
 const ALL_ACHIEVEMENTS: Achievement[] = [
   // — Avis —
   {
-    id: "critique_en_herbe",
-    title: "Critique en herbe",
+    id: "ratatouille",
+    title: "La main à la pâte",
     condition: "Publier un premier avis",
-    icon: "📝",
-    // Fichier nommé d'après le titre (et non l'id) côté design.
-    image: "/achievements/critique_en_herbe.svg",
+    icon: "🐀",
+    image: "/achievements/ratatouille.svg",
   },
   {
-    id: "palais_aguerri",
-    title: "Palais aguerri",
+    id: "death_note",
+    title: "Rayer de la carte",
     condition: "Publier 5 avis",
-    icon: "👅",
-    image: "/achievements/palais_aguerri.svg",
+    icon: "📓",
+    image: "/achievements/death_note.svg",
   },
   {
-    id: "plume_gastronomique",
-    title: "Plume gastronomique",
+    id: "naruto",
+    title: "Ramen ta science",
     condition: "Publier 20 avis",
-    icon: "🖋️",
-    image: "/achievements/plume_gastronomique.svg",
+    icon: "🍜",
+    image: "/achievements/naruto.svg",
   },
 
   // — Photos —
   {
-    id: "photographe",
-    title: "Photographe",
+    id: "duck_face",
+    title: "Selfood",
     condition: "Ajouter une première photo",
-    icon: "📷",
-    image: "/achievements/photographe.svg",
+    icon: "🤳",
+    image: "/achievements/duck_face.svg",
   },
   {
-    id: "inffluenceur",
-    title: "Inffluenceur",
+    id: "salt_bae",
+    title: "Grain de sel",
     condition: "Ajouter 5 photos",
-    icon: "🤳",
-    image: "/achievements/inffluenceur.svg",
+    icon: "🧂",
+    image: "/achievements/salt_bae.svg",
   },
   {
     id: "pizzarazzi",
@@ -149,34 +148,34 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
 
   // — Prix déclarés —
   {
-    id: "addition",
-    title: "L'addition !",
+    id: "take_my_money",
+    title: "Gardez la monnaie",
     condition: "Déclarer le prix d'un premier restaurant",
-    icon: "🧾",
-    image: "/achievements/addition.svg",
+    icon: "💸",
+    image: "/achievements/take_my_money.svg",
   },
   {
-    id: "gardez_la_monnaie",
-    title: "Gardez la monnaie",
+    id: "stonks",
+    title: "Beurre dans les épinards",
     condition: "Déclarer le prix de 5 restaurants",
-    icon: "💸",
-    image: "/achievements/gardez_la_monnaie.svg",
+    icon: "📈",
+    image: "/achievements/stonks.svg",
   },
 
   // — Réactions —
   {
-    id: "petit_geste",
-    title: "Petit geste",
+    id: "brent_rambo",
+    title: "Coup de pouce",
     condition: "Réagir à une photo",
     icon: "👍",
-    image: "/achievements/petit_geste.svg",
+    image: "/achievements/brent_rambo.svg",
   },
   {
-    id: "public_conquis",
-    title: "Public conquis",
+    id: "absolute_cinema",
+    title: "Du grand art",
     condition: "Réagir à 20 photos différentes",
-    icon: "👏",
-    image: "/achievements/public_conquis.svg",
+    icon: "🎬",
+    image: "/achievements/absolute_cinema.svg",
   },
   {
     id: "approuve",
@@ -196,63 +195,63 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
 
   // — Favoris —
   {
-    id: "quinte_gagnant",
-    title: "Quinté gagnant",
+    id: "pokeball",
+    title: "Dégustez-les tous",
     condition: "Avoir 5 restaurants favoris",
-    icon: "🐎",
-    image: "/achievements/quinte_gagnant.svg",
+    icon: "🥣",
+    image: "/achievements/pokeball.svg",
   },
 
   // — Roulette (Surprise du midi) —
   {
-    id: "gambling",
-    title: "Gambling",
+    id: "new_vegas",
+    title: "Faites vos jeux",
     condition: "Tirer le repas au hasard",
     icon: "🎰",
-    image: "/achievements/gambling.svg",
+    image: "/achievements/new_vegas.svg",
   },
   {
-    id: "indecis",
-    title: "Indécis",
-    icon: "🤔",
-    image: "/achievements/indecis.svg",
+    id: "matrix",
+    title: "Choix cornélien",
+    icon: "💊",
+    image: "/achievements/matrix.svg",
     secret: true,
   },
   {
-    id: "de_pipe",
+    id: "magritte",
     title: "Dé pipé",
     icon: "🎲",
-    image: "/achievements/de_pipe.svg",
+    image: "/achievements/magritte.svg",
     secret: true,
   },
 
   // — Méta / assiduité —
   {
-    id: "fidele_au_poste",
+    id: "michael_scott",
     title: "Fidèle au poste",
     condition: "Se connecter 5 jours d'affilée",
-    icon: "📅",
-    image: "/achievements/fidele_au_poste.svg",
+    icon: "☕",
+    image: "/achievements/michael_scott.svg",
   },
   {
-    id: "flambe",
-    title: "Flambé",
+    id: "johnny_hallyday",
+    title: "Tout feu tout flamme",
     condition: `Déclarer son midi ${FLAMBE_STREAK} jours ouvrés d'affilée`,
     icon: "🔥",
-    image: "/achievements/flambe.svg",
+    image: "/achievements/johnny_hallyday.svg",
   },
   {
-    id: "sprinter",
-    title: "Sprinter",
-    icon: "⏱️",
-    image: "/achievements/sprinter.svg",
+    id: "flash",
+    title: "Premier arrivé, premier servi",
+    icon: "⚡",
+    image: "/achievements/flash.svg",
     secret: true,
   },
   {
-    id: "retardataire",
-    title: "Retardataire",
+    id: "mister_bean",
+    title: "Mieux vaut tard que jamais",
     icon: "🐌",
-    image: "/achievements/retardataire.svg",
+    image: "/achievements/mister_bean.svg",
     secret: true,
   },
   {
@@ -268,23 +267,23 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
   // — Easter eggs divers —
   {
     // Jacquouille et l'interrupteur (Les Visiteurs) : « Le jour, la nuit… »
-    id: "jour_nuit",
+    id: "jacquouille",
     title: "Jour ! Nuit ! Jour ! Nuit !",
     icon: "🌗",
-    image: "/achievements/jour_nuit.svg",
+    image: "/achievements/jacquouille.svg",
     secret: true,
   },
   {
-    id: "narcisse",
-    title: "Narcisse",
+    id: "johnny_bravo",
+    title: "Jamais mieux servi que par soi-même",
     icon: "🪞",
-    image: "/achievements/narcisse.svg",
+    image: "/achievements/johnny_bravo.svg",
     secret: true,
   },
   {
     // Bag Raiders : curseur étoile + traînée jusqu'au rechargement (fiche resto).
     id: "shooting_stars",
-    title: "Shooting Stars",
+    title: "Étoiles filantes",
     icon: "🌠",
     image: "/achievements/shooting_stars.svg",
     secret: true,
@@ -294,35 +293,35 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     // Le seul cookie du site est dans la phrase qui dit qu'il n'y en a pas
     // (page confidentialité) ; le manger débloque. Le gros cookie de
     // l'easter egg est un autre fichier (public/easter/cookie.webp), hors DA.
-    id: "cookie",
-    title: "Cookie",
+    id: "cookie_clicker",
+    title: "Cookie Clicker",
     icon: "🍪",
-    image: "/achievements/cookie.svg",
+    image: "/achievements/cookie_clicker.svg",
     secret: true,
   },
   {
     // « Pas de souci » : Némo couché sur son riz, en sushi. Ouvrir la fenêtre
     // des demandes (FeedbackDialog) une première fois.
-    id: "pas_de_sushi",
+    id: "nemo",
     title: "Pas de sushi",
     icon: "🍣",
-    image: "/achievements/pas_de_sushi.svg",
+    image: "/achievements/nemo.svg",
     secret: true,
   },
 
   // — Easter egg mouton (Beeeh) —
   {
-    id: "anti_panurgisme",
-    title: "Anti-panurgisme",
+    id: "petit_prince",
+    title: "Dessine-moi un mouton",
     icon: "🐑",
-    image: "/achievements/anti_panurgisme.svg",
+    image: "/achievements/petit_prince.svg",
     secret: true,
   },
   {
-    id: "berger_dun_jour",
-    title: "Berger d'un jour",
+    id: "minecraft",
+    title: "Revenons à nos moutons",
     icon: "🌾",
-    image: "/achievements/berger_dun_jour.svg",
+    image: "/achievements/minecraft.svg",
     secret: true,
   },
   {
@@ -336,11 +335,11 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
 
   // — Complétionniste —
   {
-    id: "completionniste",
-    title: "Complétionniste",
+    id: "gatsby",
+    title: "La cerise sur le gâteau",
     condition: "Débloquer tous les autres succès",
-    icon: "🏆",
-    image: "/achievements/completionniste.svg",
+    icon: "🥂",
+    image: "/achievements/gatsby.svg",
   },
 ];
 
@@ -352,22 +351,70 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
 export const ACHIEVEMENT_GOALS: Partial<
   Record<AchievementId, { metric: keyof AchievementMetrics; goal: number }>
 > = {
-  critique_en_herbe: { metric: "reviews", goal: 1 },
-  palais_aguerri: { metric: "reviews", goal: 5 },
-  plume_gastronomique: { metric: "reviews", goal: 20 },
-  photographe: { metric: "photos", goal: 1 },
-  inffluenceur: { metric: "photos", goal: 5 },
+  ratatouille: { metric: "reviews", goal: 1 },
+  death_note: { metric: "reviews", goal: 5 },
+  naruto: { metric: "reviews", goal: 20 },
+  duck_face: { metric: "photos", goal: 1 },
+  salt_bae: { metric: "photos", goal: 5 },
   pizzarazzi: { metric: "photos", goal: 15 },
-  addition: { metric: "prices", goal: 1 },
-  gardez_la_monnaie: { metric: "prices", goal: 5 },
-  petit_geste: { metric: "reactionsGivenDistinct", goal: 1 },
-  public_conquis: { metric: "reactionsGivenDistinct", goal: 20 },
+  take_my_money: { metric: "prices", goal: 1 },
+  stonks: { metric: "prices", goal: 5 },
+  brent_rambo: { metric: "reactionsGivenDistinct", goal: 1 },
+  absolute_cinema: { metric: "reactionsGivenDistinct", goal: 20 },
   approuve: { metric: "reactionsReceived", goal: 5 },
   gouts_et_couleurs: { metric: "reactionEmojisDistinct", goal: 3 },
-  quinte_gagnant: { metric: "favorites", goal: 5 },
-  fidele_au_poste: { metric: "loginStreak", goal: 5 },
-  flambe: { metric: "lunchStreak", goal: FLAMBE_STREAK },
+  pokeball: { metric: "favorites", goal: 5 },
+  michael_scott: { metric: "loginStreak", goal: 5 },
+  johnny_hallyday: { metric: "lunchStreak", goal: FLAMBE_STREAK },
 };
+
+/**
+ * Anciens ids → id actuel. Une obtention se lit TOUJOURS sous son id actuel,
+ * même si la base porte encore l'ancien (migration SQL pas encore passée) :
+ * sans ça, le front croirait le succès perdu et le redébloquerait — toast et
+ * date du jour compris. Renommer un succès ne doit JAMAIS toucher aux
+ * obtentions ni à leurs dates. Inoffensif une fois la migration passée.
+ */
+const ACHIEVEMENT_ALIASES: Record<string, AchievementId> = {
+  // sql/2026-10-04_succes_renommage.sql
+  critique_en_herbe: "ratatouille",
+  // Paliers échangés avec les illustrations : 5 avis = Death Note,
+  // 20 avis = Naruto. L'obtention suit le PALIER, pas l'image.
+  palais_aguerri: "death_note",
+  plume_gastronomique: "naruto",
+  photographe: "duck_face",
+  inffluenceur: "salt_bae",
+  addition: "take_my_money",
+  gardez_la_monnaie: "stonks",
+  petit_geste: "brent_rambo",
+  public_conquis: "absolute_cinema",
+  quinte_gagnant: "pokeball",
+  gambling: "new_vegas",
+  indecis: "matrix",
+  de_pipe: "magritte",
+  fidele_au_poste: "michael_scott",
+  flambe: "johnny_hallyday",
+  sprinter: "flash",
+  retardataire: "mister_bean",
+  jour_nuit: "jacquouille",
+  narcisse: "johnny_bravo",
+  cookie: "cookie_clicker",
+  pas_de_sushi: "nemo",
+  anti_panurgisme: "petit_prince",
+  berger_dun_jour: "minecraft",
+  completionniste: "gatsby",
+};
+
+/** L'id actuel d'un id lu en base (ancien ou non). */
+export const canonicalId = (id: string) =>
+  (ACHIEVEMENT_ALIASES[id] ?? id) as AchievementId;
+
+/** Tous les ids sous lesquels un succès peut être stocké : l'actuel et ses
+ *  anciens. */
+export const storedIds = (id: AchievementId) => [
+  id,
+  ...Object.keys(ACHIEVEMENT_ALIASES).filter((old) => ACHIEVEMENT_ALIASES[old] === id),
+];
 
 /** Le catalogue en service : tout le reste du code ne voit que lui. */
 export const ACHIEVEMENTS = ALL_ACHIEVEMENTS.filter((a) => !a.disabled);

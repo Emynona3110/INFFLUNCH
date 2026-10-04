@@ -4,7 +4,12 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import supabaseClient from "../services/supabaseClient";
 import useSession from "./useSession";
 import useRealtimeTable from "./useRealtimeTable";
-import { AchievementId, ACHIEVEMENTS_BY_ID } from "@/data/achievements";
+import {
+  AchievementId,
+  ACHIEVEMENTS_BY_ID,
+  canonicalId,
+  storedIds,
+} from "@/data/achievements";
 import { showAchievementToast } from "@/lib/achievementToast";
 
 /**
@@ -41,7 +46,11 @@ const useAchievements = () => {
         .select("achievement_id, unlocked_at")
         .eq("user_id", userId);
       if (error) throw new Error(error.message);
-      return (data ?? []) as { achievement_id: AchievementId; unlocked_at: string }[];
+      // Lu sous son id actuel, même stocké sous un ancien (cf. canonicalId).
+      return (data ?? []).map((r) => ({
+        achievement_id: canonicalId(r.achievement_id as string),
+        unlocked_at: r.unlocked_at as string,
+      }));
     },
   });
 
@@ -114,7 +123,7 @@ const useAchievements = () => {
         .from("user_achievements")
         .delete()
         .eq("user_id", userId)
-        .eq("achievement_id", id);
+        .in("achievement_id", storedIds(id));
       if (error) throw new Error(error.message);
 
       fired.delete(`${userId}:${id}`);

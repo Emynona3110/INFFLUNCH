@@ -26,6 +26,7 @@ import {
   ACHIEVEMENTS,
   ACHIEVEMENTS_BY_ID,
   Achievement,
+  canonicalId,
 } from "@/data/achievements";
 import { formatAuthorName } from "@/utils/authorName";
 import { cn } from "@/lib/utils";
@@ -59,7 +60,7 @@ const formatDate = (iso: string) =>
  * succès et ses photos. Le même composant sert de première page de « Mon
  * Profil » (pour soi) et de page /profil/:id (pour les autres).
  */
-/** Étincelles autour de la pp « Flambé » : position horizontale (% de la
+/** Étincelles autour de la pp « Tout feu tout flamme » : position horizontale (% de la
  *  largeur, hors cercle = le long des bords), dérive, durée et délai. Fixes
  *  plutôt qu'aléatoires : rendu stable entre deux rendus. */
 const SPARKS = [
@@ -90,7 +91,7 @@ const StreakAvatar = ({
 }) => {
   const streak = profile.lunch_streak ?? 0;
   const onFire = streak >= 2;
-  // Palier du succès « Flambé » : la pp prend feu (halo + étincelles).
+  // Palier du succès « Tout feu tout flamme » : la pp prend feu (halo + étincelles).
   const flambe = streak >= FLAMBE_STREAK;
   return (
     <span
@@ -156,7 +157,7 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
 
   const data = profile.data;
   const unlocked = (data?.achievements ?? [])
-    .map((a) => ({ ...a, def: ACHIEVEMENTS_BY_ID[a.achievement_id] }))
+    .map((a) => ({ ...a, def: ACHIEVEMENTS_BY_ID[canonicalId(a.achievement_id)] }))
     // Un succès retiré du catalogue ne doit pas faire planter la page.
     .filter((a) => a.def)
     // Dans l'ordre du catalogue.

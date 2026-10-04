@@ -40,7 +40,7 @@ export const isWeekend = () => {
   return day === "Sat" || day === "Sun";
 };
 
-/** Heure courante à Paris (0-23), pour les succès « Sprinter » / « Retardataire ». */
+/** Heure courante à Paris (0-23), pour les succès « Premier arrivé, premier servi » / « Mieux vaut tard que jamais ». */
 const parisHour = () =>
   Number(
     new Date().toLocaleTimeString("en-US", {
@@ -50,8 +50,8 @@ const parisHour = () =>
     })
   );
 
-/** Heure (Paris) avant laquelle déclarer son midi vaut le succès « Sprinter ».
- *  Son pendant tardif est LUNCH_CUTOFF_HOUR (succès « Retardataire »). */
+/** Heure (Paris) avant laquelle déclarer son midi vaut le succès « Premier arrivé, premier servi ».
+ *  Son pendant tardif est LUNCH_CUTOFF_HOUR (succès « Mieux vaut tard que jamais »). */
 const SPRINTER_HOUR = 10;
 
 /** Heure (Paris) à partir de laquelle le midi est joué : on ne demande plus où
@@ -207,7 +207,7 @@ const useLunchToday = () => {
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey });
-    // Série de midis (succès « Flambé ») et compteur du profil.
+    // Série de midis (succès « Tout feu tout flamme ») et compteur du profil.
     queryClient.invalidateQueries({ queryKey: ["achievement-metrics"] });
     queryClient.invalidateQueries({ queryKey: ["public-profile", userId] });
     // Relances de prix : déclarer un restaurant à 18 h crée aussitôt un midi à
@@ -250,8 +250,8 @@ const useLunchToday = () => {
       // « pas au resto ») choisi très tôt ou après que le déjeuner soit passé.
       // Heure de Paris ; « après 14 h » = le seuil du midi (isAfterLunch).
       if (plan.restaurantId != null) {
-        if (parisHour() < SPRINTER_HOUR) unlock("sprinter");
-        else if (isAfterLunch()) unlock("retardataire");
+        if (parisHour() < SPRINTER_HOUR) unlock("flash");
+        else if (isAfterLunch()) unlock("mister_bean");
       }
     },
   });

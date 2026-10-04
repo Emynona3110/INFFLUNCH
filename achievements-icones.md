@@ -47,33 +47,33 @@ dans le code. Renommer un succès = renommer son id, son fichier, et ajouter un
 
 | ID | Titre | Fichier |
 |---|---|---|
-| `anti_panurgisme` | Anti-panurgisme | `anti_panurgisme.svg` |
-| `berger_dun_jour` | Berger d'un jour | `berger_dun_jour.svg` |
+| `petit_prince` | Dessine-moi un mouton | `petit_prince.svg` |
+| `minecraft` | Revenons à nos moutons | `minecraft.svg` |
 | `gourou_du_troupeau` | Gourou du troupeau | `gourou_du_troupeau.svg` |
-| `critique_en_herbe` | Critique en herbe | `critique_en_herbe.svg` |
-| `palais_aguerri` | Palais aguerri | `palais_aguerri.svg` |
-| `plume_gastronomique` | Plume gastronomique | `plume_gastronomique.svg` |
-| `photographe` | Photographe | `photographe.svg` |
-| `inffluenceur` | Inffluenceur | `inffluenceur.svg` |
+| `ratatouille` | La main à la pâte | `ratatouille.svg` |
+| `death_note` | Rayer de la carte | `death_note.svg` |
+| `naruto` | Ramen ta science | `naruto.svg` |
+| `duck_face` | Selfood | `duck_face.svg` |
+| `salt_bae` | Grain de sel | `salt_bae.svg` |
 | `pizzarazzi` | Pizzarazzi | `pizzarazzi.svg` |
-| `addition` | L'addition ! | `addition.svg` |
-| `gardez_la_monnaie` | Gardez la monnaie | `gardez_la_monnaie.svg` |
-| `petit_geste` | Petit geste | `petit_geste.svg` |
-| `public_conquis` | Public conquis | `public_conquis.svg` |
+| `take_my_money` | Gardez la monnaie | `take_my_money.svg` |
+| `stonks` | Beurre dans les épinards | `stonks.svg` |
+| `brent_rambo` | Coup de pouce | `brent_rambo.svg` |
+| `absolute_cinema` | Du grand art | `absolute_cinema.svg` |
 | `approuve` | Approuvé | `approuve.svg` |
 | `gouts_et_couleurs` | Goûts et couleurs | `gouts_et_couleurs.svg` (fournie : meme du chat devant l'assiette) |
-| `quinte_gagnant` | Quinté gagnant | `quinte_gagnant.svg` |
-| `gambling` | Gambling | `gambling.svg` |
-| `indecis` | Indécis | `indecis.svg` |
-| `de_pipe` | Dé pipé | `de_pipe.svg` |
-| `jour_nuit` | Jour ! Nuit ! Jour ! Nuit ! | `jour_nuit.svg` |
-| `narcisse` | Narcisse | `narcisse.svg` |
-| `shooting_stars` | Shooting Stars | `shooting_stars.svg` |
-| `cookie` | Cookie | `cookie.svg` |
-| `fidele_au_poste` | Fidèle au poste | `fidele_au_poste.svg` |
-| `flambe` | Flambé | `flambe.svg` |
-| `sprinter` | Sprinter | `sprinter.svg` |
-| `retardataire` | Retardataire | `retardataire.svg` |
-| `completionniste` | Complétionniste | `completionniste.svg` |
+| `pokeball` | Dégustez-les tous | `pokeball.svg` |
+| `new_vegas` | Faites vos jeux | `new_vegas.svg` |
+| `matrix` | Choix cornélien | `matrix.svg` |
+| `magritte` | Dé pipé | `magritte.svg` |
+| `jacquouille` | Jour ! Nuit ! Jour ! Nuit ! | `jacquouille.svg` |
+| `johnny_bravo` | Jamais mieux servi que par soi-même | `johnny_bravo.svg` |
+| `shooting_stars` | Étoiles filantes | `shooting_stars.svg` |
+| `cookie_clicker` | Cookie Clicker | `cookie_clicker.svg` |
+| `michael_scott` | Fidèle au poste | `michael_scott.svg` |
+| `johnny_hallyday` | Tout feu tout flamme | `johnny_hallyday.svg` |
+| `flash` | Premier arrivé, premier servi | `flash.svg` |
+| `mister_bean` | Mieux vaut tard que jamais | `mister_bean.svg` |
+| `gatsby` | La cerise sur le gâteau | `gatsby.svg` |
 
 26 succès.

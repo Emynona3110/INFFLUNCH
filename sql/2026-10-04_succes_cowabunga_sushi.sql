@@ -7,7 +7,7 @@
 
 insert into public.achievement_secrets (id, condition) values
   ('cowabunga',    'Déjeuner à au moins 4 dans le même restaurant'),
-  ('pas_de_sushi', 'Ouvrir la fenêtre des demandes')
+  ('nemo',         'Ouvrir la fenêtre des demandes')
 on conflict (id) do update set condition = excluded.condition;
 
 -- « Pas de sushi » rétroactif : qui a déjà soumis une demande l'obtient, daté
@@ -15,7 +15,7 @@ on conflict (id) do update set condition = excluded.condition;
 -- voit sa date ramenée à cette première demande si elle est plus ancienne.
 -- Idempotent : à rejouer sans risque.
 insert into public.user_achievements (user_id, achievement_id, unlocked_at)
-select author_id, 'pas_de_sushi', min(created_at)
+select author_id, 'nemo', min(created_at)
   from public.feedback
  group by author_id
 on conflict (user_id, achievement_id) do update

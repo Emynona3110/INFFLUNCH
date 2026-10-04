@@ -261,7 +261,7 @@ const CookieWord = () => {
     setGone(true);
     setBites(BITES);
     drop({ x: 50, y: 70 }, 26, 50, 160);
-    unlock("cookie");
+    unlock("cookie_clicker");
   };
 
   // Le dernier morceau parti, on range ; les miettes, elles, finissent de

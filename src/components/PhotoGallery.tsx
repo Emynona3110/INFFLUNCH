@@ -472,13 +472,13 @@ const PhotoGallery = ({
               <EmojiReactions
                 summary={photoReactions.summaryFor(lightbox.id)}
                 onToggle={(emoji) => {
-                  // Succès « Narcisse » : AJOUTER une réaction sur sa propre
+                  // Succès « Jamais mieux servi que par soi-même » : AJOUTER une réaction sur sa propre
                   // photo (pas la retirer).
                   if (
                     lightbox.user_id === userId &&
                     !photoReactions.summaryFor(lightbox.id).mine.has(emoji)
                   )
-                    unlock("narcisse");
+                    unlock("johnny_bravo");
                   photoReactions.toggle(lightbox.id, emoji);
                 }}
                 disabled={!photoReactions.canReact}

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import supabaseClient from "../services/supabaseClient";
 import useSession from "./useSession";
-import { AchievementId } from "@/data/achievements";
+import { AchievementId, canonicalId } from "@/data/achievements";
 
 /**
  * Conditions des succès SECRETS, lues en base (`achievement_secrets`) : la RLS
@@ -21,7 +21,8 @@ const useSecretConditions = () => {
         .select("id, condition");
       if (error) throw new Error(error.message);
       return Object.fromEntries(
-        (data ?? []).map((r) => [r.id, r.condition])
+        // Lue sous l'id actuel, même stockée sous un ancien (cf. canonicalId).
+        (data ?? []).map((r) => [canonicalId(r.id), r.condition])
       ) as Partial<Record<AchievementId, string>>;
     },
   });

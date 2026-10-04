@@ -34,9 +34,9 @@ const Beeeh = () => {
   const [items, setItems] = useState<FallingItem[]>([]);
   const { unlock } = useAchievements();
 
-  // Succès « Anti-panurgisme » : avoir trouvé le mouton (afficher cette page).
+  // Succès « Dessine-moi un mouton » : avoir trouvé le mouton (afficher cette page).
   useEffect(() => {
-    unlock("anti_panurgisme");
+    unlock("petit_prince");
   }, [unlock]);
 
   const spawnEmoji = useCallback(() => {
@@ -92,7 +92,7 @@ const Beeeh = () => {
     // Succès nourriture. Le streak se remet à zéro en quittant la page (le ref
     // est recréé au prochain montage) → « 10 fois d'affilée ».
     streakRef.current += 1;
-    if (streakRef.current === 1) unlock("berger_dun_jour");
+    if (streakRef.current === 1) unlock("minecraft");
     if (streakRef.current >= GOUROU_STREAK) unlock("gourou_du_troupeau");
   };
 

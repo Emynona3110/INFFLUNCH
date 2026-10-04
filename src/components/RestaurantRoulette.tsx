@@ -154,10 +154,10 @@ const RestaurantRoulette = ({
   const launch = () => {
     // Succès « Dé pipé » : lancer avec un seul resto, réduit volontairement
     // (d'autres restos existent mais ont été décochés).
-    if (selectedPool.length === 1 && pool.length > 1) unlock("de_pipe");
+    if (selectedPool.length === 1 && pool.length > 1) unlock("magritte");
     // Succès « Indécis » : 3 lancers dans la même session (secret).
     sessionSpinCount += 1;
-    if (sessionSpinCount >= INDECIS_SPINS) unlock("indecis");
+    if (sessionSpinCount >= INDECIS_SPINS) unlock("matrix");
 
     setSpinKey((k) => k + 1);
     setPhase("spinning");
@@ -229,7 +229,7 @@ const RestaurantRoulette = ({
                 onWinnerChange(spin.winner.id);
                 setPhase("result");
                 // Succès « Gambling » : un tirage est allé au bout.
-                unlock("gambling");
+                unlock("new_vegas");
               }}
             >
               {spin.reel.map((resto, i) => (

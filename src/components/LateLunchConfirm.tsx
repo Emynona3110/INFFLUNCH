@@ -29,7 +29,7 @@ const WORDING: Record<
     destructive: false,
   },
   clear: {
-    // Le seul cas qui coûte vraiment quelque chose : la série « Flambé » compte
+    // Le seul cas qui coûte vraiment quelque chose : la série « Tout feu tout flamme » compte
     // les jours OUVRÉS avec une déclaration, restaurant ou pas (cf.
     // sql/2026-09-20_public_profile_lunches.sql). Changer de resto la préserve,
     // tout retirer la coupe.

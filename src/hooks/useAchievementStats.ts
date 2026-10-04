@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import supabaseClient from "../services/supabaseClient";
-import { AchievementId } from "@/data/achievements";
+import { AchievementId, canonicalId } from "@/data/achievements";
 
 /**
  * Pourcentage global d'utilisateurs ayant débloqué chaque succès (façon Steam).
@@ -18,7 +18,9 @@ const useAchievementStats = () => {
       if (error) throw new Error(error.message);
       const map: Partial<Record<AchievementId, number>> = {};
       for (const row of (data ?? []) as { achievement_id: AchievementId; percent: number }[]) {
-        map[row.achievement_id] = row.percent;
+        // Ancien id encore en base : compté avec l'actuel (cf. canonicalId).
+        const id = canonicalId(row.achievement_id);
+        map[id] = (map[id] ?? 0) + row.percent;
       }
       return map;
     },
