@@ -292,14 +292,16 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
                 Aucun succès débloqué pour le moment.
               </p>
             ) : (
-              /* Mobile : bandeau horizontal à défilement libre.
+              /* Mobile : bandeau horizontal à défilement libre verrouillé à
+               l'horizontale : touch-pan-x pour le doigt, overflow-y-hidden car
+               overflow-x-auto passerait sinon overflow-y en auto.
                Desktop : grille de 10 par ligne sur toute la largeur, titre en
                infobulle. */
               <ul
                 // Le défilement du bandeau ne doit pas passer pour un balayage
                 // de changement d'onglet (Mon compte) : cf. useSwipeTabs.
                 data-no-swipe
-                className="m-0 flex list-none gap-2 overflow-x-auto p-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:grid sm:grid-cols-10 sm:gap-2 sm:overflow-visible sm:p-0"
+                className="m-0 flex list-none gap-2 touch-pan-x overflow-x-auto overflow-y-hidden overscroll-x-contain p-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:grid sm:grid-cols-10 sm:gap-2 sm:touch-auto sm:overflow-visible sm:p-0"
               >
                 {slots.map((slot, i) => {
                   // Succès que la personne n'a pas encore : cadre vide, à sa
