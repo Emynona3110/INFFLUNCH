@@ -96,12 +96,20 @@ const useRestaurants = (restaurantFilters: RestaurantFilters) => {
       }
     }
 
-    const asc = sortOrder === "distance";
     // Les fermés restent consultables mais passent toujours en fin de liste,
     // quel que soit le tri choisi (false avant true en ordre croissant).
-    const ordered = query
-      .order("closed", { ascending: true })
-      .order(sortOrder, { ascending: asc });
+    const byClosed = query.order("closed", { ascending: true });
+
+    // Prix : le moins cher d'abord (`price_ref`, milieu de la fourchette) ; les
+    // restos sans prix déclaré à la suite, puis la pertinence tranche.
+    if (sortOrder === "price") {
+      return byClosed
+        .order("price_ref", { ascending: true, nullsFirst: false })
+        .order("relevance", { ascending: false });
+    }
+
+    const asc = sortOrder === "distance";
+    const ordered = byClosed.order(sortOrder, { ascending: asc });
 
     // À note égale, le plus commenté passe devant (un 4,5 sur 20 avis vaut
     // mieux qu'un 4,5 sur 1 avis), puis la pertinence tranche.

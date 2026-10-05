@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { BsFilter } from "react-icons/bs";
 import { FaStar, FaRegStar } from "react-icons/fa";
-import { FiChevronDown } from "react-icons/fi";
-import { SortOrder } from "./SortSelector";
+import SortSelector from "./SortSelector";
 import { defaultRestaurantFilters, RestaurantFilters } from "../pages/UserPage";
 import BadgesToggles from "./BadgesToggles";
 import { RangeSlider } from "@/components/ui/slider";
@@ -92,24 +91,11 @@ const FilterDialog = ({ restaurantFilters, onFilterChange }: FilterDialogProps) 
           {/* Tri */}
           <div>
             <span className="text-sm font-bold text-foreground">Trier par</span>
-            <div className="relative mt-1.5">
-              <select
+            <div className="mt-1.5">
+              <SortSelector
                 value={localQuery.sortOrder}
-                onChange={(e) =>
-                  setLocalQuery({
-                    ...localQuery,
-                    sortOrder: e.target.value as SortOrder,
-                  })
-                }
-                className="h-10 w-full cursor-pointer appearance-none rounded-lg border border-border bg-background pl-3 pr-9 text-sm text-foreground outline-none transition focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/25"
-              >
-                <option value="relevance">Pertinence</option>
-                <option value="rating">Meilleures notes</option>
-                <option value="distance">Proximité</option>
-                <option value="reviews">Nombre d'avis</option>
-                <option value="created_at">Ajout récent</option>
-              </select>
-              <FiChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground opacity-50" />
+                onChange={(sortOrder) => setLocalQuery({ ...localQuery, sortOrder })}
+              />
             </div>
           </div>
 
