@@ -161,6 +161,11 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
     .map((a) => ({ ...a, def: ACHIEVEMENTS_BY_ID[canonicalId(a.achievement_id)] }))
     // Un succès retiré du catalogue ne doit pas faire planter la page.
     .filter((a) => a.def)
+    // Un même succès peut exister en base sous son ancien id ET le nouveau
+    // (renommage pas encore migré) : une seule fois, à la date la plus
+    // ancienne — sinon le compteur dépassait le total (31/30).
+    .sort((a, b) => a.unlocked_at.localeCompare(b.unlocked_at))
+    .filter((a, i, all) => all.findIndex((x) => x.def === a.def) === i)
     // Dans l'ordre du catalogue.
     .sort(
       (a, b) => ACHIEVEMENTS.indexOf(a.def) - ACHIEVEMENTS.indexOf(b.def),
