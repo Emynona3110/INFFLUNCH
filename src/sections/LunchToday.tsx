@@ -22,6 +22,7 @@ import { defaultRestaurantFilters } from "@/pages/UserPage";
 import AuthorButton from "@/components/AuthorButton";
 import { toast } from "@/lib/toast";
 import noImage from "@/assets/no-image.jpg";
+import { resizedImgProps, IMG_THUMB } from "@/lib/imageUrl";
 import { cn } from "@/lib/utils";
 import { formatAuthorName } from "@/utils/authorName";
 import { SECTION_BODY } from "@/lib/sectionClasses";
@@ -605,7 +606,7 @@ const LunchToday = () => {
                     <img
                       loading="lazy"
                       data-fade
-                      src={restaurant.image || noImage}
+                      {...resizedImgProps(restaurant.image || noImage, IMG_THUMB)}
                       alt=""
                       className={cn(
                         HOVER_ZOOM_IMG,

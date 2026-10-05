@@ -51,6 +51,7 @@ import Avatar from "@/components/Avatar";
 import AuthorButton from "@/components/AuthorButton";
 import { toast } from "@/lib/toast";
 import noImage from "@/assets/no-image.jpg";
+import { resizedImgProps, IMG_HERO } from "@/lib/imageUrl";
 import { cn } from "@/lib/utils";
 import {
   SECTION,
@@ -215,7 +216,7 @@ const RestaurantPage = () => {
       {/* Hero */}
       <div className="relative h-[220px] overflow-hidden rounded-card border border-border sm:h-[300px] md:h-[380px]">
         <img
-          src={restaurant.image ?? noImage}
+          {...resizedImgProps(restaurant.image ?? noImage, IMG_HERO)}
           alt={restaurant.name}
           // Image principale de la fiche : priorité haute.
           fetchPriority="high"

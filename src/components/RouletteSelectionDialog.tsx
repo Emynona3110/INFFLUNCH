@@ -3,6 +3,7 @@ import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Restaurant } from "@/hooks/useRestaurants";
 import noImage from "@/assets/no-image.jpg";
+import { resizedImgProps, IMG_THUMB } from "@/lib/imageUrl";
 import { cn } from "@/lib/utils";
 
 interface RouletteSelectionDialogProps {
@@ -94,7 +95,7 @@ const RouletteSelectionDialog = ({
                 <img
                   loading="lazy"
                   data-fade
-                  src={r.image || noImage}
+                  {...resizedImgProps(r.image || noImage, IMG_THUMB)}
                   alt=""
                   className="h-9 w-12 shrink-0 rounded object-cover"
                 />

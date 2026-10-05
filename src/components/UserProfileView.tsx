@@ -18,6 +18,7 @@ import ReviewForm from "@/components/ReviewForm";
 import useUserReviews, { UserReview } from "@/hooks/useUserReviews";
 import { toast } from "@/lib/toast";
 import noImage from "@/assets/no-image.jpg";
+import { resizedImgProps, IMG_THUMB } from "@/lib/imageUrl";
 import useAchievements from "@/hooks/useAchievements";
 import useAchievementStats from "@/hooks/useAchievementStats";
 import useSecretConditions from "@/hooks/useSecretConditions";
@@ -479,7 +480,7 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
                           <img
                             loading="lazy"
                             data-fade
-                            src={r.restaurant?.image ?? noImage}
+                            {...resizedImgProps(r.restaurant?.image ?? noImage, IMG_THUMB)}
                             alt=""
                             className="h-full w-full object-cover"
                           />

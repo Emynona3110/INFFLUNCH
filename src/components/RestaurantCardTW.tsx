@@ -5,6 +5,7 @@ import { FiEdit2 } from "react-icons/fi";
 import { HiOutlineLocationMarker } from "react-icons/hi";
 import { Restaurant } from "@/hooks/useRestaurants";
 import noImage from "@/assets/no-image.jpg";
+import { resizedImgProps, IMG_THUMB } from "@/lib/imageUrl";
 import badgeMap, { orderBadges } from "@/services/badgeMap";
 import { Tooltip } from "@/components/ui/tooltip";
 import LikeButton from "@/components/LikeButton";
@@ -88,7 +89,7 @@ const RestaurantCardTW = ({
           loading={priority ? "eager" : "lazy"}
           fetchPriority={priority ? "high" : "auto"}
           data-fade
-          src={restaurant.image ?? noImage}
+          {...resizedImgProps(restaurant.image ?? noImage, IMG_THUMB)}
           alt={restaurant.name}
           className={cn(
             HOVER_ZOOM_IMG,

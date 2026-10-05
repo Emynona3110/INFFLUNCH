@@ -34,7 +34,21 @@ const markImageLoaded = (e: Event) => {
   if (e.target instanceof HTMLImageElement) e.target.dataset.loaded = "";
 };
 document.addEventListener("load", markImageLoaded, true);
-document.addEventListener("error", markImageLoaded, true);
+document.addEventListener(
+  "error",
+  (e) => {
+    // Image redimensionnée en échec (cf. lib/imageUrl) : on retombe sur
+    // l'original avant de déclarer l'image chargée.
+    const img = e.target;
+    if (img instanceof HTMLImageElement && img.dataset.original) {
+      img.src = img.dataset.original;
+      delete img.dataset.original;
+      return;
+    }
+    markImageLoaded(e);
+  },
+  true,
+);
 // Image déjà en cache : React pose `src` AVANT d'insérer l'élément, elle peut
 // finir de charger hors du document — son `load` ne nous parvient jamais et
 // elle resterait blanche. On rattrape donc à l'insertion celles déjà prêtes.

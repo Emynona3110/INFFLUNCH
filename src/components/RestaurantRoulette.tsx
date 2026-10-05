@@ -8,6 +8,7 @@ import RouletteSelectionDialog from "@/components/RouletteSelectionDialog";
 import { Restaurant } from "@/hooks/useRestaurants";
 import useAchievements from "@/hooks/useAchievements";
 import noImage from "@/assets/no-image.jpg";
+import { resizedImgProps, IMG_THUMB } from "@/lib/imageUrl";
 
 const ITEM_H = 88; // hauteur d'une ligne de la roulette (px)
 const SLOT_H = 360; // hauteur réservée = taille d'une tuile (boutons stables)
@@ -76,7 +77,7 @@ const buildReel = (pool: Restaurant[], winner: Restaurant) => {
 const ReelRow = ({ resto }: { resto: Restaurant }) => (
   <div className="flex items-center gap-3 px-7" style={{ height: ITEM_H }}>
     <img
-      src={resto.image || noImage}
+      {...resizedImgProps(resto.image || noImage, IMG_THUMB)}
       alt=""
       className="h-16 w-20 shrink-0 rounded-lg object-cover"
     />

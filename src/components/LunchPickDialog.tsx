@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Restaurant } from "@/hooks/useRestaurants";
 import { slugify } from "@/utils/slugify";
 import noImage from "@/assets/no-image.jpg";
+import { resizedImgProps, IMG_THUMB } from "@/lib/imageUrl";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -78,7 +79,7 @@ const LunchPickDialog = ({
               <img
                 loading="lazy"
                 data-fade
-                src={r.image || noImage}
+                {...resizedImgProps(r.image || noImage, IMG_THUMB)}
                 alt=""
                 className="h-9 w-12 shrink-0 rounded object-cover"
               />
