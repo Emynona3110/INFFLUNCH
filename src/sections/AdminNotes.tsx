@@ -11,6 +11,7 @@ import useAdminNotes, { AdminNote } from "@/hooks/useAdminNotes";
 import { NoteCategory, noteCategory } from "@/services/noteCategories";
 import AdminNoteDialog from "@/components/AdminNoteDialog";
 import AdminNoteViewDialog from "@/components/AdminNoteViewDialog";
+import HoldButton from "@/components/HoldButton";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
@@ -386,33 +387,39 @@ const AdminNotes = () => {
           {/* Actions toujours visibles (pas au survol), au-dessus de la zone
               cliquable de la tuile. */}
           <div className="relative flex shrink-0 items-center gap-1">
-            <button
-              type="button"
-              onClick={() =>
-                toggleDone.mutate(
-                  { id: note.id, done: !note.done },
-                  { onError: fail },
-                )
-              }
-              aria-label={
-                note.done ? "Rouvrir la note" : "Marquer comme terminé"
-              }
-              aria-pressed={note.done}
-              className={cn(
+            {note.done ? (
+              <button
+                type="button"
+                onClick={() =>
+                  toggleDone.mutate(
+                    { id: note.id, done: false },
+                    { onError: fail },
+                  )
+                }
+                aria-label="Rouvrir la note"
+                aria-pressed
                 // Fond au survol seulement : la pastille permanente alourdissait
                 // les tuiles terminées.
-                "flex h-8 w-8 cursor-pointer items-center justify-center rounded-full transition",
-                note.done
-                  ? "text-primary hover:bg-primary/10"
-                  : "text-foreground/35 hover:bg-muted hover:text-primary",
-              )}
-            >
-              {note.done ? (
+                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-primary transition hover:bg-primary/10"
+              >
                 <FiX className="h-4 w-4" />
-              ) : (
+              </button>
+            ) : (
+              // Valider demande un appui long : un clic égaré ne termine plus
+              // une note par erreur.
+              <HoldButton
+                onConfirm={() =>
+                  toggleDone.mutate(
+                    { id: note.id, done: true },
+                    { onError: fail },
+                  )
+                }
+                aria-label="Marquer comme terminé"
+                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-foreground/35 transition hover:bg-muted hover:text-primary"
+              >
                 <FiCheck className="h-4 w-4" />
-              )}
-            </button>
+              </HoldButton>
+            )}
           </div>
         </div>
       </li>
