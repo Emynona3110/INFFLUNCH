@@ -642,4 +642,13 @@ img[data-fade] {
 }
 img[data-fade]:not([data-loaded]) {
   opacity: 0;
+  /* Filet de sécurité : si l'évènement `load` nous a échappé (cas vus sur
+     iOS), l'image réapparaît d'elle-même au bout de 2 s au lieu de rester
+     blanche — une image encore en cours s'affiche alors progressivement. */
+  animation: fade-fallback 0.3s ease-out 2s forwards;
+}
+@keyframes fade-fallback {
+  to {
+    opacity: 1;
+  }
 }
