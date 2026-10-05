@@ -81,6 +81,14 @@ const SPARKS = [
  * (« pas au resto » compris), contour orange et pastille flamme + nombre.
  * L'Avatar rogne (overflow-hidden) : la pastille vit dans un cadre autour.
  */
+/** À partir de ce nombre de midis d'affilée, la flamme passe au bleu. */
+const BLUE_FLAME_STREAK = 15;
+const BLUE_SPARK: Record<string, string> = {
+  "#fb923c": "#60a5fa",
+  "#fde68a": "#e0f2fe",
+  "#ea580c": "#2563eb",
+};
+
 const StreakAvatar = ({
   profile,
   size,
@@ -94,9 +102,10 @@ const StreakAvatar = ({
   const onFire = streak >= 2;
   // Palier du succès « Tout feu tout flamme » : la pp prend feu (halo + étincelles).
   const flambe = streak >= FLAMBE_STREAK;
+  const blue = streak >= BLUE_FLAME_STREAK;
   return (
     <span
-      className={cn("relative shrink-0", flambe && "streak-fire", className)}
+      className={cn("relative shrink-0", flambe && "streak-fire", blue && "streak-fire-blue", className)}
       style={{ width: size, height: size }}
     >
       {flambe &&
@@ -114,7 +123,7 @@ const StreakAvatar = ({
                 "--dur": `${sp.dur}s`,
                 "--delay": `${sp.delay}s`,
                 "--size": `${sp.size}px`,
-                "--color": sp.color,
+                "--color": blue ? BLUE_SPARK[sp.color] : sp.color,
               } as React.CSSProperties
             }
           />
@@ -123,12 +132,15 @@ const StreakAvatar = ({
         email={profile.email}
         avatarPath={profile.avatar_path}
         size={size}
-        className={cn("relative z-[1] ring-2", onFire ? "ring-accent" : "ring-border")}
+        className={cn("relative z-[1] ring-2", blue ? "ring-blue-500" : onFire ? "ring-accent" : "ring-border")}
       />
       {onFire && (
         <span
           aria-label={`${streak} midis d'affilée`}
-          className="absolute -bottom-0.5 -right-0.5 z-[2] flex h-5 min-w-5 items-center justify-center gap-0.5 rounded-full bg-accent pl-1 pr-1.5 text-xs leading-none text-white shadow ring-2 ring-card"
+          className={cn(
+            "absolute -bottom-0.5 -right-0.5 z-[2] flex h-5 min-w-5 items-center justify-center gap-0.5 rounded-full pl-1 pr-1.5 text-xs leading-none text-white shadow ring-2 ring-card",
+            blue ? "bg-blue-500" : "bg-accent",
+          )}
         >
           <LuFlame className="h-3 w-3" />
           {streak}
