@@ -100,9 +100,13 @@ const Layout = ({
         // moins toute la hauteur visible, ce qui cale le footer en bas de
         // l'écran quand la page est courte et sous le contenu quand elle est
         // longue — sans dépendre d'un `min-h-full` en pourcentage.
+        // `scrollbar-gutter: stable` : la place de la barre de défilement est
+        // toujours réservée, sinon passer d'un contenu long à un court (ex.
+        // sous-onglets de Mon compte) l'ôtait, élargissait la page et faisait
+        // sauter tout ce qui est centré.
         <main
           ref={mainRef}
-          className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain"
+          className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain [scrollbar-gutter:stable]"
         >
           <div
             className={cn(

@@ -194,7 +194,7 @@ const MyAccount = () => {
               type="button"
               onClick={() => setActive(t.key)}
               className={cn(
-                "relative inline-flex cursor-pointer items-center rounded-full px-4 py-1.5 text-sm font-medium transition",
+                "relative inline-flex cursor-pointer items-center rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
                 isActive
                   ? "bg-primary text-primary-foreground"
                   : "bg-muted text-foreground/70 hover:bg-muted/70",
