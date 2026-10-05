@@ -318,19 +318,24 @@ const RestaurantPage = () => {
           </span>
         </div>
       ) : null}
-      <div className="mt-2.5 flex flex-wrap items-center justify-end gap-2.5 sm:mt-4 sm:gap-3">
+      {/* Une seule ligne, jamais de retour : quand des avatars apparaissent
+          (inscription au midi), la rangée ne grandit pas et la page ne se
+          décale pas. Les avatars, plus bas que les boutons, prennent la place
+          libre à gauche ; s'ils manquent de place, ils sont rognés. */}
+      <div className="mt-2.5 flex items-center justify-end gap-2.5 sm:mt-4 sm:gap-3">
         {!restaurant.closed && (
           <>
-            {/* Mobile : avatars à la taille des boutons ronds (36 px). */}
-            <div className="sm:hidden">
+            {/* Mobile : avatars à la taille des boutons ronds (36 px), 3 au
+                plus pour tenir sur la ligne avec les boutons. */}
+            <div className="flex min-w-0 justify-end overflow-x-clip sm:hidden">
               <LunchAvatars
                 restaurantId={restaurant.id}
                 size={36}
-                max={5}
+                max={3}
                 interactive
               />
             </div>
-            <div className="hidden sm:block">
+            <div className="hidden min-w-0 justify-end overflow-x-clip sm:flex">
               <LunchAvatars
                 restaurantId={restaurant.id}
                 size={42}

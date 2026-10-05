@@ -68,7 +68,8 @@ const LunchButton = ({ restaurantId, className }: Props) => {
         className={cn(
           "inline-flex cursor-pointer items-center gap-2 rounded-full p-2.5 text-sm font-medium transition disabled:opacity-60 sm:px-4",
           active
-            ? "bg-primary text-primary-foreground shadow-md hover:bg-primary/90"
+            ? // Bordure transparente : même hauteur qu'inactif, rien ne bouge.
+              "border border-transparent bg-primary text-primary-foreground shadow-md hover:bg-primary/90"
             : weekendOff
               ? "border border-border bg-muted/40 text-foreground/45 hover:bg-muted hover:text-foreground/70"
               : "border border-border bg-card text-foreground hover:bg-muted",
