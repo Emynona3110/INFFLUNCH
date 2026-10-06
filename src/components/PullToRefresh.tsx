@@ -41,6 +41,9 @@ const PullToRefresh = ({ scrollRef, children }: Props) => {
 
     const onStart = (e: TouchEvent) => {
       if (refreshingRef.current || el.scrollTop > 0) return;
+      // Visionneuses d'images (`data-no-pull`) : on y glisse pour zoomer ou
+      // déplacer la photo, pas pour recharger la page en dessous.
+      if ((e.target as Element).closest?.("[data-no-pull]")) return;
       startY.current = e.touches[0].clientY;
     };
     const onMove = (e: TouchEvent) => {

@@ -257,6 +257,8 @@ const RestaurantMenus = ({
       {/* Visionneuse (images) */}
       {lightbox?.kind === "image" && (
         <div
+          // Pas de « tirer pour rafraîchir » dans la visionneuse (PullToRefresh).
+          data-no-pull
           className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/85 p-4"
           onClick={closeLightbox}
         >
