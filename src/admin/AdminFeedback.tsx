@@ -83,7 +83,7 @@ const AdminFeedback = () => {
   );
 
   // Tri par colonne (3e clic = ordre naturel : la plus récente d'abord).
-  const { sort, toggle } = useTableSort<"type" | "date" | "author" | "state">();
+  const { sort, toggle } = useTableSort<"type" | "date" | "author" | "state">("feedback");
   const sortedRows = sortRows(rows, sort, (item, key) =>
     key === "type"
       ? feedbackType(item.type).label

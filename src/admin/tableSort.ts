@@ -1,23 +1,35 @@
-import { useState } from "react";
+import { useReducer } from "react";
 
 export type SortDir = "asc" | "desc";
 export type SortState<K extends string> = { key: K; dir: SortDir } | null;
 
 /**
+ * Tri retenu par table, le temps de la session : il survit à la navigation
+ * entre écrans admin (démontage du composant) et repart de zéro au
+ * rechargement du site. En mémoire de module, volontairement pas en storage.
+ */
+const remembered = new Map<string, SortState<string>>();
+
+/**
  * Tri d'une table admin par colonne : un clic trie en ordre croissant, deux en
  * décroissant, trois rendent son ordre naturel à la table (`null` = celui de la
  * requête, en attente d'abord ou plus récent d'abord selon les cas).
+ * `tableId` identifie la table pour mémoriser son tri (cf. `remembered`).
  */
-export function useTableSort<K extends string>() {
-  const [sort, setSort] = useState<SortState<K>>(null);
-  const toggle = (key: K) =>
-    setSort((s) =>
-      !s || s.key !== key
+export function useTableSort<K extends string>(tableId: string) {
+  const [, rerender] = useReducer((n: number) => n + 1, 0);
+  const sort = (remembered.get(tableId) ?? null) as SortState<K>;
+  const toggle = (key: K) => {
+    remembered.set(
+      tableId,
+      !sort || sort.key !== key
         ? { key, dir: "asc" }
-        : s.dir === "asc"
+        : sort.dir === "asc"
           ? { key, dir: "desc" }
           : null
     );
+    rerender();
+  };
   return { sort, toggle };
 }
 

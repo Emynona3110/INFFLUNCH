@@ -32,7 +32,7 @@ const AdminUsers = () => {
   const myId = sessionData?.user?.id;
 
   // Tri par colonne (3e clic = ordre de la requête, par email).
-  const { sort, toggle } = useTableSort<"user" | "role" | "created">();
+  const { sort, toggle } = useTableSort<"user" | "role" | "created">("users");
   const rows = sortRows(users, sort, (u, key) =>
     key === "user"
       ? formatAuthorName(u.email)

@@ -71,7 +71,7 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
 
   // Tri par colonne (3e clic = ordre de la requête). Les colonnes sont
   // dynamiques : la clé de tri EST le nom de la colonne.
-  const { sort, toggle } = useTableSort<string>();
+  const { sort, toggle } = useTableSort<string>(`table:${tableName}`);
 
   const error = queryError ? queryError.message : "";
   const columnNames = data.length > 0 ? columns ?? Object.keys(data[0]) : [];
