@@ -1,7 +1,8 @@
 import Footer from "./Footer";
 import Navbar from "./Navbar";
 import { RestaurantFilters } from "../pages/UserPage";
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
+import { useLocation, useNavigationType } from "react-router-dom";
 import PullToRefresh from "@/components/PullToRefresh";
 import { cn } from "@/lib/utils";
 
@@ -37,14 +38,14 @@ interface LayoutProps {
    * compte mobile). Le footer doit rester présent sur tous les écrans.
    */
   footer?: boolean;
-  /**
-   * Quand cette valeur change, le contenu remonte en haut. À passer (ex. le
-   * pathname) sur les pages où une navigation réutilise le même Layout sans
-   * le remonter — mentions légales ↔ confidentialité —, sinon on arrive au
-   * milieu de la nouvelle page, à la position de l'ancienne.
-   */
-  scrollKey?: string;
 }
+
+/** Position de défilement de <main> par entrée d'historique (location.key),
+ *  le temps de la session : de quoi la retrouver au retour. */
+const scrollPositions = new Map<string, number>();
+/** Le contenu d'une page revenue peut arriver un peu après (PageReveal,
+ *  données) : on retente la restauration jusqu'à ce délai. */
+const RESTORE_MAX_MS = 1500;
 
 const Layout = ({
   children,
@@ -56,13 +57,57 @@ const Layout = ({
   pullToRefresh = false,
   toolbarPortal = false,
   footer = true,
-  scrollKey,
 }: LayoutProps) => {
   const mainRef = useRef<HTMLElement>(null);
-  // C'est <main> qui scrolle (pas window) : c'est lui qu'on remonte.
+  const location = useLocation();
+  const navigationType = useNavigationType();
+
+  // C'est <main> qui scrolle (pas window), et il survit aux changements de
+  // page : sans ça, une nouvelle page s'ouvrait à la position de l'ancienne.
+  // Mémorisation au fil du défilement, sous la clé de l'entrée affichée.
+  const keyRef = useRef(location.key);
   useEffect(() => {
-    mainRef.current?.scrollTo({ top: 0 });
-  }, [scrollKey]);
+    const main = mainRef.current;
+    if (!main) return;
+    const save = () => scrollPositions.set(keyRef.current, main.scrollTop);
+    main.addEventListener("scroll", save, { passive: true });
+    return () => main.removeEventListener("scroll", save);
+  }, [fillContent]);
+
+  // Nouvelle page (lien, replace) → en haut. Retour/avance (flèche « Retour »
+  // = navigate(-1), ou bouton du navigateur : POP) → position mémorisée.
+  // Layout effect : la clé change avant que le contenu remplacé ne déclenche
+  // un « scroll » qui écraserait la position de la page quittée.
+  useLayoutEffect(() => {
+    keyRef.current = location.key;
+    const main = mainRef.current;
+    if (!main) return;
+    const target =
+      navigationType === "POP" ? scrollPositions.get(location.key) ?? 0 : 0;
+    main.scrollTop = target;
+    if (target === 0) return;
+
+    // Contenu pas encore assez haut : on retente à chaque frame, et l'on
+    // s'arrête dès que l'utilisateur reprend la main.
+    let frame = 0;
+    const start = performance.now();
+    const stop = () => cancelAnimationFrame(frame);
+    const retry = () => {
+      main.scrollTop = target;
+      if (
+        Math.abs(main.scrollTop - target) > 1 &&
+        performance.now() - start < RESTORE_MAX_MS
+      )
+        frame = requestAnimationFrame(retry);
+    };
+    frame = requestAnimationFrame(retry);
+    const events = ["wheel", "touchstart", "keydown", "mousedown"] as const;
+    events.forEach((e) => main.addEventListener(e, stop, { passive: true }));
+    return () => {
+      stop();
+      events.forEach((e) => main.removeEventListener(e, stop));
+    };
+  }, [location.key, navigationType]);
   const content = pullToRefresh ? (
     <PullToRefresh scrollRef={mainRef}>{children}</PullToRefresh>
   ) : (

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { FaStar } from "react-icons/fa";
@@ -123,13 +123,6 @@ const RestaurantPage = () => {
   const [editOpen, setEditOpen] = useState(false);
   const [mapEditOpen, setMapEditOpen] = useState(false);
   const [priceOpen, setPriceOpen] = useState(false);
-
-  // Remonte en haut quand on ouvre une nouvelle fiche. Corps de bloc obligatoire :
-  // une flèche à expression retournerait la valeur de scrollTo, que React prendrait
-  // pour une fonction de nettoyage (→ crash "destroy is not a function" au démontage).
-  useEffect(() => {
-    window.scrollTo({ top: 0 });
-  }, [slug]);
 
   /* --------------------------- états de chargement --------------------------- */
 

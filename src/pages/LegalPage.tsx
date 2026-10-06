@@ -353,7 +353,7 @@ export default function LegalPage({ kind }: { kind: Kind }) {
     location.key === "default" ? navigate("/") : navigate(-1);
 
   return (
-    <Layout scrollKey={location.pathname}>
+    <Layout>
       <div className="tw-scope flex w-full justify-center sm:px-4">
         <Card className="w-full max-w-2xl p-5 sm:p-8">
           <div
