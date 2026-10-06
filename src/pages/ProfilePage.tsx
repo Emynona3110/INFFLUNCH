@@ -9,8 +9,8 @@ import { isUuid } from "@/utils/profilePath";
 
 /**
  * Profil d'un collègue (/profil/:handle — le local-part de son email, ou son
- * id). Son propre profil renvoie vers « Mon Profil », sous-onglet Profil, qui a
- * la même première page et le reste en plus.
+ * id). Son propre profil s'affiche ici aussi, comme celui des autres (avec le
+ * retour), plutôt que de basculer dans « Mon compte ».
  */
 const ProfilePage = () => {
   const { handle } = useParams<{ handle: string }>();
@@ -44,9 +44,7 @@ const ProfilePage = () => {
     );
   }
   if (!userId) return <PageNotFound />;
-  if (sessionData?.user?.id === userId)
-    // L'onglet passe par l'état de navigation : l'URL reste /mon-compte.
-    return <Navigate to="/mon-compte" state={{ tab: "profil" }} replace />;
+  const isMe = sessionData?.user?.id === userId;
 
   return (
     <div
@@ -56,7 +54,7 @@ const ProfilePage = () => {
       <BackLink fallbackTo="/" fallbackLabel="Accueil" className="mb-4" />
 
       <div className="space-y-3 sm:space-y-6">
-        <UserProfileView userId={userId} />
+        <UserProfileView userId={userId} isMe={isMe} />
       </div>
     </div>
   );
