@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import supabaseClient from "../services/supabaseClient";
@@ -35,7 +35,7 @@ const useAchievements = () => {
   const queryKey = ["achievements", userId];
 
   const { data: rows = [], isPending } = useQuery<
-    { achievement_id: AchievementId; unlocked_at: string }[],
+    { achievement_id: AchievementId; unlocked_at: string; seen: boolean }[],
     Error
   >({
     queryKey,
@@ -43,13 +43,14 @@ const useAchievements = () => {
     queryFn: async () => {
       const { data, error } = await supabaseClient
         .from("user_achievements")
-        .select("achievement_id, unlocked_at")
+        .select("achievement_id, unlocked_at, seen")
         .eq("user_id", userId);
       if (error) throw new Error(error.message);
       // Lu sous son id actuel, même stocké sous un ancien (cf. canonicalId).
       return (data ?? []).map((r) => ({
         achievement_id: canonicalId(r.achievement_id as string),
         unlocked_at: r.unlocked_at as string,
+        seen: r.seen as boolean,
       }));
     },
   });
@@ -80,6 +81,33 @@ const useAchievements = () => {
   // Temps réel : un succès débloqué sur un autre appareil (ou un autre onglet)
   // apparaît aussi ici. La RLS ne livre que ses propres lignes.
   useRealtimeTable("user_achievements", refresh, !!userId);
+
+  // Succès décernés par le serveur (seen = false, ex. « Cowabunga ! » via le
+  // trigger de lunch_plans) : toast à la première lecture, puis acquittement.
+  // La garde `fired` évite le doublon entre les instances du hook.
+  const unseenKey = rows
+    .filter((r) => !r.seen)
+    .map((r) => r.achievement_id)
+    .join(",");
+  useEffect(() => {
+    if (!userId || !unseenKey) return;
+    const ids = unseenKey.split(",") as AchievementId[];
+    const fresh = ids.filter((id) => !fired.has(`${userId}:${id}`));
+    if (!fresh.length) return;
+    fresh.forEach((id) => {
+      fired.add(`${userId}:${id}`);
+      const achievement = ACHIEVEMENTS_BY_ID[id];
+      if (achievement)
+        showAchievementToast(achievement, () =>
+          navigate("/mon-compte?tab=succes")
+        );
+    });
+    supabaseClient
+      .rpc("ack_achievements", { ids: fresh.flatMap(storedIds) })
+      .then(({ error }) => {
+        if (!error) refresh();
+      });
+  }, [userId, unseenKey, navigate, refresh]);
 
   const unlock = useCallback(
     async (id: AchievementId) => {

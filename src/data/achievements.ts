@@ -256,7 +256,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
   },
   {
     // Le cri des Tortues Ninja : déjeuner à au moins COWABUNGA_TABLE dans le
-    // même restaurant le même midi (useLunchToday).
+    // même restaurant le même midi (trigger SQL, sql/2026-10-06_cowabunga_serveur.sql).
     id: "cowabunga",
     title: "Cowabunga !",
     icon: "🐢",
