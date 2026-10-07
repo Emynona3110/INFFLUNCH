@@ -10,7 +10,7 @@ import useMediaQuery from "@/hooks/useMediaQuery";
 import RestaurantsToolbar from "../components/RestaurantsToolbar";
 import RestaurantPage from "./RestaurantPage";
 import PageNotFound from "./PageNotFound";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SortOrder } from "../components/SortSelector";
 import { DEFAULT_PRICE_FILTER, PriceRangeFilter } from "../services/price";
 import MyAccount from "../sections/MyAccount";
@@ -69,6 +69,10 @@ export const defaultRestaurantFilters: RestaurantFilters = {
   favoritesOnly: false,
   priceRange: DEFAULT_PRICE_FILTER,
 };
+
+/** Onglet d'origine de chaque profil ouvert, par entrée d'historique : un
+ *  retour sur ce profil (après être allé ailleurs) retrouve le bon onglet. */
+const profileTabByKey = new Map<string, string>();
 
 const UserPage = () => {
   const navigate = useNavigate();
@@ -131,8 +135,19 @@ const UserPage = () => {
     : (sections.find((section) => location.pathname.includes(section.path))
         ?.path ?? sections[0].path);
   // Onglet surligné : une fiche resto reste « dans » Restaurants, même si la
-  // barre d'outils, elle, n'y est pas.
-  const activeTab = isRestaurantDetail ? "restaurants" : currentPage;
+  // barre d'outils, elle, n'y est pas. Un profil reste dans l'onglet d'où on
+  // l'a ouvert (tablée du Déjeuner, avis d'une fiche resto…) ; arrivée directe
+  // sur un profil (lien, F5) : Restaurants.
+  const lastTab = useRef(sections[0].path);
+  const isProfile = location.pathname.includes("/profil/");
+  let activeTab = isRestaurantDetail ? "restaurants" : currentPage;
+  if (isProfile) {
+    activeTab = profileTabByKey.get(location.key) ?? lastTab.current;
+    profileTabByKey.set(location.key, activeTab);
+  }
+  useEffect(() => {
+    lastTab.current = activeTab;
+  }, [activeTab]);
 
   // à propos = contenu centré ; mon-compte gère lui-même sa mise en page (pills
   // en haut, carte centrée) ; demandes / tables = pleine hauteur avec scroll
