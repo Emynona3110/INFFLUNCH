@@ -3,6 +3,7 @@ import Navbar from "./Navbar";
 import { RestaurantFilters } from "../pages/UserPage";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { useLocation, useNavigationType } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import PullToRefresh from "@/components/PullToRefresh";
 import { cn } from "@/lib/utils";
 
@@ -114,21 +115,57 @@ const Layout = ({
     children
   );
   return (
-    <div className="tw-scope flex h-dvh flex-col bg-background text-foreground">
+    // `relative` : repère du bandeau d'outils sorti de la mise en page
+    // pendant sa disparition (AnimatePresence `popLayout`).
+    <div className="tw-scope relative flex h-dvh flex-col bg-background text-foreground">
       {withNavbar && navbarProps && (
         <header className="sticky top-0 z-[1000] flex h-12 shrink-0 items-center border-b border-border bg-card px-3 shadow-sm sm:h-[60px] sm:px-4">
           <Navbar {...navbarProps} />
         </header>
       )}
 
-      {(toolbar || toolbarPortal) && (
-        <div className="sticky top-12 z-[999] shrink-0 border-b border-border bg-card px-3 shadow-sm sm:top-[60px] sm:px-4">
-          <div className="mx-auto flex h-11 w-full max-w-[1200px] items-center sm:h-[56px]">
-            {toolbar}
-            {toolbarPortal && <div id="page-toolbar" className="w-full" />}
-          </div>
-        </div>
-      )}
+      {/* Bandeau d'outils : il DESCEND de derrière la navbar en apparaissant
+          (et y remonte en disparaissant), sans jamais pousser l'écran :
+          - entrée : sa hauteur est réservée d'emblée, le bandeau glisse
+            (translaté d'une hauteur) DANS cet espace ; le cadre le rogne en
+            haut et la navbar (z supérieur) le couvre — on le voit sortir de
+            dessous, pendant que la page arrive à sa place définitive ;
+          - sortie (`popLayout`) : le cadre est retiré de la mise en page dès
+            le changement d'onglet (la page prend aussitôt la place) et le
+            bandeau remonte par-dessus.
+          `overflow: hidden` le temps de l'animation seulement : ensuite, les
+          menus déroulants qu'il porte doivent pouvoir déborder. */}
+      <AnimatePresence initial={false} mode="popLayout">
+        {(toolbar || toolbarPortal) && (
+          <motion.div
+            key="toolbar"
+            // L'opacité ne bouge pas : elle ne sert qu'à porter la durée de
+            // l'animation, au bout de laquelle `overflow` est rendu visible.
+            initial={{ opacity: 1, overflow: "hidden" }}
+            animate={{ opacity: 1, transitionEnd: { overflow: "visible" } }}
+            exit={{ opacity: 1, overflow: "hidden" }}
+            transition={{ duration: 0.25 }}
+            className="sticky top-12 z-[999] shrink-0 sm:top-[60px]"
+          >
+            <motion.div
+              initial={{ y: "-100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "-100%" }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              className="border-b border-border bg-card px-3 sm:px-4"
+            >
+              <div className="mx-auto flex h-11 w-full max-w-[1200px] items-center sm:h-[56px]">
+                {/* Pas d'animation propre au contenu : il descend et
+                    remonte avec le bandeau, qui l'emporte. */}
+                {toolbar}
+                {/* Cible de portail : hors animation de contenu, elle doit
+                    rester en place pour que la page y monte ses onglets. */}
+                {toolbarPortal && <div id="page-toolbar" className="w-full" />}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {fillContent ? (
         // Pleine hauteur, pas de scroll de page : seul le contenu scrolle.
