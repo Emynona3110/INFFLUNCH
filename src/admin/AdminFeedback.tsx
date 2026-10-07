@@ -230,6 +230,8 @@ const AdminFeedback = () => {
                         label={c.label}
                         dir={sort?.key === c.key ? sort.dir : null}
                         onClick={() => toggle(c.key)}
+                        // Nature : la pastille de couleur se passe d'intitulé.
+                        hideLabel={c.key === "type"}
                       />
                     </th>
                   ))}

@@ -12,8 +12,12 @@ export function SortHeader({
   label,
   dir,
   onClick,
+  hideLabel = false,
 }: {
   label: string;
+  /** Colonne sans intitulé visible (ex. pastille de nature) : seule la
+   *  flèche, à la place du libellé, reste cliquable. Libellé lu par l'aria. */
+  hideLabel?: boolean;
   /** Sens actuel sur CETTE colonne, ou null si le tri porte ailleurs. */
   dir: SortDir | null;
   onClick: () => void;
@@ -25,10 +29,11 @@ export function SortHeader({
       aria-label={`Trier par ${label}`}
       className="group relative inline-flex cursor-pointer items-center uppercase tracking-wide transition hover:text-foreground/80"
     >
-      {label}
+      {!hideLabel && label}
       <span
         className={cn(
-          "pointer-events-none absolute left-full ml-0.5 flex items-center transition",
+          "pointer-events-none flex items-center transition",
+          hideLabel ? "h-4 min-w-4 justify-center" : "absolute left-full ml-0.5",
           dir ? "opacity-100" : "opacity-0 group-hover:opacity-40"
         )}
       >
