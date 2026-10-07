@@ -1,8 +1,8 @@
 import { avatarUrl } from "@/services/avatar";
-import { authorInitials } from "@/utils/authorName";
+import { authorTrigram } from "@/utils/authorName";
 import { cn } from "@/lib/utils";
 
-// Palette douce et déterministe pour les avatars par défaut (initiales).
+// Palette douce et déterministe pour les avatars par défaut (trigramme).
 // Fonds OPAQUES : ces pastilles se posent sur les photos des restaurants (page
 // Midi, cards), où un fond translucide laissait transparaître l'image.
 const avatarColors = [
@@ -17,7 +17,7 @@ export const avatarColor = (key: string) =>
 
 interface Props {
   email?: string | null;
-  /** profiles.avatar_path : chemin de la pp perso (null ⇒ initiales). */
+  /** profiles.avatar_path : chemin de la pp perso (null ⇒ trigramme). */
   avatarPath?: string | null;
   /** Taille en px (carré). */
   size?: number;
@@ -26,7 +26,7 @@ interface Props {
 
 /**
  * Avatar d'un utilisateur : photo de profil personnalisée si elle existe,
- * sinon initiales colorées (dérivées de l'email).
+ * sinon trigramme coloré (dérivé de l'email).
  */
 const Avatar = ({ email, avatarPath, size = 40, className }: Props) => {
   const url = avatarUrl(avatarPath);
@@ -58,17 +58,19 @@ const Avatar = ({ email, avatarPath, size = 40, className }: Props) => {
 
   // `relative` comme la variante photo : dans un éventail (-space-x-*), les
   // deux sortes d'avatars se superposent alors dans l'ordre du DOM. Sans ça,
-  // les photos (positionnées) passaient toujours devant les initiales.
+  // les photos (positionnées) passaient toujours devant les trigrammes.
   return (
     <div
-      style={{ ...dim, fontSize: Math.round(size * 0.4) }}
+      // Trois lettres : un cran plus petit que les deux initiales d'avant,
+      // pour tenir dans le cercle même en petite taille.
+      style={{ ...dim, fontSize: Math.round(size * 0.32) }}
       className={cn(
         "relative flex shrink-0 items-center justify-center rounded-full font-bold",
         avatarColor(email ?? "?"),
         className
       )}
     >
-      {authorInitials(email)}
+      {authorTrigram(email)}
     </div>
   );
 };

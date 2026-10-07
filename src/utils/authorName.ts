@@ -1,9 +1,9 @@
 /**
- * Dérive un nom d'affichage et des initiales depuis l'email INFFLUX d'un auteur
+ * Dérive un nom d'affichage et un trigramme depuis l'email INFFLUX d'un auteur
  * (avis). Convention : on retire @domaine, la 1re lettre = initiale du prénom,
  * le reste du local-part = nom de famille.
  * Limite assumée : pas d'accents (non reconstituables depuis l'email).
- *   "cdubois@infflux.com" → "C.Dubois" / initiales "CD".
+ *   "cdubois@infflux.com" → "C.Dubois" / trigramme "CDS".
  */
 export const formatAuthorName = (email: string | null | undefined): string => {
   // Sans email = contribution anonymisée (compte supprimé, avis conservé).
@@ -15,8 +15,11 @@ export const formatAuthorName = (email: string | null | undefined): string => {
   return `${first}.${lastName.charAt(0).toUpperCase()}${lastName.slice(1)}`;
 };
 
-export const authorInitials = (email: string | null | undefined): string => {
+/** Trigramme des avatars sans photo : initiale du prénom, puis première et
+ *  dernière lettre du nom (« cdubois » → « CDS »). */
+export const authorTrigram = (email: string | null | undefined): string => {
   if (!email) return "?";
   const local = email.split("@")[0];
-  return `${local[0] ?? ""}${local[1] ?? ""}`.toUpperCase();
+  const lastName = local.slice(1);
+  return `${local[0] ?? ""}${lastName[0] ?? ""}${lastName.length > 1 ? lastName[lastName.length - 1] : ""}`.toUpperCase();
 };
