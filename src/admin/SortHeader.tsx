@@ -11,14 +11,15 @@ import type { SortDir } from "./tableSort";
  *
  * Un seul chevron, retourné (rotation) pour le décroissant : le changement de
  * sens s'anime au lieu de sauter. Quand le tri part sur une autre colonne, le
- * chevron s'efface en GARDANT son sens ; il ne revient à « croissant » (ce
- * qu'un clic donnerait, montré par le fantôme au survol) qu'une fois invisible.
+ * chevron s'efface en GARDANT son sens ; il ne revient au sens qu'un clic
+ * donnerait (`idleDir`, montré par le fantôme au survol) qu'une fois invisible.
  */
 export function SortHeader({
   label,
   dir,
   onClick,
   hideLabel = false,
+  idleDir = "asc",
 }: {
   label: string;
   /** Colonne sans intitulé visible (ex. pastille de nature) : seule la
@@ -26,10 +27,13 @@ export function SortHeader({
   hideLabel?: boolean;
   /** Sens actuel sur CETTE colonne, ou null si le tri porte ailleurs. */
   dir: SortDir | null;
+  /** Sens qu'un clic appliquerait à cette colonne inactive (premier sens du
+   *  tri) : c'est lui que montre le chevron fantôme au survol. */
+  idleDir?: SortDir;
   onClick: () => void;
 }) {
   // Sens affiché : le dernier sens actif, conservé pendant le fondu de sortie.
-  const [shown, setShown] = useState<SortDir>(dir ?? "asc");
+  const [shown, setShown] = useState<SortDir>(dir ?? idleDir);
   if (dir && dir !== shown) setShown(dir);
 
   return (
@@ -42,7 +46,7 @@ export function SortHeader({
       {!hideLabel && label}
       <span
         onTransitionEnd={(e) => {
-          if (e.propertyName === "opacity" && !dir) setShown("asc");
+          if (e.propertyName === "opacity" && !dir) setShown(idleDir);
         }}
         className={cn(
           "pointer-events-none flex items-center transition-[opacity,transform] duration-200 ease-out",

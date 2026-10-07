@@ -75,7 +75,7 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
 
   // Tri par colonne, par défaut celui de la requête. Les colonnes sont
   // dynamiques : la clé de tri EST le nom de la colonne.
-  const { sort, toggle } = useTableSort<string>(`table:${tableName}`, {
+  const { sort, toggle, firstDir } = useTableSort<string>(`table:${tableName}`, {
     key: orderField,
     dir: "asc",
   });
@@ -136,6 +136,7 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
                   <SortHeader
                     label={columnLabels[col] ?? col}
                     dir={sort.key === col ? sort.dir : null}
+                    idleDir={firstDir(col)}
                     onClick={() => toggle(col)}
                   />
                 </th>

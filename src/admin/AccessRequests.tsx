@@ -42,7 +42,7 @@ const AccessRequests = ({ activeType }: { activeType: RequestType }) => {
     });
 
   // Tri par colonne ; par défaut, en attente d'abord.
-  const { sort, toggle } = useTableSort<"who" | "date" | "state">(
+  const { sort, toggle, firstDir } = useTableSort<"who" | "date" | "state">(
     "access-requests",
     { key: "state", dir: "asc" }
   );
@@ -168,6 +168,7 @@ const AccessRequests = ({ activeType }: { activeType: RequestType }) => {
                       <SortHeader
                         label={c.label}
                         dir={sort.key === c.key ? sort.dir : null}
+                        idleDir={firstDir(c.key)}
                         onClick={() => toggle(c.key)}
                       />
                     </th>

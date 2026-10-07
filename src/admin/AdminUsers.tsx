@@ -32,7 +32,7 @@ const AdminUsers = () => {
   const myId = sessionData?.user?.id;
 
   // Tri par colonne ; par défaut, par nom.
-  const { sort, toggle } = useTableSort<"user" | "role" | "created">("users", {
+  const { sort, toggle, firstDir } = useTableSort<"user" | "role" | "created">("users", {
     key: "user",
     dir: "asc",
   });
@@ -141,6 +141,7 @@ const AdminUsers = () => {
                       <SortHeader
                         label={c.label}
                         dir={sort.key === c.key ? sort.dir : null}
+                        idleDir={firstDir(c.key)}
                         onClick={() => toggle(c.key)}
                       />
                     </th>
