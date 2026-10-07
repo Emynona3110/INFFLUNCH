@@ -256,7 +256,7 @@ const AdminFeedback = () => {
                     >
                       {/* Nature : un point de couleur, comme les tuiles du
                           carnet. Le libellé est dans la popup. */}
-                      <td className="w-10 whitespace-nowrap px-2 py-2.5 first:pl-4 last:pr-4">
+                      <td className="w-10 whitespace-nowrap px-2 py-1.5 first:pl-4 last:pr-4">
                         <span
                           aria-label={feedbackType(item.type).label}
                           className={cn(
@@ -270,10 +270,10 @@ const AdminFeedback = () => {
                       </td>
                       {/* Date de la dernière version : celle qui donne l'ordre
                           du tableau. */}
-                      <td className="whitespace-nowrap px-2 py-2.5 first:pl-4 last:pr-4 text-foreground/70">
+                      <td className="whitespace-nowrap px-2 py-1.5 first:pl-4 last:pr-4 text-foreground/70">
                         {formatDate(lastVersion(item))}
                       </td>
-                      <td className="whitespace-nowrap px-2 py-2.5 first:pl-4 last:pr-4 text-foreground/70">
+                      <td className="whitespace-nowrap px-2 py-1.5 first:pl-4 last:pr-4 text-foreground/70">
                         {item.email ? formatAuthorName(item.email) : "—"}
                         {/* Trombone : des captures accompagnent le message. */}
                         {item.images.length > 0 && (
@@ -288,7 +288,7 @@ const AdminFeedback = () => {
                           d'autre état à montrer. Dès qu'elle a été classée,
                           c'est le traitement qui compte — il continue, et son
                           auteur n'en saura simplement rien. */}
-                      <td className="whitespace-nowrap px-2 py-2.5 first:pl-4 last:pr-4">
+                      <td className="whitespace-nowrap px-2 py-1.5 first:pl-4 last:pr-4">
                         <span
                           className={cn(
                             "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium",
