@@ -1,15 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiCamera, FiStar, FiAward, FiLock } from "react-icons/fi";
-import { LuFlame, LuUtensils } from "react-icons/lu";
-import { FLAMBE_STREAK, RARE_PERCENT } from "@/data/achievements";
+import { LuUtensils } from "react-icons/lu";
+import { RARE_PERCENT } from "@/data/achievements";
 import { Card } from "@/components/ui/card";
 import { Tooltip } from "@/components/ui/tooltip";
-import Avatar from "@/components/Avatar";
-import usePublicProfile, {
-  PublicPhoto,
-  PublicProfile,
-} from "@/hooks/usePublicProfile";
+import StreakAvatar from "@/components/StreakAvatar";
+import usePublicProfile, { PublicPhoto } from "@/hooks/usePublicProfile";
 import useSession from "@/hooks/useSession";
 import useIsAdmin from "@/hooks/useIsAdmin";
 import PhotoGallery from "@/components/PhotoGallery";
@@ -62,106 +59,6 @@ const formatDate = (iso: string) =>
  * succès et ses photos. Le même composant sert de première page de « Mon
  * Profil » (pour soi) et de page /profil/:id (pour les autres).
  */
-/** Étincelles autour de la pp « Tout feu tout flamme » : position horizontale (% de la
- *  largeur, hors cercle = le long des bords), dérive, durée et délai. Fixes
- *  plutôt qu'aléatoires : rendu stable entre deux rendus. */
-const SPARKS = [
-  { x: -6, drift: -10, rise: 1.15, dur: 2.2, delay: 0, size: 4, color: "#fb923c" },
-  { x: 4, drift: -6, rise: 1.0, dur: 1.8, delay: 0.6, size: 3, color: "#fde68a" },
-  { x: 14, drift: -3, rise: 1.25, dur: 2.6, delay: 1.3, size: 3, color: "#fb923c" },
-  { x: 50, drift: 2, rise: 1.3, dur: 2.4, delay: 0.3, size: 3, color: "#fde68a" },
-  { x: 84, drift: 4, rise: 1.2, dur: 2.0, delay: 1.7, size: 3, color: "#fb923c" },
-  { x: 96, drift: 7, rise: 1.05, dur: 1.9, delay: 0.9, size: 4, color: "#ea580c" },
-  { x: 104, drift: 11, rise: 1.15, dur: 2.3, delay: 1.1, size: 3, color: "#fde68a" },
-  { x: 30, drift: -4, rise: 1.35, dur: 2.8, delay: 2.0, size: 2, color: "#fb923c" },
-  { x: 70, drift: 5, rise: 1.3, dur: 2.5, delay: 0.15, size: 2, color: "#fde68a" },
-];
-
-/**
- * Photo de profil avec la série de midis : à partir de 2 jours ouvrés d'affilée
- * (« pas au resto » compris), contour orange et pastille flamme + nombre.
- * L'Avatar rogne (overflow-hidden) : la pastille vit dans un cadre autour.
- */
-/** À partir de ce nombre de midis d'affilée, la flamme passe au bleu, puis au
- *  violet. */
-const BLUE_FLAME_STREAK = 15;
-const VIOLET_FLAME_STREAK = 30;
-const BLUE_SPARK: Record<string, string> = {
-  "#fb923c": "#60a5fa",
-  "#fde68a": "#e0f2fe",
-  "#ea580c": "#2563eb",
-};
-const VIOLET_SPARK: Record<string, string> = {
-  "#fb923c": "#a78bfa",
-  "#fde68a": "#ede9fe",
-  "#ea580c": "#7c3aed",
-};
-
-const StreakAvatar = ({
-  profile,
-  size,
-  className,
-}: {
-  profile: PublicProfile;
-  size: number;
-  className?: string;
-}) => {
-  const streak = profile.lunch_streak ?? 0;
-  const onFire = streak >= 2;
-  // Palier du succès « Tout feu tout flamme » : la pp prend feu (halo + étincelles).
-  const flambe = streak >= FLAMBE_STREAK;
-  const violet = streak >= VIOLET_FLAME_STREAK;
-  const blue = !violet && streak >= BLUE_FLAME_STREAK;
-  return (
-    <span
-      className={cn("relative shrink-0", flambe && "streak-fire", blue && "streak-fire-blue", violet && "streak-fire-violet", className)}
-      style={{ width: size, height: size }}
-    >
-      {flambe &&
-        SPARKS.map((sp, i) => (
-          <span
-            key={i}
-            aria-hidden
-            className="streak-spark"
-            style={
-              {
-                "--x": `${sp.x}%`,
-                "--drift": `${sp.drift}px`,
-                // Hauteur de montée relative à la pp : dépasse le sommet.
-                "--rise": `${-Math.round(size * sp.rise)}px`,
-                "--dur": `${sp.dur}s`,
-                "--delay": `${sp.delay}s`,
-                "--size": `${sp.size}px`,
-                "--color": violet
-                  ? VIOLET_SPARK[sp.color]
-                  : blue
-                    ? BLUE_SPARK[sp.color]
-                    : sp.color,
-              } as React.CSSProperties
-            }
-          />
-        ))}
-      <Avatar
-        email={profile.email}
-        avatarPath={profile.avatar_path}
-        size={size}
-        className={cn("relative z-[1] ring-2", violet ? "ring-violet-600" : blue ? "ring-blue-500" : onFire ? "ring-accent" : "ring-border")}
-      />
-      {onFire && (
-        <span
-          aria-label={`${streak} midis d'affilée`}
-          className={cn(
-            "absolute -bottom-0.5 -right-0.5 z-[2] flex h-5 min-w-5 items-center justify-center gap-0.5 rounded-full pl-1 pr-1.5 text-xs leading-none text-white shadow ring-2 ring-card",
-            violet ? "bg-violet-600" : blue ? "bg-blue-500" : "bg-accent",
-          )}
-        >
-          <LuFlame className="h-3 w-3" />
-          {streak}
-        </span>
-      )}
-    </span>
-  );
-};
 
 const UserProfileView = ({ userId, isMe = false }: Props) => {
   const navigate = useNavigate();
@@ -239,8 +136,8 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
       <Card className="p-4 sm:p-8">
         <div className="flex items-center gap-4 text-left">
           {/* Mobile : pp plus petite. */}
-          <StreakAvatar profile={data} size={64} className="sm:hidden" />
-          <StreakAvatar profile={data} size={96} className="hidden sm:block" />
+          <StreakAvatar email={data.email} avatarPath={data.avatar_path} streak={data.lunch_streak ?? 0} size={64} className="sm:hidden" />
+          <StreakAvatar email={data.email} avatarPath={data.avatar_path} streak={data.lunch_streak ?? 0} size={96} className="hidden sm:block" />
           <div className="min-w-0 flex-1">
             <div
               role="heading"

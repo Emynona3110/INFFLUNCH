@@ -10,10 +10,11 @@ interface SearchInputProps {
   onSearch: (input: string) => void;
   /** Focus immédiat à l'affichage (barre dépliée sur mobile). */
   autoFocus?: boolean;
+  placeholder?: string;
 }
 
 /**
- * Barre de recherche des restaurants. La recherche ne part QU'À la validation
+ * Barre de recherche (restaurants, classement). La recherche ne part QU'À la validation
  * (touche Entrée ou clic sur la loupe) : la remontée à chaque frappe, même
  * débouncée, relançait une requête par mot tapé pour un gain nul à notre
  * échelle. La croix, elle, vide et relance aussitôt.
@@ -22,6 +23,7 @@ const SearchInput = ({
   value: current = "",
   onSearch,
   autoFocus,
+  placeholder = "Chercher un restaurant...",
 }: SearchInputProps) => {
   // État local libre pendant la frappe, resynchronisé dès que la valeur change
   // à l'extérieur (retour sur l'onglet, réinitialisation via le logo…).
@@ -54,7 +56,7 @@ const SearchInput = ({
       <input
         type="search"
         autoFocus={autoFocus}
-        placeholder="Chercher un restaurant..."
+        placeholder={placeholder}
         value={value}
         onChange={(e) => setValue(e.target.value)}
         className="block h-9 w-full rounded-full sm:h-10 border border-border bg-muted pl-9 pr-9 text-sm text-foreground outline-none transition placeholder:text-foreground/40 focus-visible:border-primary focus-visible:bg-background focus-visible:ring-2 focus-visible:ring-primary/25 [&::-webkit-search-cancel-button]:hidden"

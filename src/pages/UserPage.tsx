@@ -17,6 +17,12 @@ import MyAccount from "../sections/MyAccount";
 import About from "../sections/About";
 import Nouveautes from "../sections/Nouveautes";
 import LunchToday from "../sections/LunchToday";
+import Leaderboard from "../sections/Leaderboard";
+import LeaderboardToolbar from "../components/LeaderboardToolbar";
+import {
+  parisMonthKey,
+  useLeaderboardFirstMonth,
+} from "../hooks/useLeaderboard";
 import AdminSection from "../sections/AdminSection";
 import AdminGuard from "../components/AdminGuard";
 import Layout from "../components/Layout";
@@ -32,6 +38,7 @@ export const buildUserSections = (isAdmin: boolean) =>
     ? [
         { label: "Restaurants", path: "restaurants" },
         { label: "Déjeuner", path: "dejeuner" },
+        { label: "Classement", path: "classement" },
         { label: "Admin", path: "admin" },
         { label: "Nouveautés", path: "nouveautes" },
         { label: "Compte", path: "mon-compte" },
@@ -39,6 +46,7 @@ export const buildUserSections = (isAdmin: boolean) =>
     : [
         { label: "Restaurants", path: "restaurants" },
         { label: "Déjeuner", path: "dejeuner" },
+        { label: "Classement", path: "classement" },
         { label: "Nouveautés", path: "nouveautes" },
         { label: "Compte", path: "mon-compte" },
         { label: "À propos", path: "a-propos" },
@@ -112,6 +120,18 @@ const UserPage = () => {
     }
   };
 
+  // Classement : période et recherche gardées au niveau page, comme les
+  // filtres des restos (la barre d'outils est démontée hors de l'onglet).
+  // Mois retenu même en « Depuis toujours » : y revenir retrouve le même.
+  const [leaderboardMonth, setLeaderboardMonth] = useState(parisMonthKey);
+  const [leaderboardAll, setLeaderboardAll] = useState(false);
+  const [leaderboardSearch, setLeaderboardSearch] = useState("");
+  const leaderboardPeriod = leaderboardAll ? "all" : leaderboardMonth;
+  // Ne part qu'une fois sur l'onglet (puis reste en cache).
+  const { data: firstMonth } = useLeaderboardFirstMonth(
+    location.pathname.includes("/classement"),
+  );
+
   // Restos exclus de la roue (décochés dans la popup de sélection). Mémorisé en
   // mémoire comme les filtres : survit au changement de vue, remis à zéro au
   // rechargement de la page. Modèle par exclusion → par défaut, tout participe.
@@ -157,6 +177,8 @@ const UserPage = () => {
   const isDesktop = useMediaQuery("(min-width: 640px)");
   const fillContent =
     currentPage === "admin" ||
+    // Classement : table pleine hauteur à scroll interne, comme l'admin.
+    currentPage === "classement" ||
     // Mobile : Mon compte = pager plein écran (chaque onglet a son scroll).
     (currentPage === "mon-compte" && !isDesktop) ||
     (currentPage === "restaurants" &&
@@ -195,6 +217,16 @@ const UserPage = () => {
             viewMode={viewMode}
             onViewModeChange={changeViewMode}
           />
+        ) : currentPage === "classement" ? (
+          <LeaderboardToolbar
+            month={leaderboardMonth}
+            onMonthChange={setLeaderboardMonth}
+            all={leaderboardAll}
+            onAllChange={setLeaderboardAll}
+            firstMonth={firstMonth ?? null}
+            search={leaderboardSearch}
+            onSearch={setLeaderboardSearch}
+          />
         ) : undefined
       }
     >
@@ -227,6 +259,15 @@ const UserPage = () => {
             }
           />
           <Route path="dejeuner" element={<LunchToday />} />
+          <Route
+            path="classement"
+            element={
+              <Leaderboard
+                period={leaderboardPeriod}
+                search={leaderboardSearch}
+              />
+            }
+          />
           {/* Compat : ancien chemin de l'onglet, renommé « Déjeuner ». */}
           <Route path="midi" element={<Navigate to="/dejeuner" replace />} />
           <Route path="restaurant/:slug" element={<RestaurantPage />} />
