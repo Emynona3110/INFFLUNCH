@@ -85,14 +85,12 @@ const AchievementsGallery = () => {
   const openedDef = opened ? ACHIEVEMENTS_BY_ID[opened] : null;
 
   // Tri : du plus courant au plus rare (% d'obtention décroissant → les plus
-  // rares à la fin), puis par intitulé pour les raretés égales. Un succès sans
-  // stat (personne ne l'a encore) = 0 % → tout en bas.
-  const sorted = [...ACHIEVEMENTS].sort((a, b) => {
-    const ra = percentById[a.id] ?? 0;
-    const rb = percentById[b.id] ?? 0;
-    if (ra !== rb) return rb - ra;
-    return a.title.localeCompare(b.title, "fr");
-  });
+  // rares à la fin), puis dans l'ordre du catalogue (src/data/achievements.ts)
+  // pour les raretés égales — le tri est stable. Un succès sans stat
+  // (personne ne l'a encore) = 0 % → tout en bas.
+  const sorted = [...ACHIEVEMENTS].sort(
+    (a, b) => (percentById[b.id] ?? 0) - (percentById[a.id] ?? 0),
+  );
 
   // Reverrouillage d'UN succès (admin seulement) : outil de test pour revoir
   // son toast de déblocage. S'il est toujours mérité, il revient aussitôt.
