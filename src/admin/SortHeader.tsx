@@ -20,11 +20,15 @@ export function SortHeader({
   onClick,
   hideLabel = false,
   idleDir = "asc",
+  disabled = false,
 }: {
   label: string;
   /** Colonne sans intitulé visible (ex. pastille de nature) : seule la
    *  flèche, à la place du libellé, reste cliquable. Libellé lu par l'aria. */
   hideLabel?: boolean;
+  /** Colonne qu'il n'y a pas lieu de trier (que des 0 au classement) :
+   *  intitulé grisé, ni clic ni chevron fantôme. */
+  disabled?: boolean;
   /** Sens actuel sur CETTE colonne, ou null si le tri porte ailleurs. */
   dir: SortDir | null;
   /** Sens qu'un clic appliquerait à cette colonne inactive (premier sens du
@@ -40,8 +44,14 @@ export function SortHeader({
     <button
       type="button"
       onClick={onClick}
+      disabled={disabled}
       aria-label={`Trier par ${label}`}
-      className="group relative inline-flex cursor-pointer items-center uppercase tracking-wide transition hover:text-foreground/80"
+      className={cn(
+        "group relative inline-flex items-center uppercase tracking-wide transition",
+        disabled
+          ? "cursor-default opacity-40"
+          : "cursor-pointer hover:text-foreground/80",
+      )}
     >
       {!hideLabel && label}
       <span
@@ -52,7 +62,11 @@ export function SortHeader({
           "pointer-events-none flex items-center transition-[opacity,transform] duration-200 ease-out",
           hideLabel ? "h-4 min-w-4 justify-center" : "absolute left-full ml-0.5",
           shown === "desc" && "rotate-180",
-          dir ? "opacity-100" : "opacity-0 group-hover:opacity-40"
+          dir
+            ? "opacity-100"
+            : disabled
+              ? "opacity-0"
+              : "opacity-0 group-hover:opacity-40"
         )}
       >
         <FiChevronUp className="h-3.5 w-3.5" />
