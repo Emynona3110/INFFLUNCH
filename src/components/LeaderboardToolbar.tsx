@@ -235,7 +235,7 @@ const LeaderboardToolbar = ({
             <div
               role="listbox"
               aria-label="Mois"
-              className="absolute right-0 top-full z-20 mt-1 max-h-64 min-w-full overflow-y-auto rounded-card border border-border bg-card py-1 shadow-xl"
+              className="absolute right-0 top-full z-20 mt-1 max-h-64 min-w-full overflow-y-auto rounded-card border border-border bg-card shadow-xl"
             >
               {months.map((m) => (
                 <button

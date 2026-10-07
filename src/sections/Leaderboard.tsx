@@ -150,6 +150,19 @@ const Leaderboard = ({ period, search }: Props) => {
     }
   }, [settled, fadedOut, isPlaceholderData, viewKey]);
 
+  // Colonnes vides sur la période (que des 0) : rien à y trier.
+  const emptyCols = useMemo(
+    () =>
+      new Set<ColKey>(
+        data.length
+          ? METRICS.filter((m) => data.every((r) => r[m.key] === 0)).map(
+              (m) => m.key,
+            )
+          : [],
+      ),
+    [data],
+  );
+
   // Ordre de base par nom : il départage les ex æquo (tri stable).
   const byName = useMemo(
     () =>
@@ -163,15 +176,25 @@ const Leaderboard = ({ period, search }: Props) => {
   );
 
   const needle = fold(search.trim());
-  // Égalités : départagées par les autres colonnes chiffrées, de gauche à
-  // droite, dans le sens du tri ; puis par nom (ordre de base, tri stable).
-  const tieKeys = METRICS.map((m) => m.key).filter((k) => k !== sort.key);
-  const liveRows = sortRows(
+  // Égalités : départagées d'abord par le total des quatre colonnes, puis par
+  // les autres colonnes chiffrées de gauche à droite, toujours dans le sens
+  // du tri ; enfin par nom (ordre de base, tri stable).
+  type TieKey = ColKey | "total";
+  const tieKeys: TieKey[] = [
+    "total",
+    ...METRICS.map((m) => m.key).filter((k) => k !== sort.key),
+  ];
+  const liveRows = sortRows<LeaderboardRow, TieKey>(
     needle
       ? byName.filter((r) => fold(formatAuthorName(r.email)).includes(needle))
       : byName,
     sort,
-    (r, key) => (key === "user" ? formatAuthorName(r.email) : r[key]),
+    (r, key) =>
+      key === "user"
+        ? formatAuthorName(r.email)
+        : key === "total"
+          ? METRICS.reduce((sum, m) => sum + r[m.key], 0)
+          : r[key],
     tieKeys,
   );
   // Instantané de ce qui est affiché, rejoué pendant l'effacement.
@@ -226,6 +249,7 @@ const Leaderboard = ({ period, search }: Props) => {
                         label={c.label}
                         dir={sort.key === c.key ? sort.dir : null}
                         idleDir={firstDir(c.key)}
+                        disabled={emptyCols.has(c.key)}
                         onClick={() => toggle(c.key, sort)}
                       />
                     </th>
