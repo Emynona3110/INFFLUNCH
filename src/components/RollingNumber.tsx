@@ -1,10 +1,14 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface Props {
   value: number;
   className?: string;
+  /** Ce qui défile, à la place du nombre lui-même : `value` ne sert alors
+   *  qu'à identifier la valeur et à donner le sens (ex. le mois du
+   *  classement, rendu par son nom). */
+  children?: React.ReactNode;
 }
 
 /** Même courbe que les glissements de la page du midi : lent, rapide, lent.
@@ -22,14 +26,18 @@ const ROLL = {
  * `tabular-nums` : sans chasse fixe, passer de 1 à 2 décalerait le mot qui
  * suit, le défilé donnerait l'impression de bouger latéralement.
  */
-const RollingNumber = ({ value, className }: Props) => {
-  // Le sens se lit entre deux rendus : on garde la valeur précédente plutôt
-  // que de la dériver, elle n'existe nulle part ailleurs.
+const RollingNumber = ({ value, className, children }: Props) => {
+  // Le sens est FIGÉ au changement de valeur, et seulement là. Le recalculer
+  // à chaque rendu (valeur ≥ précédente) le remettait à « monte » au premier
+  // rendu suivant — un parent qui se re-rend pendant le défilement — et le
+  // chiffre sortant repartait en sens inverse en pleine course.
   const previous = useRef(value);
-  const goingUp = value >= previous.current;
-  useEffect(() => {
+  const up = useRef(true);
+  if (value !== previous.current) {
+    up.current = value > previous.current;
     previous.current = value;
-  }, [value]);
+  }
+  const goingUp = up.current;
 
   return (
     // `overflow-hidden` : le chiffre qui part et celui qui arrive sont hors de
@@ -61,7 +69,7 @@ const RollingNumber = ({ value, className }: Props) => {
           exit="exit"
           transition={ROLL}
         >
-          {value}
+          {children ?? value}
         </motion.span>
       </AnimatePresence>
     </span>
