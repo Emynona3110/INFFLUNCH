@@ -41,8 +41,11 @@ const AccessRequests = ({ activeType }: { activeType: RequestType }) => {
       return 0;
     });
 
-  // Tri par colonne (3e clic = ordre naturel : en attente d'abord).
-  const { sort, toggle } = useTableSort<"who" | "date" | "state">("access-requests");
+  // Tri par colonne ; par défaut, en attente d'abord.
+  const { sort, toggle } = useTableSort<"who" | "date" | "state">(
+    "access-requests",
+    { key: "state", dir: "asc" }
+  );
   const rows = sortRows(sorted, sort, (r, key) =>
     key === "who"
       ? isCreation
@@ -164,7 +167,7 @@ const AccessRequests = ({ activeType }: { activeType: RequestType }) => {
                     >
                       <SortHeader
                         label={c.label}
-                        dir={sort?.key === c.key ? sort.dir : null}
+                        dir={sort.key === c.key ? sort.dir : null}
                         onClick={() => toggle(c.key)}
                       />
                     </th>

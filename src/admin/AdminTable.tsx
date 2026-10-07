@@ -48,6 +48,14 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
     }
   };
 
+  // Ordre de la requête, repris comme tri par défaut affiché.
+  const orderField =
+    tableName === "restaurants"
+      ? "slug"
+      : tableName === "waiting_list"
+        ? "email"
+        : "label";
+
   const {
     data = [],
     isPending: loading,
@@ -55,10 +63,6 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
   } = useQuery<any[], Error>({
     queryKey: ["table", tableName, columns],
     queryFn: async () => {
-      let orderField = "label";
-      if (tableName === "restaurants") orderField = "slug";
-      else if (tableName === "waiting_list") orderField = "email";
-
       const { data, error } = await supabaseClient
         .from(tableName)
         .select(columns?.join(",") || "*")
@@ -69,9 +73,12 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
     },
   });
 
-  // Tri par colonne (3e clic = ordre de la requête). Les colonnes sont
+  // Tri par colonne, par défaut celui de la requête. Les colonnes sont
   // dynamiques : la clé de tri EST le nom de la colonne.
-  const { sort, toggle } = useTableSort<string>(`table:${tableName}`);
+  const { sort, toggle } = useTableSort<string>(`table:${tableName}`, {
+    key: orderField,
+    dir: "asc",
+  });
 
   const error = queryError ? queryError.message : "";
   const columnNames = data.length > 0 ? columns ?? Object.keys(data[0]) : [];
@@ -128,7 +135,7 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
                 >
                   <SortHeader
                     label={columnLabels[col] ?? col}
-                    dir={sort?.key === col ? sort.dir : null}
+                    dir={sort.key === col ? sort.dir : null}
                     onClick={() => toggle(col)}
                   />
                 </th>

@@ -82,8 +82,11 @@ const AdminFeedback = () => {
           : 0) || b.id - a.id,
   );
 
-  // Tri par colonne (3e clic = ordre naturel : la plus récente d'abord).
-  const { sort, toggle } = useTableSort<"type" | "date" | "author" | "state">("feedback");
+  // Tri par colonne ; par défaut, la plus récente d'abord.
+  const { sort, toggle } = useTableSort<"type" | "date" | "author" | "state">(
+    "feedback",
+    { key: "date", dir: "desc" }
+  );
   const sortedRows = sortRows(rows, sort, (item, key) =>
     key === "type"
       ? feedbackType(item.type).label
@@ -228,7 +231,7 @@ const AdminFeedback = () => {
                     >
                       <SortHeader
                         label={c.label}
-                        dir={sort?.key === c.key ? sort.dir : null}
+                        dir={sort.key === c.key ? sort.dir : null}
                         onClick={() => toggle(c.key)}
                         // Nature : la pastille de couleur se passe d'intitulé.
                         hideLabel={c.key === "type"}

@@ -31,8 +31,11 @@ const AdminUsers = () => {
   const { sessionData } = useSession();
   const myId = sessionData?.user?.id;
 
-  // Tri par colonne (3e clic = ordre de la requête, par email).
-  const { sort, toggle } = useTableSort<"user" | "role" | "created">("users");
+  // Tri par colonne ; par défaut, par nom.
+  const { sort, toggle } = useTableSort<"user" | "role" | "created">("users", {
+    key: "user",
+    dir: "asc",
+  });
   const rows = sortRows(users, sort, (u, key) =>
     key === "user"
       ? formatAuthorName(u.email)
@@ -137,7 +140,7 @@ const AdminUsers = () => {
                     >
                       <SortHeader
                         label={c.label}
-                        dir={sort?.key === c.key ? sort.dir : null}
+                        dir={sort.key === c.key ? sort.dir : null}
                         onClick={() => toggle(c.key)}
                       />
                     </th>
