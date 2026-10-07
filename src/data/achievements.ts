@@ -109,7 +109,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: "death_note",
-    title: "Rayer de la carte",
+    title: "Dish note",
     condition: "Publier 5 avis",
     icon: "📓",
     image: "/achievements/death_note.svg",
@@ -337,7 +337,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
   // — Complétionniste —
   {
     id: "gatsby",
-    title: "Bouquet final",
+    title: "Banquet final",
     condition: "Débloquer tous les succès",
     icon: "🥂",
     image: "/achievements/gatsby.svg",

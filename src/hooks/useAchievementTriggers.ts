@@ -23,7 +23,7 @@ const useAchievementTriggers = () => {
 
   useEffect(() => {
     // `loading` est capital : tant que la liste des débloqués n'est pas là, elle
-    // est vide, et le Bouquet final serait retiré à tort juste en dessous.
+    // est vide, et le Banquet final serait retiré à tort juste en dessous.
     if (!metrics || loading) return;
 
     (Object.keys(ACHIEVEMENT_GOALS) as AchievementId[]).forEach((id) => {
@@ -31,7 +31,7 @@ const useAchievementTriggers = () => {
       if (metrics[metric] >= goal) unlock(id);
     });
 
-    // Bouquet final : tous les AUTRES succès débloqués. Se ré-évalue à chaque
+    // Banquet final : tous les AUTRES succès débloqués. Se ré-évalue à chaque
     // changement de unlockedIds (l'unlock invalide la requête achievements).
     const others = ACHIEVEMENTS.map((a) => a.id).filter(
       (id) => id !== "gatsby"
@@ -40,7 +40,7 @@ const useAchievementTriggers = () => {
       unlock("gatsby");
     } else if (unlockedIds.includes("gatsby")) {
       // SEULE exception à « un succès débloqué ne s'annule jamais » : le
-      // Le Bouquet final ne récompense pas une action mais un ÉTAT, « avoir tous
+      // Le Banquet final ne récompense pas une action mais un ÉTAT, « avoir tous
       // les autres ». Le jour où un succès est ajouté au catalogue, cet état
       // redevient faux, donc on le retire — et il reviendra, toast compris, dès
       // que le nouveau succès sera décroché.
