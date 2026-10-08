@@ -24,7 +24,7 @@ import { toast } from "@/lib/toast";
 import noImage from "@/assets/no-image.jpg";
 import { resizedImgProps, IMG_THUMB } from "@/lib/imageUrl";
 import { cn } from "@/lib/utils";
-import { formatAuthorName } from "@/utils/authorName";
+import useUserNames from "@/hooks/useUserNames";
 import { SECTION_BODY } from "@/lib/sectionClasses";
 import { HOVER_ZOOM_IMG } from "@/lib/imageClasses";
 
@@ -94,77 +94,80 @@ const OffTable = ({
   icon: typeof LuSandwich;
   /** C'est ma ligne : fond teinté sur mobile, anneau sur desktop. */
   mine: boolean;
-}) => (
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    exit={{ opacity: 0 }}
-    transition={{ duration: 0.2 }}
-    className={cn(
-      // Aucun contour : ce n'est pas une tablée, juste du contexte. Ma ligne se
-      // repère au fond teinté, pas à un anneau.
-      "flex items-center gap-3 overflow-hidden rounded-card p-2.5 sm:gap-4 sm:bg-card sm:p-3",
-      mine && "bg-primary/5 sm:bg-primary/5"
-    )}
-  >
-    <span className="relative flex h-12 w-16 shrink-0 items-center justify-center rounded-lg bg-foreground/5 sm:h-16 sm:w-24">
-      {/* Couleur OPAQUE + `opacity` sur le svg, jamais `text-foreground/45` :
-          une icône barrée ou croisée (LuMapPinOff, LuUtensilsCrossed) dessine
-          des traits qui se recouvrent, et en couleur translucide chaque
-          intersection cumule son alpha — on y voit une seconde icône
-          superposée. L'opacité de groupe compose les traits d'abord et
-          n'atténue qu'ensuite. */}
-      <Icon className="h-5 w-5 text-foreground opacity-45 sm:h-6 sm:w-6" />
-      <motion.span
-        key={people.length}
-        initial={{ scale: 0.5, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={spring}
-        className="absolute bottom-0.5 right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-foreground/35 px-1 text-[11px] font-bold text-white shadow sm:bottom-1 sm:right-1 sm:h-6 sm:min-w-6 sm:px-1.5 sm:text-xs"
-      >
-        {people.length}
-      </motion.span>
-    </span>
+}) => {
+  const { nameOf } = useUserNames();
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className={cn(
+        // Aucun contour : ce n'est pas une tablée, juste du contexte. Ma ligne se
+        // repère au fond teinté, pas à un anneau.
+        "flex items-center gap-3 overflow-hidden rounded-card p-2.5 sm:gap-4 sm:bg-card sm:p-3",
+        mine && "bg-primary/5 sm:bg-primary/5"
+      )}
+    >
+      <span className="relative flex h-12 w-16 shrink-0 items-center justify-center rounded-lg bg-foreground/5 sm:h-16 sm:w-24">
+        {/* Couleur OPAQUE + `opacity` sur le svg, jamais `text-foreground/45` :
+            une icône barrée ou croisée (LuMapPinOff, LuUtensilsCrossed) dessine
+            des traits qui se recouvrent, et en couleur translucide chaque
+            intersection cumule son alpha — on y voit une seconde icône
+            superposée. L'opacité de groupe compose les traits d'abord et
+            n'atténue qu'ensuite. */}
+        <Icon className="h-5 w-5 text-foreground opacity-45 sm:h-6 sm:w-6" />
+        <motion.span
+          key={people.length}
+          initial={{ scale: 0.5, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={spring}
+          className="absolute bottom-0.5 right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-foreground/35 px-1 text-[11px] font-bold text-white shadow sm:bottom-1 sm:right-1 sm:h-6 sm:min-w-6 sm:px-1.5 sm:text-xs"
+        >
+          {people.length}
+        </motion.span>
+      </span>
 
-    <div className="min-w-0 flex-1">
-      <div className="truncate font-display text-base font-bold text-foreground/70 sm:text-lg">
-        {label}
-      </div>
-      <div className="mt-1 flex items-center gap-2">
-        <span className="hidden -space-x-2 sm:flex">
-          <AnimatePresence initial={false}>
-            {people.slice(0, 5).map((p) => (
-              <motion.span
-                key={p.user_id}
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0, opacity: 0 }}
-                transition={spring}
-                className="inline-flex"
-              >
-                <Avatar email={p.email} avatarPath={p.avatar_path} size={26} />
-              </motion.span>
+      <div className="min-w-0 flex-1">
+        <div className="truncate font-display text-base font-bold text-foreground/70 sm:text-lg">
+          {label}
+        </div>
+        <div className="mt-1 flex items-center gap-2">
+          <span className="hidden -space-x-2 sm:flex">
+            <AnimatePresence initial={false}>
+              {people.slice(0, 5).map((p) => (
+                <motion.span
+                  key={p.user_id}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0, opacity: 0 }}
+                  transition={spring}
+                  className="inline-flex"
+                >
+                  <Avatar email={p.email} avatarPath={p.avatar_path} size={26} />
+                </motion.span>
+              ))}
+            </AnimatePresence>
+          </span>
+          {/* Mobile : noms en texte simple, comme sur les tablées. */}
+          <span className="min-w-0 truncate text-xs text-foreground/55">
+            {people.map((p, i) => (
+              <span key={p.user_id}>
+                {i > 0 && ", "}
+                <span className="sm:hidden">{nameOf(p.email)}</span>
+                <AuthorButton
+                  userId={p.user_id}
+                  email={p.email}
+                  className="hidden hover:text-foreground sm:inline"
+                />
+              </span>
             ))}
-          </AnimatePresence>
-        </span>
-        {/* Mobile : noms en texte simple, comme sur les tablées. */}
-        <span className="min-w-0 truncate text-xs text-foreground/55">
-          {people.map((p, i) => (
-            <span key={p.user_id}>
-              {i > 0 && ", "}
-              <span className="sm:hidden">{formatAuthorName(p.email)}</span>
-              <AuthorButton
-                userId={p.user_id}
-                email={p.email}
-                className="hidden hover:text-foreground sm:inline"
-              />
-            </span>
-          ))}
-        </span>
+          </span>
+        </div>
       </div>
-    </div>
-  </motion.div>
-);
+    </motion.div>
+  );
+};
 
 /**
  * Section « Déjeuner » : qui déjeune où aujourd'hui. Il n'y a ni organisateur ni
@@ -175,6 +178,7 @@ const OffTable = ({
  * portent un bouton « Rejoindre » (sauf la mienne) et mènent à la fiche.
  */
 const LunchToday = () => {
+  const { nameOf } = useUserNames();
   const navigate = useNavigate();
   const [pickOpen, setPickOpen] = useState(false);
   const [offOpen, setOffOpen] = useState(false);
@@ -654,7 +658,7 @@ const LunchToday = () => {
                         {people.map((p, i) => (
                           <span key={p.user_id}>
                             {i > 0 && ", "}
-                            <span className="sm:hidden">{formatAuthorName(p.email)}</span>
+                            <span className="sm:hidden">{nameOf(p.email)}</span>
                             <AuthorButton
                               userId={p.user_id}
                               email={p.email}

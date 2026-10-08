@@ -14,11 +14,12 @@ import { fnError } from "@/utils/fnError";
 import RowActionsDialog from "./RowActionsDialog";
 import { sortRows, useTableSort } from "./tableSort";
 import { SortHeader } from "./SortHeader";
-import { formatAuthorName } from "@/utils/authorName";
+import useUserNames from "@/hooks/useUserNames";
 
 // Table d'une catégorie de demandes. Les onglets (Inscription / Mot de passe)
 // sont gérés par la section Admin parente, qui passe le type actif.
 const AccessRequests = ({ activeType }: { activeType: RequestType }) => {
+  const { nameOf } = useUserNames();
   const queryClient = useQueryClient();
 
   const [processingId, setProcessingId] = useState<number | null>(null);
@@ -50,7 +51,7 @@ const AccessRequests = ({ activeType }: { activeType: RequestType }) => {
     key === "who"
       ? isCreation
         ? r.email
-        : formatAuthorName(r.email)
+        : nameOf(r.email)
       : key === "date"
         ? Date.parse(r.created_at)
         : // En attente d'abord, puis acceptée, puis refusée.
@@ -188,7 +189,7 @@ const AccessRequests = ({ activeType }: { activeType: RequestType }) => {
                     className="cursor-pointer transition hover:bg-muted/40 [&>td]:border-t [&>td]:border-border/60"
                   >
                     <td className="px-2 py-1.5 first:pl-4 last:pr-4 text-foreground/90">
-                      {isCreation ? req.email : formatAuthorName(req.email)}
+                      {isCreation ? req.email : nameOf(req.email)}
                     </td>
                     <td className="px-2 py-1.5 first:pl-4 last:pr-4 text-foreground/70">
                       {new Date(req.created_at).toLocaleDateString("fr-FR")}
@@ -230,7 +231,7 @@ const AccessRequests = ({ activeType }: { activeType: RequestType }) => {
           actionsFor
             ? isCreation
               ? actionsFor.email
-              : formatAuthorName(actionsFor.email)
+              : nameOf(actionsFor.email)
             : ""
         }
         subtitle={

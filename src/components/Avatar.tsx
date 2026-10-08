@@ -1,5 +1,5 @@
 import { avatarUrl } from "@/services/avatar";
-import { authorTrigram } from "@/utils/authorName";
+import useUserNames from "@/hooks/useUserNames";
 import { cn } from "@/lib/utils";
 
 // Palette douce et déterministe pour les avatars par défaut (trigramme).
@@ -26,9 +26,10 @@ interface Props {
 
 /**
  * Avatar d'un utilisateur : photo de profil personnalisée si elle existe,
- * sinon trigramme coloré (dérivé de l'email).
+ * sinon trigramme coloré (public.users.trigram, couleur dérivée de l'email).
  */
 const Avatar = ({ email, avatarPath, size = 40, className }: Props) => {
+  const { trigramOf } = useUserNames();
   const url = avatarUrl(avatarPath);
   const dim = { height: size, width: size };
 
@@ -70,7 +71,7 @@ const Avatar = ({ email, avatarPath, size = 40, className }: Props) => {
         className
       )}
     >
-      {authorTrigram(email)}
+      {trigramOf(email)}
     </div>
   );
 };

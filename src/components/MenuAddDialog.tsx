@@ -3,7 +3,7 @@ import { FiUploadCloud, FiX, FiLink, FiFileText, FiImage } from "react-icons/fi"
 import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import useUsers from "@/hooks/useUsers";
-import { formatAuthorName } from "@/utils/authorName";
+import useUserNames from "@/hooks/useUserNames";
 import {
   checkImageResolution,
   MIN_IMAGE_LONG_EDGE,
@@ -37,6 +37,7 @@ const KINDS: { value: MenuKind; label: string; icon: typeof FiLink }[] = [
  * un autre collaborateur.
  */
 const MenuAddDialog = ({ isOpen, onClose, isAdmin, onSubmit }: Props) => {
+  const { nameOf } = useUserNames();
   const inputRef = useRef<HTMLInputElement>(null);
   const [kind, setKind] = useState<MenuKind>("link");
   const [url, setUrl] = useState("");
@@ -307,7 +308,7 @@ const MenuAddDialog = ({ isOpen, onClose, isAdmin, onSubmit }: Props) => {
               <option value="">Moi (par défaut)</option>
               {users.map((u) => (
                 <option key={u.id} value={u.id}>
-                  {formatAuthorName(u.email)} — {u.email}
+                  {nameOf(u.email)} — {u.email}
                 </option>
               ))}
             </select>

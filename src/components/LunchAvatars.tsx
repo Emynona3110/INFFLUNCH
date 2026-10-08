@@ -1,7 +1,7 @@
 import Avatar from "@/components/Avatar";
 import AuthorButton from "@/components/AuthorButton";
 import { Tooltip } from "@/components/ui/tooltip";
-import { formatAuthorName } from "@/utils/authorName";
+import useUserNames from "@/hooks/useUserNames";
 import useLunchToday from "@/hooks/useLunchToday";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +29,7 @@ const LunchAvatars = ({
   className,
   interactive = false,
 }: Props) => {
+  const { nameOf } = useUserNames();
   const { byRestaurant } = useLunchToday();
   const people = byRestaurant.get(restaurantId) ?? [];
   if (people.length === 0) return null;
@@ -40,7 +41,7 @@ const LunchAvatars = ({
     return (
       <span className={cn("inline-flex items-center gap-1.5", className)}>
         {shown.map((p) => (
-          <Tooltip key={p.user_id} label={formatAuthorName(p.email)}>
+          <Tooltip key={p.user_id} label={nameOf(p.email)}>
             {/* `flex` : la boîte du bouton épouse l'avatar. Au survol,
                 l'avatar grossit un peu — pas de contour, juste un relief. */}
             <AuthorButton

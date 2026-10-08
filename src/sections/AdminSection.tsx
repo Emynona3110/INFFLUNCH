@@ -16,9 +16,9 @@ import { cn } from "@/lib/utils";
 //  - Demandes : boîte de réception des bugs / idées envoyés par les collègues,
 //    avec une puce tant qu'il en reste en attente. En premier : c'est ce qu'on
 //    vient consulter le plus souvent.
+//  - Utilisateurs : composant dédié (AdminUsers).
 //  - Inscription / Mot de passe : demandes d'accès (composant AccessRequests,
 //    une catégorie par onglet, avec puce bleue "en attente").
-//  - Utilisateurs : composant dédié (AdminUsers).
 //  - Tags : CRUD générique (DataManager).
 //  - Illustrations : toutes les images de succès en grand (AdminIllustrations),
 //    pour contrôler style, cadrage et détourage.
@@ -30,9 +30,9 @@ const tagsSection = adminSections.find((s) => s.tableName === "tags")!;
 
 const tabs = [
   { key: "feedback", label: "Demandes" },
+  { key: "users", label: "Utilisateurs" },
   { key: "creation", label: "Inscriptions" },
   { key: "password_reset", label: "Mot de passe" },
-  { key: "users", label: "Utilisateurs" },
   { key: "tags", label: "Tags" },
   { key: "illustrations", label: "Illustrations" },
 ] as const;

@@ -12,7 +12,7 @@ import { Feedback, FeedbackMessage } from "@/hooks/useFeedback";
 import Avatar from "@/components/Avatar";
 import FeedbackVersions from "@/components/FeedbackVersions";
 import FeedbackImages from "@/components/FeedbackImages";
-import { formatAuthorName } from "@/utils/authorName";
+import useUserNames from "@/hooks/useUserNames";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -61,14 +61,17 @@ const formatDay = (iso: string) =>
 const dayKey = (iso: string) => new Date(iso).toDateString();
 
 /** Pastille système dans le fil : l'auteur a retiré sa demande, à cette date. */
-const WithdrawnNotice = ({ item }: { item: Feedback }) => (
-  <div className="my-3 flex justify-center">
-    <span className="rounded-full bg-destructive/10 px-3 py-0.5 text-[11px] text-destructive">
-      {item.email ? formatAuthorName(item.email) : "L'auteur"} a retiré sa
-      demande · {formatDay(item.cancelled_at as string)}
-    </span>
-  </div>
-);
+const WithdrawnNotice = ({ item }: { item: Feedback }) => {
+  const { nameOf } = useUserNames();
+  return (
+    <div className="my-3 flex justify-center">
+      <span className="rounded-full bg-destructive/10 px-3 py-0.5 text-[11px] text-destructive">
+        {item.email ? nameOf(item.email) : "L'auteur"} a retiré sa
+        demande · {formatDay(item.cancelled_at as string)}
+      </span>
+    </div>
+  );
+};
 
 /**
  * Fil de discussion sous la demande, façon messagerie : pp et nom de qui parle
@@ -88,6 +91,7 @@ const FeedbackThread = ({
   onReply?: (body: string) => Promise<void>;
   onEditMessage?: (id: number, body: string) => Promise<void>;
 }) => {
+  const { nameOf } = useUserNames();
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   // Message en cours de correction : son texte est repris dans la zone de
@@ -144,7 +148,7 @@ const FeedbackThread = ({
 
   // Qui parle : chacun par son nom et sa pp, moi compris.
   const who = (m: FeedbackMessage) =>
-    m.email ? formatAuthorName(m.email) : "?";
+    m.email ? nameOf(m.email) : "?";
 
   return (
     <div className="mt-4 border-t border-border pt-3">
@@ -328,6 +332,7 @@ const FeedbackViewDialog = ({
   currentUserId,
   busy = false,
 }: Props) => {
+  const { nameOf } = useUserNames();
   if (!item) return null;
   const type = feedbackType(item.type);
   const status = item.deleted_at
@@ -350,7 +355,7 @@ const FeedbackViewDialog = ({
           {formatDate(item.updated_at ?? item.created_at)}
           {/* L'email n'est rapporté que pour l'admin : sur ses propres
               demandes, l'auteur n'a pas à se voir nommer. */}
-          {item.email && ` · ${formatAuthorName(item.email)}`}
+          {item.email && ` · ${nameOf(item.email)}`}
         </span>
         {/* Le sort de la demande, là où on décide (admin) ou où on le lit. */}
         <span

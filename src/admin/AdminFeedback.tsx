@@ -12,7 +12,7 @@ import {
 import FeedbackViewDialog from "@/components/FeedbackViewDialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { formatAuthorName } from "@/utils/authorName";
+import useUserNames from "@/hooks/useUserNames";
 import { sortRows, useTableSort } from "./tableSort";
 import { SortHeader } from "./SortHeader";
 
@@ -48,6 +48,7 @@ const pending = (item: Feedback) =>
  * cochée, termine la demande (et la rouvre si on la décoche).
  */
 const AdminFeedback = () => {
+  const { nameOf } = useUserNames();
   const {
     data: items = [],
     isPending,
@@ -93,7 +94,7 @@ const AdminFeedback = () => {
       : key === "date"
         ? Date.parse(lastVersion(item))
         : key === "author"
-          ? formatAuthorName(item.email)
+          ? nameOf(item.email)
           : feedbackStatus(item.status).label
   );
 
@@ -280,7 +281,7 @@ const AdminFeedback = () => {
                         {formatDate(lastVersion(item))}
                       </td>
                       <td className="whitespace-nowrap px-2 py-1.5 first:pl-4 last:pr-4 text-foreground/70">
-                        {item.email ? formatAuthorName(item.email) : "—"}
+                        {item.email ? nameOf(item.email) : "—"}
                         {/* Trombone : des captures accompagnent le message. */}
                         {item.images.length > 0 && (
                           <span className="ml-2 inline-flex items-center gap-0.5 align-middle text-xs text-foreground/45">

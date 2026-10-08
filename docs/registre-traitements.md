@@ -16,9 +16,9 @@ Tenu au titre de l'art. 30 RGPD (modèle simplifié CNIL). Dernière mise à jou
 | Finalité | Créer, authentifier et administrer les comptes des collaborateurs ; traiter les demandes de création / réinitialisation de mot de passe |
 | Base légale | Exécution du service demandé (6.1.b) ; intérêt légitime — sécurité (6.1.f) |
 | Personnes concernées | Collaborateurs INFFLUX (~100 max) |
-| Données | E-mail pro, mot de passe haché, rôle (user/admin), avatar facultatif, date de création, `must_change_password` ; `waiting_list` : e-mail, type, état, date ; IP + empreinte navigateur transmises à Cloudflare Turnstile à l'inscription |
+| Données | E-mail pro, mot de passe haché, rôle (user/admin), nom affiché et trigramme (dérivés de l'e-mail, corrigeables par l'admin), avatar facultatif, date de création, `must_change_password` ; `waiting_list` : e-mail, type, état, date ; IP + empreinte navigateur transmises à Cloudflare Turnstile à l'inscription |
 | Tables | `auth.users`, `users`, `profiles`, `waiting_list` ; bucket `avatars` |
-| Destinataires | Admin (LLS) ; les autres collaborateurs voient e-mail formaté (`P.Nom`) et avatar |
+| Destinataires | Admin (LLS) ; les autres collaborateurs voient le nom affiché (`P.Nom`), le trigramme et l'avatar |
 | Conservation | Tant que la personne ne demande pas la suppression de son compte (décision du responsable, 2026-09-19 : pas de purge automatique ni au départ de la société — les contributions gardent leur utilité pour les collègues ; sur demande explicite : suppression du compte + effacement des données personnelles, contributions anonymisées — effacées si la personne le précise ; cf. journal ci-dessous). Demandes d'accès refusées : 12 mois max |
 | Sécurité | Voir en-tête ; Edge Functions `admin-create-user` / `admin-delete-user` ; mdp temporaire transmis par Teams |
 

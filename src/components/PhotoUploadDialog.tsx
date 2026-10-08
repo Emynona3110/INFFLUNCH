@@ -3,7 +3,7 @@ import { FiUploadCloud, FiX } from "react-icons/fi";
 import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import useUsers from "@/hooks/useUsers";
-import { formatAuthorName } from "@/utils/authorName";
+import useUserNames from "@/hooks/useUserNames";
 import {
   checkImageResolution,
   MIN_IMAGE_LONG_EDGE,
@@ -44,6 +44,7 @@ const PhotoUploadDialog = ({
   maxFiles,
   onSubmit,
 }: Props) => {
+  const { nameOf } = useUserNames();
   const inputRef = useRef<HTMLInputElement>(null);
   const [picked, setPicked] = useState<Picked[]>([]);
   const [dragging, setDragging] = useState(false);
@@ -279,7 +280,7 @@ const PhotoUploadDialog = ({
               <option value="">Moi (par défaut)</option>
               {users.map((u) => (
                 <option key={u.id} value={u.id}>
-                  {formatAuthorName(u.email)} — {u.email}
+                  {nameOf(u.email)} — {u.email}
                 </option>
               ))}
             </select>

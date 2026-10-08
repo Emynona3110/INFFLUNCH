@@ -26,7 +26,7 @@ import {
   Achievement,
   canonicalId,
 } from "@/data/achievements";
-import { formatAuthorName } from "@/utils/authorName";
+import useUserNames from "@/hooks/useUserNames";
 import { cn } from "@/lib/utils";
 import RareRing from "@/components/RareRing";
 import {
@@ -61,6 +61,7 @@ const formatDate = (iso: string) =>
  */
 
 const UserProfileView = ({ userId, isMe = false }: Props) => {
+  const { nameOf } = useUserNames();
   const navigate = useNavigate();
   const { profile, photos, remove, setCaption } = usePublicProfile(userId);
   const { reviews, remove: removeReview } = useUserReviews(userId);
@@ -144,7 +145,7 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
               aria-level={2}
               className="truncate font-display text-xl sm:text-2xl font-bold text-card-foreground"
             >
-              {formatAuthorName(data.email)}
+              {nameOf(data.email)}
             </div>
             <p className="mb-0 mt-0.5 text-[13px] text-foreground/55 sm:text-sm">
               Membre depuis {formatMonth(data.member_since)}

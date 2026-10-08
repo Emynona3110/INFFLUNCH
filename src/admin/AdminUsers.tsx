@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/lib/toast";
@@ -7,14 +7,19 @@ import useUsers, { AppUser } from "../hooks/useUsers";
 import useSession from "../hooks/useSession";
 import ConfirmDeleteDialog from "../components/ConfirmDeleteDialog";
 import RowActionsDialog from "./RowActionsDialog";
+import UserNameDialog from "./UserNameDialog";
 import { sortRows, useTableSort } from "./tableSort";
 import { SortHeader } from "./SortHeader";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { profilePath } from "@/utils/profilePath";
-import { formatAuthorName } from "@/utils/authorName";
+import { authorTrigram, formatAuthorName } from "@/utils/authorName";
 import { copyTempPassword } from "@/utils/tempPassword";
 import { fnError } from "@/utils/fnError";
+
+/** Valeurs stockées, avec repli sur le calcul depuis l'email. */
+const nameOf = (u: AppUser) => u.display_name || formatAuthorName(u.email);
+const trigramOf = (u: AppUser) => u.trigram || authorTrigram(u.email);
 
 /** Date d'inscription, format court FR (identique à AdminFeedback). */
 const formatDate = (iso: string) =>
@@ -32,16 +37,31 @@ const AdminUsers = () => {
   const myId = sessionData?.user?.id;
 
   // Tri par colonne ; par défaut, par nom.
-  const { sort, toggle, firstDir } = useTableSort<"user" | "role" | "created">("users", {
+  const { sort, toggle, firstDir } = useTableSort<"user" | "trigram" | "role" | "created">("users", {
     key: "user",
     dir: "asc",
   });
   const rows = sortRows(users, sort, (u, key) =>
     key === "user"
-      ? formatAuthorName(u.email)
-      : key === "role"
-        ? u.role
-        : Date.parse(u.created_at)
+      ? nameOf(u)
+      : key === "trigram"
+        ? trigramOf(u)
+        : key === "role"
+          ? u.role
+          : Date.parse(u.created_at)
+  );
+
+  // Trigrammes portés par plusieurs comptes : signalés dans la table, à
+  // départager depuis la popup « Nom et trigramme ».
+  const trigramCount = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const u of users) m.set(trigramOf(u), (m.get(trigramOf(u)) ?? 0) + 1);
+    return m;
+  }, [users]);
+  const [editing, setEditing] = useState<AppUser | null>(null);
+  const takenTrigrams = useMemo(
+    () => new Set(users.filter((u) => u.id !== editing?.id).map(trigramOf)),
+    [users, editing]
   );
 
   // Ligne dont la popup d'actions est ouverte (clic sur la ligne).
@@ -130,6 +150,7 @@ const AdminUsers = () => {
                   {(
                     [
                       { key: "user", label: "Utilisateur" },
+                      { key: "trigram", label: "Trigramme" },
                       { key: "role", label: "Rôle" },
                       { key: "created", label: "Inscrit le" },
                     ] as const
@@ -161,7 +182,19 @@ const AdminUsers = () => {
                       className="cursor-pointer transition hover:bg-muted/40 [&>td]:border-t [&>td]:border-border/60"
                     >
                       <td className="px-2 py-1.5 first:pl-4 last:pr-4 text-foreground/90">
-                        {formatAuthorName(u.email)}
+                        {nameOf(u)}
+                      </td>
+                      <td className="px-2 py-1.5 first:pl-4 last:pr-4 font-mono text-xs">
+                        {(trigramCount.get(trigramOf(u)) ?? 0) > 1 ? (
+                          <span
+                            className="rounded bg-amber-100 px-1.5 py-0.5 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300"
+                            aria-label={`${trigramOf(u)} (trigramme en double)`}
+                          >
+                            {trigramOf(u)}
+                          </span>
+                        ) : (
+                          <span className="text-foreground/70">{trigramOf(u)}</span>
+                        )}
                       </td>
                       <td className="px-2 py-1.5 first:pl-4 last:pr-4">
                         <span
@@ -192,7 +225,7 @@ const AdminUsers = () => {
       <RowActionsDialog
         open={!!actionsFor}
         onClose={() => setActionsFor(null)}
-        title={actionsFor ? formatAuthorName(actionsFor.email) : ""}
+        title={actionsFor ? nameOf(actionsFor) : ""}
         subtitle={actionsFor?.email}
         actions={
           actionsFor
@@ -203,6 +236,11 @@ const AdminUsers = () => {
                   // Navigation : rien à attendre, la popup se ferme aussitôt.
                   onSelect: () =>
                     navigate(profilePath(actionsFor.id, actionsFor.email)),
+                },
+                {
+                  key: "name",
+                  label: "Modifier le nom et le trigramme",
+                  onSelect: () => setEditing(actionsFor),
                 },
                 {
                   key: "reset",
@@ -230,6 +268,12 @@ const AdminUsers = () => {
               ]
             : []
         }
+      />
+
+      <UserNameDialog
+        user={editing}
+        onClose={() => setEditing(null)}
+        takenTrigrams={takenTrigrams}
       />
 
       <ConfirmDeleteDialog

@@ -1,6 +1,6 @@
 import { ButtonHTMLAttributes, ReactNode, forwardRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { formatAuthorName } from "@/utils/authorName";
+import useUserNames from "@/hooks/useUserNames";
 import { profilePath } from "@/utils/profilePath";
 import { cn } from "@/lib/utils";
 
@@ -24,12 +24,13 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
 const AuthorButton = forwardRef<HTMLButtonElement, Props>(
   ({ userId, email, className, children, onClick, ...rest }, ref) => {
     const navigate = useNavigate();
+    const { nameOf } = useUserNames();
     // Compte supprimé, contribution conservée : « Ancien collaborateur », et
     // rien où aller.
     if (!userId) {
       return (
         <span className={cn("m-0 p-0 text-left", className)}>
-          {children ?? formatAuthorName(email)}
+          {children ?? nameOf(email)}
         </span>
       );
     }
@@ -51,7 +52,7 @@ const AuthorButton = forwardRef<HTMLButtonElement, Props>(
           className
         )}
       >
-        {children ?? formatAuthorName(email)}
+        {children ?? nameOf(email)}
       </button>
     );
   }

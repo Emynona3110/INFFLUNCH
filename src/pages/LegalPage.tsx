@@ -194,7 +194,9 @@ const Confidentialite = () => {
           <li>
             <span className="font-medium text-foreground">Compte</span> :
             adresse e-mail professionnelle, mot de passe (haché par Supabase,
-            jamais accessible en clair à l'éditeur), rôle, avatar facultatif —
+            jamais accessible en clair à l'éditeur), rôle, nom affiché et
+            trigramme (déduits de l'e-mail, corrigeables par l'administrateur),
+            avatar facultatif —
             pour te connecter et t'identifier auprès des collègues.
           </li>
           <li>

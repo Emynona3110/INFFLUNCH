@@ -11,7 +11,7 @@ import useLeaderboard, {
 } from "@/hooks/useLeaderboard";
 import useSession from "@/hooks/useSession";
 import useRealtimeTable from "@/hooks/useRealtimeTable";
-import { formatAuthorName } from "@/utils/authorName";
+import useUserNames from "@/hooks/useUserNames";
 import { profilePath } from "@/utils/profilePath";
 import { cn } from "@/lib/utils";
 
@@ -56,6 +56,7 @@ const STAGGER_MS = 30;
 const STAGGER_MAX = 15;
 
 const Leaderboard = ({ period, search }: Props) => {
+  const { nameOf } = useUserNames();
   const navigate = useNavigate();
   const { sessionData } = useSession();
   const myId = sessionData?.user?.id;
@@ -167,12 +168,12 @@ const Leaderboard = ({ period, search }: Props) => {
   const byName = useMemo(
     () =>
       [...data].sort((a, b) =>
-        formatAuthorName(a.email).localeCompare(
-          formatAuthorName(b.email),
+        nameOf(a.email).localeCompare(
+          nameOf(b.email),
           "fr",
         ),
       ),
-    [data],
+    [data, nameOf],
   );
 
   const needle = fold(search.trim());
@@ -186,12 +187,12 @@ const Leaderboard = ({ period, search }: Props) => {
   ];
   const liveRows = sortRows<LeaderboardRow, TieKey>(
     needle
-      ? byName.filter((r) => fold(formatAuthorName(r.email)).includes(needle))
+      ? byName.filter((r) => fold(nameOf(r.email)).includes(needle))
       : byName,
     sort,
     (r, key) =>
       key === "user"
-        ? formatAuthorName(r.email)
+        ? nameOf(r.email)
         : key === "total"
           ? METRICS.reduce((sum, m) => sum + r[m.key], 0)
           : r[key],
@@ -300,7 +301,7 @@ const Leaderboard = ({ period, search }: Props) => {
                         onClick={() =>
                           navigate(profilePath(r.user_id, r.email))
                         }
-                        aria-label={`Voir le profil de ${formatAuthorName(r.email)}`}
+                        aria-label={`Voir le profil de ${nameOf(r.email)}`}
                         className={cn(
                           "cursor-pointer transition [&>td]:border-t [&>td]:border-border/60",
                           // Fonds OPAQUES : la 1re colonne, figée, passe
@@ -335,7 +336,7 @@ const Leaderboard = ({ period, search }: Props) => {
                                     : "text-foreground/90",
                               )}
                             >
-                              {formatAuthorName(r.email)}
+                              {nameOf(r.email)}
                             </span>
                           </span>
                         </td>

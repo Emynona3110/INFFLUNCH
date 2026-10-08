@@ -9,6 +9,9 @@ export interface AppUser {
   role: string;
   /** Date d'inscription (auth.users.created_at, ISO). */
   created_at: string;
+  /** Nom affiché et trigramme, modifiables (sql/2026-10-08_noms_trigrammes.sql). */
+  display_name: string | null;
+  trigram: string | null;
 }
 
 /**

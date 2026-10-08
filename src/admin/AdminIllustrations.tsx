@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { FiX } from "react-icons/fi";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Dialog } from "@/components/ui/dialog";
 import { ACHIEVEMENTS, Achievement } from "@/data/achievements";
 import { cn } from "@/lib/utils";
 
@@ -15,12 +15,15 @@ const fileOf = (a: Achievement) => a.image?.split("/").pop() ?? "—";
 const AdminIllustrations = () => {
   const [opened, setOpened] = useState<Achievement | null>(null);
 
-  // Échap referme la vue plein écran.
+  // Popup ouverte : plus aucun glissé tactile derrière elle (défilement de la
+  // grille ou de la page, tirer-pour-recharger). Capture sur le document :
+  // passe avant les écouteurs des zones de défilement.
   useEffect(() => {
     if (!opened) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpened(null);
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    const block = (e: TouchEvent) => e.cancelable && e.preventDefault();
+    document.addEventListener("touchmove", block, { passive: false, capture: true });
+    return () =>
+      document.removeEventListener("touchmove", block, { capture: true });
   }, [opened]);
 
   const items = ACHIEVEMENTS.filter((a) => a.image);
@@ -38,15 +41,13 @@ const AdminIllustrations = () => {
                 type="button"
                 onClick={() => setOpened(a)}
                 aria-label={`Agrandir ${a.title}`}
-                className="group flex h-full w-full cursor-pointer flex-col bg-card text-left transition hover:bg-muted/40"
+                className="group flex h-full w-full cursor-pointer flex-col bg-card text-center transition hover:bg-muted/40"
               >
                 {/* Case 5:4 (illustration à 70 % de la largeur, petite marge
                     haute et basse). Image en absolu : dans une case à ratio, un
                     contenu plus grand (les SVG font 500-700 px) l'étirerait
                     en hauteur — la case ne garderait pas ses proportions. */}
-                <span
-                  className="relative block aspect-[5/4] w-full bg-white"
-                >
+                <span className="relative block aspect-[5/4] w-full">
                   <img
                     src={a.image}
                     alt=""
@@ -82,40 +83,36 @@ const AdminIllustrations = () => {
         </ul>
       </ScrollArea>
 
-      {/* Plein écran : l'image au plus grand. */}
-      {opened && (
-        <div
-          role="dialog"
-          aria-label={opened.title}
-          data-no-pull
-          onClick={() => setOpened(null)}
-          className="fixed inset-0 z-[1200] flex flex-col items-center justify-center gap-3 bg-black/80 p-4"
-        >
-          <button
-            type="button"
-            aria-label="Fermer"
-            onClick={() => setOpened(null)}
-            className="absolute right-4 top-4 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
-          >
-            <FiX className="h-6 w-6" />
-          </button>
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="relative aspect-square w-[min(80vh,90vw)] rounded-card bg-white"
-          >
-            <img
-              src={opened.image}
-              alt=""
-              className="absolute inset-0 h-full w-full object-contain p-6"
-            />
+      {/* Plein écran : l'image au plus grand, dans la popup standard (croix,
+          Échap ; pas de fermeture au clic extérieur). Sur mobile, le fond ne
+          glisse pas tant qu'elle est ouverte (cf. effet plus haut). */}
+      <Dialog
+        open={!!opened}
+        onClose={() => setOpened(null)}
+        showClose
+        className="max-w-[min(75vh,90vw)] overflow-hidden p-0 text-center sm:p-0"
+      >
+        {opened && (
+          <div data-no-pull>
+            <span className="relative block aspect-square w-full">
+              <img
+                src={opened.image}
+                alt=""
+                className="absolute inset-0 h-full w-full object-contain p-6"
+              />
+            </span>
+            <span className="block border-t border-border bg-muted/40 px-4 py-2">
+              <span className="block text-base font-semibold text-card-foreground">
+                {opened.title}
+              </span>
+              <span className="block text-xs text-foreground/50">
+                {fileOf(opened)} · {opened.id}
+                {opened.secret && " · secret"}
+              </span>
+            </span>
           </div>
-          <p className="m-0 text-center text-sm text-white/80">
-            <span className="font-semibold text-white">{opened.title}</span>
-            {" · "}
-            {fileOf(opened)}
-          </p>
-        </div>
-      )}
+        )}
+      </Dialog>
     </div>
   );
 };

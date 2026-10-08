@@ -4,7 +4,7 @@ import Avatar from "@/components/Avatar";
 import AuthorButton from "@/components/AuthorButton";
 import useAchievementHolders from "@/hooks/useAchievementHolders";
 import { Achievement, RARE_PERCENT } from "@/data/achievements";
-import { formatAuthorName } from "@/utils/authorName";
+import useUserNames from "@/hooks/useUserNames";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -51,6 +51,7 @@ const AchievementDialog = ({
   percent,
   progress,
 }: Props) => {
+  const { nameOf } = useUserNames();
   const holders = useAchievementHolders(
     isOpen && achievement ? achievement.id : null,
   );
@@ -166,7 +167,7 @@ const AchievementDialog = ({
                   onClick={onClose}
                   className="min-w-0 flex-1 truncate text-sm font-medium text-card-foreground"
                 >
-                  {formatAuthorName(h.email)}
+                  {nameOf(h.email)}
                 </AuthorButton>
                 <span className="shrink-0 text-xs tabular-nums text-foreground/45">
                   {formatDate(h.unlocked_at)}

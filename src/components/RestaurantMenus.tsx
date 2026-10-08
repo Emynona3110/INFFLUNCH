@@ -14,7 +14,7 @@ import MenuAddDialog from "@/components/MenuAddDialog";
 import ZoomableImage from "@/components/ZoomableImage";
 import HoldToDeleteButton from "@/components/HoldToDeleteButton";
 import { toast } from "@/lib/toast";
-import { formatAuthorName } from "@/utils/authorName";
+import useUserNames from "@/hooks/useUserNames";
 import { cn } from "@/lib/utils";
 import {
   SECTION,
@@ -60,6 +60,7 @@ const RestaurantMenus = ({
   canContribute = true,
   className,
 }: Props) => {
+  const { nameOf } = useUserNames();
   const {
     data: menus = [],
     isPending,
@@ -207,7 +208,7 @@ const RestaurantMenus = ({
                     // Pas de lien vers le profil ici : la tuile entière ouvre
                     // le menu, un second clic dedans prêterait à confusion.
                     <span className="block truncate text-xs text-foreground/45">
-                      {formatAuthorName(menu.email)}
+                      {nameOf(menu.email)}
                     </span>
                   )}
                 </span>

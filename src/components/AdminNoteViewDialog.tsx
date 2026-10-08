@@ -6,7 +6,7 @@ import { AdminNote } from "@/hooks/useAdminNotes";
 import useNoteFeedback from "@/hooks/useNoteFeedback";
 import FeedbackVersions from "@/components/FeedbackVersions";
 import FeedbackImages from "@/components/FeedbackImages";
-import { formatAuthorName } from "@/utils/authorName";
+import useUserNames from "@/hooks/useUserNames";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -41,6 +41,7 @@ const AdminNoteViewDialog = ({
   onDelete,
   busy = false,
 }: Props) => {
+  const { nameOf } = useUserNames();
   // Une note reprise d'une demande hérite de son historique : l'admin voit ce
   // que le collaborateur disait avant, sans quitter le carnet.
   const { data: origin } = useNoteFeedback(isOpen && note ? note.id : null);
@@ -61,7 +62,7 @@ const AdminNoteViewDialog = ({
           demande a été reprise au carnet. */}
       <p className="mb-0 mt-1 text-sm text-foreground/45">
         {formatDate(note.created_at)} ·{" "}
-        {note.email ? formatAuthorName(note.email) : "Auteur inconnu"}
+        {note.email ? nameOf(note.email) : "Auteur inconnu"}
         {note.done && note.done_at && ` · terminée le ${formatDate(note.done_at)}`}
       </p>
 

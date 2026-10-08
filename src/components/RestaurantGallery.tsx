@@ -4,7 +4,7 @@ import { FiPlus, FiImage } from "react-icons/fi";
 import useRestaurantPhotos from "@/hooks/useRestaurantPhotos";
 import PhotoUploadDialog, { PickedPhoto } from "@/components/PhotoUploadDialog";
 import PhotoGallery from "@/components/PhotoGallery";
-import { formatAuthorName } from "@/utils/authorName";
+import useUserNames from "@/hooks/useUserNames";
 import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import {
@@ -44,6 +44,7 @@ const RestaurantGallery = ({
   canContribute = true,
   className,
 }: Props) => {
+  const { nameOf } = useUserNames();
   const {
     data: photos = [],
     isPending,
@@ -135,7 +136,7 @@ const RestaurantGallery = ({
             userId={userId}
             isAdmin={isAdmin}
             // Sous chaque photo : qui l'a prise, et un clic mène à son profil.
-            labelOf={(photo) => formatAuthorName(photo.email)}
+            labelOf={(photo) => nameOf(photo.email)}
             onLabelClick={(photo) =>
               photo.user_id && navigate(`/profil/${photo.user_id}`)
             }
