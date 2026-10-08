@@ -184,7 +184,7 @@ const AdminUsers = () => {
                       <td className="px-2 py-1.5 first:pl-4 last:pr-4 text-foreground/90">
                         {nameOf(u)}
                       </td>
-                      <td className="px-2 py-1.5 first:pl-4 last:pr-4 font-mono text-xs">
+                      <td className="px-2 py-1.5 first:pl-4 last:pr-4">
                         {(trigramCount.get(trigramOf(u)) ?? 0) > 1 ? (
                           <span
                             className="rounded bg-amber-100 px-1.5 py-0.5 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300"
