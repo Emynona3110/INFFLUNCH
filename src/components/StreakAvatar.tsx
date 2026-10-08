@@ -52,20 +52,20 @@ const StreakAvatar = ({
   streak: number;
   size: number;
   className?: string;
-  /** Petite pp (liste du classement) : ni pastille chiffrée, ni grand
-   *  effet — halo resserré et étincelles réduites. */
+  /** Petite pp (liste du classement) : le contour coloré seul — ni pastille
+   *  chiffrée, ni halo, ni étincelles (ils débordaient sur les lignes
+   *  voisines). */
   compact?: boolean;
 }) => {
-  // Échelle des étincelles (taille, dérive, montée).
-  const k = compact ? 0.6 : 1;
   const onFire = streak >= 2;
-  // Palier du succès « Tout feu tout flamme » : la pp prend feu (halo + étincelles).
-  const flambe = streak >= FLAMBE_STREAK;
+  // Palier du succès « Tout feu tout flamme » : la pp prend feu (halo +
+  // étincelles), sauf en petite taille.
+  const flambe = !compact && streak >= FLAMBE_STREAK;
   const violet = streak >= VIOLET_FLAME_STREAK;
   const blue = !violet && streak >= BLUE_FLAME_STREAK;
   return (
     <span
-      className={cn("relative block shrink-0", flambe && "streak-fire", flambe && compact && "streak-fire-sm", blue && "streak-fire-blue", violet && "streak-fire-violet", className)}
+      className={cn("relative block shrink-0", flambe && "streak-fire", blue && "streak-fire-blue", violet && "streak-fire-violet", className)}
       // `block` : un span en ligne ignore width/height — dans un parent qui
       // n'est pas flex (cellule du classement), la boîte faisait 0 de large
       // et halo + étincelles (placés en %) se tassaient à gauche (iOS).
@@ -80,12 +80,12 @@ const StreakAvatar = ({
             style={
               {
                 "--x": `${sp.x}%`,
-                "--drift": `${sp.drift * k}px`,
+                "--drift": `${sp.drift}px`,
                 // Hauteur de montée relative à la pp : dépasse le sommet.
-                "--rise": `${-Math.round(size * sp.rise * k)}px`,
+                "--rise": `${-Math.round(size * sp.rise)}px`,
                 "--dur": `${sp.dur}s`,
                 "--delay": `${sp.delay}s`,
-                "--size": `${Math.max(1.5, sp.size * k)}px`,
+                "--size": `${sp.size}px`,
                 "--color": violet
                   ? VIOLET_SPARK[sp.color]
                   : blue

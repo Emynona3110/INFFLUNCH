@@ -27,7 +27,7 @@ type ColKey = "user" | Metric;
 // compteurs du profil) : la table tient sans défiler en largeur.
 const ICON = "h-4 w-4";
 const COLUMNS: { key: ColKey; label: string; icon?: React.ReactNode }[] = [
-  { key: "user", label: "Utilisateur" },
+  { key: "user", label: "Utilisateurs" },
   { key: "lunches", label: "Midis", icon: <LuUtensils className={ICON} /> },
   { key: "reviews", label: "Avis", icon: <FiStar className={ICON} /> },
   { key: "photos", label: "Photos", icon: <FiCamera className={ICON} /> },
@@ -193,7 +193,12 @@ const Leaderboard = ({ period, search }: Props) => {
   ];
   const liveRows = sortRows<LeaderboardRow, TieKey>(
     needle
-      ? byName.filter((r) => fold(nameOf(r.email)).includes(needle))
+      ? // Nom ou trigramme (celui qu'affiche le mobile).
+        byName.filter(
+          (r) =>
+            fold(nameOf(r.email)).includes(needle) ||
+            fold(trigramOf(r.email)).includes(needle),
+        )
       : byName,
     sort,
     (r, key) =>
@@ -248,12 +253,16 @@ const Leaderboard = ({ period, search }: Props) => {
                       key={c.key}
                       className={cn(
                         "sticky top-0 z-10 bg-muted px-2 py-3 first:pl-4 last:pr-4 text-center text-xs font-semibold uppercase tracking-wide text-foreground/55 shadow-[inset_0_-1px_0_0_var(--border)]",
-                        // Le nom reste visible quand la table défile en largeur.
-                        c.key === "user" && "left-0 z-20 text-left",
+                        c.key === "user" && "text-left",
                       )}
                     >
                       <SortHeader
-                        label={c.label}
+                        // Nombre de lignes affichées (période, recherche).
+                        label={
+                          c.key === "user"
+                            ? `${c.label} (${rows.length})`
+                            : c.label
+                        }
                         icon={c.icon}
                         dir={sort.key === c.key ? sort.dir : null}
                         idleDir={firstDir(c.key)}
@@ -311,8 +320,6 @@ const Leaderboard = ({ period, search }: Props) => {
                         aria-label={`Voir le profil de ${nameOf(r.email)}`}
                         className={cn(
                           "cursor-pointer transition [&>td]:border-t [&>td]:border-border/60",
-                          // Fonds OPAQUES : la 1re colonne, figée, passe
-                          // par-dessus les autres au défilement horizontal.
                           // Ma ligne : teinte portée par `.lb-me`, qui suit le
                           // fondu (sinon on la voyait sauter de place).
                           me
@@ -320,7 +327,14 @@ const Leaderboard = ({ period, search }: Props) => {
                             : "[&>td]:bg-card hover:[&>td]:bg-[color-mix(in_srgb,var(--muted)_50%,var(--card))]",
                         )}
                       >
-                        <td className="sticky left-0 z-[5] px-2 py-1.5 first:pl-4 text-left">
+                        {/* Pas de colonne figée (sticky + z-index) : chaque cellule
+                            aurait formé son propre calque, et la ligne
+                            suivante, peinte par-dessus, coupait l'aura et les
+                            étincelles de la série. Cellules non positionnées :
+                            l'avatar passe au-dessus de tous les fonds. La
+                            table tient sans défiler en largeur (symboles et
+                            trigrammes sur mobile). */}
+                        <td className="px-2 py-1.5 first:pl-4 text-left">
                           <span className="lb-cell flex items-center gap-2">
                             {/* Opacité sur un enfant : celle de `.lb-cell`
                                 porte le fondu, on ne la remplace pas. */}
