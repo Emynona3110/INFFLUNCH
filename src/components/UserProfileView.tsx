@@ -219,7 +219,7 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
                   if (!slot)
                     return (
                       <li key={`vide-${i}`} aria-hidden className="shrink-0">
-                        <div className="h-12 w-12 rounded-xl border border-dashed border-border bg-muted/40 sm:aspect-square sm:h-auto sm:w-full" />
+                        <div className="h-14 w-14 rounded-xl border border-dashed border-border bg-muted/40 sm:aspect-square sm:h-auto sm:w-full" />
                       </li>
                     );
                   const { def, unlocked_at } = slot;
@@ -248,7 +248,7 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
                           onClick={() => setOpened(def)}
                           aria-label={`${def.title}, obtenu le ${formatDate(unlocked_at)}`}
                           className={cn(
-                            "flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl border border-border p-0.5 text-2xl outline-none transition hover:border-primary/40 focus-visible:ring-2 focus-visible:ring-primary/40 sm:aspect-square sm:h-auto sm:w-full sm:p-1 sm:text-3xl",
+                            "flex h-14 w-14 cursor-pointer items-center justify-center rounded-xl border border-border p-0.5 text-3xl outline-none transition hover:border-primary/40 focus-visible:ring-2 focus-visible:ring-primary/40 sm:aspect-square sm:h-auto sm:w-full sm:p-1 sm:text-3xl",
                             known
                               ? cn(
                                   "bg-background",
