@@ -7,6 +7,7 @@ import DataManager from "../admin/DataManager";
 import AdminUsers from "../admin/AdminUsers";
 import AccessRequests from "../admin/AccessRequests";
 import AdminFeedback, { useNewFeedbackCount } from "../admin/AdminFeedback";
+import AdminIllustrations from "../admin/AdminIllustrations";
 import useAccessRequests from "../hooks/useAccessRequests";
 import { adminSections } from "../services/adminSections";
 import { cn } from "@/lib/utils";
@@ -19,6 +20,8 @@ import { cn } from "@/lib/utils";
 //    une catégorie par onglet, avec puce bleue "en attente").
 //  - Utilisateurs : composant dédié (AdminUsers).
 //  - Tags : CRUD générique (DataManager).
+//  - Illustrations : toutes les images de succès en grand (AdminIllustrations),
+//    pour contrôler style, cadrage et détourage.
 //
 // Navigation entre sous-onglets : pills sur desktop, roue « ‹ Onglet › » dans
 // le bandeau sur mobile (comme Mon compte). Pas de balayage ici, contrairement
@@ -31,6 +34,7 @@ const tabs = [
   { key: "password_reset", label: "Mot de passe" },
   { key: "users", label: "Utilisateurs" },
   { key: "tags", label: "Tags" },
+  { key: "illustrations", label: "Illustrations" },
 ] as const;
 
 type TabKey = (typeof tabs)[number]["key"];
@@ -91,6 +95,8 @@ const AdminSection = () => {
   const renderTab = (tab: TabKey) =>
     tab === "tags" ? (
       <DataManager section={tagsSection} />
+    ) : tab === "illustrations" ? (
+      <AdminIllustrations />
     ) : tab === "users" ? (
       <AdminUsers />
     ) : tab === "feedback" ? (
