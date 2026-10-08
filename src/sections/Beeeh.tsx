@@ -45,11 +45,11 @@ const Beeeh = () => {
   const spawnCountRef = useRef(0);
   const [items, setItems] = useState<FallingItem[]>([]);
   const { unlock, unlockedIds } = useAchievements();
-  const hasRing = unlockedIds.includes("seigneur_des_anneaux");
+  const hasRing = unlockedIds.includes("sheep_ring");
 
   // Succès « Dessine-moi un mouton » : avoir trouvé le mouton (afficher cette page).
   useEffect(() => {
-    unlock("petit_prince");
+    unlock("sheep_found");
   }, [unlock]);
 
   const spawnEmoji = useCallback(() => {
@@ -102,7 +102,7 @@ const Beeeh = () => {
   // streak. Le mouton ne le mange pas, il le garde (« mon précieux »).
   const handleCatchRing = (id: number) => {
     removeItem(id);
-    unlock("seigneur_des_anneaux");
+    unlock("sheep_ring");
   };
 
   // Clic sur un emoji en chute : il disparaît, son de croquage, le mouton "mange".
@@ -118,7 +118,7 @@ const Beeeh = () => {
     // Succès nourriture : dès la première (le compteur repart à zéro en
     // quittant la page, le ref étant recréé au prochain montage).
     streakRef.current += 1;
-    if (streakRef.current === 1) unlock("minecraft");
+    if (streakRef.current === 1) unlock("sheep_fed");
   };
 
   const handleImageLoad = () => {

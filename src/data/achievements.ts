@@ -5,8 +5,14 @@
 // Succès SECRET = pas de `condition` ici, mais une ligne dans la table
 // `achievement_secrets` (sql/2026-09-14_achievement_secrets.sql).
 //
+// IDS STABLES (2026-10-08) : l'id nomme la CONDITION (`reviews_5`,
+// `lunch_table_4`…) et ne change plus. Titre et illustration (`image`, fichier
+// nommé librement) se changent sans migration. Un id ne désigne jamais deux
+// succès : une nouvelle condition = un nouvel id ; ne jamais réutiliser un id
+// (ni un ancien, cf. ACHIEVEMENT_ALIASES).
+//
 // RÈGLE DU JEU : un succès débloqué ne s'annule JAMAIS. Une seule exception,
-// `gatsby` : il récompense un état (« avoir tous les autres »), pas une
+// `all_achievements` (Banquet final) : il récompense un état (« avoir tous les autres »), pas une
 // action, donc ajouter un succès ici le désactive chez celles et ceux qui
 // l'avaient — il revient dès que le nouveau est décroché. C'est
 // `useAchievementTriggers` qui le retire, et la RLS n'autorise la suppression
@@ -16,44 +22,44 @@ import type { AchievementMetrics } from "@/hooks/useAchievementMetrics";
 
 export type AchievementId =
   // Easter egg mouton (Beeeh)
-  | "petit_prince"
-  | "minecraft"
-  | "seigneur_des_anneaux"
+  | "sheep_found"
+  | "sheep_fed"
+  | "sheep_ring"
   // Avis
-  | "ratatouille"
-  | "naruto"
-  | "death_note"
+  | "reviews_1"
+  | "reviews_15"
+  | "reviews_5"
   // Photos
-  | "duck_face"
-  | "salt_bae"
-  | "louvre"
+  | "photos_1"
+  | "photos_5"
+  | "photos_15"
   // Réactions
-  | "brent_rambo"
-  | "absolute_cinema"
-  | "jules_cesar"
-  | "gouts_et_couleurs"
+  | "reactions_received_5"
+  | "reactions_given_10"
+  | "reactions_given_1"
+  | "reaction_kinds_3"
   // Prix déclarés
-  | "take_my_money"
-  | "stonks"
+  | "prices_1"
+  | "prices_10"
   // Favoris
-  | "pokeball"
+  | "favorites_6"
   // Roulette (Surprise du midi)
-  | "new_vegas"
-  | "matrix"
-  | "magritte"
+  | "roulette_spin"
+  | "roulette_two_restaurants"
+  | "roulette_one_restaurant"
   // Easter eggs divers
-  | "jacquouille"
-  | "johnny_bravo"
-  | "shooting_stars"
-  | "cookie_clicker"
-  | "nemo"
+  | "theme_toggle"
+  | "react_own_photo"
+  | "star_cursor"
+  | "privacy_cookie"
+  | "feedback_open"
   // Méta / assiduité
-  | "michael_scott"
-  | "johnny_hallyday"
-  | "flash"
-  | "mister_bean"
-  | "cowabunga"
-  | "gatsby";
+  | "login_streak_5"
+  | "lunch_streak_5"
+  | "lunch_early"
+  | "lunch_late"
+  | "lunch_table_4"
+  | "all_achievements";
 
 export interface Achievement {
   id: AchievementId;
@@ -101,21 +107,22 @@ export const RARE_PERCENT = 10;
 const ALL_ACHIEVEMENTS: Achievement[] = [
   // — Avis —
   {
-    id: "ratatouille",
-    title: "La main à la pâte",
+    // Le biscuit « Eat me » d'Alice au pays des merveilles.
+    id: "reviews_1",
+    title: "Amuse-bouche",
     condition: "Publier un premier avis",
-    icon: "🐀",
-    image: "/achievements/ratatouille.svg",
+    icon: "🍪",
+    image: "/achievements/eat_me.svg",
   },
   {
-    id: "death_note",
+    id: "reviews_5",
     title: "Dish note",
     condition: "Publier 5 avis",
     icon: "📓",
     image: "/achievements/death_note.svg",
   },
   {
-    id: "naruto",
+    id: "reviews_15",
     title: "Ramen ta science",
     condition: "Publier 15 avis",
     icon: "🍜",
@@ -124,37 +131,40 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
 
   // — Photos —
   {
-    id: "duck_face",
-    title: "Selfood",
+    // Jerry (Tom et Jerry) et son fromage.
+    id: "photos_1",
+    title: "Cheese !",
     condition: "Ajouter une première photo",
-    icon: "🤳",
-    image: "/achievements/duck_face.svg",
+    icon: "🧀",
+    image: "/achievements/jerry.svg",
   },
   {
-    id: "salt_bae",
-    title: "Ton grain de sel",
+    // « Pizza Delamama », la marque de Mister V.
+    id: "photos_5",
+    title: "La main à la pâte",
     condition: "Ajouter 5 photos",
-    icon: "🧂",
-    image: "/achievements/salt_bae.svg",
+    icon: "🍕",
+    image: "/achievements/delamama.svg",
   },
   {
-    id: "louvre",
-    title: "La cerise sur le gâteau",
+    // La Joconde.
+    id: "photos_15",
+    title: "Hors-d'œuvre",
     condition: "Ajouter 15 photos",
-    icon: "🍕",
-    image: "/achievements/louvre.svg",
+    icon: "🖼️",
+    image: "/achievements/joconde.svg",
   },
 
   // — Prix déclarés —
   {
-    id: "take_my_money",
+    id: "prices_1",
     title: "Gardez la monnaie",
     condition: "Déclarer le prix d'un restaurant",
     icon: "💸",
     image: "/achievements/take_my_money.svg",
   },
   {
-    id: "stonks",
+    id: "prices_10",
     title: "Du beurre dans les épinards",
     condition: "Déclarer le prix de 10 restaurants",
     icon: "📈",
@@ -165,28 +175,28 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
   {
     // Échangé le 2026-10-05 avec brent_rambo (illustration + titre + id) :
     // l'obtention suit la CONDITION. Cf. sql/2026-10-05_succes_louvre_cesar.sql.
-    id: "jules_cesar",
+    id: "reactions_given_1",
     title: "Veni, vidi, amavi",
     condition: "Réagir à une photo",
     icon: "👍",
     image: "/achievements/jules_cesar.svg",
   },
   {
-    id: "absolute_cinema",
+    id: "reactions_given_10",
     title: "Du grand art",
     condition: "Réagir à 10 photos différentes",
     icon: "🎬",
     image: "/achievements/absolute_cinema.svg",
   },
   {
-    id: "brent_rambo",
+    id: "reactions_received_5",
     title: "Coup de pouce",
     condition: "Recevoir 5 réactions sur vos photos",
     icon: "❤️",
     image: "/achievements/brent_rambo.svg",
   },
   {
-    id: "gouts_et_couleurs",
+    id: "reaction_kinds_3",
     title: "Les goûts et les couleurs",
     icon: "🎨",
     image: "/achievements/gouts_et_couleurs.svg",
@@ -195,7 +205,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
 
   // — Favoris —
   {
-    id: "pokeball",
+    id: "favorites_6",
     title: "Dégustez-les tous",
     condition: "Avoir 6 restaurants favoris",
     icon: "🥣",
@@ -204,21 +214,21 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
 
   // — Roulette (Surprise du midi) —
   {
-    id: "new_vegas",
+    id: "roulette_spin",
     title: "Faites vos jeux",
     condition: "Tirer le repas au hasard",
     icon: "🎰",
     image: "/achievements/new_vegas.svg",
   },
   {
-    id: "matrix",
+    id: "roulette_two_restaurants",
     title: "Choix cornélien",
     icon: "💊",
     image: "/achievements/matrix.svg",
     secret: true,
   },
   {
-    id: "magritte",
+    id: "roulette_one_restaurant",
     title: "Dé pipé",
     icon: "🎲",
     image: "/achievements/magritte.svg",
@@ -227,28 +237,28 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
 
   // — Méta / assiduité —
   {
-    id: "michael_scott",
+    id: "login_streak_5",
     title: "Fidèle au poste",
     condition: "Se connecter 5 jours d'affilée",
     icon: "☕",
     image: "/achievements/michael_scott.svg",
   },
   {
-    id: "johnny_hallyday",
+    id: "lunch_streak_5",
     title: "Tout feu tout flamme",
     condition: `Déclarer son midi ${FLAMBE_STREAK} jours ouvrés d'affilée`,
     icon: "🔥",
     image: "/achievements/johnny_hallyday.svg",
   },
   {
-    id: "flash",
+    id: "lunch_early",
     title: "Premier arrivé, premier servi",
     icon: "⚡",
     image: "/achievements/flash.svg",
     secret: true,
   },
   {
-    id: "mister_bean",
+    id: "lunch_late",
     title: "Mieux vaut tard que jamais",
     icon: "🐌",
     image: "/achievements/mister_bean.svg",
@@ -257,7 +267,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
   {
     // Le cri des Tortues Ninja : déjeuner à au moins COWABUNGA_TABLE dans le
     // même restaurant le même midi (trigger SQL, sql/2026-10-06_cowabunga_serveur.sql).
-    id: "cowabunga",
+    id: "lunch_table_4",
     title: "Cowabunga !",
     icon: "🐢",
     image: "/achievements/cowabunga.svg",
@@ -267,14 +277,14 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
   // — Easter eggs divers —
   {
     // Jacquouille et l'interrupteur (Les Visiteurs) : « Le jour, la nuit… »
-    id: "jacquouille",
+    id: "theme_toggle",
     title: "Jour ! Nuit ! Jour ! Nuit !",
     icon: "🌗",
     image: "/achievements/jacquouille.svg",
     secret: true,
   },
   {
-    id: "johnny_bravo",
+    id: "react_own_photo",
     title: "Man, I'm pretty!",
     icon: "🪞",
     image: "/achievements/johnny_bravo.svg",
@@ -282,7 +292,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
   },
   {
     // Bag Raiders : curseur étoile + traînée jusqu'au rechargement (fiche resto).
-    id: "shooting_stars",
+    id: "star_cursor",
     title: "Étoiles filantes",
     icon: "🌠",
     image: "/achievements/shooting_stars.svg",
@@ -293,7 +303,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     // Le seul cookie du site est dans la phrase qui dit qu'il n'y en a pas
     // (page confidentialité) ; le manger débloque. Le gros cookie de
     // l'easter egg est un autre fichier (public/easter/cookie.webp), hors DA.
-    id: "cookie_clicker",
+    id: "privacy_cookie",
     title: "Cookie Clicker",
     icon: "🍪",
     image: "/achievements/cookie_clicker.svg",
@@ -302,7 +312,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
   {
     // « Pas de souci » : Némo couché sur son riz, en sushi. Ouvrir la fenêtre
     // des demandes (FeedbackDialog) une première fois.
-    id: "nemo",
+    id: "feedback_open",
     title: "Pas de sushi",
     icon: "🍣",
     image: "/achievements/nemo.svg",
@@ -311,14 +321,14 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
 
   // — Easter egg mouton (Beeeh) —
   {
-    id: "petit_prince",
+    id: "sheep_found",
     title: "Dessine-moi un mouton",
     icon: "🐑",
     image: "/achievements/petit_prince.svg",
     secret: true,
   },
   {
-    id: "minecraft",
+    id: "sheep_fed",
     title: "Revenons à nos moutons",
     icon: "🌾",
     image: "/achievements/minecraft.svg",
@@ -327,7 +337,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
   {
     // « Le Seigneur des agneaux » : 1 chance sur 100 que le mouton fasse tomber
     // l'Anneau unique au lieu d'une nourriture ; il faut l'attraper.
-    id: "seigneur_des_anneaux",
+    id: "sheep_ring",
     title: "Le Seigneur des agneaux",
     icon: "💍",
     image: "/achievements/seigneur_des_anneaux.svg",
@@ -336,7 +346,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
 
   // — Complétionniste —
   {
-    id: "gatsby",
+    id: "all_achievements",
     title: "Banquet final",
     condition: "Débloquer tous les succès",
     icon: "🥂",
@@ -352,21 +362,21 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
 export const ACHIEVEMENT_GOALS: Partial<
   Record<AchievementId, { metric: keyof AchievementMetrics; goal: number }>
 > = {
-  ratatouille: { metric: "reviews", goal: 1 },
-  death_note: { metric: "reviews", goal: 5 },
-  naruto: { metric: "reviews", goal: 15 },
-  duck_face: { metric: "photos", goal: 1 },
-  salt_bae: { metric: "photos", goal: 5 },
-  louvre: { metric: "photos", goal: 15 },
-  take_my_money: { metric: "prices", goal: 1 },
-  stonks: { metric: "prices", goal: 10 },
-  jules_cesar: { metric: "reactionsGivenDistinct", goal: 1 },
-  absolute_cinema: { metric: "reactionsGivenDistinct", goal: 10 },
-  brent_rambo: { metric: "reactionsReceived", goal: 5 },
-  gouts_et_couleurs: { metric: "reactionEmojisDistinct", goal: 3 },
-  pokeball: { metric: "favorites", goal: 6 }, // une équipe Pokémon
-  michael_scott: { metric: "loginStreak", goal: 5 },
-  johnny_hallyday: { metric: "lunchStreak", goal: FLAMBE_STREAK },
+  reviews_1: { metric: "reviews", goal: 1 },
+  reviews_5: { metric: "reviews", goal: 5 },
+  reviews_15: { metric: "reviews", goal: 15 },
+  photos_1: { metric: "photos", goal: 1 },
+  photos_5: { metric: "photos", goal: 5 },
+  photos_15: { metric: "photos", goal: 15 },
+  prices_1: { metric: "prices", goal: 1 },
+  prices_10: { metric: "prices", goal: 10 },
+  reactions_given_1: { metric: "reactionsGivenDistinct", goal: 1 },
+  reactions_given_10: { metric: "reactionsGivenDistinct", goal: 10 },
+  reactions_received_5: { metric: "reactionsReceived", goal: 5 },
+  reaction_kinds_3: { metric: "reactionEmojisDistinct", goal: 3 },
+  favorites_6: { metric: "favorites", goal: 6 }, // une équipe Pokémon
+  login_streak_5: { metric: "loginStreak", goal: 5 },
+  lunch_streak_5: { metric: "lunchStreak", goal: FLAMBE_STREAK },
 };
 
 /**
@@ -377,37 +387,69 @@ export const ACHIEVEMENT_GOALS: Partial<
  * obtentions ni à leurs dates. Inoffensif une fois la migration passée.
  */
 const ACHIEVEMENT_ALIASES: Record<string, AchievementId> = {
-  // sql/2026-10-04_succes_renommage.sql
-  critique_en_herbe: "ratatouille",
-  // Paliers échangés avec les illustrations : 5 avis = Death Note,
-  // 20 avis = Naruto. L'obtention suit le PALIER, pas l'image.
-  palais_aguerri: "death_note",
-  plume_gastronomique: "naruto",
-  photographe: "duck_face",
-  inffluenceur: "salt_bae",
-  addition: "take_my_money",
-  gardez_la_monnaie: "stonks",
-  // Réagir à une photo : brent_rambo jusqu'au 2026-10-05, puis jules_cesar.
-  petit_geste: "jules_cesar",
-  public_conquis: "absolute_cinema",
-  quinte_gagnant: "pokeball",
-  gambling: "new_vegas",
-  indecis: "matrix",
-  de_pipe: "magritte",
-  fidele_au_poste: "michael_scott",
-  flambe: "johnny_hallyday",
-  sprinter: "flash",
-  retardataire: "mister_bean",
-  jour_nuit: "jacquouille",
-  narcisse: "johnny_bravo",
-  cookie: "cookie_clicker",
-  pas_de_sushi: "nemo",
-  anti_panurgisme: "petit_prince",
-  berger_dun_jour: "minecraft",
-  completionniste: "gatsby",
-  // sql/2026-10-05_succes_louvre_cesar.sql
-  pizzarazzi: "louvre",
-  approuve: "brent_rambo",
+  // Ids « référence de l'illustration » (2026-10-04 → 2026-10-08), remplacés
+  // par les ids stables par condition : sql/2026-10-08_succes_ids_stables.sql.
+  eat_me: "reviews_1",
+  death_note: "reviews_5",
+  naruto: "reviews_15",
+  jerry: "photos_1",
+  delamama: "photos_5",
+  joconde: "photos_15",
+  take_my_money: "prices_1",
+  stonks: "prices_10",
+  jules_cesar: "reactions_given_1",
+  absolute_cinema: "reactions_given_10",
+  brent_rambo: "reactions_received_5",
+  gouts_et_couleurs: "reaction_kinds_3",
+  pokeball: "favorites_6",
+  new_vegas: "roulette_spin",
+  matrix: "roulette_two_restaurants",
+  magritte: "roulette_one_restaurant",
+  michael_scott: "login_streak_5",
+  johnny_hallyday: "lunch_streak_5",
+  flash: "lunch_early",
+  mister_bean: "lunch_late",
+  cowabunga: "lunch_table_4",
+  jacquouille: "theme_toggle",
+  johnny_bravo: "react_own_photo",
+  shooting_stars: "star_cursor",
+  cookie_clicker: "privacy_cookie",
+  nemo: "feedback_open",
+  petit_prince: "sheep_found",
+  minecraft: "sheep_fed",
+  seigneur_des_anneaux: "sheep_ring",
+  gatsby: "all_achievements",
+  // Ids plus anciens encore (2026-10-04 et 2026-10-05), même cible.
+  critique_en_herbe: "reviews_1",
+  palais_aguerri: "reviews_5",
+  plume_gastronomique: "reviews_15",
+  photographe: "photos_1",
+  inffluenceur: "photos_5",
+  addition: "prices_1",
+  gardez_la_monnaie: "prices_10",
+  petit_geste: "reactions_given_1",
+  public_conquis: "reactions_given_10",
+  quinte_gagnant: "favorites_6",
+  gambling: "roulette_spin",
+  indecis: "roulette_two_restaurants",
+  de_pipe: "roulette_one_restaurant",
+  fidele_au_poste: "login_streak_5",
+  flambe: "lunch_streak_5",
+  sprinter: "lunch_early",
+  retardataire: "lunch_late",
+  jour_nuit: "theme_toggle",
+  narcisse: "react_own_photo",
+  cookie: "privacy_cookie",
+  pas_de_sushi: "feedback_open",
+  anti_panurgisme: "sheep_found",
+  berger_dun_jour: "sheep_fed",
+  completionniste: "all_achievements",
+  pizzarazzi: "photos_15",
+  approuve: "reactions_received_5",
+  ratatouille: "reviews_1",
+  duck_face: "photos_1",
+  salt_bae: "photos_5",
+  louvre: "photos_15",
 };
 
 /** L'id actuel d'un id lu en base (ancien ou non). */

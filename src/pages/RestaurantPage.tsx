@@ -109,7 +109,7 @@ const RestaurantPage = () => {
     // 5e étoile : le curseur devient étoile filante (toggle : 5 clics de plus
     // pour désactiver).
     toggleShootingStars();
-    unlock("shooting_stars");
+    unlock("star_cursor");
   };
   const { data: reviews = [], isPending: reviewsLoading } = useReviews(
     restaurant?.id,

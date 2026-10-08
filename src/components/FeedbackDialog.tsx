@@ -82,7 +82,7 @@ const FeedbackDialog = ({ isOpen, onClose, item }: Props) => {
   useEffect(() => {
     if (!isOpen) return;
     // Succès secret « Pas de sushi » : avoir ouvert la fenêtre une fois.
-    unlock("nemo");
+    unlock("feedback_open");
     setType(item?.type ?? null);
     setMessage(item?.message ?? "");
     setImages((prev) => {

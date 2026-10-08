@@ -258,8 +258,8 @@ const useLunchToday = () => {
       // « pas au resto ») choisi très tôt ou après que le déjeuner soit passé.
       // Heure de Paris ; « après 14 h » = le seuil du midi (isAfterLunch).
       if (plan.restaurantId != null) {
-        if (parisHour() < SPRINTER_HOUR) unlock("flash");
-        else if (isAfterLunch()) unlock("mister_bean");
+        if (parisHour() < SPRINTER_HOUR) unlock("lunch_early");
+        else if (isAfterLunch()) unlock("lunch_late");
       }
     },
   });

@@ -147,9 +147,9 @@ const RestaurantRoulette = ({
   const launch = () => {
     // Succès « Dé pipé » : lancer avec un seul resto, réduit volontairement
     // (d'autres restos existent mais ont été décochés).
-    if (selectedPool.length === 1 && pool.length > 1) unlock("magritte");
+    if (selectedPool.length === 1 && pool.length > 1) unlock("roulette_one_restaurant");
     // Succès « Choix cornélien » : lancer la roue entre deux restos (secret).
-    if (selectedPool.length === 2) unlock("matrix");
+    if (selectedPool.length === 2) unlock("roulette_two_restaurants");
 
     setSpinKey((k) => k + 1);
     setPhase("spinning");
@@ -221,7 +221,7 @@ const RestaurantRoulette = ({
                 onWinnerChange(spin.winner.id);
                 setPhase("result");
                 // Succès « Gambling » : un tirage est allé au bout.
-                unlock("new_vegas");
+                unlock("roulette_spin");
               }}
             >
               {spin.reel.map((resto, i) => (

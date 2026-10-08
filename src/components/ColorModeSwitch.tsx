@@ -27,7 +27,7 @@ const ColorModeSwitch = ({ className, onJourNuit }: Props) => {
     toggleRun = now - lastToggleAt < JOUR_NUIT_GAP_MS ? toggleRun + 1 : 1;
     lastToggleAt = now;
     if (toggleRun === JOUR_NUIT_TOGGLES) {
-      unlock("jacquouille");
+      unlock("theme_toggle");
       onJourNuit?.();
     }
   };

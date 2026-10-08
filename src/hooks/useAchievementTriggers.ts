@@ -34,17 +34,17 @@ const useAchievementTriggers = () => {
     // Banquet final : tous les AUTRES succès débloqués. Se ré-évalue à chaque
     // changement de unlockedIds (l'unlock invalide la requête achievements).
     const others = ACHIEVEMENTS.map((a) => a.id).filter(
-      (id) => id !== "gatsby"
+      (id) => id !== "all_achievements"
     );
     if (others.every((id) => unlockedIds.includes(id))) {
-      unlock("gatsby");
-    } else if (unlockedIds.includes("gatsby")) {
+      unlock("all_achievements");
+    } else if (unlockedIds.includes("all_achievements")) {
       // SEULE exception à « un succès débloqué ne s'annule jamais » : le
       // Le Banquet final ne récompense pas une action mais un ÉTAT, « avoir tous
       // les autres ». Le jour où un succès est ajouté au catalogue, cet état
       // redevient faux, donc on le retire — et il reviendra, toast compris, dès
       // que le nouveau succès sera décroché.
-      resetOne("gatsby").catch(() => {});
+      resetOne("all_achievements").catch(() => {});
     }
     // unlockedIds est capturé ; on dépend de sa version stable (unlockedKey).
     // eslint-disable-next-line react-hooks/exhaustive-deps

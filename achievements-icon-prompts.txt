@@ -386,3 +386,43 @@ off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a
 small cartoon clownfish (orange with white bands) lying on top of an oval block
 of rice like a nigiri sushi, relaxed and smiling, with a thin seaweed strip
 across its middle — "no worries" turned into "no sushi".
+
+
+================================================================================
+REFONTE 2026-10-08 — nouvelles références (ids renommés)
+================================================================================
+Nommer chaque fichier par l'ID ci-dessous, puis mettre `image:` à jour dans
+src/data/achievements.ts (aujourd'hui, ces succès réutilisent encore l'ancienne
+illustration).
+
+--- R1. eat_me — "Amuse-bouche" (1er avis) ------------------------------------
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a small round cookie with a tiny paper tag tied to it
+(the "Eat me" cookie from Alice in Wonderland, the tag left blank), a few crumbs.
+
+--- R2. jerry — "Cheese !" (1re photo) ----------------------------------------
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a cartoon mouse (Jerry from Tom and Jerry) holding a
+wedge of holey cheese up to the camera, a small camera flash burst.
+
+--- R3. delamama — "La main à la pâte" (5 photos) -----------------------------
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: a round pizza in an open pizza box with a little
+Italian flag ribbon, a tuft of steam (nod to Mister V's "Pizza Delamama").
+
+--- R4. joconde — "Hors-d'œuvre" (15 photos) ----------------------------------
+Very simple minimalist flat vector icon, single centered subject, few large
+clean geometric rounded shapes, thick uniform royal blue outlines (#113894),
+flat shading only, mostly off-white fills with one small warm orange accent,
+strict three-colour palette (deep royal blue #113894, warm orange #EA580C,
+off-white #FAF8F4), no text, plain solid background, square 1:1. Subject: the Mona Lisa in a simple ornate frame, her hands
+holding a small plate with a single canapé.

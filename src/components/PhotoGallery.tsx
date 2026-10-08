@@ -485,7 +485,7 @@ const PhotoGallery = ({
                     lightbox.user_id === userId &&
                     !photoReactions.summaryFor(lightbox.id).mine.has(emoji)
                   )
-                    unlock("johnny_bravo");
+                    unlock("react_own_photo");
                   photoReactions.toggle(lightbox.id, emoji);
                 }}
                 disabled={!photoReactions.canReact}
