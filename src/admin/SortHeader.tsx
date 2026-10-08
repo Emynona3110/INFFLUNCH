@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import { FiChevronUp } from "react-icons/fi";
 import { cn } from "@/lib/utils";
 import type { SortDir } from "./tableSort";
@@ -19,6 +19,7 @@ export function SortHeader({
   dir,
   onClick,
   hideLabel = false,
+  icon,
   idleDir = "asc",
   disabled = false,
 }: {
@@ -26,6 +27,9 @@ export function SortHeader({
   /** Colonne sans intitulé visible (ex. pastille de nature) : seule la
    *  flèche, à la place du libellé, reste cliquable. Libellé lu par l'aria. */
   hideLabel?: boolean;
+  /** Symbole remplaçant le libellé sur mobile (le libellé reste lu par
+   *  l'aria) : des colonnes plus étroites sur un téléphone. */
+  icon?: ReactNode;
   /** Colonne qu'il n'y a pas lieu de trier (que des 0 au classement) :
    *  intitulé grisé, ni clic ni chevron fantôme. */
   disabled?: boolean;
@@ -58,7 +62,15 @@ export function SortHeader({
           : "cursor-pointer hover:text-foreground/80",
       )}
     >
-      {!hideLabel && label}
+      {!hideLabel &&
+        (icon ? (
+          <>
+            <span className="flex items-center sm:hidden">{icon}</span>
+            <span className="hidden sm:inline">{label}</span>
+          </>
+        ) : (
+          label
+        ))}
       <span
         onTransitionEnd={(e) => {
           if (e.propertyName === "opacity" && !dir) setShown(idleDir);

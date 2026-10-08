@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import { FiAward, FiCamera, FiStar } from "react-icons/fi";
+import { LuUtensils } from "react-icons/lu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import StreakAvatar from "@/components/StreakAvatar";
 import { SortHeader } from "@/admin/SortHeader";
@@ -21,16 +23,20 @@ type Metric = Exclude<
 >;
 type ColKey = "user" | Metric;
 
-const COLUMNS: { key: ColKey; label: string }[] = [
+// Sur mobile, les colonnes chiffrées s'intitulent par leur symbole (ceux des
+// compteurs du profil) : la table tient sans défiler en largeur.
+const ICON = "h-4 w-4";
+const COLUMNS: { key: ColKey; label: string; icon?: React.ReactNode }[] = [
   { key: "user", label: "Utilisateur" },
-  { key: "lunches", label: "Midis" },
-  { key: "reviews", label: "Avis" },
-  { key: "photos", label: "Photos" },
-  { key: "achievements", label: "Succès" },
+  { key: "lunches", label: "Midis", icon: <LuUtensils className={ICON} /> },
+  { key: "reviews", label: "Avis", icon: <FiStar className={ICON} /> },
+  { key: "photos", label: "Photos", icon: <FiCamera className={ICON} /> },
+  { key: "achievements", label: "Succès", icon: <FiAward className={ICON} /> },
 ];
 const METRICS = COLUMNS.filter((c) => c.key !== "user") as {
   key: Metric;
   label: string;
+  icon: React.ReactNode;
 }[];
 
 /** Recherche insensible à la casse et aux accents. */
@@ -56,7 +62,7 @@ const STAGGER_MS = 30;
 const STAGGER_MAX = 15;
 
 const Leaderboard = ({ period, search }: Props) => {
-  const { nameOf } = useUserNames();
+  const { nameOf, trigramOf } = useUserNames();
   const navigate = useNavigate();
   const { sessionData } = useSession();
   const myId = sessionData?.user?.id;
@@ -248,6 +254,7 @@ const Leaderboard = ({ period, search }: Props) => {
                     >
                       <SortHeader
                         label={c.label}
+                        icon={c.icon}
                         dir={sort.key === c.key ? sort.dir : null}
                         idleDir={firstDir(c.key)}
                         disabled={emptyCols.has(c.key)}
@@ -317,7 +324,7 @@ const Leaderboard = ({ period, search }: Props) => {
                           <span className="lb-cell flex items-center gap-2">
                             {/* Opacité sur un enfant : celle de `.lb-cell`
                                 porte le fondu, on ne la remplace pas. */}
-                            <span className={cn(idle && "opacity-50")}>
+                            <span className={cn("block", idle && "opacity-50")}>
                               <StreakAvatar
                                 email={r.email}
                                 avatarPath={r.avatar_path}
@@ -336,7 +343,9 @@ const Leaderboard = ({ period, search }: Props) => {
                                     : "text-foreground/90",
                               )}
                             >
-                              {nameOf(r.email)}
+                              {/* Mobile : le trigramme, plus court. */}
+                              <span className="sm:hidden">{trigramOf(r.email)}</span>
+                              <span className="hidden sm:inline">{nameOf(r.email)}</span>
                             </span>
                           </span>
                         </td>

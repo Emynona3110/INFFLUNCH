@@ -65,7 +65,10 @@ const StreakAvatar = ({
   const blue = !violet && streak >= BLUE_FLAME_STREAK;
   return (
     <span
-      className={cn("relative shrink-0", flambe && "streak-fire", flambe && compact && "streak-fire-sm", blue && "streak-fire-blue", violet && "streak-fire-violet", className)}
+      className={cn("relative block shrink-0", flambe && "streak-fire", flambe && compact && "streak-fire-sm", blue && "streak-fire-blue", violet && "streak-fire-violet", className)}
+      // `block` : un span en ligne ignore width/height — dans un parent qui
+      // n'est pas flex (cellule du classement), la boîte faisait 0 de large
+      // et halo + étincelles (placés en %) se tassaient à gauche (iOS).
       style={{ width: size, height: size }}
     >
       {flambe &&

@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { FiChevronDown, FiX } from "react-icons/fi";
 import { BsSearch } from "react-icons/bs";
 import SearchInput from "./SearchInput";
@@ -66,6 +67,31 @@ const LeaderboardToolbar = ({
   const [searchOpen, setSearchOpen] = useState(false);
   const [listOpen, setListOpen] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
+  const popRef = useRef<HTMLDivElement>(null);
+  // Position de la liste, calée sous le segment du mois. Elle est rendue dans
+  // un portail : posée dans le bandeau, elle en dépendait (overflow rendu
+  // `hidden` le temps de son animation, empilement) et pouvait s'y retrouver
+  // rognée à son bord inférieur.
+  const [popPos, setPopPos] = useState<{ top: number; right: number; minWidth: number } | null>(null);
+  useLayoutEffect(() => {
+    if (!listOpen) return;
+    const place = () => {
+      const r = listRef.current?.getBoundingClientRect();
+      if (r)
+        setPopPos({
+          top: r.bottom + 4,
+          right: document.documentElement.clientWidth - r.right,
+          minWidth: r.width,
+        });
+    };
+    place();
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);
+    return () => {
+      window.removeEventListener("resize", place);
+      window.removeEventListener("scroll", place, true);
+    };
+  }, [listOpen]);
 
   const current = parisMonthKey();
   const first = firstMonth && firstMonth < current ? firstMonth : current;
@@ -76,7 +102,9 @@ const LeaderboardToolbar = ({
   useEffect(() => {
     if (!listOpen) return;
     const onPointerDown = (e: PointerEvent) => {
-      if (!listRef.current?.contains(e.target as Node)) setListOpen(false);
+      const t = e.target as Node;
+      if (!listRef.current?.contains(t) && !popRef.current?.contains(t))
+        setListOpen(false);
     };
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setListOpen(false);
     document.addEventListener("pointerdown", onPointerDown);
@@ -231,11 +259,13 @@ const LeaderboardToolbar = ({
             </span>
           </button>
 
-          {listOpen && (
+          {listOpen && popPos && createPortal(
             <div
+              ref={popRef}
               role="listbox"
               aria-label="Mois"
-              className="absolute right-0 top-full z-20 mt-1 max-h-64 min-w-full overflow-y-auto rounded-card border border-border bg-card shadow-xl"
+              style={popPos}
+              className="tw-scope fixed z-[1001] max-h-64 overflow-y-auto rounded-card border border-border bg-card shadow-xl"
             >
               {months.map((m) => (
                 <button
@@ -256,7 +286,8 @@ const LeaderboardToolbar = ({
                   <span className="sm:hidden">{shortLabel(m)}</span>
                 </button>
               ))}
-            </div>
+            </div>,
+            document.body,
           )}
         </div>
 
