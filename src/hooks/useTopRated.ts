@@ -1,10 +1,9 @@
 import useSupabaseQuery from "./useSupabaseQuery";
 import supabaseClient from "../services/supabaseClient";
 
-/** Nombre d'avis minimum pour monter sur le podium : éligible dès le premier
- *  avis (choix assumé — un resto noté une fois peut donc être en tête). À
- *  monter si un unique avis enthousiaste fausse trop le classement. */
-const MIN_REVIEWS = 1;
+/** Nombre d'avis minimum pour monter sur le podium : 3, pour qu'un unique avis
+ *  enthousiaste ne suffise plus à placer un resto en tête. */
+const MIN_REVIEWS = 3;
 
 /** Taille du podium : or, argent, bronze. */
 const PODIUM = 3;
@@ -19,8 +18,8 @@ const PODIUM = 3;
  * l'emporte), puis le nom pour que l'ordre soit stable d'un chargement à
  * l'autre. Les restos sans distance connue passent en dernier (NULLS LAST).
  *
- * Éligibilité : au moins MIN_REVIEWS avis (1 aujourd'hui, donc tout resto noté
- * concourt ; seuls ceux sans aucun avis sont écartés, leur note valant 0). Le
+ * Éligibilité : au moins MIN_REVIEWS avis (3) ; les autres n'y figurent pas,
+ * quelle que soit leur note. Le
  * resto de test et les fermés sont exclus quel que soit le rôle.
  */
 const useTopRated = () =>
