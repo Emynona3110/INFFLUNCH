@@ -58,6 +58,7 @@ dans le code. Renommer un succès = renommer son id, son fichier, et ajouter un
 | `louvre` | La cerise sur le gâteau | `louvre.svg` |
 | `take_my_money` | Gardez la monnaie | `take_my_money.svg` |
 | `stonks` | Beurre dans les épinards | `stonks.svg` |
+| `prices_15` | Pièce montée | `picsou.svg` |
 | `brent_rambo` | Coup de pouce | `brent_rambo.svg` |
 | `absolute_cinema` | Du grand art | `absolute_cinema.svg` |
 | `jules_cesar` | Veni, vidi, amavi | `jules_cesar.svg` |

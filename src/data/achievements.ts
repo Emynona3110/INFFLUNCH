@@ -40,7 +40,8 @@ export type AchievementId =
   | "reaction_kinds_3"
   // Prix déclarés
   | "prices_1"
-  | "prices_10"
+  | "prices_5"
+  | "prices_15"
   // Favoris
   | "favorites_6"
   // Roulette (Surprise du midi)
@@ -164,11 +165,26 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     image: "/achievements/take_my_money.svg",
   },
   {
-    id: "prices_10",
+    id: "prices_5",
     title: "Du beurre dans les épinards",
-    condition: "Déclarer le prix de 10 restaurants",
+    condition: "Déclarer le prix de 5 restaurants",
     icon: "📈",
     image: "/achievements/stonks.svg",
+  },
+  {
+    // Picsou et sa montagne de pièces.
+    id: "prices_15",
+    title: "Pièce montée",
+    condition: "Déclarer le prix de 15 restaurants",
+    icon: "🪙",
+    image: "/achievements/picsou.svg",
+  },
+  {
+    id: "reactions_received_5",
+    title: "Coup de pouce",
+    condition: "Recevoir 5 réactions sur vos photos",
+    icon: "❤️",
+    image: "/achievements/brent_rambo.svg",
   },
 
   // — Réactions —
@@ -187,13 +203,6 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     condition: "Réagir à 10 photos différentes",
     icon: "🎬",
     image: "/achievements/absolute_cinema.svg",
-  },
-  {
-    id: "reactions_received_5",
-    title: "Coup de pouce",
-    condition: "Recevoir 5 réactions sur vos photos",
-    icon: "❤️",
-    image: "/achievements/brent_rambo.svg",
   },
   {
     id: "reaction_kinds_3",
@@ -369,7 +378,8 @@ export const ACHIEVEMENT_GOALS: Partial<
   photos_5: { metric: "photos", goal: 5 },
   photos_15: { metric: "photos", goal: 15 },
   prices_1: { metric: "prices", goal: 1 },
-  prices_10: { metric: "prices", goal: 10 },
+  prices_5: { metric: "prices", goal: 5 },
+  prices_15: { metric: "prices", goal: 15 },
   reactions_given_1: { metric: "reactionsGivenDistinct", goal: 1 },
   reactions_given_10: { metric: "reactionsGivenDistinct", goal: 10 },
   reactions_received_5: { metric: "reactionsReceived", goal: 5 },
@@ -387,6 +397,10 @@ export const ACHIEVEMENT_GOALS: Partial<
  * obtentions ni à leurs dates. Inoffensif une fois la migration passée.
  */
 const ACHIEVEMENT_ALIASES: Record<string, AchievementId> = {
+  // Paliers de prix 1/10 → 1/5/15 (2026-10-09) : qui avait déclaré 10 prix en
+  // a déclaré 5. Dates recalées sur la 5e déclaration par
+  // sql/2026-10-09_paliers_prix.sql.
+  prices_10: "prices_5",
   // Ids « référence de l'illustration » (2026-10-04 → 2026-10-08), remplacés
   // par les ids stables par condition : sql/2026-10-08_succes_ids_stables.sql.
   eat_me: "reviews_1",
@@ -396,7 +410,7 @@ const ACHIEVEMENT_ALIASES: Record<string, AchievementId> = {
   delamama: "photos_5",
   joconde: "photos_15",
   take_my_money: "prices_1",
-  stonks: "prices_10",
+  stonks: "prices_5",
   jules_cesar: "reactions_given_1",
   absolute_cinema: "reactions_given_10",
   brent_rambo: "reactions_received_5",
@@ -426,7 +440,7 @@ const ACHIEVEMENT_ALIASES: Record<string, AchievementId> = {
   photographe: "photos_1",
   inffluenceur: "photos_5",
   addition: "prices_1",
-  gardez_la_monnaie: "prices_10",
+  gardez_la_monnaie: "prices_5",
   petit_geste: "reactions_given_1",
   public_conquis: "reactions_given_10",
   quinte_gagnant: "favorites_6",
