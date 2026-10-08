@@ -24,6 +24,15 @@ export interface ChangelogEntry {
 export const changelog: ChangelogEntry[] = [
   // ──────────────────────── Octobre 2026 ────────────────────────
   {
+    date: "2026-10-08",
+    title: "Classement",
+    points: [
+      "Nouvel onglet Classement : midis, avis, photos et succès de chacun",
+      "Mois par mois ou depuis toujours, trié par la colonne de ton choix",
+      "Cherche un collègue et clique sur sa ligne pour voir son profil",
+    ],
+  },
+  {
     date: "2026-10-01",
     title: "Prix du midi",
     points: [

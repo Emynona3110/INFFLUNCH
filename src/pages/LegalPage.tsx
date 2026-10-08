@@ -212,7 +212,8 @@ const Confidentialite = () => {
             déjeune où ? » — y compris « pas de restaurant » ou « pas sur
             site » quand tu le déclares —, prix déclarés, succès débloqués —
             pour faire fonctionner le service et les afficher aux autres
-            collaborateurs. Les montants que tu déclares dépenser dans un
+            collaborateurs, y compris sous forme de compteurs (midis, avis,
+            photos, succès, série de midis) dans le classement. Les montants que tu déclares dépenser dans un
             restaurant ne sont visibles que de toi et de l'administrateur : les
             autres n'en voient que la fourchette du restaurant, calculée à
             partir de l'ensemble des déclarations.
