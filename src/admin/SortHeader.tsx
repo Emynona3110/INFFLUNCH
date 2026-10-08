@@ -47,7 +47,12 @@ export function SortHeader({
       disabled={disabled}
       aria-label={`Trier par ${label}`}
       className={cn(
-        "group relative inline-flex items-center uppercase tracking-wide transition",
+        "group relative items-center uppercase tracking-wide transition",
+        // Sans intitulé, un bouton en ligne se pose sur la ligne de base du
+        // texte : l'interligne réservé dessous grandissait toute la ligne
+        // d'en-tête (Demandes, colonne Nature). En bloc centré, il n'a que
+        // sa propre hauteur.
+        hideLabel ? "mx-auto flex" : "inline-flex",
         disabled
           ? "cursor-default opacity-40"
           : "cursor-pointer hover:text-foreground/80",
