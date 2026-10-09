@@ -19,7 +19,7 @@ const FOOD_EMOJIS = [
   // Cuisine asiatique
   "🍱", "🍘", "🍙", "🍚", "🍛", "🍜", "🍝", "🍠", "🍢", "🍣", "🍤", "🍥", "🥮", "🍡", "🥟", "🥠", "🥡",
   // Desserts & sucreries
-  "🍦", "🍧", "🍨", "🍩", "🍪", "🎂", "🍰", "🧁", "🥧", "🍫", "🍬", "🍭", "🍮", "🍯",
+  "🍦", "🍧", "🍨", "🍩", "🎂", "🍰", "🧁", "🥧", "🍫", "🍬", "🍭", "🍮", "🍯",
 ];
 
 /** Largeur utile = largeur du layout (max 1200px, centrée) pour rester attrapable. */
