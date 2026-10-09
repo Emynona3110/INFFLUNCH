@@ -257,7 +257,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     title: "Tout feu tout flamme",
     condition: `Déclarer son midi ${FLAMBE_STREAK} jours ouvrés d'affilée`,
     icon: "🔥",
-    image: "/achievements/johnny_hallyday.svg",
+    image: "/achievements/ace.svg",
   },
   {
     id: "lunch_early",

@@ -72,7 +72,7 @@ dans le code. Renommer un succès = renommer son id, son fichier, et ajouter un
 | `shooting_stars` | Étoiles filantes | `luma.svg` |
 | `cookie_clicker` | Cookie Clicker | `cookie_clicker.svg` |
 | `michael_scott` | Fidèle au poste | `michael_scott.svg` |
-| `johnny_hallyday` | Tout feu tout flamme | `johnny_hallyday.svg` |
+| `johnny_hallyday` | Tout feu tout flamme | `ace.svg` |
 | `flash` | Premier arrivé, premier servi | `flash.svg` |
 | `mister_bean` | Mieux vaut tard que jamais | `mister_bean.svg` |
 | `gatsby` | Le bouquet final | `gatsby.svg` |
