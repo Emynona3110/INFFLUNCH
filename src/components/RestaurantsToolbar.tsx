@@ -99,7 +99,7 @@ const RestaurantsToolbar = ({
         >
           <BsSearch className="h-[18px] w-[18px]" />
           {restaurantFilters.searchText && (
-            <span className="absolute right-1.5 top-1.5 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />
+            <span className="absolute right-1.5 top-1.5 h-2.5 w-2.5 rounded-full bg-[#ea580c] ring-2 ring-card" />
           )}
         </button>
       )}

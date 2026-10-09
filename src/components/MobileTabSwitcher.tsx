@@ -102,7 +102,7 @@ export function MobileTabSwitcher<K extends string>({
               >
                 {t.label}
                 {t.dot && d !== 0 && (
-                  <span className="absolute -right-1.5 top-2 h-2 w-2 rounded-full bg-primary ring-2 ring-card" />
+                  <span className="absolute -right-1.5 top-2 h-2 w-2 rounded-full bg-[#ea580c] ring-2 ring-card" />
                 )}
               </button>
             );
@@ -120,7 +120,7 @@ export function MobileTabSwitcher<K extends string>({
         <FiChevronRight className="h-5 w-5" />
         {/* Pastille : un onglet hors champ à droite a quelque chose à voir. */}
         {tabs.slice(index + 3).some((t) => t.dot) && (
-          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary ring-2 ring-card" />
+          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[#ea580c] ring-2 ring-card" />
         )}
       </button>
     </div>

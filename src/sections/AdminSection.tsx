@@ -146,7 +146,7 @@ const AdminSection = () => {
               >
                 {t.label}
                 {waiting > 0 && (
-                  <span className="absolute right-0.5 top-0.5 h-2.5 w-2.5 rounded-full bg-[#f79220] ring-2 ring-background" />
+                  <span className="absolute right-0.5 top-0.5 h-2.5 w-2.5 rounded-full bg-[#ea580c] ring-2 ring-background" />
                 )}
               </button>
             );

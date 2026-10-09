@@ -11,7 +11,7 @@ import rawIcon from "@/assets/bg-infflux.svg?raw";
  */
 
 // Même orange que la puce « demandes » de la navbar.
-const BADGE_COLOR = "#f79220";
+const BADGE_COLOR = "#ea580c";
 
 // On retire d'éventuels width/height et on laisse le viewBox (0 0 100 100)
 // dimensionner.

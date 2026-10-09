@@ -80,7 +80,7 @@ const FilterDialog = ({ restaurantFilters, onFilterChange }: FilterDialogProps) 
       >
         <BsFilter className="h-5 w-5 sm:h-6 sm:w-6" />
         {hasActiveFilters(restaurantFilters) && (
-          <span className="absolute right-1.5 top-1.5 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-card" />
+          <span className="absolute right-1.5 top-1.5 h-2.5 w-2.5 rounded-full bg-[#ea580c] ring-2 ring-card" />
         )}
       </button>
 

@@ -175,7 +175,7 @@ const MyFeedback = () => {
                   {isNew(item) && (
                     <span
                       aria-label="Du nouveau depuis ta dernière visite"
-                      className="absolute right-1 top-1 z-[1] h-3 w-3 rounded-full bg-primary ring-2 ring-card sm:-right-1 sm:-top-1"
+                      className="absolute right-1 top-1 z-[1] h-3 w-3 rounded-full bg-[#ea580c] ring-2 ring-card sm:-right-1 sm:-top-1"
                     />
                   )}
                   {/* Toute la tuile ouvre la lecture ; modifier et supprimer sont

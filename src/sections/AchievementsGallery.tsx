@@ -147,7 +147,7 @@ const AchievementsGallery = () => {
                   {unlocked && isNew(date) && (
                     <span
                       aria-label="Nouveau succès"
-                      className="absolute -right-1 -top-1 z-[1] h-3 w-3 rounded-full bg-primary ring-2 ring-card"
+                      className="absolute -right-1 -top-1 z-[1] h-3 w-3 rounded-full bg-[#ea580c] ring-2 ring-card"
                     />
                   )}
                   <div

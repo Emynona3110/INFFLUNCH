@@ -204,7 +204,7 @@ const MyAccount = () => {
               {((t.key === "succes" && hasUnseenAchievements) ||
                 (t.key === "retours" && hasUnseenFeedback)) &&
                 !isActive && (
-                  <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-background" />
+                  <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-[#ea580c] ring-2 ring-background" />
                 )}
             </button>
           );
