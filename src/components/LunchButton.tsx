@@ -22,11 +22,9 @@ const LunchButton = ({ restaurantId, className }: Props) => {
   // basculer son midi, elle ne peut pas être la porte dérobée.
   const { confirmLateChange, lateLunchDialog } = useLateLunchConfirm();
   const active = myRestaurantId === restaurantId;
-  // Week-end : personne ne déjeune au bureau, on cesse d'y inviter. Le bouton
-  // reste cliquable (se déclarer un samedi n'est pas interdit, cf. isWeekend),
-  // il s'éteint simplement et passe aux couverts croisés — même signal que
-  // l'encart de la page du midi. Un choix déjà posé ici garde son bouton
-  // allumé, sinon on ne pourrait plus l'annuler franchement.
+  // Week-end : personne ne déjeune au bureau, le bouton est bloqué (couverts
+  // croisés, même signal que l'encart de la page du midi). Un choix déjà posé
+  // ici garde son bouton actif, sinon on ne pourrait plus l'annuler.
   const weekendOff = !active && isWeekend();
 
   const apply = async () => {
@@ -56,13 +54,13 @@ const LunchButton = ({ restaurantId, className }: Props) => {
       <button
         type="button"
         onClick={onClick}
-        disabled={saving}
+        disabled={saving || weekendOff}
         aria-pressed={active}
         aria-label={
           active
             ? "J'y déjeune"
             : weekendOff
-              ? "Je déjeune ici (c'est le week-end)"
+              ? "Je déjeune ici (indisponible le week-end)"
               : "Je déjeune ici"
         }
         className={cn(
@@ -71,7 +69,7 @@ const LunchButton = ({ restaurantId, className }: Props) => {
             ? // Bordure transparente : même hauteur qu'inactif, rien ne bouge.
               "border border-transparent bg-primary text-primary-foreground shadow-md hover:bg-primary/90"
             : weekendOff
-              ? "border border-border bg-muted/40 text-foreground/45 hover:bg-muted hover:text-foreground/70"
+              ? "cursor-not-allowed border border-border bg-muted/40 text-foreground/45 disabled:opacity-100"
               : "border border-border bg-card text-foreground hover:bg-muted",
           className
         )}
