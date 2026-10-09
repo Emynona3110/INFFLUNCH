@@ -56,12 +56,9 @@ const AdminIllustrations = () => {
                   />
                 </span>
                 <span className="mt-auto block border-t border-border bg-muted/40 px-2 py-1">
+                  {/* Titre seul ; fichier, id et « secret » dans la popup. */}
                   <span className="block truncate text-xs font-semibold text-card-foreground">
                     {a.title}
-                  </span>
-                  <span className="block truncate text-[10px] text-foreground/50">
-                    {fileOf(a)} · {a.id}
-                    {a.secret && " · secret"}
                   </span>
                 </span>
               </button>

@@ -66,10 +66,10 @@ dans le code. Renommer un succès = renommer son id, son fichier, et ajouter un
 | `pokeball` | Dégustez-les tous | `pokeball.svg` |
 | `new_vegas` | Faites vos jeux | `new_vegas.svg` |
 | `matrix` | Choix cornélien | `matrix.svg` |
-| `magritte` | Dé pipé | `magritte.svg` |
+| `magritte` | Dé pipé | `king_dice.svg` |
 | `jacquouille` | Jour ! Nuit ! Jour ! Nuit ! | `jacquouille.svg` |
 | `johnny_bravo` | Man, I'm pretty! | `johnny_bravo.svg` |
-| `shooting_stars` | Étoiles filantes | `shooting_stars.svg` |
+| `shooting_stars` | Étoiles filantes | `luma.svg` |
 | `cookie_clicker` | Cookie Clicker | `cookie_clicker.svg` |
 | `michael_scott` | Fidèle au poste | `michael_scott.svg` |
 | `johnny_hallyday` | Tout feu tout flamme | `johnny_hallyday.svg` |

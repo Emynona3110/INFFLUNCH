@@ -240,7 +240,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     id: "roulette_one_restaurant",
     title: "Dé pipé",
     icon: "🎲",
-    image: "/achievements/magritte.svg",
+    image: "/achievements/king_dice.svg",
     secret: true,
   },
 
@@ -304,7 +304,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     id: "star_cursor",
     title: "Étoiles filantes",
     icon: "🌠",
-    image: "/achievements/shooting_stars.svg",
+    image: "/achievements/luma.svg",
     secret: true,
   },
 
