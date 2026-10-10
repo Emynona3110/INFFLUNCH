@@ -26,8 +26,11 @@ export interface RestaurantSuggestion {
   handled_at: string | null;
   /** Dernière correction par l'auteur (en attente seulement), null sinon. */
   updated_at: string | null;
-  /** L'auteur l'a retirée de sa liste après décision ; l'admin la garde. */
+  /** L'auteur l'a retirée de sa liste ; l'admin la garde (« Annulée » si elle
+   *  attendait encore). */
   cancelled_at: string | null;
+  /** L'admin l'a retirée de sa table ; l'auteur la garde. */
+  deleted_at: string | null;
   /** Email de l'auteur (jointure manuelle) : vue admin seulement. */
   email?: string | null;
   /** Slug de la fiche créée, pour y mener depuis la liste. */
@@ -39,6 +42,14 @@ export type SuggestionDraft = Pick<
   "name" | "address" | "phone" | "website" | "tags" | "comment" | "lat" | "lng"
 >;
 
+/** Attendait encore quand son auteur l'a retirée : rien à trancher. */
+export const isCancelledPending = (s: RestaurantSuggestion) =>
+  s.status === "nouveau" && !!s.cancelled_at;
+
+/** La balle est chez l'admin : en attente, et pas retirée par son auteur. */
+export const suggestionAwaitingAdmin = (s: RestaurantSuggestion) =>
+  s.status === "nouveau" && !s.cancelled_at;
+
 export const SUGGESTION_STATUSES: Record<
   SuggestionStatus,
   { label: string; chip: string }
@@ -48,11 +59,11 @@ export const SUGGESTION_STATUSES: Record<
     chip: "bg-amber-500/12 text-amber-600 dark:text-amber-400",
   },
   accepte: {
-    label: "Ajouté",
+    label: "Terminée",
     chip: "bg-emerald-500/12 text-emerald-600 dark:text-emerald-400",
   },
   refuse: {
-    label: "Refusé",
+    label: "Refusée",
     chip: "bg-rose-500/12 text-rose-600 dark:text-rose-400",
   },
 };
@@ -79,14 +90,15 @@ const useRestaurantSuggestions = (
       let request = supabaseClient
         .from("restaurant_suggestions")
         .select(
-          "id, name, address, phone, website, tags, comment, lat, lng, status, admin_reply, restaurant_id, author_id, created_at, handled_at, updated_at, cancelled_at, restaurants(slug)",
+          "id, name, address, phone, website, tags, comment, lat, lng, status, admin_reply, restaurant_id, author_id, created_at, handled_at, updated_at, cancelled_at, deleted_at, restaurants(slug)",
         )
         .order("created_at", { ascending: false });
-      // L'auteur ne revoit pas ce qu'il a retiré ; l'admin, si.
-      if (scope === "mine")
-        request = request
-          .eq("author_id", userId as string)
-          .is("cancelled_at", null);
+      // Suppressions indépendantes : l'auteur ne revoit pas ce qu'il a retiré
+      // (l'admin, si) ; l'admin ne revoit pas ce qu'il a supprimé (l'auteur, si).
+      request =
+        scope === "mine"
+          ? request.eq("author_id", userId as string).is("cancelled_at", null)
+          : request.is("deleted_at", null);
 
       const { data, error } = await request;
       if (error) throw new Error(error.message);
@@ -138,21 +150,16 @@ const useRestaurantSuggestions = (
   });
 
   /**
-   * Auteur, « Supprimer » — mêmes règles que les demandes : effacée pour de
-   * bon tant qu'elle attend, simplement retirée de sa liste une fois tranchée
-   * (l'admin la garde, la fiche créée vit sa vie). Renvoie `true` si effacée.
+   * Auteur, « Supprimer » : la proposition sort de SA liste seulement
+   * (`cancelled_at`) — l'admin la garde, « Annulée » si elle attendait encore.
    */
   const cancel = useMutation({
     mutationFn: async (item: RestaurantSuggestion) => {
-      const erase = item.status === "nouveau";
-      const { error } = erase
-        ? await supabaseClient.from("restaurant_suggestions").delete().eq("id", item.id)
-        : await supabaseClient
-            .from("restaurant_suggestions")
-            .update({ cancelled_at: new Date().toISOString() })
-            .eq("id", item.id);
+      const { error } = await supabaseClient
+        .from("restaurant_suggestions")
+        .update({ cancelled_at: new Date().toISOString() })
+        .eq("id", item.id);
       if (error) throw new Error(error.message);
-      return erase;
     },
     onSuccess: invalidate,
   });
@@ -183,13 +190,13 @@ const useRestaurantSuggestions = (
     onSuccess: invalidate,
   });
 
-  /** Admin : supprimer la ligne pour de bon (proposition déjà tranchée ; la
-   *  fiche créée, elle, reste). */
+  /** Admin, « Supprimer » : la proposition sort de SA table seulement
+   *  (`deleted_at`) — l'auteur la garde, la fiche créée aussi. */
   const remove = useMutation({
     mutationFn: async (id: number) => {
       const { error } = await supabaseClient
         .from("restaurant_suggestions")
-        .delete()
+        .update({ deleted_at: new Date().toISOString() })
         .eq("id", id);
       if (error) throw new Error(error.message);
     },

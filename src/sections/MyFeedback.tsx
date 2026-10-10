@@ -102,15 +102,15 @@ const MyFeedback = () => {
     markSeen();
   }, [markSeen]);
 
-  /** « Supprimer » : effacée pour de bon tant que personne n'y a répondu,
-   *  simplement retirée de ma liste une fois traitée. Ce qui a été porté au
-   *  carnet de backlog y reste dans tous les cas — c'est l'admin qui le gère. */
+  /** « Supprimer » : la demande sort de MA liste seulement — l'admin la garde
+   *  (suppressions indépendantes de chaque côté). Ce qui a été porté au carnet
+   *  de backlog y reste — c'est l'admin qui le gère. */
   const destroy = async (item: Feedback) => {
     try {
-      const erased = await cancel.mutateAsync(item);
+      await cancel.mutateAsync(item);
       setViewing(null);
       toast({
-        title: erased ? "Demande supprimée" : "Demande retirée",
+        title: "Demande supprimée",
         status: "success",
         duration: 2500,
       });

@@ -276,26 +276,17 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
    *     et ni le travail engagé ni l'historique ne s'évaporent avec elle.
    * La RLS applique exactement la même règle.
    */
+  // Suppressions indépendantes (règle du user, 2026-10-10) : supprimer côté
+  // auteur ne supprime pas côté admin, même une demande en attente jamais
+  // lue — elle sort de la liste de l'auteur (`cancelled_at`), l'admin la voit
+  // « Annulée » et la supprime de son côté s'il veut.
   const cancel = useMutation({
     mutationFn: async (item: Feedback) => {
-      const untouched =
-        item.status === "nouveau" &&
-        !item.note_id &&
-        item.edits === 0 &&
-        item.messages.length === 0;
-      const { error } = untouched
-        ? await supabaseClient.from("feedback").delete().eq("id", item.id)
-        : await supabaseClient
-            .from("feedback")
-            .update({ cancelled_at: new Date().toISOString() })
-            .eq("id", item.id);
+      const { error } = await supabaseClient
+        .from("feedback")
+        .update({ cancelled_at: new Date().toISOString() })
+        .eq("id", item.id);
       if (error) throw new Error(error.message);
-      // Effacée pour de bon → ses images aussi (première version : aucune
-      // révision ne les référence).
-      if (untouched) {
-        await removeFromBucket(item.images, FEEDBACK_BUCKET).catch(() => {});
-      }
-      return untouched;
     },
     onSuccess: invalidate,
   });

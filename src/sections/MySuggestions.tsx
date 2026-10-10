@@ -38,9 +38,8 @@ const frozen = (s: RestaurantSuggestion) => s.status !== "nouveau";
 /**
  * « Mes ajouts » : les restos que j'ai proposés et ce que l'admin en a fait,
  * en tuiles comme « Mes demandes ». Un clic ouvre la lecture ; de là, on
- * corrige tant que la proposition attend, et on la supprime (effacée en
- * attente, retirée de la liste une fois tranchée). L'envoi se fait depuis la
- * toque de la navbar.
+ * corrige tant que la proposition attend, et on la supprime — de SA liste
+ * seulement : l'admin la garde. L'envoi se fait depuis la toque de la navbar.
  */
 const MySuggestions = () => {
   const { data: fetched = [], isPending, cancel } = useRestaurantSuggestions("mine");
@@ -81,10 +80,10 @@ const MySuggestions = () => {
 
   const destroy = async (s: RestaurantSuggestion) => {
     try {
-      const erased = await cancel.mutateAsync(s);
+      await cancel.mutateAsync(s);
       setViewing(null);
       toast({
-        title: erased ? "Proposition supprimée" : "Proposition retirée",
+        title: "Proposition supprimée",
         status: "success",
         duration: 2500,
       });
