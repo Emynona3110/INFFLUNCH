@@ -106,7 +106,7 @@ export const COWABUNGA_TABLE = 4;
 
 /** En dessous de ce pourcentage d'obtention, un succès est rare : son icône
  *  porte une aura dorée (classe `rare-aura`) chez ceux qui l'ont. */
-export const RARE_PERCENT = 10;
+export const RARE_PERCENT = 20;
 
 const ALL_ACHIEVEMENTS: Achievement[] = [
   // — Avis —
@@ -131,6 +131,32 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     condition: "Publier 15 avis",
     icon: "🍜",
     image: "/achievements/naruto.svg",
+  },
+
+  // — Midis déclarés —
+  {
+    // Albert Einstein qui lèche une glace.
+    id: "lunches_1",
+    title: "Pour la science",
+    condition: "Déclarer un premier midi",
+    icon: "🍦",
+    image: "/achievements/einstein.svg",
+  },
+  {
+    // Kirby qui aspire un burger.
+    id: "lunches_5",
+    title: "Ventre sur pattes",
+    condition: "Déclarer 5 midis",
+    icon: "🍔",
+    image: "/achievements/kirby.svg",
+  },
+  {
+    // Garfield et sa lasagne.
+    id: "lunches_15",
+    title: "Gratiné",
+    condition: "Déclarer 15 midis",
+    icon: "🐈",
+    image: "/achievements/garfield.svg",
   },
 
   // — Photos —
@@ -261,30 +287,6 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     condition: `Déclarer son midi ${FLAMBE_STREAK} jours ouvrés d'affilée`,
     icon: "🔥",
     image: "/achievements/ace.svg",
-  },
-  {
-    // Albert Einstein qui lèche une glace.
-    id: "lunches_1",
-    title: "Pour la science",
-    condition: "Déclarer un premier midi",
-    icon: "🍦",
-    image: "/achievements/einstein.svg",
-  },
-  {
-    // Kirby qui aspire un burger.
-    id: "lunches_5",
-    title: "Ventre sur pattes",
-    condition: "Déclarer 5 midis",
-    icon: "🍔",
-    image: "/achievements/kirby.svg",
-  },
-  {
-    // Garfield et sa lasagne.
-    id: "lunches_15",
-    title: "Gratiné",
-    condition: "Déclarer 15 midis",
-    icon: "🐈",
-    image: "/achievements/garfield.svg",
   },
   {
     id: "lunch_early",
