@@ -115,13 +115,13 @@ const RestaurantRow = ({
         <div className="mt-0.5 flex min-h-6 flex-wrap items-center gap-2 text-sm text-foreground/60">
           <Stars rating={restaurant.rating ?? 0} />
           {restaurant.reviews > 0 && (
-            <span className="flex items-center gap-1.5 whitespace-nowrap text-xs sm:gap-2 sm:text-sm">
+            // Mobile : les étoiles suffisent, ni note chiffrée ni nombre d'avis.
+            <span className="hidden items-center gap-2 whitespace-nowrap text-sm sm:flex">
               <span className="font-semibold text-foreground/80">
                 {restaurant.rating}
               </span>
-              {/* Mobile : note seule, sans le nombre d'avis. */}
-              <span className="hidden text-foreground/20 sm:inline">|</span>
-              <span className="hidden sm:inline">{restaurant.reviews} avis</span>
+              <span className="text-foreground/20">|</span>
+              <span>{restaurant.reviews} avis</span>
             </span>
           )}
           {/* Prix du midi : à la suite de la note sur mobile — sur desktop il
@@ -129,7 +129,8 @@ const RestaurantRow = ({
               la note : la pastille héritait du `text-sm` de la ligne, et les
               deux points de plus suffisaient, sur un écran étroit, à la faire
               passer seule à la ligne suivante. */}
-          <PriceTag restaurant={restaurant} className="text-xs sm:hidden" />
+          {/* Mobile : sans contour (border-0 px-0), simple texte. */}
+          <PriceTag restaurant={restaurant} className="border-0 px-0 text-xs sm:hidden" />
         </div>
 
         {tags.length > 0 && (
