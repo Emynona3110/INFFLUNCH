@@ -1,13 +1,15 @@
 import useAccessRequests from "./useAccessRequests";
 import useFeedback, { awaitingAdmin } from "./useFeedback";
 import useIsAdmin from "./useIsAdmin";
-import useRestaurantSuggestions from "./useRestaurantSuggestions";
+import useRestaurantSuggestions, {
+  suggestionAwaitingAdmin,
+} from "./useRestaurantSuggestions";
 
 /**
  * Ce qui attend l'admin, toutes catégories confondues : demandes d'accès non
- * traitées (onglets Inscriptions / Mot de passe) et demandes des collaborateurs
+ * traitées (onglet Accès) et demandes des collaborateurs
  * qui attendent l'admin — pas classées, ou dernier mot à l'auteur (onglet
- * Demandes), et propositions de restos à trancher (onglet Restos).
+ * Demandes, avec les propositions de restos à trancher).
  *
  * Sert la puce de l'onglet « Admin » dans la navbar : elle doit s'allumer dès
  * qu'un sous-onglet allume la sienne. À compléter ici si un futur sous-onglet
@@ -23,8 +25,8 @@ const useAdminPending = () => {
 
   const access = requests.filter((r) => r.state === "Waiting").length;
   const newFeedback = feedback.filter(awaitingAdmin).length;
-  // Propositions de restos pas encore tranchées (onglet Restos).
-  const newSuggestions = suggestions.filter((s) => s.status === "nouveau").length;
+  // Propositions de restos pas encore tranchées (aussi dans Demandes).
+  const newSuggestions = suggestions.filter(suggestionAwaitingAdmin).length;
 
   return {
     access,

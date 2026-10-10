@@ -15,6 +15,22 @@ import { cn } from "@/lib/utils";
 import useUserNames from "@/hooks/useUserNames";
 import { sortRows, useTableSort } from "./tableSort";
 import { SortHeader } from "./SortHeader";
+import useRestaurantSuggestions, {
+  RestaurantSuggestion,
+  SUGGESTION_STATUSES,
+  isCancelledPending,
+  suggestionAwaitingAdmin,
+} from "@/hooks/useRestaurantSuggestions";
+import SuggestionAdminDialog from "./SuggestionAdminDialog";
+
+/** Propositions de restos, rangées avec les demandes : leur propre nature
+ *  (pastille jaune-orangé), à côté de bug / amélioration / fonctionnalité. */
+const SUGGESTION_KIND = { label: "Restaurant", dot: "bg-amber-400" };
+
+/** Une ligne de la table : demande sur l'appli ou proposition de resto. */
+type Row =
+  | { kind: "feedback"; key: string; item: Feedback }
+  | { kind: "suggestion"; key: string; s: RestaurantSuggestion };
 
 
 const formatDate = (iso: string) =>
@@ -32,7 +48,9 @@ const pending = (item: Feedback) =>
 /**
  * Boîte de réception des demandes des collaborateurs, tenue comme les autres
  * tables de l'admin : une ligne par demande — un aperçu —, et tout le reste
- * dans la popup : le message, le fil, et les décisions.
+ * dans la popup : le message, le fil, et les décisions. Les propositions de
+ * restos y ont aussi leurs lignes (pastille jaune-orangé) ; un clic ouvre leur
+ * traitement (SuggestionAdminDialog).
  *
  * L'ordre suit la DERNIÈRE VERSION de chaque demande : ce qui vient de bouger
  * se lit en haut, sans avoir à chercher.
@@ -66,6 +84,9 @@ const AdminFeedback = () => {
     remove: removeNote,
   } = useAdminNotes();
   const [viewing, setViewing] = useState<Feedback | null>(null);
+  // Propositions de restos, dans la même table.
+  const { data: suggestions = [] } = useRestaurantSuggestions("admin");
+  const [suggestionFor, setSuggestionFor] = useState<RestaurantSuggestion | null>(null);
   // La popup lit toujours la version courante de la demande (fil compris).
   const viewingLive = viewing
     ? (items.find((f) => f.id === viewing.id) ?? viewing)
@@ -88,15 +109,32 @@ const AdminFeedback = () => {
     "feedback",
     { key: "date", dir: "desc" }
   );
-  const sortedRows = sortRows(rows, sort, (item, key) =>
-    key === "type"
+  const allRows: Row[] = [
+    ...rows.map((item): Row => ({ kind: "feedback", key: `f${item.id}`, item })),
+    ...suggestions.map((s): Row => ({ kind: "suggestion", key: `s${s.id}`, s })),
+  ];
+  const sortedRows = sortRows(allRows, sort, (row, key) => {
+    if (row.kind === "suggestion") {
+      const { s } = row;
+      return key === "type"
+        ? SUGGESTION_KIND.label
+        : key === "date"
+          ? Date.parse(s.updated_at ?? s.created_at)
+          : key === "author"
+            ? nameOf(s.email)
+            : isCancelledPending(s)
+              ? FEEDBACK_CANCELLED.label
+              : SUGGESTION_STATUSES[s.status].label;
+    }
+    const { item } = row;
+    return key === "type"
       ? feedbackType(item.type).label
       : key === "date"
         ? Date.parse(lastVersion(item))
         : key === "author"
           ? nameOf(item.email)
-          : feedbackStatus(item.status).label
-  );
+          : feedbackStatus(item.status).label;
+  });
 
   const fail = (e: any) =>
     toast({
@@ -200,7 +238,7 @@ const AdminFeedback = () => {
         </div>
       ) : error ? (
         <p className="text-destructive">Erreur : {error.message}</p>
-      ) : rows.length === 0 ? (
+      ) : allRows.length === 0 ? (
         <p className="text-foreground/60">Aucune demande pour le moment.</p>
       ) : (
         <div className="flex max-h-full flex-col overflow-hidden rounded-card border border-border bg-card">
@@ -243,14 +281,61 @@ const AdminFeedback = () => {
                 </tr>
               </thead>
               <tbody>
-                {sortedRows.map((item) => {
+                {sortedRows.map((row) => {
+                  if (row.kind === "suggestion") {
+                    const { s } = row;
+                    // Retirée par son auteur alors qu'elle attendait :
+                    // « Annulée », comme une demande dans le même cas.
+                    const state = isCancelledPending(s)
+                      ? FEEDBACK_CANCELLED
+                      : SUGGESTION_STATUSES[s.status];
+                    const awaiting = suggestionAwaitingAdmin(s);
+                    return (
+                      // En attente : dialog resto prérempli ; tranchée :
+                      // lecture et suppression.
+                      <tr
+                        key={row.key}
+                        onClick={() => setSuggestionFor(s)}
+                        aria-label={awaiting ? "Créer la fiche" : "Voir la proposition"}
+                        className={cn(
+                          "cursor-pointer transition hover:bg-muted/40 [&>td]:border-t [&>td]:border-border/60",
+                          awaiting && "[&>td]:text-foreground",
+                        )}
+                      >
+                        <td className="w-10 whitespace-nowrap px-2 py-1.5 first:pl-4 last:pr-4">
+                          <span
+                            aria-label={SUGGESTION_KIND.label}
+                            className={cn("mx-auto block h-2.5 w-2.5 rounded-full", SUGGESTION_KIND.dot)}
+                          />
+                          <span className="sr-only">{SUGGESTION_KIND.label}</span>
+                        </td>
+                        <td className="whitespace-nowrap px-2 py-1.5 first:pl-4 last:pr-4 text-foreground/70">
+                          {formatDate(s.updated_at ?? s.created_at)}
+                        </td>
+                        <td className="whitespace-nowrap px-2 py-1.5 first:pl-4 last:pr-4 text-foreground/70">
+                          {s.email ? nameOf(s.email) : "—"}
+                        </td>
+                        <td className="whitespace-nowrap px-2 py-1.5 first:pl-4 last:pr-4">
+                          <span
+                            className={cn(
+                              "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium",
+                              state.chip,
+                            )}
+                          >
+                            {state.label}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  }
+                  const { item } = row;
                   const status = feedbackStatus(item.status);
                   const cancelled = !!item.cancelled_at && pending(item);
                   return (
                     // Le message ne tient pas dans une colonne : toute la ligne
                     // ouvre la lecture.
                     <tr
-                      key={item.id}
+                      key={row.key}
                       onClick={() => setViewing(item)}
                       aria-label="Voir la demande"
                       className={cn(
@@ -324,6 +409,9 @@ const AdminFeedback = () => {
           Supprimer (appui long) : la demande quitte la boîte de réception ;
           l'auteur garde sa tuile, grisée « Supprimée ». Sa note de backlog
           éventuelle reste dans le carnet. */}
+      {/* Proposition de resto : création de la fiche, refus, ou suppression. */}
+      <SuggestionAdminDialog target={suggestionFor} onClose={() => setSuggestionFor(null)} />
+
       <FeedbackViewDialog
         isOpen={!!viewing}
         onClose={() => setViewing(null)}
@@ -398,10 +486,15 @@ const AdminFeedback = () => {
   );
 };
 
-/** Nombre de demandes qui attendent l'admin : sert la puce de l'onglet Admin. */
+/** Ce qui attend l'admin dans la table Demandes (demandes sur l'appli et
+ *  propositions de restos à trancher) : sert la puce de l'onglet. */
 export const useNewFeedbackCount = () => {
   const { data = [] } = useFeedback("admin");
-  return data.filter(awaitingAdmin).length;
+  const { data: suggestions = [] } = useRestaurantSuggestions("admin");
+  return (
+    data.filter(awaitingAdmin).length +
+    suggestions.filter(suggestionAwaitingAdmin).length
+  );
 };
 
 export default AdminFeedback;
