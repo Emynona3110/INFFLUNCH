@@ -268,7 +268,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     title: "Pour la science",
     condition: "Déclarer un premier midi",
     icon: "🍦",
-    // image: "/achievements/einstein.svg", (illustration à venir : emoji en attendant)
+    image: "/achievements/einstein.svg",
   },
   {
     // Kirby qui aspire un burger.
@@ -276,7 +276,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     title: "Ventre sur pattes",
     condition: "Déclarer 5 midis",
     icon: "🍔",
-    // image: "/achievements/kirby.svg", (illustration à venir : emoji en attendant)
+    image: "/achievements/kirby.svg",
   },
   {
     // Garfield et sa lasagne.
@@ -284,7 +284,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     title: "Gratiné",
     condition: "Déclarer 15 midis",
     icon: "🐈",
-    // image: "/achievements/garfield.svg", (illustration à venir : emoji en attendant)
+    image: "/achievements/garfield.svg",
   },
   {
     id: "lunch_early",
