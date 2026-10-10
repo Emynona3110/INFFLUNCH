@@ -69,7 +69,10 @@ const LunchButton = ({ restaurantId, className }: Props) => {
             ? // Bordure transparente : même hauteur qu'inactif, rien ne bouge.
               "border border-transparent bg-primary text-primary-foreground shadow-md hover:bg-primary/90"
             : weekendOff
-              ? "cursor-not-allowed border border-border bg-muted/40 text-foreground/45 disabled:opacity-100"
+              ? // Couleur opaque, atténuée par l'opacité de l'icône et du
+                // libellé : en couleur translucide, le croisement des couverts
+                // cumule son alpha (intersection plus claire).
+                "cursor-not-allowed border border-border bg-muted/40 text-foreground disabled:opacity-100 [&>*]:opacity-45"
               : "border border-border bg-card text-foreground hover:bg-muted",
           className
         )}

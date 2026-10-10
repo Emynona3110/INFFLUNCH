@@ -50,7 +50,7 @@ const LunchPickDialog = ({
 
       <div className="mt-4">
         <div className="relative">
-          <FiSearch className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/40" />
+          <FiSearch className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground opacity-40" />
           <Input
             autoFocus
             value={search}

@@ -41,7 +41,7 @@ const About = () => {
             <FiMessageSquare className="inline h-4 w-4 align-text-bottom text-primary" />
             {/* Même repère que dans « Mes demandes » : la flèche pointe vers le
                 bouton, en haut à droite de la barre. */}
-            <FiArrowUpRight className="inline h-4 w-4 align-text-bottom text-foreground/40" />
+            <FiArrowUpRight className="inline h-4 w-4 align-text-bottom text-foreground opacity-40" />
           </p>
         </div>
       </Card>

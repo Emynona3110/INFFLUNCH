@@ -97,7 +97,7 @@ const LunchPricePrompt = ({ restaurant, day, onSkip }: Props) => {
           type="button"
           onClick={onSkip}
           aria-label="Ne plus demander pour ce restaurant"
-          className="absolute right-2 top-2 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full text-foreground/40 transition hover:bg-muted hover:text-foreground sm:right-3 sm:top-3"
+          className="absolute right-2 top-2 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full text-foreground transition hover:bg-muted [&>svg]:opacity-40 hover:[&>svg]:opacity-100 sm:right-3 sm:top-3"
         >
           <FiX className="h-4 w-4" />
         </button>

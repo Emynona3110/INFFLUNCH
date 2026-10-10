@@ -1,7 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { FiChevronDown, FiX } from "react-icons/fi";
-import { BsSearch } from "react-icons/bs";
+import { FiChevronDown, FiX, FiSearch } from "react-icons/fi";
 import SearchInput from "./SearchInput";
 import RollingNumber from "./RollingNumber";
 import { addMonths, parisMonthKey } from "@/hooks/useLeaderboard";
@@ -172,7 +171,7 @@ const LeaderboardToolbar = ({
             type="button"
             aria-label="Fermer la recherche"
             onClick={() => setSearchOpen(false)}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-foreground/60"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-foreground [&>svg]:opacity-60"
           >
             <FiX className="h-5 w-5" />
           </button>
@@ -185,9 +184,9 @@ const LeaderboardToolbar = ({
           type="button"
           aria-label="Rechercher"
           onClick={() => setSearchOpen(true)}
-          className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-foreground/60 sm:hidden"
+          className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-foreground sm:hidden [&>svg]:opacity-60"
         >
-          <BsSearch className="h-[18px] w-[18px]" />
+          <FiSearch className="h-[18px] w-[18px]" />
           {search && (
             <span className="absolute right-1.5 top-1.5 h-2.5 w-2.5 rounded-full bg-[#ea580c] ring-2 ring-card" />
           )}

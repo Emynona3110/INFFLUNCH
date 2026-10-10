@@ -131,8 +131,8 @@ taille, et absorbe les clics tant qu'on reste sur ce sous-onglet. */}
             // Sur le GIF (fond noir), la croix passe en clair pour rester
             // visible.
             jourNuit
-              ? "text-white/80 hover:bg-white/15 hover:text-white"
-              : "text-foreground/50 hover:bg-muted hover:text-foreground",
+              ? "text-white hover:bg-white/15 [&>svg]:opacity-80 hover:[&>svg]:opacity-100"
+              : "text-foreground hover:bg-muted [&>svg]:opacity-50 hover:[&>svg]:opacity-100",
           )}
         >
           <FiX className="h-5 w-5" />

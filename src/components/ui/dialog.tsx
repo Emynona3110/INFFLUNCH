@@ -62,7 +62,7 @@ export function Dialog({
             type="button"
             onClick={onClose}
             aria-label="Fermer"
-            className="absolute right-3 top-3 z-10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-foreground/50 transition hover:bg-muted hover:text-foreground sm:right-4 sm:top-4"
+            className="absolute right-3 top-3 z-10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-foreground transition hover:bg-muted [&>svg]:opacity-50 hover:[&>svg]:opacity-100 sm:right-4 sm:top-4"
           >
             <FiX className="h-5 w-5" />
           </button>

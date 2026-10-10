@@ -154,7 +154,7 @@ const MyFeedback = () => {
             Un souci ? Une idée ? Exprime-toi en cliquant sur{" "}
             <FiMessageSquare className="inline h-4 w-4 align-text-bottom text-primary" />
             {/* La flèche dit où le trouver : en haut à droite, dans la barre. */}
-            <FiArrowUpRight className="inline h-4 w-4 align-text-bottom text-foreground/40" />
+            <FiArrowUpRight className="inline h-4 w-4 align-text-bottom text-foreground opacity-40" />
           </p>
         ) : (
           <ul className="m-0 list-none divide-y divide-border p-0 sm:divide-y-0 sm:space-y-2">

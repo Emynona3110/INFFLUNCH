@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BsFilter } from "react-icons/bs";
+import { LuListFilter } from "react-icons/lu";
 import { FaStar, FaRegStar } from "react-icons/fa";
 import SortSelector from "./SortSelector";
 import { defaultRestaurantFilters, RestaurantFilters } from "../pages/UserPage";
@@ -76,11 +76,11 @@ const FilterDialog = ({ restaurantFilters, onFilterChange }: FilterDialogProps) 
         type="button"
         aria-label="Filtres"
         onClick={handleOpen}
-        className="relative flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-foreground/60 transition hover:bg-muted sm:h-10 sm:w-10"
+        className="relative flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-foreground/60 transition hover:bg-muted sm:h-9 sm:w-9"
       >
-        <BsFilter className="h-5 w-5 sm:h-6 sm:w-6" />
+        <LuListFilter className="h-5 w-5" />
         {hasActiveFilters(restaurantFilters) && (
-          <span className="absolute right-1.5 top-1.5 h-2.5 w-2.5 rounded-full bg-[#ea580c] ring-2 ring-card" />
+          <span className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-[#ea580c] ring-2 ring-card" />
         )}
       </button>
 

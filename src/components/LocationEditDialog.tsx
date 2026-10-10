@@ -211,7 +211,7 @@ export default function LocationEditDialog({
                   type="button"
                   aria-label="Ignorer la suggestion"
                   onClick={() => setDetected(null)}
-                  className="flex h-7 w-7 items-center justify-center rounded-full text-foreground/50 transition hover:bg-muted hover:text-foreground"
+                  className="flex h-7 w-7 items-center justify-center rounded-full text-foreground transition hover:bg-muted [&>svg]:opacity-50 hover:[&>svg]:opacity-100"
                 >
                   <FiX className="h-4 w-4" />
                 </button>

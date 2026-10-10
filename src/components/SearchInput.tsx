@@ -1,6 +1,5 @@
 import { FormEvent, useEffect, useState } from "react";
-import { BsSearch } from "react-icons/bs";
-import { FiX } from "react-icons/fi";
+import { FiX, FiSearch } from "react-icons/fi";
 
 interface SearchInputProps {
   /** Recherche courante, conservée au niveau page : la barre est démontée
@@ -49,9 +48,9 @@ const SearchInput = ({
       <button
         type="submit"
         aria-label="Rechercher"
-        className="absolute left-2 top-1/2 flex h-6 w-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full text-foreground/50 transition hover:bg-foreground/10 hover:text-foreground"
+        className="absolute left-2 top-1/2 flex h-6 w-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full text-foreground transition hover:bg-foreground/10 [&>svg]:opacity-50 hover:[&>svg]:opacity-100"
       >
-        <BsSearch className="h-4 w-4" />
+        <FiSearch className="h-4 w-4" />
       </button>
       <input
         type="search"
@@ -66,7 +65,7 @@ const SearchInput = ({
           type="button"
           onClick={clear}
           aria-label="Effacer la recherche"
-          className="absolute right-2.5 top-1/2 flex h-6 w-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full leading-none text-foreground/45 transition hover:bg-foreground/10 hover:text-foreground"
+          className="absolute right-2.5 top-1/2 flex h-6 w-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full leading-none text-foreground transition hover:bg-foreground/10 [&>svg]:opacity-45 hover:[&>svg]:opacity-100"
         >
           <FiX className="block h-4 w-4" />
         </button>
