@@ -1,18 +1,16 @@
-import { useEffect, useRef, useState } from "react";
-import { FiCheck, FiMapPin, FiX, FiSearch } from "react-icons/fi";
+import { useEffect, useState } from "react";
 import { toast } from "@/lib/toast";
 import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
 import TagPicker from "@/components/TagPicker";
-import useTags from "@/hooks/useTags";
 import useRestaurantSuggestions, {
   RestaurantSuggestion,
   SuggestionDraft,
 } from "@/hooks/useRestaurantSuggestions";
 import supabaseClient from "@/services/supabaseClient";
-import { Place, searchPlaces } from "@/services/geocode";
+import { Place } from "@/services/geocode";
+import PlaceSearch, { formatOsmPhone as formatPhone } from "@/components/PlaceSearch";
 import { MAX_TEXT } from "@/services/textLimits";
 import { slugify } from "@/utils/slugify";
 
@@ -24,48 +22,6 @@ interface Props {
   /** Proposition à corriger (en attente) ; absente = nouvelle proposition. */
   item?: RestaurantSuggestion | null;
 }
-
-/**
- * Valeurs OSM (`cuisine`, ou type de commerce) → tags INFFLUNCH candidats. Seuls
- * ceux qui existent réellement en base sont retenus : on ne crée rien ici.
- */
-const OSM_TAGS: Record<string, string[]> = {
-  french: ["Français"],
-  italian: ["Italien"],
-  pizza: ["Pizza", "Italien"],
-  japanese: ["Japonais"],
-  sushi: ["Sushi", "Japonais"],
-  ramen: ["Ramen", "Japonais"],
-  chinese: ["Chinois"],
-  vietnamese: ["Vietnamien"],
-  thai: ["Thaïlandais"],
-  korean: ["Coréen"],
-  indian: ["Indien"],
-  lebanese: ["Libanais"],
-  turkish: ["Turc"],
-  kebab: ["Kebab", "Turc"],
-  greek: ["Grec"],
-  portuguese: ["Portugais"],
-  spanish: ["Espagnol"],
-  mexican: ["Mexicain"],
-  american: ["Américain"],
-  burger: ["Burger"],
-  sandwich: ["Sandwich"],
-  salad: ["Salade"],
-  crepe: ["Crêpe"],
-  bagel: ["Bagel"],
-  poke: ["Poke"],
-  vegetarian: ["Végétarien"],
-  vegan: ["Vegan"],
-  bakery: ["Boulangerie"],
-  pastry: ["Pâtisserie"],
-  supermarket: ["Supermarché"],
-  deli: ["Traiteur"],
-  bistro: ["Bistrot"],
-};
-
-const formatPhone = (value: string) =>
-  value.replace(/\D/g, "").replace(/^33/, "0").slice(0, 10).replace(/(\d{2})(?=\d)/g, "$1 ");
 
 /**
  * « Proposer un resto » : un collaborateur signale un resto qui manque. Une
@@ -82,11 +38,7 @@ const ProposeRestaurantDialog = ({
   item = null,
 }: Props) => {
   const { submit, edit } = useRestaurantSuggestions("mine", false);
-  const { data: availableTags } = useTags();
 
-  const [search, setSearch] = useState("");
-  const [places, setPlaces] = useState<Place[] | null>(null);
-  const [searching, setSearching] = useState(false);
   const [picked, setPicked] = useState<Place | null>(null);
 
   const [name, setName] = useState("");
@@ -97,29 +49,12 @@ const ProposeRestaurantDialog = ({
   const [comment, setComment] = useState("");
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [busy, setBusy] = useState(false);
-  const requestId = useRef(0);
-  const searchRef = useRef<HTMLDivElement>(null);
-  const [listOpen, setListOpen] = useState(true);
-
-  // Clic hors de la recherche : le déroulant se replie.
-  useEffect(() => {
-    if (!listOpen) return;
-    const onPointerDown = (e: PointerEvent) => {
-      if (!searchRef.current?.contains(e.target as Node)) setListOpen(false);
-    };
-    document.addEventListener("pointerdown", onPointerDown);
-    return () => document.removeEventListener("pointerdown", onPointerDown);
-  }, [listOpen]);
-
   // Formulaire vierge à chaque ouverture (la recherche reprenant la saisie
   // restée sans résultat dans la liste), ou rempli avec la proposition à
   // corriger.
   useEffect(() => {
     if (!isOpen) return;
-    setSearch(item ? "" : initialName);
-    setPlaces(null);
     setPicked(null);
-    setListOpen(true);
     setName(item?.name ?? initialName);
     setAddress(item?.address ?? "");
     setPhone(item?.phone ?? "");
@@ -131,52 +66,13 @@ const ProposeRestaurantDialog = ({
     );
   }, [isOpen, initialName, item]);
 
-  // Recherche lancée à la touche Entrée seulement (pas à chaque frappe : on
-  // ménage Nominatim). Une réponse arrivée après une recherche plus récente
-  // est ignorée.
-  const runSearch = async (raw: string) => {
-    const text = raw.trim();
-    if (text.length < 3) return;
-    const id = ++requestId.current;
-    setSearching(true);
-    setListOpen(true);
-    const found = await searchPlaces(text).catch(() => []);
-    if (id !== requestId.current) return;
-    setPlaces(found);
-    setSearching(false);
-  };
-
-  // Ouverture depuis une recherche infructueuse de la liste : on cherche
-  // d'emblée ce nom-là, une seule fois.
-  useEffect(() => {
-    if (isOpen && !item && initialName.trim().length >= 3) runSearch(initialName);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, initialName]);
-
-  /** Tags existants correspondant à la cuisine / au type OSM du lieu. */
-  const tagsFor = (place: Place) => {
-    const known = new Map(
-      (availableTags ?? []).map((t) => [slugify(t.label), t.label]),
-    );
-    const keys = [
-      ...(place.cuisine ?? "").split(/[;,]/).map((c) => c.trim().toLowerCase()),
-      place.type ?? "",
-    ];
-    const labels = keys
-      .flatMap((k) => OSM_TAGS[k] ?? [])
-      .map((l) => known.get(slugify(l)))
-      .filter((l): l is string => !!l);
-    return [...new Set(labels)].sort();
-  };
-
-  const pick = (place: Place) => {
+  const pick = (place: Place, placeTags: string[]) => {
     setPicked(place);
-    setPlaces(null);
     setName(place.name);
     setAddress(place.address);
     setPhone(place.phone ? formatPhone(place.phone) : "");
     setWebsite(place.website ?? "");
-    setTags(tagsFor(place));
+    setTags(placeTags);
     setCoords({ lat: place.lat, lng: place.lng });
   };
 
@@ -274,93 +170,14 @@ const ProposeRestaurantDialog = ({
 
       <div className="mt-4 space-y-4 sm:mt-5">
         {/* Recherche OSM : un clic remplit le formulaire. */}
-        {picked ? (
-          <div className="flex h-10 items-center gap-2 rounded-lg border border-primary/40 bg-primary/5 pl-3 pr-1.5 text-sm">
-            <FiCheck className="h-4 w-4 shrink-0 text-primary" />
-            <span className="min-w-0 flex-1 truncate">
-              <span className="font-medium">{picked.name}</span>
-              {picked.address && (
-                <span className="text-foreground/60"> · {picked.address}</span>
-              )}
-            </span>
-            <button
-              type="button"
-              onClick={unpick}
-              aria-label="Choisir un autre lieu"
-              className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full text-foreground transition hover:bg-muted [&>svg]:opacity-60"
-            >
-              <FiX className="h-4 w-4" />
-            </button>
-          </div>
-        ) : (
-          // Le déroulant s'affiche PAR-DESSUS le formulaire ; un clic ailleurs
-          // ou Échap le ferme, revenir dans le champ le rouvre.
-          <div ref={searchRef} className="relative">
-            <div className="relative">
-              <FiSearch className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground opacity-45" />
-              <Input
-                autoFocus
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  // Les résultats affichés ne correspondent plus à la saisie.
-                  requestId.current++;
-                  setPlaces(null);
-                  setSearching(false);
-                }}
-                onFocus={() => setListOpen(true)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    runSearch(search);
-                  } else if (e.key === "Escape" && listOpen && places) {
-                    // Ferme le déroulant, pas la fenêtre.
-                    e.stopPropagation();
-                    setListOpen(false);
-                  }
-                }}
-                placeholder="Rechercher le resto dans le quartier (Entrée)"
-                className="pl-9 pr-9"
-              />
-              {searching && (
-                <span className="absolute inset-y-0 right-3 flex items-center text-foreground/45">
-                  <Spinner />
-                </span>
-              )}
-            </div>
-            {listOpen && places && !searching && (
-              <div className="absolute inset-x-0 top-full z-20 mt-1 max-h-56 overflow-y-auto rounded-lg border border-border bg-card shadow-lg">
-                {places.length > 0 ? (
-                  <ul className="m-0 list-none p-0">
-                    {places.map((p) => (
-                      <li key={`${p.lat},${p.lng},${p.name}`}>
-                        <button
-                          type="button"
-                          onClick={() => pick(p)}
-                          className="flex w-full cursor-pointer items-start gap-2 px-3 py-2 text-left text-sm transition hover:bg-muted"
-                        >
-                          <FiMapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                          <span className="min-w-0">
-                            <span className="block truncate font-medium">{p.name}</span>
-                            {p.address && (
-                              <span className="block truncate text-xs text-foreground/55">
-                                {p.address}
-                              </span>
-                            )}
-                          </span>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="m-0 px-3 py-2.5 text-sm text-foreground/55">
-                    Rien trouvé dans le quartier : remplis les champs ci-dessous.
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-        )}
+        <PlaceSearch
+          picked={picked}
+          onPick={pick}
+          onClear={unpick}
+          resetKey={`${isOpen}-${item?.id ?? ""}-${initialName}`}
+          initialQuery={item ? "" : initialName}
+          autoFocus
+        />
 
         <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2">
           <label className="flex flex-col gap-1.5">

@@ -30,6 +30,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import TagPicker from "@/components/TagPicker";
+import PlaceSearch, { formatOsmPhone } from "@/components/PlaceSearch";
+import { Place } from "../../services/geocode";
 import {
   DEFAULT_TAG_CATEGORY,
   TAG_CATEGORIES,
@@ -87,6 +89,9 @@ const RestaurantDialog = ({
   // elle passe en noir et blanc, en fin de liste, et n'est plus choisissable
   // pour le midi. Indépendant du verrou de contributions juste en dessous.
   const [closed, setClosed] = useState(false);
+  // Lieu choisi dans la recherche OSM (création seulement) : sa position est
+  // reprise tant que l'adresse n'est pas retouchée.
+  const [picked, setPicked] = useState<Place | null>(null);
   const [contributionsEnabled, setContributionsEnabled] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [creatingTag, setCreatingTag] = useState(false);
@@ -155,6 +160,7 @@ const RestaurantDialog = ({
   };
 
   useEffect(() => {
+    setPicked(null);
     if (isOpen && initialData) {
       setName(initialData.name || "");
       setImage(initialData.image || "");
@@ -385,13 +391,16 @@ const RestaurantDialog = ({
 
     // Création préremplie avec une position (lieu choisi dans OSM par le
     // collaborateur) : plus juste que le géocodage de l'adresse.
+    // Même chose pour un lieu choisi dans la recherche OSM.
     const presetCoords =
-      !initialData?.id &&
-      initialData?.lat != null &&
-      initialData?.lng != null &&
-      sameAddress(address, initialData.address)
-        ? { lat: initialData.lat, lng: initialData.lng }
-        : null;
+      picked && sameAddress(address, picked.address)
+        ? { lat: picked.lat, lng: picked.lng }
+        : !initialData?.id &&
+            initialData?.lat != null &&
+            initialData?.lng != null &&
+            sameAddress(address, initialData.address)
+          ? { lat: initialData.lat, lng: initialData.lng }
+          : null;
 
     if (!keepLocation) {
       try {
@@ -595,6 +604,31 @@ const RestaurantDialog = ({
       {intro}
 
       <div className="mt-4 space-y-4 sm:mt-5 sm:space-y-6">
+        {/* Création : recherche OSM, un clic remplit nom, adresse, tél, site,
+            tags (même recherche que la proposition d'un collaborateur). */}
+        {!initialData?.id && (
+          <PlaceSearch
+            picked={picked}
+            resetKey={isOpen ? initialData : null}
+            onPick={(place, placeTags) => {
+              setPicked(place);
+              setName(formatName(place.name));
+              setAddress(place.address);
+              if (place.phone) setPhone(formatPhoneNumber(formatOsmPhone(place.phone)));
+              if (place.website) setWebsite(place.website);
+              setTags((prev) => [...new Set([...prev, ...placeTags])].sort());
+            }}
+            // Retirer le lieu vide ce qu'il avait rempli.
+            onClear={() => {
+              setPicked(null);
+              setName("");
+              setAddress("");
+              setPhone("");
+              setWebsite("");
+              setTags([]);
+            }}
+          />
+        )}
         <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2">
           <label className="flex flex-col gap-1.5">
             <span className="text-sm font-medium text-foreground">Nom</span>
