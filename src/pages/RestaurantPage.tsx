@@ -138,7 +138,7 @@ const RestaurantPage = () => {
     // Slug inexistant (pas d'erreur, juste aucun résultat) : easter egg 🐑.
     if (!error) return <Beeeh />;
     return (
-      <div className="tw-scope mx-auto max-w-[1100px] py-16 text-center">
+      <div className="tw-scope mx-auto w-full max-w-[1100px] py-16 text-center">
         <p className="text-foreground/70">{`Erreur : ${error}`}</p>
         <button
           type="button"
@@ -197,7 +197,7 @@ const RestaurantPage = () => {
 
   return (
     <div
-      className="tw-scope mx-auto max-w-[1100px] pb-4"
+      className="tw-scope mx-auto w-full max-w-[1100px] pb-4"
     >
       {/* Retour là d'où l'on vient : une tablée du midi, un avis, la grille… */}
       <BackLink
