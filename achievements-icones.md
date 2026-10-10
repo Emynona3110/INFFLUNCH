@@ -52,13 +52,16 @@ dans le code. Renommer un succès = renommer son id, son fichier, et ajouter un
 | `seigneur_des_anneaux` | Le Seigneur des agneaux | `seigneur_des_anneaux.svg` |
 | `ratatouille` | La main à la pâte | `ratatouille.svg` |
 | `death_note` | Rayer de la carte | `death_note.svg` |
-| `naruto` | Ramen ta science | `naruto.svg` |
+| `naruto` | Ramen ta fraise | `naruto.svg` |
 | `duck_face` | Selfood | `duck_face.svg` |
 | `salt_bae` | Grain de sel | `salt_bae.svg` |
 | `louvre` | La cerise sur le gâteau | `louvre.svg` |
 | `take_my_money` | Gardez la monnaie | `take_my_money.svg` |
 | `stonks` | Beurre dans les épinards | `stonks.svg` |
 | `prices_15` | Pièce montée | `picsou.svg` |
+| `lunches_1` | Pour la science | `einstein.svg` |
+| `lunches_5` | Ventre sur pattes | `kirby.svg` |
+| `lunches_15` | Gratiné | `garfield.svg` |
 | `brent_rambo` | Coup de pouce | `brent_rambo.svg` |
 | `absolute_cinema` | Du grand art | `absolute_cinema.svg` |
 | `jules_cesar` | Veni, vidi, amavi | `jules_cesar.svg` |

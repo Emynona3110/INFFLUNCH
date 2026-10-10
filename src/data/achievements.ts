@@ -57,6 +57,9 @@ export type AchievementId =
   // Méta / assiduité
   | "login_streak_5"
   | "lunch_streak_5"
+  | "lunches_1"
+  | "lunches_5"
+  | "lunches_15"
   | "lunch_early"
   | "lunch_late"
   | "lunch_table_4"
@@ -124,7 +127,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: "reviews_15",
-    title: "Ramen ta science",
+    title: "Ramen ta fraise",
     condition: "Publier 15 avis",
     icon: "🍜",
     image: "/achievements/naruto.svg",
@@ -260,6 +263,30 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     image: "/achievements/ace.svg",
   },
   {
+    // Albert Einstein qui lèche une glace.
+    id: "lunches_1",
+    title: "Pour la science",
+    condition: "Déclarer un premier midi",
+    icon: "🍦",
+    // image: "/achievements/einstein.svg", (illustration à venir : emoji en attendant)
+  },
+  {
+    // Kirby qui aspire un burger.
+    id: "lunches_5",
+    title: "Ventre sur pattes",
+    condition: "Déclarer 5 midis",
+    icon: "🍔",
+    // image: "/achievements/kirby.svg", (illustration à venir : emoji en attendant)
+  },
+  {
+    // Garfield et sa lasagne.
+    id: "lunches_15",
+    title: "Gratiné",
+    condition: "Déclarer 15 midis",
+    icon: "🐈",
+    // image: "/achievements/garfield.svg", (illustration à venir : emoji en attendant)
+  },
+  {
     id: "lunch_early",
     title: "Premier arrivé, premier servi",
     icon: "⚡",
@@ -387,6 +414,9 @@ export const ACHIEVEMENT_GOALS: Partial<
   favorites_6: { metric: "favorites", goal: 6 }, // une équipe Pokémon
   login_streak_5: { metric: "loginStreak", goal: 5 },
   lunch_streak_5: { metric: "lunchStreak", goal: FLAMBE_STREAK },
+  lunches_1: { metric: "lunches", goal: 1 },
+  lunches_5: { metric: "lunches", goal: 5 },
+  lunches_15: { metric: "lunches", goal: 15 },
 };
 
 /**

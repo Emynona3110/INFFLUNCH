@@ -18,6 +18,9 @@ export interface AchievementMetrics {
   loginStreak: number;
   /** Jours ouvrés consécutifs avec un midi déclaré (rpc lunch_streak). */
   lunchStreak: number;
+  /** Midis déclarés en semaine, au resto ou non : le même compte que
+   *  `lunches_count` du profil public. */
+  lunches: number;
 }
 
 /**
@@ -91,6 +94,16 @@ const useAchievementMetrics = () => {
         reactionsReceived = count ?? 0;
       }
 
+      // Midis déclarés : comme le profil public, les week-ends ne comptent pas.
+      const { data: lunchDays } = await supabaseClient
+        .from("lunch_plans")
+        .select("day")
+        .eq("user_id", userId);
+      const lunches = (lunchDays ?? []).filter((l) => {
+        const dow = new Date(`${l.day as string}T12:00:00Z`).getUTCDay();
+        return dow !== 0 && dow !== 6;
+      }).length;
+
       // Streak de connexion : enregistre le jour courant et renvoie le streak.
       const { data: streak } = await supabaseClient.rpc("touch_login");
       // Série de midis déclarés (« Qui déjeune où »), jours ouvrés seulement.
@@ -108,6 +121,7 @@ const useAchievementMetrics = () => {
         reactionsReceived,
         loginStreak: (streak as number | null) ?? 0,
         lunchStreak: (lunchStreak as number | null) ?? 0,
+        lunches,
       };
     },
   });
