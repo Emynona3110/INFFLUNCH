@@ -13,7 +13,8 @@ import RestaurantRow from "@/components/RestaurantRow";
 import RestaurantsMap from "@/components/RestaurantsMap";
 import RestaurantRoulette from "@/components/RestaurantRoulette";
 import RestaurantDialog from "@/admin/Dialogs/RestaurantDialog";
-import { FiChevronDown } from "react-icons/fi";
+import ChefHatPlus from "@/components/icons/ChefHatPlus";
+import { FiArrowUpRight, FiChevronDown } from "react-icons/fi";
 
 interface RestaurantGridProps {
   restaurantFilters: RestaurantFilters;
@@ -158,10 +159,10 @@ const RestaurantGrid = ({
   // Le message « aucun favori » ne vaut que si la liste de favoris est vraiment
   // vide : avec des favoris et une recherche qui ne donne rien, c'est bien la
   // recherche (ou les filtres) qui n'aboutit pas.
-  const emptyMessage =
-    restaurantFilters.favoritesOnly && favoriteIds.length === 0
-      ? "Aucun restaurant ne fait partie de vos favoris."
-      : "Aucun restaurant ne correspond à votre recherche.";
+  const noFavorites = !!restaurantFilters.favoritesOnly && favoriteIds.length === 0;
+  const emptyMessage = noFavorites
+    ? "Aucun restaurant ne fait partie de vos favoris."
+    : "Aucun restaurant ne correspond à votre recherche.";
 
   const renderContent = () => {
     if (error) {
@@ -171,7 +172,19 @@ const RestaurantGrid = ({
     }
     if (!isLoading && filteredData.length === 0) {
       return (
-        <p className="py-10 text-center text-foreground/70">{emptyMessage}</p>
+        <div className="flex flex-col items-center gap-3 py-10 text-center">
+          <p className="m-0 text-foreground/70">{emptyMessage}</p>
+          {/* Recherche infructueuse : on montre où ajouter le resto, comme
+              « Mes demandes » montre la bulle de la navbar. */}
+          {!noFavorites && (
+            <p className="m-0 text-sm text-foreground/55">
+              {isAdmin ? "Ajoute-le" : "Pas trouvé ? Propose-le"} en cliquant sur{" "}
+              <ChefHatPlus className="inline h-4 w-4 align-text-bottom text-primary" />
+              {/* La flèche dit où le trouver : en haut à droite, dans la barre. */}
+              <FiArrowUpRight className="inline h-4 w-4 align-text-bottom text-foreground opacity-40" />
+            </p>
+          )}
+        </div>
       );
     }
 

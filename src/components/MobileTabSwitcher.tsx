@@ -14,6 +14,9 @@ interface Props<K extends string> {
   active: K;
   onChange: (key: K) => void;
   className?: string;
+  /** Garder la pastille sur l'onglet ouvert : elle signale une action à faire
+   *  (Admin), pas une nouveauté qu'ouvrir l'onglet suffit à acquitter. */
+  keepActiveDot?: boolean;
 }
 
 /**
@@ -26,6 +29,7 @@ export function MobileTabSwitcher<K extends string>({
   active,
   onChange,
   className,
+  keepActiveDot = false,
 }: Props<K>) {
   const index = Math.max(
     0,
@@ -101,7 +105,7 @@ export function MobileTabSwitcher<K extends string>({
                 )}
               >
                 {t.label}
-                {t.dot && d !== 0 && (
+                {t.dot && (d !== 0 || keepActiveDot) && (
                   <span className="absolute -right-1.5 top-2 h-2 w-2 rounded-full bg-[#ea580c] ring-2 ring-card" />
                 )}
               </button>

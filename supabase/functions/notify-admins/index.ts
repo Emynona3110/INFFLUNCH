@@ -1,11 +1,12 @@
 // Edge Function : notify-admins
-// Envoie une notification push aux ADMINS. Deux déclencheurs, deux Database
+// Envoie une notification push aux ADMINS. Trois déclencheurs, trois Database
 // Webhooks Supabase pointant ici, distingués par `payload.table` :
 //   - INSERT dans `waiting_list` : une demande d'accès (creation /
 //     password_reset), quelle que soit la voie d'écriture, y compris l'Edge
 //     Function `request-access` ;
 //   - INSERT dans `feedback` : un collaborateur signale un bug ou propose une
-//     idée depuis l'appli.
+//     idée depuis l'appli ;
+//   - INSERT dans `restaurant_suggestions` : un collaborateur propose un resto.
 //
 // Web Push « à la main » (RFC 8188 + RFC 8291) via WebCrypto : pas de
 // dépendance npm, donc rien qui puisse casser au gré du runtime Deno.
@@ -295,7 +296,16 @@ Deno.serve(async (req) => {
     if (subsError) return json({ error: subsError.message }, 500);
 
     const notification =
-      table === "feedback"
+      table === "restaurant_suggestions"
+        ? {
+            title: "Nouveau resto proposé",
+            body: record.name
+              ? excerpt(`${record.name}${record.address ? ` — ${record.address}` : ""}`)
+              : "Un collaborateur propose un restaurant.",
+            url: "/admin",
+            tag: "restaurant-suggestion",
+          }
+        : table === "feedback"
         ? {
             title: `Nouveau retour — ${
               feedbackLabel[record.type] ?? record.type ?? "retour"

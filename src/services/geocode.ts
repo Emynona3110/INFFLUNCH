@@ -62,6 +62,36 @@ export const reverseGeocode = async (
   return ((data as { address?: string })?.address ?? "").trim();
 };
 
+/** Lieu du quartier trouvé dans OpenStreetMap (proposition de resto). */
+export interface Place {
+  name: string;
+  address: string;
+  phone: string | null;
+  website: string | null;
+  /** Valeur OSM brute, « japanese;sushi » par exemple. */
+  cuisine: string | null;
+  /** restaurant, fast_food, bakery… */
+  type: string | null;
+  lat: number;
+  lng: number;
+}
+
+/**
+ * Commerces de bouche autour d'INFFLUX dont le nom correspond à la saisie
+ * (3 caractères au moins). Passe par l'Edge Function `geocode` pour la même
+ * raison CORS que le géocodage ; Nominatim limite à une requête par seconde,
+ * l'appelant temporise la frappe.
+ */
+export const searchPlaces = async (text: string): Promise<Place[]> => {
+  const { data, error } = await supabaseClient.functions.invoke("geocode", {
+    body: { search: text },
+  });
+  if (error) throw new Error("Recherche impossible");
+  return ((data as { places?: Place[] })?.places ?? []).filter(
+    (p) => Number.isFinite(p.lat) && Number.isFinite(p.lng),
+  );
+};
+
 /** iPhone / iPad (y compris iPadOS qui se présente en Mac tactile). */
 const isIOS = (): boolean =>
   typeof navigator !== "undefined" &&

@@ -5,12 +5,18 @@ import { AnimatePresence, motion } from "framer-motion";
 import darkLogo from "../assets/infflux.svg";
 import lightLogo from "../assets/w-infflux.svg";
 import FeedbackDialog from "./FeedbackDialog";
+import ProposeRestaurantDialog from "./ProposeRestaurantDialog";
+import RestaurantDialog from "@/admin/Dialogs/RestaurantDialog";
+import ChefHatPlus from "./icons/ChefHatPlus";
+import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { Tooltip } from "@/components/ui/tooltip";
 import useIsAdmin from "../hooks/useIsAdmin";
 import useAdminPending from "../hooks/useAdminPending";
 import useChangelogSeen from "../hooks/useChangelogSeen";
 import useAchievementsSeen from "../hooks/useAchievementsSeen";
 import useFeedbackSeen from "../hooks/useFeedbackSeen";
+import useSuggestionsSeen from "../hooks/useSuggestionsSeen";
 import useLunchToday, { isWeekend } from "../hooks/useLunchToday";
 import useUnpricedLunches from "../hooks/useUnpricedLunches";
 import {
@@ -36,7 +42,12 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
   // Signaler un bug ou proposer une idée depuis n'importe quel écran : c'est au
   // moment où on le rencontre qu'on le dit, pas après être allé le chercher.
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  // Ajouter un resto, de n'importe quel écran : l'admin crée la fiche, un
+  // collaborateur la propose.
+  const [addOpen, setAddOpen] = useState(false);
   const isAdmin = useIsAdmin();
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const sections = buildUserSections(isAdmin);
 
   // Puce de l'onglet Admin : allumée dès qu'un de ses sous-onglets a la sienne
@@ -55,7 +66,11 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
   // dernière visite de « Mes demandes ». Temps réel via le canal de useFeedback.
   // Pas pour l'admin : il n'a pas cet onglet (ses demandes vont au backlog).
   const { hasUnseen: hasUnseenFeedback } = useFeedbackSeen();
-  const myAccountDot = hasUnseenAchievements || (!isAdmin && hasUnseenFeedback);
+  // Idem pour mes propositions de restos.
+  const { hasUnseen: hasUnseenSuggestions } = useSuggestionsSeen(!isAdmin);
+  const myAccountDot =
+    hasUnseenAchievements ||
+    (!isAdmin && (hasUnseenFeedback || hasUnseenSuggestions));
 
   // Puce "déjeuner" : je n'ai rien déclaré pour aujourd'hui. Elle disparaît dès
   // que j'ai choisi un restaurant OU dit que je ne mange pas au resto. On attend la fin du
@@ -273,6 +288,16 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
       </div>
 
       <div className="flex shrink-0 items-center gap-1">
+        <Tooltip label={isAdmin ? "Ajouter un restaurant" : "Proposer un restaurant"}>
+          <button
+            type="button"
+            onClick={() => setAddOpen(true)}
+            aria-label={isAdmin ? "Ajouter un restaurant" : "Proposer un restaurant"}
+            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-primary sm:h-9 sm:w-9"
+          >
+            <ChefHatPlus className="h-5 w-5" />
+          </button>
+        </Tooltip>
         <Tooltip label="Un souci, une idée ?">
           <button
             type="button"
@@ -300,6 +325,21 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
         isOpen={feedbackOpen}
         onClose={() => setFeedbackOpen(false)}
       />
+      {isAdmin ? (
+        <RestaurantDialog
+          isOpen={addOpen}
+          onClose={() => setAddOpen(false)}
+          onSuccess={(slug) => {
+            setAddOpen(false);
+            queryClient.invalidateQueries();
+            // On enchaîne sur la fiche toute neuve : c'est là qu'on ajoute
+            // photos et menus, autant y être tout de suite.
+            if (slug) navigate(`/restaurant/${slug}`);
+          }}
+        />
+      ) : (
+        <ProposeRestaurantDialog isOpen={addOpen} onClose={() => setAddOpen(false)} />
+      )}
       <AccountSettingsDialog
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}

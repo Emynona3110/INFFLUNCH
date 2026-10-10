@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { toast } from "@/lib/toast";
 import { useQueryClient } from "@tanstack/react-query";
 import supabaseClient from "../../services/supabaseClient";
@@ -21,9 +21,11 @@ import {
 } from "../../services/uploadImage";
 import { coverPathBase } from "../../services/storagePaths";
 import { fetchWalkMinutes, estimateWalkMinutes } from "../../services/walkTime";
+import { distanceKmFromInfflux, formatDistance } from "../../services/distance";
 import { FiChevronDown, FiPlus, FiCheck, FiX, FiTrash2 } from "react-icons/fi";
 import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
+import HoldToDeleteButton from "@/components/HoldToDeleteButton";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -45,7 +47,17 @@ interface RestaurantDialogProps {
    *  `onSuccess`. Permet à l'appelant de quitter la fiche supprimée plutôt que
    *  de la recharger (elle n'existe plus). */
   onDeleted?: () => void;
+  /** Fiche à modifier (avec `id`), ou préremplissage d'une création (sans
+   *  `id` : proposition d'un collaborateur, dont `lat`/`lng` sont repris tant
+   *  que l'adresse n'est pas retouchée). */
   initialData?: Partial<Restaurant>;
+  /** Action affichée à gauche du pied en création (« Refuser » une
+   *  proposition de collaborateur). */
+  footerStart?: ReactNode;
+  /** Valider par appui long (décision sur une proposition de collaborateur). */
+  holdToSubmit?: boolean;
+  /** Contexte affiché sous le titre (auteur et commentaire d'une proposition). */
+  intro?: ReactNode;
 }
 
 const RestaurantDialog = ({
@@ -54,6 +66,9 @@ const RestaurantDialog = ({
   onSuccess,
   onDeleted,
   initialData,
+  footerStart,
+  holdToSubmit = false,
+  intro,
 }: RestaurantDialogProps) => {
 
   const [name, setName] = useState("");
@@ -368,9 +383,26 @@ const RestaurantDialog = ({
     let location: Awaited<ReturnType<typeof fetchLocation>> | null = null;
     let walkMinutes: number | null = null;
 
+    // Création préremplie avec une position (lieu choisi dans OSM par le
+    // collaborateur) : plus juste que le géocodage de l'adresse.
+    const presetCoords =
+      !initialData?.id &&
+      initialData?.lat != null &&
+      initialData?.lng != null &&
+      sameAddress(address, initialData.address)
+        ? { lat: initialData.lat, lng: initialData.lng }
+        : null;
+
     if (!keepLocation) {
       try {
-        location = await fetchLocation(address);
+        if (presetCoords) {
+          const km = distanceKmFromInfflux(presetCoords);
+          location = {
+            coords: presetCoords,
+            distanceKm: km,
+            formattedDistance: formatDistance(km),
+          };
+        } else location = await fetchLocation(address);
       } catch (err: any) {
         toast({
           title: "Erreur d'adresse",
@@ -558,8 +590,9 @@ const RestaurantDialog = ({
     <>
     <Dialog open={isOpen} onClose={onClose} className="max-w-3xl">
       <DialogTitle>
-        {initialData ? "Modifier un restaurant" : "Ajouter un restaurant"}
+        {initialData?.id ? "Modifier un restaurant" : "Ajouter un restaurant"}
       </DialogTitle>
+      {intro}
 
       <div className="mt-4 space-y-4 sm:mt-5 sm:space-y-6">
         <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2">
@@ -714,7 +747,7 @@ const RestaurantDialog = ({
                     setNewTag("");
                     setNewTagCategory(DEFAULT_TAG_CATEGORY);
                   }}
-                  className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-border text-foreground/70 transition hover:bg-muted"
+                  className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-border text-foreground transition hover:bg-muted [&>svg]:opacity-70"
                 >
                   <FiX className="h-5 w-5" />
                 </button>
@@ -766,6 +799,7 @@ const RestaurantDialog = ({
 
       <div className="mt-4 flex items-center justify-between gap-2 sm:mt-6">
         <div>
+          {!initialData?.id && footerStart}
           {initialData?.id && (
             <button
               type="button"
@@ -803,13 +837,25 @@ const RestaurantDialog = ({
           <Button variant="outline" onClick={onClose}>
             Annuler
           </Button>
-          <Button
-            onClick={handleSubmit}
-            loading={isSubmitting || locationLoading}
-            disabled={!name.trim() || !address.trim()}
-          >
-            {initialData ? "Modifier" : "Ajouter"}
-          </Button>
+          {holdToSubmit ? (
+            <HoldToDeleteButton
+              onConfirm={handleSubmit}
+              disabled={!name.trim() || !address.trim() || isSubmitting || locationLoading}
+              title="Maintenir pour ajouter"
+              mobileConfirm={false}
+              className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90"
+            >
+              {initialData?.id ? "Modifier" : "Ajouter"}
+            </HoldToDeleteButton>
+          ) : (
+            <Button
+              onClick={handleSubmit}
+              loading={isSubmitting || locationLoading}
+              disabled={!name.trim() || !address.trim()}
+            >
+              {initialData?.id ? "Modifier" : "Ajouter"}
+            </Button>
+          )}
         </div>
       </div>
     </Dialog>

@@ -43,7 +43,7 @@ Tenu au titre de l'art. 30 RGPD (modèle simplifié CNIL). Dernière mise à jou
 | Base légale | Intérêt légitime — amélioration du service (6.1.f) ; **consentement** pour les push (admins seulement, retirable dans « Réglages ») |
 | Personnes concernées | Collaborateurs disposant d'un compte |
 | Données | Texte + images jointes (3 max), versions, état de traitement, fil de discussion auteur/admin ; abonnement push (endpoint, clés p256dh/auth, user agent) |
-| Tables | `feedback`, `feedback_revisions`, `feedback_messages`, `push_subscriptions` ; `admin_notes` (backlog admin, peut citer un utilisateur) |
+| Tables | `feedback`, `feedback_revisions`, `feedback_messages`, `restaurant_suggestions` (propositions de restos, depuis le 2026-10-10), `push_subscriptions` ; `admin_notes` (backlog admin, peut citer un utilisateur) |
 | Destinataires | Admin (LLS) ; l'auteur voit ses propres demandes |
 | Conservation | Demandes : durée de vie du compte ; abonnement push : jusqu'au retrait du consentement, suppression du compte ou expiration de l'endpoint |
 | Sécurité | RLS own-read/own-write ; Edge Function `notify-admins` (VAPID) |

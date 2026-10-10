@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { FiArrowUpRight, FiMessageSquare } from "react-icons/fi";
+import ChefHatPlus from "@/components/icons/ChefHatPlus";
 
 /**
  * Journal des nouveautés du site (changelog), en dur.
@@ -23,6 +24,18 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
   // ──────────────────────── Octobre 2026 ────────────────────────
+  {
+    date: "2026-10-10",
+    title: "Proposer un resto",
+    points: [
+      <>
+        Un resto manque ? Propose-le en cliquant sur{" "}
+        <ChefHatPlus className="inline h-4 w-4 align-text-bottom text-primary" />
+        <FiArrowUpRight className="inline h-4 w-4 align-text-bottom text-foreground opacity-40" />
+      </>,
+      "Suis tes propositions dans Compte › Ajouts",
+    ],
+  },
   {
     date: "2026-10-08",
     title: "Classement",
@@ -66,7 +79,7 @@ export const changelog: ChangelogEntry[] = [
         Signale un bug ou propose une idée en cliquant sur{" "}
         <FiMessageSquare className="inline h-4 w-4 align-text-bottom text-primary" />
         {/* La flèche dit où le trouver : en haut à droite, dans la barre. */}
-        <FiArrowUpRight className="inline h-4 w-4 align-text-bottom text-foreground/40" />
+        <FiArrowUpRight className="inline h-4 w-4 align-text-bottom text-foreground opacity-40" />
       </>,
       "Les demandes sont consultables sur mon Compte",
     ],

@@ -8,6 +8,8 @@ import AdminUsers from "../admin/AdminUsers";
 import AccessRequests from "../admin/AccessRequests";
 import AdminFeedback, { useNewFeedbackCount } from "../admin/AdminFeedback";
 import AdminIllustrations from "../admin/AdminIllustrations";
+import AdminSuggestions from "../admin/AdminSuggestions";
+import useRestaurantSuggestions from "../hooks/useRestaurantSuggestions";
 import useAccessRequests from "../hooks/useAccessRequests";
 import { adminSections } from "../services/adminSections";
 import { cn } from "@/lib/utils";
@@ -16,6 +18,8 @@ import { cn } from "@/lib/utils";
 //  - Demandes : boîte de réception des bugs / idées envoyés par les collègues,
 //    avec une puce tant qu'il en reste en attente. En premier : c'est ce qu'on
 //    vient consulter le plus souvent.
+//  - Restos : propositions de restaurants des collaborateurs (AdminSuggestions),
+//    puce tant qu'il en reste à trancher.
 //  - Utilisateurs : composant dédié (AdminUsers).
 //  - Inscription / Mot de passe : demandes d'accès (composant AccessRequests,
 //    une catégorie par onglet, avec puce bleue "en attente").
@@ -30,6 +34,7 @@ const tagsSection = adminSections.find((s) => s.tableName === "tags")!;
 
 const tabs = [
   { key: "feedback", label: "Demandes" },
+  { key: "suggestions", label: "Restos" },
   { key: "users", label: "Utilisateurs" },
   { key: "creation", label: "Inscriptions" },
   { key: "password_reset", label: "Mot de passe" },
@@ -54,13 +59,18 @@ const AdminSection = () => {
 
   // Puce "demandes en attente" sur l'onglet Demandes.
   const newFeedback = useNewFeedbackCount();
+  // Puce "propositions de restos à trancher" sur l'onglet Restos.
+  const { data: suggestions = [] } = useRestaurantSuggestions("admin");
+  const newSuggestions = suggestions.filter((s) => s.status === "nouveau").length;
 
   const waitingFor = (key: TabKey) =>
     key === "creation" || key === "password_reset"
       ? waitingByType(key)
       : key === "feedback"
         ? newFeedback
-        : 0;
+        : key === "suggestions"
+          ? newSuggestions
+          : 0;
 
   const isDesktop = useMediaQuery("(min-width: 640px)");
   const index = tabs.findIndex((t) => t.key === active);
@@ -101,6 +111,8 @@ const AdminSection = () => {
       <AdminUsers />
     ) : tab === "feedback" ? (
       <AdminFeedback />
+    ) : tab === "suggestions" ? (
+      <AdminSuggestions />
     ) : (
       <AccessRequests activeType={tab} />
     );
@@ -121,6 +133,7 @@ const AdminSection = () => {
               }))}
               active={active}
               onChange={setActive}
+              keepActiveDot
             />
           </div>,
           toolbarSlot

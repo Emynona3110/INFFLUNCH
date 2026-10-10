@@ -11,7 +11,8 @@
 //
 // Entrée  : { q: string }              → géocodage direct
 //           { lat: number, lng: number } → géocodage inverse
-// Sortie  : { lat, lng } | { address: string } | { error: string }
+//           { search: string }         → lieux du quartier (proposition de resto)
+// Sortie  : { lat, lng } | { address: string } | { places: Place[] } | { error }
 //
 // Secret utilisé (déjà défini pour walk-time, les secrets sont partagés par
 // toutes les fonctions du projet) :
@@ -23,6 +24,7 @@
 
 const ORS_GEOCODE = "https://api.openrouteservice.org/geocode";
 const NOMINATIM = "https://nominatim.openstreetmap.org";
+const PHOTON = "https://photon.komoot.io/api/";
 
 // Nominatim exige un User-Agent identifiant l'application (sinon 403).
 const UA = "INFFLUNCH/1.0 (https://infflunch.com)";
@@ -117,6 +119,110 @@ async function reverseNominatim(lat: number, lng: number) {
   );
 }
 
+/* ---------------------------- recherche de lieux ---------------------------- */
+
+// Rayon de recherche autour d'INFFLUX (~2,5 km) : un resto du midi se rejoint à
+// pied, inutile de remonter un homonyme à l'autre bout de la France.
+const INFFLUX = { lat: 48.8487433, lng: 2.4280408 };
+const VIEWBOX = [
+  INFFLUX.lng - 0.035,
+  INFFLUX.lat + 0.023,
+  INFFLUX.lng + 0.035,
+  INFFLUX.lat - 0.023,
+].join(",");
+
+// Seuls les commerces de bouche nous intéressent (pas les rues ni les arrêts
+// de bus qui portent le même nom).
+const PLACE_CLASSES = new Set(["amenity", "shop"]);
+
+/** Lieux nommés du quartier correspondant à la saisie, avec ce qu'OSM en sait
+ *  (adresse, téléphone, site, cuisine) pour préremplir une proposition. */
+async function searchNominatim(text: string) {
+  const url =
+    `${NOMINATIM}/search?format=jsonv2&limit=10&countrycodes=fr` +
+    `&addressdetails=1&extratags=1&bounded=1&viewbox=${VIEWBOX}` +
+    `&q=${encodeURIComponent(text)}`;
+  const res = await fetch(url, {
+    headers: { "User-Agent": UA, "Accept-Language": "fr" },
+  });
+  if (!res.ok) {
+    // Nominatim filtre volontiers les IP partagées des hébergeurs (403 / 429).
+    throw new Error(`HTTP ${res.status}`);
+  }
+  const data = await res.json();
+  if (!Array.isArray(data)) return [];
+  return data
+    .filter((hit) => hit?.name && PLACE_CLASSES.has(hit.category))
+    .map((hit) => {
+      const a = hit.address ?? {};
+      const x = hit.extratags ?? {};
+      const city = a.city || a.town || a.village || a.municipality || "";
+      return {
+        name: String(hit.name),
+        address: formatAddress(a.house_number ?? "", a.road ?? "", a.postcode ?? "", city),
+        phone: x.phone || x["contact:phone"] || null,
+        website: x.website || x["contact:website"] || null,
+        cuisine: x.cuisine || null,
+        type: hit.type ?? null,
+        lat: parseFloat(hit.lat),
+        lng: parseFloat(hit.lon),
+      };
+    });
+}
+
+/** Secours : Photon (komoot), moteur OSM rapide et tolérant envers les
+ *  serveurs, mais sans téléphone, site ni cuisine — l'utilisateur complète. */
+async function searchPhoton(text: string) {
+  const [west, north, east, south] = VIEWBOX.split(",");
+  const url =
+    `${PHOTON}?q=${encodeURIComponent(text)}&lang=fr&limit=10` +
+    `&lat=${INFFLUX.lat}&lon=${INFFLUX.lng}` +
+    `&bbox=${west},${south},${east},${north}` +
+    `&osm_tag=amenity&osm_tag=shop`;
+  const res = await fetch(url, { headers: { "User-Agent": UA } });
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}`);
+  }
+  const features = (await res.json())?.features;
+  if (!Array.isArray(features)) return [];
+  return features
+    .filter((f) => f?.properties?.name && Array.isArray(f.geometry?.coordinates))
+    .map((f) => {
+      const p = f.properties;
+      return {
+        name: String(p.name),
+        address: formatAddress(p.housenumber ?? "", p.street ?? "", p.postcode ?? "", p.city ?? ""),
+        phone: null,
+        website: null,
+        cuisine: null,
+        type: p.osm_value ?? null,
+        // GeoJSON : [lng, lat].
+        lat: Number(f.geometry.coordinates[1]),
+        lng: Number(f.geometry.coordinates[0]),
+      };
+    });
+}
+
+/** Résultats + raisons d'échec de chaque source (renvoyées au front quand
+ *  rien n'est trouvé : sans elles, une liste vide ne dit pas pourquoi). */
+async function searchPlaces(text: string) {
+  const errors: string[] = [];
+  const attempt = async (label: string, run: () => Promise<unknown[]>) => {
+    try {
+      return await run();
+    } catch (e) {
+      const msg = `${label}: ${e instanceof Error ? e.message : String(e)}`;
+      console.warn("[geocode]", msg);
+      errors.push(msg);
+      return [];
+    }
+  };
+  const fromNominatim = await attempt("nominatim", () => searchNominatim(text));
+  if (fromNominatim.length > 0) return { places: fromNominatim, errors };
+  const fromPhoton = await attempt("photon", () => searchPhoton(text));
+  return { places: fromPhoton, errors };
+}
+
 /* ---------------------------------- handler ---------------------------------- */
 
 Deno.serve(async (req) => {
@@ -126,7 +232,13 @@ Deno.serve(async (req) => {
 
   try {
     const key = Deno.env.get("ORS_API_KEY") ?? "";
-    const { q, lat, lng } = await req.json().catch(() => ({}));
+    const { q, lat, lng, search } = await req.json().catch(() => ({}));
+
+    // --- recherche de lieux (proposition de resto) ---
+    if (typeof search === "string" && search.trim().length >= 3) {
+      const { places, errors } = await searchPlaces(search.trim());
+      return json(errors.length ? { places, errors } : { places }, 200);
+    }
 
     // --- géocodage inverse ---
     if (typeof lat === "number" && typeof lng === "number") {

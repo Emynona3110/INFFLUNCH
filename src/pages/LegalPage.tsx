@@ -224,7 +224,8 @@ const Confidentialite = () => {
             </span>{" "}
             : textes et images que tu envoies via « Compte › Demandes », et les
             échanges qui s'ensuivent avec l'administrateur — pour améliorer le
-            site.
+            site ; restaurants que tu proposes (« Compte › Ajouts ») et
+            la réponse de l'administrateur — pour compléter le catalogue.
           </li>
           <li>
             <span className="font-medium text-foreground">Notifications</span> :

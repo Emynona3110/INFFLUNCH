@@ -18,12 +18,16 @@ import AchievementsGallery from "./AchievementsGallery";
 import AdminNotes from "./AdminNotes";
 import MyFeedback from "./MyFeedback";
 import useFeedbackSeen from "@/hooks/useFeedbackSeen";
+import MySuggestions from "./MySuggestions";
+import useSuggestionsSeen from "@/hooks/useSuggestionsSeen";
 import { cn } from "@/lib/utils";
 const subTabs = [
   // Ce que les autres voient de moi, en premier.
   { key: "profil", label: "Profil", adminOnly: false },
   // « Avis » retiré (2026-09-19) : redondant avec le profil — voir MyReviews.tsx.
   { key: "succes", label: "Succès", adminOnly: false },
+  // Restos proposés et leur sort. Inutile à l'admin : il crée les fiches.
+  { key: "propositions", label: "Ajouts", adminOnly: false, userOnly: true },
   // Suivi de ses propres signalements : l'envoi se fait depuis la navbar.
   // Inutile à l'admin : ses demandes vont directement au backlog.
   { key: "retours", label: "Demandes", adminOnly: false, userOnly: true },
@@ -101,6 +105,8 @@ const MyAccount = () => {
   const { hasUnseen: hasUnseenAchievements, markSeen } = useAchievementsSeen();
   // Même signal côté « Demandes » : l'admin a classé une de mes demandes.
   const { hasUnseen: hasUnseenFeedback } = useFeedbackSeen();
+  // Et côté « Ajouts » : l'admin a tranché une de mes propositions.
+  const { hasUnseen: hasUnseenSuggestions } = useSuggestionsSeen(!isAdmin);
   useEffect(() => {
     if (active === "succes") markSeen();
   }, [active, markSeen]);
@@ -149,6 +155,9 @@ const MyAccount = () => {
       {/* Mes demandes */}
       {tab === "retours" && <MyFeedback />}
 
+      {/* Mes propositions de restos */}
+      {tab === "propositions" && <MySuggestions />}
+
       {/* Backlog (admins) */}
       {tab === "backlog" && isAdmin && <AdminNotes />}
     </>
@@ -176,7 +185,8 @@ const MyAccount = () => {
               label: t.label,
               dot:
                 (t.key === "succes" && hasUnseenAchievements) ||
-                (t.key === "retours" && hasUnseenFeedback),
+                (t.key === "retours" && hasUnseenFeedback) ||
+                (t.key === "propositions" && hasUnseenSuggestions),
             }))}
             active={active}
             onChange={changeTab}
@@ -202,7 +212,8 @@ const MyAccount = () => {
             >
               {t.label}
               {((t.key === "succes" && hasUnseenAchievements) ||
-                (t.key === "retours" && hasUnseenFeedback)) &&
+                (t.key === "retours" && hasUnseenFeedback) ||
+                (t.key === "propositions" && hasUnseenSuggestions)) &&
                 !isActive && (
                   <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-[#ea580c] ring-2 ring-background" />
                 )}
