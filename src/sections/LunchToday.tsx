@@ -267,9 +267,9 @@ const LunchToday = () => {
         ? { key: "weekend", Icon: LuUtensilsCrossed }
         : { key: "open", Icon: LuUtensils };
 
-  // Prix à réclamer : mes déjeuners récents jamais chiffrés. Le midi du JOUR
-  // n'y entre qu'après 14 h (avant, le repas n'a pas eu lieu) ; les jours
-  // précédents, eux, sont toujours bons à prendre. Un restaurant absent de la
+  // Prix à réclamer : LA relance en cours, gardée jusqu'à être complétée,
+  // refusée ou remplacée par celle d'un midi plus récent (règle dans
+  // useUnpricedLunches). Un restaurant absent de la
   // liste (supprimé, ou « test » pour un non-admin) est ignoré : c'est lui qui
   // porte les montants proposés.
   const { lunches: unpricedLunches, skip: skipPriceAsk } = useUnpricedLunches();

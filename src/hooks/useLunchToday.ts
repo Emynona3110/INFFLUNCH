@@ -207,9 +207,14 @@ const useLunchToday = () => {
    * type refermerait le cycle.
    */
   const dropTodayPriceAsk = () => {
-    queryClient.setQueryData<{ restaurantId: number; day: string }[]>(
-      ["unpriced-lunches", userId],
-      (prev) => (prev ?? []).filter((l) => l.day !== day)
+    // Masquée plutôt que retirée : retirée, la relance précédente (que
+    // celle du jour avait remplacée) reparaîtrait le temps du refetch.
+    queryClient.setQueryData<
+      { restaurantId: number; day: string; opens: boolean; priced: boolean }[]
+    >(["unpriced-lunches", userId], (prev) =>
+      (prev ?? []).map((l) =>
+        l.day === day ? { ...l, opens: true, priced: true } : l
+      )
     );
   };
 

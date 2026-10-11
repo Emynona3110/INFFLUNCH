@@ -15,7 +15,7 @@ interface Props {
   restaurant: Restaurant;
   /** Jour du déjeuner, "AAAA-MM-JJ" : il change la phrase, pas la mécanique. */
   day: string;
-  /** « Ne me le redemande plus pour ce restaurant. » */
+  /** « Pas celle-là » : ferme la relance (levée si je redéjeune là-bas). */
   onSkip: () => void;
 }
 
@@ -27,14 +27,23 @@ const shiftDay = (day: string, days: number) => {
 };
 
 /**
- * « Hier », « Mardi », ou rien du tout pour aujourd'hui : une relance qui
- * resterait muette sur le jour ferait douter — « j'ai payé combien, et quand ? »
+ * « Hier », « Mardi », « Le 3 octobre », ou rien du tout pour aujourd'hui :
+ * une relance qui resterait muette sur le jour ferait douter — « j'ai payé
+ * combien, et quand ? ». Au-delà de six jours, le nom du jour redeviendrait
+ * ambigu (la relance n'a plus de date limite) : on passe à la date.
  */
 const dayPrefix = (day: string): string => {
   const today = parisDay();
   if (day >= today) return "";
   if (day === shiftDay(today, -1)) return "Hier";
-  const label = new Date(`${day}T00:00:00Z`).toLocaleDateString("fr-FR", {
+  const date = new Date(`${day}T00:00:00Z`);
+  if (day < shiftDay(today, -6))
+    return `Le ${date.toLocaleDateString("fr-FR", {
+      day: "numeric",
+      month: "long",
+      timeZone: "UTC",
+    })}`;
+  const label = date.toLocaleDateString("fr-FR", {
     weekday: "long",
     timeZone: "UTC",
   });
@@ -47,9 +56,9 @@ const dayPrefix = (day: string): string => {
  *
  * C'est la seule accroche qui revient régulièrement : un avis se donne une
  * fois par restaurant et par personne, un déjeuner se déclare tous les midis.
- * La relance ne s'éteint pas à minuit — beaucoup reviennent sur le site le
- * lendemain, et le déjeuner de la veille se chiffre encore très bien
- * (demande du user, 2026-10-01 ; fenêtre dans useUnpricedLunches).
+ * La relance ne s'éteint pas à minuit : elle reste jusqu'à être complétée,
+ * refusée ou remplacée par celle d'un midi plus récent (règle dans
+ * useUnpricedLunches).
  *
  * Le bloc disparaît de lui-même dès que la déclaration est enregistrée.
  */

@@ -8,13 +8,10 @@ import {
   readLunchPriceSkips,
 } from "../services/lunchPriceSkip";
 
-/**
- * Fenêtre de rattrapage, en jours : on redemande le prix d'un déjeuner passé
- * tant qu'il tient dans cette fenêtre. Six jours et pas sept : au-delà, le nom
- * du jour affiché (« mardi ») redeviendrait ambigu, et un prix qu'on ne se
- * rappelle plus ne vaut rien.
- */
-export const LUNCH_PRICE_WINDOW_DAYS = 6;
+/** Combien de mes derniers midis on examine pour retrouver la relance en
+ *  cours : elle n'a plus de date limite, mais une relance ignorée pendant
+ *  des mois n'a pas besoin d'être retrouvée au-delà. */
+const LOOKBACK = 60;
 
 export interface UnpricedLunch {
   restaurantId: number;
@@ -22,26 +19,32 @@ export interface UnpricedLunch {
   day: string;
 }
 
-/** "AAAA-MM-JJ" décalé de `days` jours. Calcul en UTC : pas de dérive d'heure
- *  d'été, la date de départ étant déjà celle de Paris. */
-const shiftDay = (day: string, days: number) => {
-  const d = new Date(`${day}T00:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + days);
-  return d.toISOString().slice(0, 10);
-};
+interface Candidate extends UnpricedLunch {
+  /** Ce midi a ouvert une relance : je n'avais pas encore chiffré ce
+   *  restaurant au moment de le déclarer. */
+  opens: boolean;
+  /** Prix donné depuis : la relance est complétée. */
+  priced: boolean;
+  /** Relance fermée à la croix. */
+  refused: boolean;
+}
 
 /**
- * Mes déjeuners récents dont je n'ai JAMAIS donné le prix, du plus récent au
- * plus ancien.
+ * LA relance de prix en cours (« combien as-tu payé ? »), s'il y en a une.
  *
- * La relance ne tient pas qu'à la journée en cours : on revient souvent sur le
- * site le lendemain, et c'est encore un bon moment pour chiffrer le déjeuner
- * de la veille (demande du user, 2026-10-01). D'où la fenêtre de
- * LUNCH_PRICE_WINDOW_DAYS jours au lieu du seul jour courant.
+ * Règle (demande du user, 2026-10-11) : une relance s'ouvre quand je déclare
+ * un midi dans un restaurant que je n'ai pas encore chiffré, et elle reste
+ * affichée — sans date limite — jusqu'à ce que :
+ *   - je donne le prix (complétée),
+ *   - je la ferme à la croix (refusée),
+ *   - un midi plus récent ouvre une autre relance (remplacée).
+ * Un midi dans un restaurant déjà chiffré n'ouvre rien : il ne remplace donc
+ * pas la relance en cours. Une relance remplacée ne revient pas, même si la
+ * suivante est refusée ou complétée.
  *
- * Deux requêtes plutôt qu'une jointure : PostgREST ne sait pas exprimer « les
- * plans SANS ligne de prix du même utilisateur » sans vue dédiée, et les deux
- * lectures portent sur quelques lignes (mes midis d'une semaine).
+ * Deux requêtes plutôt qu'une jointure : PostgREST ne sait pas exprimer « le
+ * prix déclaré AVANT ce midi » sans vue dédiée, et les deux lectures portent
+ * sur quelques dizaines de lignes.
  */
 const useUnpricedLunches = (enabled = true) => {
   const { sessionData } = useSession();
@@ -49,80 +52,83 @@ const useUnpricedLunches = (enabled = true) => {
   const queryClient = useQueryClient();
   const queryKey = ["unpriced-lunches", userId];
 
-  const { data = [], isPending } = useQuery<UnpricedLunch[], Error>({
+  const { data = [], isPending } = useQuery<Candidate[], Error>({
     queryKey,
     enabled: !!userId && enabled,
     queryFn: async () => {
-      const today = parisDay();
       const { data: plans, error } = await supabaseClient
         .from("lunch_plans")
-        .select("restaurant_id, day")
+        .select("restaurant_id, day, created_at")
         .eq("user_id", userId as string)
-        .gte("day", shiftDay(today, -LUNCH_PRICE_WINDOW_DAYS))
-        .lte("day", today)
+        .lte("day", parisDay())
         .not("restaurant_id", "is", null)
-        .order("day", { ascending: false });
+        .order("day", { ascending: false })
+        .limit(LOOKBACK);
       if (error) throw new Error(error.message);
       if (!plans?.length) return [];
 
-      // Un même restaurant peut revenir plusieurs fois dans la semaine : on ne
-      // garde que le déjeuner le plus récent, le seul dont on parlera.
-      const latest = new Map<number, string>();
-      for (const p of plans) {
-        const id = p.restaurant_id as number;
-        if (!latest.has(id)) latest.set(id, p.day as string);
-      }
-
-      const { data: priced, error: pricedError } = await supabaseClient
+      const ids = [...new Set(plans.map((p) => p.restaurant_id as number))];
+      const { data: prices, error: pricesError } = await supabaseClient
         .from("restaurant_prices")
-        .select("restaurant_id")
+        .select("restaurant_id, created_at")
         .eq("user_id", userId as string)
-        .in("restaurant_id", [...latest.keys()]);
-      if (pricedError) throw new Error(pricedError.message);
+        .in("restaurant_id", ids);
+      if (pricesError) throw new Error(pricesError.message);
 
-      // Les refus sont appliqués ICI, dans la donnée partagée : la page du
-      // midi et la navbar lisent le même cache, elles ne peuvent pas diverger.
-      const declared = new Set((priced ?? []).map((p) => p.restaurant_id as number));
+      // Date de MA déclaration de prix, par restaurant (une ligne par resto).
+      const pricedAt = new Map(
+        (prices ?? []).map((p) => [p.restaurant_id as number, p.created_at as string])
+      );
       const refused = new Set(readLunchPriceSkips(userId));
-      return [...latest.entries()]
-        .filter(
-          ([restaurantId]) =>
-            !declared.has(restaurantId) && !refused.has(restaurantId)
-        )
-        .map(([restaurantId, day]) => ({ restaurantId, day }))
-        .sort((a, b) => b.day.localeCompare(a.day));
+      return plans.map((p) => {
+        const restaurantId = p.restaurant_id as number;
+        const at = pricedAt.get(restaurantId);
+        return {
+          restaurantId,
+          day: p.day as string,
+          opens: !at || at > (p.created_at as string),
+          priced: !!at,
+          refused: refused.has(restaurantId),
+        };
+      });
     },
   });
 
   /**
    * « Pas celle-là. » Le refus est écrit pour les visites suivantes, puis
-   * retiré du CACHE : la puce de la navbar est une autre instance de ce hook,
-   * elle doit s'éteindre dans le même geste — et sans refaire les deux
+   * reporté dans le CACHE : la puce de la navbar est une autre instance de ce
+   * hook, elle doit s'éteindre dans le même geste — et sans refaire les deux
    * requêtes. Redéclarer un déjeuner ici le lèvera (cf. useLunchToday).
    */
   const skip = useCallback(
     (restaurantId: number) => {
       addLunchPriceSkip(userId, restaurantId);
-      queryClient.setQueryData<UnpricedLunch[]>(
-        ["unpriced-lunches", userId],
-        (prev) => (prev ?? []).filter((l) => l.restaurantId !== restaurantId)
+      queryClient.setQueryData<Candidate[]>(["unpriced-lunches", userId], (prev) =>
+        (prev ?? []).map((c) =>
+          c.restaurantId === restaurantId ? { ...c, refused: true } : c
+        )
       );
     },
     [userId, queryClient]
   );
 
-  // Relances DUES maintenant : le midi du jour n'en est une qu'une fois le
-  // déjeuner passé (avant 14 h, le repas n'a pas eu lieu) ; les jours
-  // précédents le sont toujours. La règle vit ici et pas dans les composants,
-  // pour que la puce de la navbar et le bloc de la page du midi s'allument
-  // exactement ensemble.
+  // Le midi du jour n'ouvre sa relance qu'une fois le déjeuner passé (avant
+  // 14 h, le repas n'a pas eu lieu) : d'ici là, il ne remplace pas non plus
+  // celle de la veille. La règle vit ici et pas dans les composants, pour que
+  // la puce de la navbar et le bloc de la page du midi s'allument ensemble.
   const today = parisDay();
-  const due = data.filter((l) => l.day < today || isAfterLunch());
+  const current = data.find(
+    (c) => c.opens && (c.day < today || isAfterLunch())
+  );
+  const lunches: UnpricedLunch[] =
+    current && !current.priced && !current.refused
+      ? [{ restaurantId: current.restaurantId, day: current.day }]
+      : [];
 
   return {
-    lunches: due,
-    /** Au moins un prix à réclamer : de quoi allumer une puce. */
-    pending: due.length > 0,
+    lunches,
+    /** Un prix à réclamer : de quoi allumer une puce. */
+    pending: lunches.length > 0,
     loading: isPending,
     skip,
   };
