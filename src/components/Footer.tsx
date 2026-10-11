@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import useSession from "@/hooks/useSession";
 
 const linkCls =
   "text-inherit no-underline visited:text-inherit hover:text-foreground hover:underline";
@@ -16,6 +17,9 @@ export const Footer = ({ compact = false }: { compact?: boolean }) => {
   const onLegal = /^\/(mentions-legales|confidentialite)$/.test(
     useLocation().pathname,
   );
+  // À propos et Nouveautés : pages du site, donc une fois connecté (le pied
+  // de page s'affiche aussi sur l'écran de connexion).
+  const loggedIn = !!useSession().sessionData?.user;
   return (
     <footer
       className={cn(
@@ -28,6 +32,18 @@ export const Footer = ({ compact = false }: { compact?: boolean }) => {
     >
       <span>Infflunch 2026</span>
       <span aria-hidden="true">·</span>
+      {loggedIn && (
+        <>
+          <Link to="/a-propos" className={linkCls}>
+            À propos
+          </Link>
+          <span aria-hidden="true">·</span>
+          <Link to="/nouveautes" className={linkCls}>
+            Nouveautés
+          </Link>
+          <span aria-hidden="true">·</span>
+        </>
+      )}
       <Link to="/mentions-legales" replace={onLegal} className={linkCls}>
         Mentions légales
       </Link>

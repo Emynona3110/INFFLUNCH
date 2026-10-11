@@ -1,6 +1,20 @@
 import { useEffect, useRef, useState } from "react";
-import { FiMessageSquare, FiChevronDown, FiSettings } from "react-icons/fi";
+import {
+  FiMessageSquare,
+  FiChevronDown,
+  FiSettings,
+  FiHelpCircle,
+  FiInfo,
+  FiUser,
+  FiShield,
+  FiLogOut,
+} from "react-icons/fi";
+import { LuMegaphone } from "react-icons/lu";
 import AccountSettingsDialog from "./AccountSettingsDialog";
+import Avatar from "./Avatar";
+import NavMenu from "./NavMenu";
+import useSession from "../hooks/useSession";
+import useProfile from "../hooks/useProfile";
 import { AnimatePresence, motion } from "framer-motion";
 import darkLogo from "../assets/infflux.svg";
 import lightLogo from "../assets/w-infflux.svg";
@@ -49,6 +63,11 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const sections = buildUserSections(isAdmin);
+  // Onglets : les trois usages quotidiens. Le reste (Nouveautés, Compte,
+  // Admin, À propos) passe par les icônes de droite et le pied de page.
+  const tabs = sections.filter((item) => item.tab);
+  const { sessionData, signOut } = useSession();
+  const { profile } = useProfile();
 
   // Puce de l'onglet Admin : allumée dès qu'un de ses sous-onglets a la sienne
   // (demandes d'accès en attente ou demandes de collaborateurs non classées).
@@ -104,15 +123,20 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
     if (path === "mon-compte" && myAccountDot) return "bg-[#ea580c]";
     return null;
   };
-  // Mobile : libellé de l'onglet courant (fiche resto = Restaurants ; profil
+  // Mobile : libellé de la page courante (fiche resto = Restaurants ; profil
   // d'un collègue = pas d'onglet) et puce si un AUTRE onglet a quelque chose.
   const currentLabel =
     sections.find((item) => item.path === page)?.label ?? "Profil";
   const othersDot =
-    sections
+    tabs
       .filter((item) => item.path !== page)
       .map((item) => dotFor(item.path))
       .find(Boolean) ?? null;
+  // Sur la page du midi elle-même, sa puce reste sur le bouton : elle dit
+  // qu'il y a encore quelque chose à faire ICI (midi à déclarer, prix à
+  // donner), menu ouvert ou non.
+  const currentDot = page === "dejeuner" ? dotFor("dejeuner") : null;
+  const triggerDot = currentDot ?? (menuOpen ? null : othersDot);
 
   // Fermeture du menu mobile au tap ailleurs.
   const menuRef = useRef<HTMLDivElement>(null);
@@ -152,7 +176,7 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
 
         {/* Onglets desktop/tablette (masqués sur mobile < md → menu burger) */}
         <nav className="hidden h-full items-center md:flex">
-          {sections.map((item) => {
+          {tabs.map((item) => {
             const isActive = item.path === page;
             return (
               <div key={item.path} className="h-full px-1.5">
@@ -230,11 +254,11 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
                 menuOpen && "rotate-180",
               )}
             />
-            {othersDot && !menuOpen && (
+            {triggerDot && (
               <span
                 className={cn(
                   "absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-card",
-                  othersDot,
+                  triggerDot,
                 )}
               />
             )}
@@ -250,7 +274,7 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
                 style={{ originY: 0 }}
                 className="absolute left-0 top-full z-20 flex flex-col gap-1 rounded-2xl bg-muted p-1 shadow-md"
               >
-                {sections
+                {tabs
                   .filter((item) => item.path !== page)
                   .map((item, i) => {
                     const dot = dotFor(item.path);
@@ -287,7 +311,7 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
         </div>
       </div>
 
-      <div className="flex shrink-0 items-center gap-1">
+      <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
         <Tooltip label={isAdmin ? "Ajouter un restaurant" : "Proposer un restaurant"}>
           <button
             type="button"
@@ -298,27 +322,98 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
             <ChefHatPlus className="h-5 w-5" />
           </button>
         </Tooltip>
-        <Tooltip label="Un souci, une idée ?">
+        {/* Nouveautés : un mégaphone levé (des annonces du site), pas une cloche, qui
+            ferait attendre des notifications personnelles. */}
+        <Tooltip label="Nouveautés">
           <button
             type="button"
-            onClick={() => setFeedbackOpen(true)}
-            aria-label="Un souci, une idée ?"
-            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted sm:h-9 sm:w-9 hover:text-primary"
+            onClick={() => setPage("nouveautes")}
+            onMouseEnter={() => prefetchSection("nouveautes")}
+            aria-label={hasUnseen ? "Nouveautés (non lues)" : "Nouveautés"}
+            className={cn(
+              "relative flex h-8 w-8 cursor-pointer items-center justify-center rounded-full transition hover:bg-muted sm:h-9 sm:w-9",
+              page === "nouveautes"
+                ? "text-primary"
+                : "text-muted-foreground hover:text-primary",
+            )}
           >
-            <FiMessageSquare className="h-5 w-5" />
+            <LuMegaphone className="h-5 w-5 -rotate-[30deg]" />
+            {hasUnseen && (
+              <span className="absolute right-0.5 top-0.5 h-2.5 w-2.5 rounded-full bg-[#ea580c] ring-2 ring-card" />
+            )}
           </button>
         </Tooltip>
-        {/* Réglages du compte (avatar, mot de passe, déconnexion…). */}
-        <Tooltip label="Réglages">
-          <button
-            type="button"
-            onClick={() => setSettingsOpen(true)}
-            aria-label="Réglages"
-            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-primary sm:h-9 sm:w-9"
-          >
-            <FiSettings className="h-5 w-5" />
-          </button>
-        </Tooltip>
+        <NavMenu
+          label="Aide"
+          active={page === "a-propos"}
+          items={[
+            {
+              label: "Un souci, une idée ?",
+              icon: <FiMessageSquare />,
+              onSelect: () => setFeedbackOpen(true),
+            },
+            {
+              label: "À propos",
+              icon: <FiInfo />,
+              onSelect: () => setPage("a-propos"),
+              onPrefetch: () => prefetchSection("a-propos"),
+            },
+          ]}
+        >
+          <FiHelpCircle className="h-5 w-5" />
+        </NavMenu>
+        {/* Menu du compte : tout ce qui est à moi (profil, réglages, admin,
+            déconnexion). Les puces de Compte et d'Admin s'y retrouvent. */}
+        <NavMenu
+          label="Mon compte"
+          active={page === "mon-compte" || page === "admin"}
+          dot={myAccountDot || adminPending > 0}
+          items={[
+            {
+              label: "Mon compte",
+              icon: <FiUser />,
+              dot: myAccountDot,
+              onSelect: () => setPage("mon-compte"),
+              onPrefetch: () => prefetchSection("mon-compte"),
+            },
+            ...(isAdmin
+              ? [
+                  {
+                    label: "Admin",
+                    icon: <FiShield />,
+                    dot: adminPending > 0,
+                    onSelect: () => setPage("admin"),
+                    onPrefetch: () => prefetchSection("admin"),
+                  },
+                ]
+              : []),
+            {
+              label: "Réglages",
+              icon: <FiSettings />,
+              onSelect: () => setSettingsOpen(true),
+            },
+            {
+              label: "Se déconnecter",
+              icon: <FiLogOut />,
+              onSelect: async () => {
+                await signOut();
+                navigate("/login");
+              },
+            },
+          ]}
+        >
+          <Avatar
+            email={sessionData?.user?.email ?? ""}
+            avatarPath={profile?.avatar_path}
+            size={28}
+            className={cn(
+              "ring-2 ring-offset-1 ring-offset-card transition",
+              page === "mon-compte" || page === "admin"
+                ? "ring-primary"
+                : "ring-transparent",
+            )}
+          />
+        </NavMenu>
       </div>
 
       <FeedbackDialog

@@ -33,24 +33,18 @@ import { cn } from "@/lib/utils";
 
 // Sections de la navbar selon le rôle. Les pages réservées aux admins vivent
 // sous /admin/* (garde unique AdminGuard) ; les autres sont à la racine.
-export const buildUserSections = (isAdmin: boolean) =>
-  isAdmin
-    ? [
-        { label: "Restaurants", path: "restaurants" },
-        { label: "Déjeuner", path: "dejeuner" },
-        { label: "Classement", path: "classement" },
-        { label: "Admin", path: "admin" },
-        { label: "Nouveautés", path: "nouveautes" },
-        { label: "Compte", path: "mon-compte" },
-      ]
-    : [
-        { label: "Restaurants", path: "restaurants" },
-        { label: "Déjeuner", path: "dejeuner" },
-        { label: "Classement", path: "classement" },
-        { label: "Nouveautés", path: "nouveautes" },
-        { label: "Compte", path: "mon-compte" },
-        { label: "À propos", path: "a-propos" },
-      ];
+export const buildUserSections = (isAdmin: boolean) => [
+  // `tab` : onglet de la navbar. Les autres pages s'ouvrent depuis les icônes
+  // de droite (Nouveautés, menu d'aide, menu du compte) et le pied de page ;
+  // elles restent listées ici pour que l'URL désigne la page courante.
+  { label: "Restaurants", path: "restaurants", tab: true },
+  { label: "Déjeuner", path: "dejeuner", tab: true },
+  { label: "Classement", path: "classement", tab: true },
+  ...(isAdmin ? [{ label: "Admin", path: "admin", tab: false }] : []),
+  { label: "Nouveautés", path: "nouveautes", tab: false },
+  { label: "Compte", path: "mon-compte", tab: false },
+  { label: "À propos", path: "a-propos", tab: false },
+];
 
 /** Modes d'affichage de la liste des restaurants (grille = défaut). */
 export type ViewMode = "grid" | "list" | "map" | "roulette";
