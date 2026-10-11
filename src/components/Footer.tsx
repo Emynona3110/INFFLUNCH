@@ -27,6 +27,10 @@ export const Footer = ({ compact = false }: { compact?: boolean }) => {
         // Même filet et même hauteur partout ; `compact` retire seulement la
         // marge au-dessus (le footer est déjà calé en bas de l'écran).
         "border-t border-border py-2 sm:py-3",
+        // iPhone (site installé, plein écran) : la barre d'accueil d'iOS est
+        // dessinée par-dessus le bas de page. On ajoute sa hauteur sous les
+        // liens (0 ailleurs). Nécessite `viewport-fit=cover` (index.html).
+        "pb-[calc(0.5rem+env(safe-area-inset-bottom))] sm:pb-[calc(0.75rem+env(safe-area-inset-bottom))]",
         !compact && "mt-4 sm:mt-8",
       )}
     >
