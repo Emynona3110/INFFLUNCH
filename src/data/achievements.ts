@@ -117,7 +117,7 @@ export const COWABUNGA_TABLE = 4;
 
 /** En dessous de ce pourcentage d'obtention, un succès est rare : son icône
  *  porte une aura dorée (classe `rare-aura`) chez ceux qui l'ont. */
-export const RARE_PERCENT = 20;
+export const RARE_PERCENT = 15;
 
 const ALL_ACHIEVEMENTS: Achievement[] = [
   // — Avis —
