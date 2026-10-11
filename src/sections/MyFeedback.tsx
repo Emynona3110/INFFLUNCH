@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { FiArrowUpRight, FiMessageSquare } from "react-icons/fi";
+import { FiArrowUpRight, FiHelpCircle } from "react-icons/fi";
 import { toast } from "@/lib/toast";
 import useFeedbackSeen, { feedbackTouchedAt } from "@/hooks/useFeedbackSeen";
 import useFeedback, { Feedback } from "@/hooks/useFeedback";
@@ -152,7 +152,7 @@ const MyFeedback = () => {
         ) : items.length === 0 ? (
           <p className="px-4 py-6 text-center text-sm text-foreground/55">
             Un souci ? Une idée ? Exprime-toi en cliquant sur{" "}
-            <FiMessageSquare className="inline h-4 w-4 align-text-bottom text-primary" />
+            <FiHelpCircle className="inline h-4 w-4 align-text-bottom text-primary" />
             {/* La flèche dit où le trouver : en haut à droite, dans la barre. */}
             <FiArrowUpRight className="inline h-4 w-4 align-text-bottom text-foreground opacity-40" />
           </p>

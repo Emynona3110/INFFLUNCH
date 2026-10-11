@@ -1,4 +1,4 @@
-import { FiArrowUpRight, FiMessageSquare } from "react-icons/fi";
+import { FiArrowUpRight, FiHelpCircle } from "react-icons/fi";
 import { Card } from "@/components/ui/card";
 
 const About = () => {
@@ -38,7 +38,7 @@ const About = () => {
           <p>
             Si tu rencontres un problème ou souhaites faire une suggestion, tu
             peux t'exprimer juste ici{" "}
-            <FiMessageSquare className="inline h-4 w-4 align-text-bottom text-primary" />
+            <FiHelpCircle className="inline h-4 w-4 align-text-bottom text-primary" />
             {/* Même repère que dans « Mes demandes » : la flèche pointe vers le
                 bouton, en haut à droite de la barre. */}
             <FiArrowUpRight className="inline h-4 w-4 align-text-bottom text-foreground opacity-40" />

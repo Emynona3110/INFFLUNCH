@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { FiArrowUpRight, FiMessageSquare } from "react-icons/fi";
+import { FiArrowUpRight, FiHelpCircle } from "react-icons/fi";
 import ChefHatPlus from "@/components/icons/ChefHatPlus";
 
 /**
@@ -77,7 +77,7 @@ export const changelog: ChangelogEntry[] = [
     points: [
       <>
         Signale un bug ou propose une idée en cliquant sur{" "}
-        <FiMessageSquare className="inline h-4 w-4 align-text-bottom text-primary" />
+        <FiHelpCircle className="inline h-4 w-4 align-text-bottom text-primary" />
         {/* La flèche dit où le trouver : en haut à droite, dans la barre. */}
         <FiArrowUpRight className="inline h-4 w-4 align-text-bottom text-foreground opacity-40" />
       </>,
