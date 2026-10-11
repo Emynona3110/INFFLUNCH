@@ -26,7 +26,7 @@ const EDITOR_NAME = "LLS";
  * seuls collègues connectés — les personnes concernées au sens du RGPD. Le
  * public (et le bundle JS) ne voit que le pseudonyme : anonymat LCEN préservé.
  */
-const LAST_UPDATE = "1er octobre 2026";
+const LAST_UPDATE = "11 octobre 2026";
 
 const HOST = {
   name: "Render Services, Inc.",
@@ -149,7 +149,11 @@ const MentionsLegales = () => {
             OpenStreetMap
           </Ext>{" "}
           (© OpenStreetMap contributors, licence ODbL). Le nom et l'identité
-          visuelle d'INFFLUX appartiennent à la société INFFLUX.
+          visuelle d'INFFLUX appartiennent à la société INFFLUX. Les
+          illustrations des succès et les images de référence associées
+          renvoient à des œuvres, personnages et marques qui restent la
+          propriété de leurs auteurs et ayants droit respectifs ; elles sont
+          utilisées à titre d'hommage, sans but commercial.
         </p>
       </Section>
 
