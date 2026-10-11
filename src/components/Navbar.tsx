@@ -364,8 +364,11 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
         </NavMenu>
         {/* Menu du compte : tout ce qui est à moi (profil, réglages, admin,
             déconnexion). Les puces de Compte et d'Admin s'y retrouvent. */}
+        {/* `ml-1` : l'avatar remplit son bouton, là où les icônes laissent
+            du vide autour d'elles ; sans ce décalage, il collait au « ? ». */}
         <NavMenu
           label="Mon compte"
+          className="ml-1"
           active={page === "mon-compte" || page === "admin"}
           dot={myAccountDot || adminPending > 0}
           items={[
