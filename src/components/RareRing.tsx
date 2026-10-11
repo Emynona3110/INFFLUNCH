@@ -2,7 +2,9 @@
  *  poser dans une case `rare-aura` : il en épouse les coins arrondis. */
 const RareRing = () => (
   <span className="rare-ring" aria-hidden>
-    <span />
+    <span>
+      <span />
+    </span>
   </span>
 );
 

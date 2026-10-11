@@ -82,6 +82,17 @@ export interface Achievement {
    * affichée à la place de l'emoji. Sinon on retombe sur `icon`.
    */
   image?: string;
+  /** D'où vient l'illustration — le personnage, l'objet, le mème… Au survol
+   *  (ou au toucher) de l'image dans la fiche d'un succès obtenu, il prend la
+   *  place du titre. */
+  reference?: string;
+  /** L'œuvre dont il sort (film, série, jeu…) : prend alors la place de la
+   *  condition. Absente = la condition reste affichée. */
+  referenceWork?: string;
+  /** Image d'origine de la référence (public/achievements/sources/), qui
+   *  remplace l'illustration en fondu au survol/toucher. Sans elle, seul le
+   *  texte `reference` s'affiche. */
+  referenceImage?: string;
   /**
    * Succès SECRET (façon Steam) : tant qu'il n'est pas débloqué, l'intitulé et la
    * condition restent cachés dans la galerie (« Succès secret »). Réservé aux
@@ -117,6 +128,9 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     condition: "Publier un premier avis",
     icon: "🍪",
     image: "/achievements/eat_me.svg",
+    reference: "Biscuit « Eat me »",
+    referenceWork: "Alice au pays des merveilles",
+    referenceImage: "/achievements/sources/eat_me.webp",
   },
   {
     id: "reviews_5",
@@ -124,6 +138,9 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     condition: "Publier 5 avis",
     icon: "📓",
     image: "/achievements/death_note.svg",
+    reference: "Light Yagami",
+    referenceWork: "Death Note",
+    referenceImage: "/achievements/sources/death_note.webp",
   },
   {
     id: "reviews_15",
@@ -131,6 +148,9 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     condition: "Publier 15 avis",
     icon: "🍜",
     image: "/achievements/naruto.svg",
+    reference: "Naruto Uzumaki",
+    referenceWork: "Naruto",
+    referenceImage: "/achievements/sources/naruto.webp",
   },
 
   // — Midis déclarés —
@@ -141,6 +161,9 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     condition: "Déclarer un premier midi",
     icon: "🍦",
     image: "/achievements/einstein.svg",
+    reference: "Albert Einstein",
+    referenceWork: "Arthur Sasse",
+    referenceImage: "/achievements/sources/einstein.webp",
   },
   {
     // Kirby qui aspire un burger.
@@ -149,6 +172,9 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     condition: "Déclarer 5 midis",
     icon: "🍔",
     image: "/achievements/kirby.svg",
+    reference: "Kirby",
+    referenceWork: "Kirby, Nintendo",
+    referenceImage: "/achievements/sources/kirby.webp",
   },
   {
     // Garfield et sa lasagne.
@@ -157,6 +183,42 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     condition: "Déclarer 15 midis",
     icon: "🐈",
     image: "/achievements/garfield.svg",
+    reference: "Garfield",
+    referenceWork: "Garfield, Jim Davis",
+    referenceImage: "/achievements/sources/garfield.webp",
+  },
+
+  // — Prix déclarés —
+  {
+    id: "prices_1",
+    title: "Gardez la monnaie",
+    condition: "Déclarer le prix d'un restaurant",
+    icon: "💸",
+    image: "/achievements/take_my_money.svg",
+    reference: "Philip J. Fry",
+    referenceWork: "Futurama",
+    referenceImage: "/achievements/sources/take_my_money.webp",
+  },
+  {
+    id: "prices_5",
+    title: "Du beurre dans les épinards",
+    condition: "Déclarer le prix de 5 restaurants",
+    icon: "📈",
+    image: "/achievements/stonks.svg",
+    reference: "Meme Man",
+    referenceWork: "Mème « Stonks »",
+    referenceImage: "/achievements/sources/stonks.webp",
+  },
+  {
+    // Picsou et sa montagne de pièces.
+    id: "prices_15",
+    title: "Pièce montée",
+    condition: "Déclarer le prix de 15 restaurants",
+    icon: "🪙",
+    image: "/achievements/picsou.svg",
+    reference: "Picsou",
+    referenceWork: "Picsou, Carl Barks",
+    referenceImage: "/achievements/sources/picsou.webp",
   },
 
   // — Photos —
@@ -167,6 +229,9 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     condition: "Ajouter une première photo",
     icon: "🧀",
     image: "/achievements/jerry.svg",
+    reference: "Jerry",
+    referenceWork: "Tom et Jerry, William Hanna et Joseph Barbera",
+    referenceImage: "/achievements/sources/jerry.webp",
   },
   {
     // « Pizza Delamama », la marque de Mister V.
@@ -175,6 +240,9 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     condition: "Ajouter 5 photos",
     icon: "🍕",
     image: "/achievements/delamama.svg",
+    reference: "Pizza Delamama",
+    referenceWork: "Mister V",
+    referenceImage: "/achievements/sources/delamama.webp",
   },
   {
     // La Joconde.
@@ -183,37 +251,9 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     condition: "Ajouter 15 photos",
     icon: "🖼️",
     image: "/achievements/joconde.svg",
-  },
-
-  // — Prix déclarés —
-  {
-    id: "prices_1",
-    title: "Gardez la monnaie",
-    condition: "Déclarer le prix d'un restaurant",
-    icon: "💸",
-    image: "/achievements/take_my_money.svg",
-  },
-  {
-    id: "prices_5",
-    title: "Du beurre dans les épinards",
-    condition: "Déclarer le prix de 5 restaurants",
-    icon: "📈",
-    image: "/achievements/stonks.svg",
-  },
-  {
-    // Picsou et sa montagne de pièces.
-    id: "prices_15",
-    title: "Pièce montée",
-    condition: "Déclarer le prix de 15 restaurants",
-    icon: "🪙",
-    image: "/achievements/picsou.svg",
-  },
-  {
-    id: "reactions_received_5",
-    title: "Coup de pouce",
-    condition: "Recevoir 5 réactions sur vos photos",
-    icon: "❤️",
-    image: "/achievements/brent_rambo.svg",
+    reference: "La Joconde",
+    referenceWork: "Léonard de Vinci",
+    referenceImage: "/achievements/sources/joconde.webp",
   },
 
   // — Réactions —
@@ -225,6 +265,9 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     condition: "Réagir à une photo",
     icon: "👍",
     image: "/achievements/jules_cesar.svg",
+    reference: "Jules César",
+    referenceWork: "Astérix, Albert Uderzo",
+    referenceImage: "/achievements/sources/jules_cesar.webp",
   },
   {
     id: "reactions_given_10",
@@ -232,12 +275,18 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     condition: "Réagir à 10 photos différentes",
     icon: "🎬",
     image: "/achievements/absolute_cinema.svg",
+    reference: "Martin Scorsese",
+    referenceWork: "Mème « Absolute Cinema »",
+    referenceImage: "/achievements/sources/absolute_cinema.webp",
   },
   {
     id: "reaction_kinds_3",
     title: "Les goûts et les couleurs",
     icon: "🎨",
     image: "/achievements/gouts_et_couleurs.svg",
+    reference: "Smudge le chat",
+    referenceWork: "Mème « Woman Yelling at a Cat »",
+    referenceImage: "/achievements/sources/gouts_et_couleurs.webp",
     secret: true,
   },
 
@@ -248,6 +297,19 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     condition: "Avoir 6 restaurants favoris",
     icon: "🥣",
     image: "/achievements/pokeball.svg",
+    reference: "La Poké Ball",
+    referenceWork: "Pokémon",
+    referenceImage: "/achievements/sources/pokeball.webp",
+  },
+  {
+    id: "reactions_received_5",
+    title: "Coup de pouce",
+    condition: "Recevoir 5 réactions sur vos photos",
+    icon: "❤️",
+    image: "/achievements/brent_rambo.svg",
+    reference: "Brent Rambo",
+    referenceWork: "Mème « Thumbs Up Kid »",
+    referenceImage: "/achievements/sources/brent_rambo.webp",
   },
 
   // — Roulette (Surprise du midi) —
@@ -257,12 +319,18 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     condition: "Tirer le repas au hasard",
     icon: "🎰",
     image: "/achievements/new_vegas.svg",
+    reference: "Starlet Slot Machine",
+    referenceWork: "Fallout: New Vegas, Bethesda Softworks",
+    referenceImage: "/achievements/sources/new_vegas.webp",
   },
   {
     id: "roulette_two_restaurants",
     title: "Choix cornélien",
     icon: "💊",
     image: "/achievements/matrix.svg",
+    reference: "Les pilules de Morpheus",
+    referenceWork: "Matrix",
+    referenceImage: "/achievements/sources/matrix.webp",
     secret: true,
   },
   {
@@ -270,6 +338,9 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     title: "Dé pipé",
     icon: "🎲",
     image: "/achievements/king_dice.svg",
+    reference: "King Dice",
+    referenceWork: "Cuphead, Studio MDHR",
+    referenceImage: "/achievements/sources/king_dice.webp",
     secret: true,
   },
 
@@ -280,6 +351,9 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     condition: "Se connecter 5 jours d'affilée",
     icon: "☕",
     image: "/achievements/michael_scott.svg",
+    reference: "Michael Scott",
+    referenceWork: "The Office",
+    referenceImage: "/achievements/sources/michael_scott.webp",
   },
   {
     id: "lunch_streak_5",
@@ -287,12 +361,18 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     condition: `Déclarer son midi ${FLAMBE_STREAK} jours ouvrés d'affilée`,
     icon: "🔥",
     image: "/achievements/ace.svg",
+    reference: "Portgas D. Ace",
+    referenceWork: "One Piece",
+    referenceImage: "/achievements/sources/ace.webp",
   },
   {
     id: "lunch_early",
     title: "Premier arrivé, premier servi",
     icon: "⚡",
     image: "/achievements/flash.svg",
+    reference: "Flash",
+    referenceWork: "DC Comics",
+    referenceImage: "/achievements/sources/flash.webp",
     secret: true,
   },
   {
@@ -300,6 +380,9 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     title: "Mieux vaut tard que jamais",
     icon: "🐌",
     image: "/achievements/mister_bean.svg",
+    reference: "Mr. Bean",
+    referenceWork: "Les Vacances de Mr. Bean",
+    referenceImage: "/achievements/sources/mister_bean.webp",
     secret: true,
   },
   {
@@ -309,6 +392,9 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     title: "Cowabunga !",
     icon: "🐢",
     image: "/achievements/cowabunga.svg",
+    reference: "Leonardo, Raphael, Donatello et Michelangelo",
+    referenceWork: "Les Tortues Ninja, Kevin Eastman et Peter Laird",
+    referenceImage: "/achievements/sources/cowabunga.webp",
     secret: true,
   },
 
@@ -319,6 +405,9 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     title: "Jour ! Nuit ! Jour ! Nuit !",
     icon: "🌗",
     image: "/achievements/jacquouille.svg",
+    reference: "Jacquouille la Fripouille",
+    referenceWork: "Les Visiteurs",
+    referenceImage: "/achievements/sources/jacquouille.webp",
     secret: true,
   },
   {
@@ -326,6 +415,9 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     title: "Man, I'm pretty!",
     icon: "🪞",
     image: "/achievements/johnny_bravo.svg",
+    reference: "Johnny Bravo",
+    referenceWork: "Johnny Bravo",
+    referenceImage: "/achievements/sources/johnny_bravo.webp",
     secret: true,
   },
   {
@@ -334,6 +426,9 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     title: "Étoiles filantes",
     icon: "🌠",
     image: "/achievements/luma.svg",
+    reference: "Luma",
+    referenceWork: "Super Mario Galaxy, Nintendo",
+    referenceImage: "/achievements/sources/luma.webp",
     secret: true,
   },
 
@@ -345,6 +440,9 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     title: "Cookie Clicker",
     icon: "🍪",
     image: "/achievements/cookie_clicker.svg",
+    reference: "Cookie Clicker",
+    referenceWork: "DashNet Studio",
+    referenceImage: "/achievements/sources/cookie_clicker.webp",
     secret: true,
   },
   {
@@ -354,6 +452,9 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     title: "Pas de sushi",
     icon: "🍣",
     image: "/achievements/nemo.svg",
+    reference: "Nemo",
+    referenceWork: "Le Monde de Nemo",
+    referenceImage: "/achievements/sources/nemo.webp",
     secret: true,
   },
 
@@ -363,6 +464,9 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     title: "Dessine-moi un mouton",
     icon: "🐑",
     image: "/achievements/petit_prince.svg",
+    reference: "Le Petit Prince",
+    referenceWork: "Antoine de Saint-Exupéry",
+    referenceImage: "/achievements/sources/petit_prince.webp",
     secret: true,
   },
   {
@@ -370,6 +474,9 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     title: "Revenons à nos moutons",
     icon: "🌾",
     image: "/achievements/minecraft.svg",
+    reference: "Le mouton rose",
+    referenceWork: "Minecraft, le film",
+    referenceImage: "/achievements/sources/minecraft.webp",
     secret: true,
   },
   {
@@ -379,6 +486,9 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     title: "Le Seigneur des agneaux",
     icon: "💍",
     image: "/achievements/seigneur_des_anneaux.svg",
+    reference: "Gollum",
+    referenceWork: "Le Seigneur des anneaux",
+    referenceImage: "/achievements/sources/seigneur_des_anneaux.webp",
     secret: true,
   },
 
@@ -389,6 +499,9 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     condition: "Débloquer tous les succès",
     icon: "🥂",
     image: "/achievements/gatsby.svg",
+    reference: "Jay Gatsby",
+    referenceWork: "Gatsby le Magnifique",
+    referenceImage: "/achievements/sources/gatsby.webp",
   },
 ];
 

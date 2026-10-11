@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import * as React from "react";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 
@@ -9,6 +9,9 @@ interface TooltipProps {
   /** Radix ferme la bulle au clic sur le déclencheur ; à `true`, elle reste
    *  (utile quand le clic ne mène nulle part et que la bulle EST l'info). */
   keepOnClick?: boolean;
+  /** Bulle forcée fermée (ex. : la fiche que le déclencheur a ouverte est à
+   *  l'écran — la bulle restait parfois affichée par-dessus). */
+  disabled?: boolean;
 }
 
 /**
@@ -22,8 +25,19 @@ const isTouch =
   typeof window !== "undefined" &&
   !!window.matchMedia?.("(hover: none)").matches;
 
-export function Tooltip({ label, children, side = "top", keepOnClick }: TooltipProps) {
+export function Tooltip({
+  label,
+  children,
+  side = "top",
+  keepOnClick,
+  disabled,
+}: TooltipProps) {
+  // Toujours contrôlée : passer de contrôlée à libre (via `disabled`)
+  // ressortait l'ancien état interne de Radix, bulle ouverte comprise.
   const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (disabled) setOpen(false);
+  }, [disabled]);
   // Tactile : pas de bulle de survol (elle restait affichée sous les popups
   // ouvertes par le tap). Seules les bulles « qui sont l'info » (keepOnClick)
   // gardent l'ouverture au tap.
@@ -34,7 +48,11 @@ export function Tooltip({ label, children, side = "top", keepOnClick }: TooltipP
     // qu'elle recouvre (le succès du dessus, sur un profil, n'était plus
     // cliquable).
     <TooltipPrimitive.Provider delayDuration={150} disableHoverableContent>
-      <TooltipPrimitive.Root open={isTouch ? open : undefined}>
+      <TooltipPrimitive.Root
+        open={open && !disabled}
+        // Tactile : seul le tap (onClick) ouvre ; ailleurs, Radix pilote.
+        onOpenChange={isTouch ? undefined : setOpen}
+      >
         <TooltipPrimitive.Trigger
           asChild
           // Radix compose ses handlers après les nôtres et s'abstient si

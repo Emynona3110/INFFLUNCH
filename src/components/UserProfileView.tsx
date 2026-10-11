@@ -231,6 +231,7 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
                   return (
                     <li key={def.id} className="shrink-0">
                       <Tooltip
+                        disabled={opened !== null}
                         label={
                           <span className="block text-center">
                             <span className="block font-semibold">

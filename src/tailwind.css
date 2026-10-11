@@ -569,7 +569,7 @@ input:-webkit-autofill:active {
    Posé sur la case de l'icône, seulement si le visiteur l'a lui-même.
 
    L'anneau est une bordure de 2px : un calque
-   `.rare-ring` (composant RareRing) masqué hors bordure, dont le contenu — un
+   `.rare-ring > span` (composant RareRing) masqué hors bordure, dont le contenu — un
    grand carré peint d'un dégradé conique FIXE — tourne par `transform`. Seule
    la carte graphique travaille : faire varier l'angle du dégradé (première
    version) le faisait repeindre à chaque image par le processeur, illustration
@@ -580,14 +580,27 @@ input:-webkit-autofill:active {
   position: relative;
   border-color: transparent;
 }
+/* Cadre de découpe : le carré qui tourne déborde de la case (inset -50 %),
+   et le masque ne le cache qu'à l'œil — il comptait encore dans la largeur
+   de la page, d'où une barre de défilement horizontale par intermittence
+   quand une case rare touchait le bord. `overflow: hidden` ici (calé sur le
+   bord EXTÉRIEUR de l'anneau, il ne rogne rien de visible) le confine. */
 .rare-ring {
   position: absolute;
   inset: -1px;
   z-index: 1;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.rare-ring > span {
+  position: absolute;
+  inset: 0;
   /* Vraie BORDURE de 2px : le navigateur en cale l'épaisseur sur les pixels
      de l'écran, identique sur les quatre côtés (un padding se décentrait).
-     Le masque ne garde que la bordure ; pas d'`overflow: hidden` (il rognerait
-     au bord intérieur de la bordure) : c'est le masque qui découpe le carré. */
+     Le masque ne garde que la bordure ; pas d'`overflow: hidden` ICI (il
+     rognerait au bord intérieur de la bordure) : c'est le masque qui découpe
+     le carré. */
   border: 2px solid transparent;
   border-radius: inherit;
   -webkit-mask:
@@ -595,9 +608,8 @@ input:-webkit-autofill:active {
     linear-gradient(#000 0 0) border-box;
   -webkit-mask-composite: xor;
   mask-composite: exclude;
-  pointer-events: none;
 }
-.rare-ring > span {
+.rare-ring > span > span {
   position: absolute;
   /* Carré assez grand pour couvrir la case à toute rotation. */
   inset: -50%;
@@ -641,7 +653,7 @@ input:-webkit-autofill:active {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .rare-ring > span,
+  .rare-ring > span > span,
   .rare-text {
     animation: none;
   }

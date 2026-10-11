@@ -1,3 +1,4 @@
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { FiLock } from "react-icons/fi";
 import { Dialog } from "@/components/ui/dialog";
 import Avatar from "@/components/Avatar";
@@ -34,6 +35,82 @@ const formatDate = (iso: string) =>
     year: "numeric",
   });
 
+/** Texte sur UNE ligne, police réduite juste ce qu'il faut s'il déborde
+ *  (« Leonardo, Raphael, Donatello et Michelangelo »). Remesuré au
+ *  redimensionnement et une fois les polices chargées. */
+const FitLine = ({ text, className }: { text: string; className?: string }) => {
+  const ref = useRef<HTMLSpanElement>(null);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const fit = () => {
+      el.style.fontSize = "";
+      if (el.scrollWidth > el.clientWidth)
+        el.style.fontSize = `${(el.clientWidth / el.scrollWidth) * 0.98}em`;
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    document.fonts?.ready.then(fit);
+    return () => ro.disconnect();
+  }, [text]);
+  return (
+    <span ref={ref} className={cn("block whitespace-nowrap", className)}>
+      {text}
+    </span>
+  );
+};
+
+/** Deux textes superposés dans la même case de grille, l'un en fondu à la
+ *  place de l'autre (même durée que l'image d'origine). La case prend la
+ *  taille du plus grand : la popup ne bouge pas. `fitAlt` : le texte de
+ *  remplacement tient sur une ligne (police réduite au besoin). */
+const Crossfade = ({
+  showAlt,
+  main,
+  alt,
+  fitAlt,
+}: {
+  showAlt: boolean;
+  main: string;
+  alt?: string;
+  fitAlt?: boolean;
+}) => (
+  // Piste bornée (minmax(0, 1fr)) : une ligne insécable ne l'élargit pas,
+  // c'est FitLine qui réduit la police.
+  <span className="grid grid-cols-[minmax(0,1fr)]">
+    <span
+      aria-hidden={showAlt}
+      className={cn(
+        "[grid-area:1/1] transition-opacity duration-200",
+        showAlt && "opacity-0",
+      )}
+    >
+      {main}
+    </span>
+    {alt &&
+      (fitAlt ? (
+        <FitLine
+          text={alt}
+          className={cn(
+            "[grid-area:1/1] self-center transition-opacity duration-200",
+            !showAlt && "opacity-0",
+          )}
+        />
+      ) : (
+        <span
+          aria-hidden={!showAlt}
+          className={cn(
+            "[grid-area:1/1] transition-opacity duration-200",
+            !showAlt && "opacity-0",
+          )}
+        >
+          {alt}
+        </span>
+      ))}
+  </span>
+);
+
 /**
  * Fiche d'un succès : sa condition, sa rareté, où en est le visiteur (« 12 /
  * 20 ») et la liste des collègues qui l'ont décroché, le dernier en tête.
@@ -55,11 +132,19 @@ const AchievementDialog = ({
   const holders = useAchievementHolders(
     isOpen && achievement ? achievement.id : null,
   );
+  // Référence de l'illustration : montrée tant que la souris survole l'image,
+  // ou basculée d'un toucher (mobile) / d'Entrée (clavier). Elle remplace le
+  // titre et la condition, et l'image d'origine celle du succès. Repliée à
+  // chaque nouvelle fiche.
+  const [showRef, setShowRef] = useState(false);
+  const pointerType = useRef("");
+  useEffect(() => setShowRef(false), [achievement?.id, isOpen]);
 
   if (!achievement) return null;
   const a = achievement;
   const revealed = unlocked || !a.secret;
   const done = progress ? Math.min(progress.value, progress.goal) : 0;
+  const refShown = showRef && unlocked && !!a.reference;
 
   return (
     <Dialog
@@ -78,7 +163,53 @@ const AchievementDialog = ({
           )}
         >
           {unlocked ? (
-            a.image ? (
+            a.image && a.reference ? (
+              /* Survol (souris) ou toucher (mobile) : d'où vient l'image. */
+              <button
+                type="button"
+                onPointerEnter={(e) =>
+                  e.pointerType === "mouse" && setShowRef(true)
+                }
+                onPointerLeave={(e) =>
+                  e.pointerType === "mouse" && setShowRef(false)
+                }
+                onPointerDown={(e) => (pointerType.current = e.pointerType)}
+                onClick={() => {
+                  // À la souris, c'est le survol qui décide.
+                  if (pointerType.current !== "mouse") setShowRef((v) => !v);
+                  pointerType.current = "";
+                }}
+                aria-label="Voir la référence de l'illustration"
+                aria-pressed={showRef}
+                className="relative h-full w-full cursor-help rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+              >
+                {/* L'illustration s'efface quand l'image d'origine apparaît
+                    (plus étroite, en portrait, elle laisserait voir l'autre). */}
+                <img
+                  src={a.image}
+                  alt=""
+                  className={cn(
+                    "h-full w-full object-contain transition-opacity duration-200",
+                    refShown && a.referenceImage && "opacity-0",
+                  )}
+                />
+                {/* L'image d'origine, en fondu par-dessus l'illustration, NON
+                    recadrée : le fichier fait 288 px de HAUT, lu en densité 2x
+                    (srcSet) → 144 px, la hauteur de la case. Une image en
+                    largeur déborde sur les côtés (en absolu : la popup ne
+                    bouge pas) ; une image en hauteur reste dans la case. */}
+                {a.referenceImage && (
+                  <img
+                    srcSet={`${a.referenceImage} 2x`}
+                    alt=""
+                    className={cn(
+                      "pointer-events-none absolute left-1/2 top-1/2 z-10 max-w-none -translate-x-1/2 -translate-y-1/2 rounded-2xl transition-opacity duration-200",
+                      showRef ? "opacity-100" : "opacity-0",
+                    )}
+                  />
+                )}
+              </button>
+            ) : a.image ? (
               <img src={a.image} alt="" className="h-full w-full object-contain" />
             ) : (
               a.icon
@@ -90,12 +221,24 @@ const AchievementDialog = ({
         <div
           role="heading"
           aria-level={2}
-          className="mt-3 font-display text-xl font-bold leading-tight text-card-foreground"
+          className="mt-3 w-full font-display text-xl font-bold leading-tight text-card-foreground"
         >
-          {a.title}
+          <Crossfade
+            showAlt={refShown}
+            main={a.title}
+            alt={a.reference}
+            fitAlt
+          />
         </div>
-        <p className="m-0 mt-0.5 text-sm leading-snug text-foreground/55">
-          {revealed && condition ? condition : "Succès secret"}
+        <p
+          aria-live="polite"
+          className="m-0 mt-0.5 w-full text-sm leading-snug text-foreground/55"
+        >
+          <Crossfade
+            showAlt={refShown && !!a.referenceWork}
+            main={revealed && condition ? condition : "Succès secret"}
+            alt={a.referenceWork}
+          />
         </p>
       </div>
 
