@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { FiArrowUpRight, FiHelpCircle } from "react-icons/fi";
+import { LuMegaphone } from "react-icons/lu";
 import ChefHatPlus from "@/components/icons/ChefHatPlus";
 
 /**
@@ -25,6 +26,23 @@ export interface ChangelogEntry {
 export const changelog: ChangelogEntry[] = [
   // ──────────────────────── Octobre 2026 ────────────────────────
   {
+    date: "2026-10-12",
+    title: "Navigation allégée et FAQ",
+    points: [
+      <>
+        Les nouveautés se retrouvent sous{" "}
+        <LuMegaphone className="inline h-4 w-4 -rotate-[30deg] align-text-bottom text-primary" />
+        <FiArrowUpRight className="inline h-4 w-4 align-text-bottom text-foreground opacity-40" />
+      </>,
+      <>
+        Une FAQ et la boîte à demandes dans le menu d'aide{" "}
+        <FiHelpCircle className="inline h-4 w-4 align-text-bottom text-primary" />
+        <FiArrowUpRight className="inline h-4 w-4 align-text-bottom text-foreground opacity-40" />
+      </>,
+      "Ton compte, les réglages et la déconnexion sous ta photo de profil",
+    ],
+  },
+  {
     date: "2026-10-10",
     title: "Proposer un resto",
     points: [
@@ -33,7 +51,7 @@ export const changelog: ChangelogEntry[] = [
         <ChefHatPlus className="inline h-4 w-4 align-text-bottom text-primary" />
         <FiArrowUpRight className="inline h-4 w-4 align-text-bottom text-foreground opacity-40" />
       </>,
-      "Suis tes propositions dans Compte › Ajouts",
+      "Suis tes propositions dans Compte › Restos",
     ],
   },
   {

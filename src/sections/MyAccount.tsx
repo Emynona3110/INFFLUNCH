@@ -27,7 +27,9 @@ const subTabs = [
   // « Avis » retiré (2026-09-19) : redondant avec le profil — voir MyReviews.tsx.
   { key: "succes", label: "Succès", adminOnly: false },
   // Restos proposés et leur sort. Inutile à l'admin : il crée les fiches.
-  { key: "propositions", label: "Ajouts", adminOnly: false, userOnly: true },
+  // « Restos » et non « Ajouts » : l'onglet accueillera aussi les demandes
+  // de modification d'une fiche (à venir).
+  { key: "propositions", label: "Restos", adminOnly: false, userOnly: true },
   // Suivi de ses propres signalements : l'envoi se fait depuis la navbar.
   // Inutile à l'admin : ses demandes vont directement au backlog.
   { key: "retours", label: "Demandes", adminOnly: false, userOnly: true },
@@ -105,7 +107,7 @@ const MyAccount = () => {
   const { hasUnseen: hasUnseenAchievements, markSeen } = useAchievementsSeen();
   // Même signal côté « Demandes » : l'admin a classé une de mes demandes.
   const { hasUnseen: hasUnseenFeedback } = useFeedbackSeen();
-  // Et côté « Ajouts » : l'admin a tranché une de mes propositions.
+  // Et côté « Restos » : l'admin a tranché une de mes propositions.
   const { hasUnseen: hasUnseenSuggestions } = useSuggestionsSeen(!isAdmin);
   useEffect(() => {
     if (active === "succes") markSeen();
