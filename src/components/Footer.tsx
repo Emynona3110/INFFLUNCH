@@ -55,6 +55,10 @@ export const Footer = ({ compact = false }: { compact?: boolean }) => {
               À propos
             </Link>
             {dot}
+            <Link to="/faq" className={linkCls}>
+              FAQ
+            </Link>
+            {dot}
             <Link to="/nouveautes" className={linkCls}>
               Nouveautés
             </Link>
