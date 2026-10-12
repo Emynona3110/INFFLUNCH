@@ -28,6 +28,7 @@ import useUserNames from "@/hooks/useUserNames";
 import { SECTION_BODY } from "@/lib/sectionClasses";
 import { HOVER_ZOOM_IMG } from "@/lib/imageClasses";
 
+import { restaurantPath } from "@/utils/restaurantPath";
 /** "Jeudi 28 août" (première lettre en majuscule). */
 const todayLabel = () => {
   const s = new Date().toLocaleDateString("fr-FR", {
@@ -593,7 +594,7 @@ const LunchToday = () => {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.2 }}
-                  onClick={() => navigate(`/restaurant/${restaurant.slug}`)}
+                  onClick={() => navigate(restaurantPath(restaurant.slug))}
                   className={cn(
                     "group flex cursor-pointer select-none items-center gap-3 overflow-hidden p-2.5 transition sm:rounded-card sm:bg-card sm:gap-4 sm:p-3 sm:hover:-translate-y-0.5 sm:hover:shadow-[0_14px_34px_-16px_rgba(2,8,40,0.30)]",
                     // Ma tablée : fond teinté sur mobile, anneau sur desktop.

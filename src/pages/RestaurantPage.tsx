@@ -62,6 +62,7 @@ import {
 } from "@/lib/sectionClasses";
 import Beeeh from "@/sections/Beeeh";
 
+import { restaurantPath } from "@/utils/restaurantPath";
 /** Easter egg « Shooting Stars » : 5 clics (sans limite de temps) sur les
  *  étoiles de la note moyenne. Compteur au niveau module. */
 const SHOOTING_STARS_CLICKS = 5;
@@ -684,7 +685,7 @@ const RestaurantPage = () => {
             onSuccess={(slug) => {
               setEditOpen(false);
               if (slug && slug !== restaurant.slug) {
-                navigate(`/restaurant/${slug}`, { replace: true });
+                navigate(restaurantPath(slug), { replace: true });
               }
               queryClient.invalidateQueries();
             }}

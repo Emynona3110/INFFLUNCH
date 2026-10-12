@@ -37,6 +37,7 @@ import {
   SECTION_BODY_PAD,
 } from "@/lib/sectionClasses";
 
+import { restaurantPath } from "@/utils/restaurantPath";
 interface Props {
   userId: string;
   /** Profil de l'utilisateur connecté : tous ses succès lui sont révélés. */
@@ -329,7 +330,7 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
                 }
                 onLabelClick={(photo) => {
                   const slug = (photo as PublicPhoto).restaurant?.slug;
-                  if (slug) navigate(`/restaurant/${slug}`);
+                  if (slug) navigate(restaurantPath(slug));
                 }}
                 layout="grid"
                 onDelete={(photo) => remove.mutateAsync(photo)}
@@ -374,7 +375,7 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
                   const mine = r.user_id === viewerId;
                   const slug = r.restaurant?.slug;
                   const goToRestaurant = slug
-                    ? () => navigate(`/restaurant/${slug}`)
+                    ? () => navigate(restaurantPath(slug))
                     : undefined;
                   return (
                     <ReviewItem

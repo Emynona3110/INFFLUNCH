@@ -18,6 +18,7 @@ import { useTheme } from "@/lib/theme";
 import { Restaurant } from "@/hooks/useRestaurants";
 import { clusterize } from "@/services/mapClusters";
 
+import { restaurantPath } from "@/utils/restaurantPath";
 /**
  * Carte globale des restaurants situés (lat/lng en base ; les fermés sont
  * écartés en amont par la grille), positionnés
@@ -276,7 +277,7 @@ const RestaurantsMap = ({ restaurants }: Props) => {
                           <li key={r.id}>
                             <button
                               type="button"
-                              onClick={() => navigate(`/restaurant/${r.slug}`)}
+                              onClick={() => navigate(restaurantPath(r.slug))}
                               className="w-full cursor-pointer rounded px-1.5 py-1 text-left text-xs font-medium text-primary transition hover:bg-primary/10"
                             >
                               {r.name}
@@ -312,7 +313,7 @@ const RestaurantsMap = ({ restaurants }: Props) => {
           }
 
           const r = cluster.items[0];
-          const open = () => navigate(`/restaurant/${r.slug}`);
+          const open = () => navigate(restaurantPath(r.slug));
           const active = isTouch && activeId === r.id;
           return (
             <Marker

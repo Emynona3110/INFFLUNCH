@@ -4,7 +4,9 @@ import {
   Routes,
   Route,
   Navigate,
+  useParams,
 } from "react-router-dom";
+import { isRestaurantDetailPath, restaurantPath } from "@/utils/restaurantPath";
 import RestaurantGrid from "../sections/RestaurantGrid";
 import useMediaQuery from "@/hooks/useMediaQuery";
 import RestaurantsToolbar from "../components/RestaurantsToolbar";
@@ -144,7 +146,7 @@ const UserPage = () => {
 
   // Fiche d'un restaurant ou profil d'un collègue : la navbar se réduit (pas
   // de recherche/filtres), d'où `currentPage` vide. Sinon, l'onglet de l'URL.
-  const isRestaurantDetail = location.pathname.includes("/restaurant/");
+  const isRestaurantDetail = isRestaurantDetailPath(location.pathname);
   const isDetail = isRestaurantDetail || location.pathname.includes("/profil/");
   const currentPage = isDetail
     ? ""
@@ -266,7 +268,9 @@ const UserPage = () => {
           />
           {/* Compat : ancien chemin de l'onglet, renommé « Déjeuner ». */}
           <Route path="midi" element={<Navigate to="/dejeuner" replace />} />
-          <Route path="restaurant/:slug" element={<RestaurantPage />} />
+          <Route path="restaurants/:slug" element={<RestaurantPage />} />
+          {/* Compat : ancien chemin des fiches, /restaurant/<slug>. */}
+          <Route path="restaurant/:slug" element={<RedirectToRestaurant />} />
           <Route path="profil/:handle" element={<ProfilePage />} />
           <Route path="mon-compte" element={<MyAccount />} />
           <Route path="faq" element={<Faq />} />
@@ -284,3 +288,9 @@ const UserPage = () => {
 };
 
 export default UserPage;
+
+/** Redirige l'ancienne URL /restaurant/<slug> vers /restaurants/<slug>. */
+function RedirectToRestaurant() {
+  const { slug = "" } = useParams();
+  return <Navigate to={restaurantPath(slug)} replace />;
+}

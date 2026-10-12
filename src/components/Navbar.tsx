@@ -44,6 +44,7 @@ import { cn } from "@/lib/utils";
 import { setFaviconBadge } from "@/lib/faviconBadge";
 import usePrefetch from "@/hooks/usePrefetch";
 
+import { restaurantPath } from "@/utils/restaurantPath";
 interface NavbarProps {
   page: string;
   setPage: (page: string) => void;
@@ -446,7 +447,7 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
             queryClient.invalidateQueries();
             // On enchaîne sur la fiche toute neuve : c'est là qu'on ajoute
             // photos et menus, autant y être tout de suite.
-            if (slug) navigate(`/restaurant/${slug}`);
+            if (slug) navigate(restaurantPath(slug));
           }}
         />
       ) : (

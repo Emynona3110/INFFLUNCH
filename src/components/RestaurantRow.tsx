@@ -18,6 +18,7 @@ import { Stars } from "@/components/RestaurantCardTW";
 import { cn } from "@/lib/utils";
 import { HOVER_ZOOM_IMG } from "@/lib/imageClasses";
 
+import { restaurantPath } from "@/utils/restaurantPath";
 interface Props {
   restaurant: Restaurant;
   topRated: { id: number }[];
@@ -64,7 +65,7 @@ const RestaurantRow = ({
 
   return (
     <article
-      onClick={() => navigate(`/restaurant/${restaurant.slug}`)}
+      onClick={() => navigate(restaurantPath(restaurant.slug))}
       // Données de la fiche chargées dès l'intention de clic.
       onMouseEnter={() => prefetchRestaurant(restaurant.id)}
       onTouchStart={() => prefetchRestaurant(restaurant.id)}

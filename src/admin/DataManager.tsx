@@ -10,6 +10,7 @@ import RestaurantDialog from "./Dialogs/RestaurantDialog";
 import TagDialog from "./Dialogs/TagDialog";
 import { Button } from "@/components/ui/button";
 
+import { restaurantPath } from "@/utils/restaurantPath";
 export interface DataManagerProps {
   section: AdminSection;
 }
@@ -37,7 +38,7 @@ const DataManager = ({ section }: DataManagerProps) => {
     // Rafraîchit la table admin ainsi que les caches dérivés (tags, badges,
     // restaurants) utilisés ailleurs dans l'app.
     queryClient.invalidateQueries();
-    if (created) navigate(`/restaurant/${slug}`);
+    if (created) navigate(restaurantPath(slug));
   };
 
   // Supprimer un tag le retire aussi des restaurants (trigger

@@ -9,6 +9,7 @@ import {
 } from "@/hooks/useRestaurantSuggestions";
 import { cn } from "@/lib/utils";
 
+import { restaurantPath } from "@/utils/restaurantPath";
 interface Props {
   isOpen: boolean;
   onClose: () => void;
@@ -123,7 +124,7 @@ const SuggestionViewDialog = ({
       )}
       {item.status === "accepte" && item.restaurant_slug && (
         <Link
-          to={`/restaurant/${item.restaurant_slug}`}
+          to={restaurantPath(item.restaurant_slug)}
           onClick={onClose}
           className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
         >

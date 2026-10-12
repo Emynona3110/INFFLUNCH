@@ -10,6 +10,7 @@ import {
   SECTION_BODY,
 } from "@/lib/sectionClasses";
 
+import { restaurantPath } from "@/utils/restaurantPath";
 /** Mobile : date courte JJ/MM/AA. */
 const formatShortDate = (iso: string) =>
   new Date(iso).toLocaleDateString("fr-FR", {
@@ -81,7 +82,7 @@ const MyReviews = () => {
                   type="button"
                   onClick={() =>
                     r.restaurant &&
-                    navigate(`/restaurant/${r.restaurant.slug}`)
+                    navigate(restaurantPath(r.restaurant.slug))
                   }
                   className="flex min-h-[60px] w-full items-center gap-3 px-3 py-2.5 text-left transition hover:bg-muted/40 sm:min-h-0 sm:rounded-xl sm:border sm:border-border sm:bg-background sm:p-3 sm:hover:border-primary/40"
                 >
