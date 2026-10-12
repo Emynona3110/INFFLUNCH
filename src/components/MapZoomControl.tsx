@@ -25,7 +25,7 @@ export default function MapZoomControl({
         type="button"
         onClick={() => map?.zoomIn()}
         aria-label="Zoomer"
-        className="flex h-7 w-7 items-center justify-center text-foreground/80 transition hover:bg-muted hover:text-primary"
+        className="flex h-7 w-7 items-center justify-center text-foreground transition hover:bg-muted hover:text-primary [&>svg]:opacity-80 hover:[&>svg]:opacity-100"
       >
         <FiPlus className="h-4 w-4" />
       </button>
@@ -34,7 +34,7 @@ export default function MapZoomControl({
         type="button"
         onClick={() => map?.zoomOut()}
         aria-label="Dézoomer"
-        className="flex h-7 w-7 items-center justify-center text-foreground/80 transition hover:bg-muted hover:text-primary"
+        className="flex h-7 w-7 items-center justify-center text-foreground transition hover:bg-muted hover:text-primary [&>svg]:opacity-80 hover:[&>svg]:opacity-100"
       >
         <FiMinus className="h-4 w-4" />
       </button>

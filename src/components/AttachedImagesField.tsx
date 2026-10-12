@@ -112,7 +112,7 @@ const AttachedImagesField = ({
           onClick={() => fileRef.current?.click()}
           disabled={disabled}
           aria-label="Joindre une image"
-          className="flex h-16 w-16 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-lg border-2 border-dashed border-border text-foreground/45 transition hover:border-primary/50 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-border disabled:hover:text-foreground/45"
+          className="flex h-16 w-16 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-lg border-2 border-dashed border-border text-foreground transition hover:border-primary/50 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-border disabled:hover:text-foreground [&>*]:opacity-45 hover:[&>*]:opacity-100 disabled:hover:[&>*]:opacity-45"
         >
           <FiPlus className="h-5 w-5" />
           <span className="text-[10px] font-medium tabular-nums">

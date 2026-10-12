@@ -65,7 +65,13 @@ export function SortHeader({
       {!hideLabel &&
         (icon ? (
           <>
-            <span className="flex items-center sm:hidden">{icon}</span>
+            {/* Couleur PLEINE + opacité sur le groupe : héritée de l'en-tête
+                (couleur semi-transparente), chaque croisement de traits de
+                l'icône s'assombrissait. Même teinte que l'intitulé (55 %,
+                80 % au survol). */}
+            <span className="flex items-center text-foreground opacity-55 transition-opacity group-hover:opacity-80 sm:hidden">
+              {icon}
+            </span>
             <span className="hidden sm:inline">{label}</span>
           </>
         ) : (

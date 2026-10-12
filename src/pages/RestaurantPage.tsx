@@ -569,9 +569,10 @@ const RestaurantPage = () => {
                         href={restaurant.website}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 truncate text-foreground/80 transition hover:text-primary"
+                        className="group inline-flex items-center gap-1 truncate text-foreground/80 transition hover:text-primary"
                       >
-                        Site web <FiExternalLink className="h-3.5 w-3.5" />
+                        Site web{" "}
+                        <FiExternalLink className="h-3.5 w-3.5 text-foreground opacity-80 transition group-hover:text-primary group-hover:opacity-100" />
                       </a>
                     </span>
                   )}

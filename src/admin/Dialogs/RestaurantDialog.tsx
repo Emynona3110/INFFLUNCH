@@ -726,7 +726,7 @@ const RestaurantDialog = ({
                   type="button"
                   aria-label="Créer un tag"
                   onClick={() => setCreatingTag(true)}
-                  className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-border text-foreground/70 transition hover:bg-muted hover:text-primary"
+                  className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-border text-foreground transition hover:bg-muted hover:text-primary [&>svg]:opacity-70 hover:[&>svg]:opacity-100"
                 >
                   <FiPlus className="h-5 w-5" />
                 </button>
