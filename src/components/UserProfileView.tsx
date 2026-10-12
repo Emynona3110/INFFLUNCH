@@ -6,7 +6,10 @@ import { RARE_PERCENT } from "@/data/achievements";
 import { Card } from "@/components/ui/card";
 import { Tooltip } from "@/components/ui/tooltip";
 import StreakAvatar from "@/components/StreakAvatar";
-import usePublicProfile, { PublicPhoto } from "@/hooks/usePublicProfile";
+import usePublicProfile, {
+  PublicPhoto,
+  PublicProfile,
+} from "@/hooks/usePublicProfile";
 import useSession from "@/hooks/useSession";
 import useIsAdmin from "@/hooks/useIsAdmin";
 import PhotoGallery from "@/components/PhotoGallery";
@@ -42,6 +45,9 @@ interface Props {
   userId: string;
   /** Profil de l'utilisateur connecté : tous ses succès lui sont révélés. */
   isMe?: boolean;
+  /** Profil fictif (easter egg Rick Astley) : ces données remplacent la base,
+   *  sans photos ni actions sur les avis. */
+  fake?: { profile: PublicProfile; reviews: UserReview[] };
 }
 
 /** « septembre 2026 » : la précision du jour n'apporte rien pour une ancienneté. */
@@ -61,11 +67,18 @@ const formatDate = (iso: string) =>
  * Profil » (pour soi) et de page /profil/:id (pour les autres).
  */
 
-const UserProfileView = ({ userId, isMe = false }: Props) => {
+const UserProfileView = ({ userId, isMe = false, fake }: Props) => {
   const { nameOf } = useUserNames();
   const navigate = useNavigate();
-  const { profile, photos, remove, setCaption } = usePublicProfile(userId);
-  const { reviews, remove: removeReview } = useUserReviews(userId);
+  const { profile, photos, remove, setCaption } = usePublicProfile(
+    fake ? null : userId,
+  );
+  const { reviews, remove: removeReview } = useUserReviews(
+    fake ? null : userId,
+  );
+  // Requêtes désactivées pour un profil fictif : elles resteraient « pending ».
+  const photosPending = !fake && photos.isPending;
+  const reviewsPending = !fake && reviews.isPending;
   // Son avis en cours d'édition (même dialog que sur la fiche resto).
   const [editing, setEditing] = useState<UserReview | null>(null);
   const { sessionData } = useSession();
@@ -80,7 +93,7 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
   const { percentById, ready: statsReady } = useAchievementStats();
   const secretConditions = useSecretConditions();
 
-  const data = profile.data;
+  const data = fake?.profile ?? profile.data;
   const unlocked = (data?.achievements ?? [])
     .map((a) => ({ ...a, def: ACHIEVEMENTS_BY_ID[canonicalId(a.achievement_id)] }))
     // Un succès retiré du catalogue ne doit pas faire planter la page.
@@ -100,7 +113,7 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
   );
 
   // Tous ses avis, note seule comprise (comme sur une fiche).
-  const visibleReviews = reviews.data ?? [];
+  const visibleReviews = fake?.reviews ?? reviews.data ?? [];
 
   const deleteReview = async (review: UserReview) => {
     try {
@@ -116,7 +129,7 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
     }
   };
 
-  if (profile.isPending) {
+  if (!fake && profile.isPending) {
     return (
       <Card className="flex justify-center p-12">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
@@ -124,7 +137,7 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
     );
   }
 
-  if (profile.error || !data) {
+  if ((!fake && profile.error) || !data) {
     return (
       <Card className="p-4 sm:p-8 text-center text-sm text-foreground/55">
         Profil introuvable.
@@ -293,7 +306,7 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
       {/* Photos : les mêmes vignettes et la même visionneuse que sur une fiche
           resto, en grille 3 par ligne façon Instagram, le nom du restaurant à
           la place de celui de l'auteur. Sans photo, la section est omise. */}
-      {(photos.isPending || (photos.data ?? []).length > 0) && (
+      {(photosPending || (photos.data ?? []).length > 0) && (
         <section
           className={cn(
             SECTION,
@@ -311,7 +324,7 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
             </div>
           </div>
           <div className={SECTION_BODY}>
-            {photos.isPending ? (
+            {photosPending ? (
               <div className="flex justify-center py-6">
                 <div className="h-6 w-6 animate-spin rounded-full border-2 border-border border-t-primary" />
               </div>
@@ -345,7 +358,7 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
       {/* Avis : la même mise en forme que sur une fiche resto, le restaurant
           (vignette + nom, cliquables) à la place de l'auteur. Sans avis, la
           section est omise. */}
-      {(reviews.isPending || visibleReviews.length > 0) && (
+      {(reviewsPending || visibleReviews.length > 0) && (
         <section
           className={cn(
             SECTION,
@@ -363,7 +376,7 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
             </div>
           </div>
           <div className={SECTION_BODY_PAD}>
-            {reviews.isPending ? (
+            {reviewsPending ? (
               <div className="flex justify-center py-6">
                 <div className="h-6 w-6 animate-spin rounded-full border-2 border-border border-t-primary" />
               </div>
@@ -411,12 +424,16 @@ const UserProfileView = ({ userId, isMe = false }: Props) => {
                         </button>
                       }
                       onEdit={
-                        mine && r.restaurant?.contributions_enabled !== false
+                        !fake &&
+                        mine &&
+                        r.restaurant?.contributions_enabled !== false
                           ? () => setEditing(r)
                           : undefined
                       }
                       onDelete={
-                        mine || isAdmin ? () => deleteReview(r) : undefined
+                        !fake && (mine || isAdmin)
+                          ? () => deleteReview(r)
+                          : undefined
                       }
                     />
                   );

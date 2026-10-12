@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import BackLink from "@/components/BackLink";
@@ -6,6 +7,13 @@ import PageNotFound from "@/pages/PageNotFound";
 import useSession from "@/hooks/useSession";
 import supabaseClient from "@/services/supabaseClient";
 import { isUuid } from "@/utils/profilePath";
+import useAchievements from "@/hooks/useAchievements";
+import {
+  RICK_HANDLE,
+  RICK_ID,
+  RICK_PROFILE,
+  RICK_REVIEWS,
+} from "@/data/rickAstley";
 
 /**
  * Profil d'un collègue (/profil/:handle — le local-part de son email, ou son
@@ -15,11 +23,17 @@ import { isUuid } from "@/utils/profilePath";
 const ProfilePage = () => {
   const { handle } = useParams<{ handle: string }>();
   const { sessionData } = useSession();
+  // Rick Astley : profil fictif, rendu sans base (succès secret).
+  const isRick = handle?.toLowerCase() === RICK_HANDLE;
+  const { unlock } = useAchievements();
+  useEffect(() => {
+    if (isRick) unlock("leaderboard_rick");
+  }, [isRick, unlock]);
 
   // Pseudo → id via la table users (lisible par tout utilisateur connecté).
   const resolved = useQuery({
     queryKey: ["profile-handle", handle],
-    enabled: !!handle && !isUuid(handle),
+    enabled: !!handle && !isUuid(handle) && !isRick,
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
       const { data, error } = await supabaseClient
@@ -34,9 +48,9 @@ const ProfilePage = () => {
   });
 
   if (!handle) return <Navigate to="/restaurants" replace />;
-  const userId = isUuid(handle) ? handle : resolved.data;
+  const userId = isRick ? RICK_ID : isUuid(handle) ? handle : resolved.data;
 
-  if (!isUuid(handle) && resolved.isPending) {
+  if (!isRick && !isUuid(handle) && resolved.isPending) {
     return (
       <div className="flex justify-center py-8 sm:py-12">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
@@ -54,7 +68,15 @@ const ProfilePage = () => {
       <BackLink fallbackTo="/" fallbackLabel="Accueil" className="mb-4" />
 
       <div className="space-y-3 sm:space-y-6">
-        <UserProfileView userId={userId} isMe={isMe} />
+        <UserProfileView
+          userId={userId}
+          isMe={isMe}
+          fake={
+            isRick
+              ? { profile: RICK_PROFILE, reviews: RICK_REVIEWS }
+              : undefined
+          }
+        />
       </div>
     </div>
   );

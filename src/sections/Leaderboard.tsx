@@ -15,6 +15,7 @@ import useSession from "@/hooks/useSession";
 import useRealtimeTable from "@/hooks/useRealtimeTable";
 import useUserNames from "@/hooks/useUserNames";
 import { profilePath } from "@/utils/profilePath";
+import { isRickSearch, RICK_ROW } from "@/data/rickAstley";
 import { cn } from "@/lib/utils";
 
 type Metric = Exclude<
@@ -193,12 +194,16 @@ const Leaderboard = ({ period, search }: Props) => {
   ];
   const liveRows = sortRows<LeaderboardRow, TieKey>(
     needle
-      ? // Nom ou trigramme (celui qu'affiche le mobile).
-        byName.filter(
-          (r) =>
-            fold(nameOf(r.email)).includes(needle) ||
-            fold(trigramOf(r.email)).includes(needle),
-        )
+      ? // Nom ou trigramme (celui qu'affiche le mobile). Rick Astley,
+        // collègue fictif, ne se montre qu'à qui le cherche (succès secret).
+        [
+          ...byName.filter(
+            (r) =>
+              fold(nameOf(r.email)).includes(needle) ||
+              fold(trigramOf(r.email)).includes(needle),
+          ),
+          ...(isRickSearch(search) ? [RICK_ROW] : []),
+        ]
       : byName,
     sort,
     (r, key) =>

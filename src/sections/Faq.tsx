@@ -1,17 +1,25 @@
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { FiChevronDown } from "react-icons/fi";
 import { Card } from "@/components/ui/card";
 import { FAQ, FaqItem } from "@/data/faq";
 import { cn } from "@/lib/utils";
+import useAchievements from "@/hooks/useAchievements";
 
 /**
  * Une question qui se déplie en glissant. Bouton plutôt que <details> natif :
  * ce dernier s'ouvre d'un coup, sans transition de hauteur possible partout.
  * `aria-expanded` / `aria-controls` gardent le clavier et les lecteurs d'écran.
  */
-const FaqQuestion = ({ item }: { item: FaqItem }) => {
-  const [open, setOpen] = useState(false);
+const FaqQuestion = ({
+  item,
+  open,
+  onToggle,
+}: {
+  item: FaqItem;
+  open: boolean;
+  onToggle: () => void;
+}) => {
   const panelId = useId();
   return (
     <div>
@@ -19,7 +27,7 @@ const FaqQuestion = ({ item }: { item: FaqItem }) => {
         type="button"
         aria-expanded={open}
         aria-controls={panelId}
-        onClick={() => setOpen((o) => !o)}
+        onClick={onToggle}
         className="flex w-full cursor-pointer items-center justify-between gap-3 py-3 text-left text-sm font-medium text-card-foreground sm:text-[15px]"
       >
         {item.question}
@@ -61,34 +69,57 @@ const FaqQuestion = ({ item }: { item: FaqItem }) => {
   );
 };
 
-/** Questions fréquentes, rangées par thème. Contenu dans src/data/faq.tsx. */
-const Faq = () => (
-  <div className="tw-scope flex w-full justify-center sm:px-4">
-    <Card className="w-full max-w-2xl p-5 sm:p-8">
-      <div
-        role="heading"
-        aria-level={1}
-        className="text-center font-display text-lg font-extrabold text-card-foreground sm:text-2xl"
-      >
-        Questions fréquentes
-      </div>
+const QUESTION_COUNT = FAQ.reduce((n, s) => n + s.items.length, 0);
 
-      <div className="mt-4 space-y-6 sm:mt-6">
-        {FAQ.map((section) => (
-          <section key={section.title}>
-            <h2 className="m-0 mb-1.5 text-xs font-semibold uppercase tracking-wide text-foreground/45">
-              {section.title}
-            </h2>
-            <div className="divide-y divide-border">
-              {section.items.map((item) => (
-                <FaqQuestion key={item.question} item={item} />
-              ))}
-            </div>
-          </section>
-        ))}
-      </div>
-    </Card>
-  </div>
-);
+/** Questions fréquentes, rangées par thème. Contenu dans src/data/faq.tsx. */
+const Faq = () => {
+  // Questions ouvertes, tenues ici : toutes ouvertes en même temps débloque
+  // « Tiré par les cheveux » (succès secret).
+  const [opened, setOpened] = useState<Set<string>>(new Set());
+  const { unlock } = useAchievements();
+  useEffect(() => {
+    if (opened.size === QUESTION_COUNT) unlock("faq_all_open");
+  }, [opened, unlock]);
+  const toggle = (question: string) =>
+    setOpened((prev) => {
+      const next = new Set(prev);
+      if (!next.delete(question)) next.add(question);
+      return next;
+    });
+
+  return (
+    <div className="tw-scope flex w-full justify-center sm:px-4">
+      <Card className="w-full max-w-2xl p-5 sm:p-8">
+        <div
+          role="heading"
+          aria-level={1}
+          className="text-center font-display text-lg font-extrabold text-card-foreground sm:text-2xl"
+        >
+          Questions fréquentes
+        </div>
+
+        <div className="mt-4 space-y-6 sm:mt-6">
+          {FAQ.map((section) => (
+            <section key={section.title}>
+              <h2 className="m-0 mb-1.5 text-xs font-semibold uppercase tracking-wide text-foreground/45">
+                {section.title}
+              </h2>
+              <div className="divide-y divide-border">
+                {section.items.map((item) => (
+                  <FaqQuestion
+                    key={item.question}
+                    item={item}
+                    open={opened.has(item.question)}
+                    onToggle={() => toggle(item.question)}
+                  />
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      </Card>
+    </div>
+  );
+};
 
 export default Faq;

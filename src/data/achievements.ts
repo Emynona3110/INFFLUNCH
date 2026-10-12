@@ -54,6 +54,8 @@ export type AchievementId =
   | "star_cursor"
   | "privacy_cookie"
   | "feedback_open"
+  | "faq_all_open"
+  | "leaderboard_rick"
   // Méta / assiduité
   | "login_streak_5"
   | "lunch_streak_5"
@@ -455,6 +457,29 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     reference: "Nemo",
     referenceWork: "Le Monde de Nemo",
     referenceImage: "/achievements/sources/nemo.webp",
+    secret: true,
+  },
+  {
+    // Rémy tire les cheveux de Linguini pour le guider (Ratatouille) : ouvrir
+    // toutes les questions de la FAQ en même temps (Faq.tsx).
+    id: "faq_all_open",
+    title: "Tiré par les cheveux",
+    icon: "🐀",
+    image: "/achievements/remy.svg",
+    reference: "Rémy",
+    referenceWork: "Ratatouille",
+    secret: true,
+  },
+  {
+    // Profil fictif de Rick Astley, qui n'apparaît qu'en le cherchant dans le
+    // classement (Leaderboard.tsx, data/rickAstley.ts) ; l'ouvrir débloque.
+    id: "leaderboard_rick",
+    title: "Rickroll",
+    icon: "🎤",
+    image: "/achievements/rick_astley.svg",
+    reference: "Rick Astley",
+    referenceWork: "Never Gonna Give You Up",
+    referenceImage: "/achievements/sources/rick_astley.webp",
     secret: true,
   },
 
