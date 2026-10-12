@@ -238,6 +238,13 @@ const RestaurantsMap = ({ restaurants }: Props) => {
                 key={cluster.id}
                 position={[cluster.lat, cluster.lng]}
                 icon={clusterIcon(cluster.items.length)}
+                // Pas de focus clavier sur les marqueurs : cliqué, un marqueur
+                // prend le focus, et Leaflet referme sa bulle quand il le perd
+                // (blur). Or cliquer DANS la bulle rend le focus à la carte :
+                // la liste d'un groupe se refermait sous le doigt, avant que
+                // le clic n'atteigne le resto choisi (la fiche ne s'ouvrait
+                // pas). Même piège pour la bulle épinglée d'un pin, sur mobile.
+                keyboard={false}
                 eventHandlers={{
                   click: () => setOpenCluster(listed ? null : cluster.id),
                 }}
@@ -312,6 +319,7 @@ const RestaurantsMap = ({ restaurants }: Props) => {
               key={r.id}
               position={[r.lat as number, r.lng as number]}
               icon={pinIcon("#f79220")}
+              keyboard={false}
               eventHandlers={{
                 click: () => {
                   if (isTouch && !active) setActiveId(r.id);
