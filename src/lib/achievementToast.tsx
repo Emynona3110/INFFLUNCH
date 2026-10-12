@@ -28,7 +28,7 @@ export function showAchievementToast(a: Achievement, onClick?: () => void) {
       >
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-2xl">
           {a.image ? (
-            <img src={a.image} alt="" className="h-9 w-9 object-contain" />
+            <img src={a.image} alt="" className="h-full w-full object-contain p-0.5" />
           ) : (
             a.icon
           )}

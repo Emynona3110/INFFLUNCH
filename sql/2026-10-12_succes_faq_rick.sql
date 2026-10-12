@@ -9,6 +9,6 @@
 -- =============================================================================
 
 insert into public.achievement_secrets (id, condition) values
-  ('faq_all_open',     'Ouvrir toutes les questions de la FAQ en même temps'),
+  ('faq_all_open',     'Ouvrir toutes les questions de la FAQ'),
   ('leaderboard_rick', 'Retrouver Rick Astley dans le classement')
 on conflict (id) do update set condition = excluded.condition;
