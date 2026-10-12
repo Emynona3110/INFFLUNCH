@@ -1,10 +1,10 @@
 # Registre des activités de traitement — INFFLUNCH
 
-Tenu au titre de l'art. 30 RGPD (modèle simplifié CNIL). Dernière mise à jour : 2026-10-08.
+Tenu au titre de l'art. 30 RGPD (modèle simplifié CNIL). Dernière mise à jour : 2026-10-12.
 
 **Responsable du traitement** : Lucas Lambrechts (« LLS », éditeur non professionnel, initiative personnelle) — contact@infflunch.com. Pas de DPO, pas de représentant.
-**Sous-traitants** : Supabase Inc. (base, auth, storage — eu-west-1, Irlande) · Render Services, Inc. (hébergement statique, États-Unis) · Cloudflare (Turnstile, page d'inscription) · IONOS (domaine + redirection de `contact@infflunch.com` vers la boîte pro de l'éditeur, UE).
-**Transferts hors UE** : Render / Cloudflare — États-Unis (Data Privacy Framework). Aucune donnée de compte n'y est stockée : le site statique et le CAPTCHA ne reçoivent que l'IP / navigateur.
+**Sous-traitants** : Supabase Inc. (base, auth, storage — eu-west-1, Irlande) · Render Services, Inc. (hébergement statique, États-Unis) · Cloudflare (Turnstile, page d'inscription) · Google / YouTube (lecteur vidéo intégré, chargé à l'ouverture de la page qui le contient — profil fictif de l'easter egg Rick Astley —, domaine youtube-nocookie.com : IP / navigateur) · IONOS (domaine + redirection de `contact@infflunch.com` vers la boîte pro de l'éditeur, UE).
+**Transferts hors UE** : Render / Cloudflare / Google (YouTube, à l'affichage du lecteur) — États-Unis (Data Privacy Framework). Aucune donnée de compte n'y est stockée : le site statique et le CAPTCHA ne reçoivent que l'IP / navigateur.
 **Mesures de sécurité** : HTTPS, RLS Supabase (lectures réservées aux comptes authentifiés, écritures own/admin), mots de passe hachés (Supabase Auth), comptes créés manuellement par l'admin (domaine @infflux.com), clé service_role réservée aux Edge Functions.
 
 ---

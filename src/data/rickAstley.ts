@@ -5,7 +5,6 @@
 import { ACHIEVEMENTS } from "@/data/achievements";
 import type { LeaderboardRow } from "@/hooks/useLeaderboard";
 import type { PublicProfile } from "@/hooks/usePublicProfile";
-import type { UserReview } from "@/hooks/useUserReviews";
 
 /** Même convention que les vrais comptes : « R.Astley », trigramme « RAY ». */
 export const RICK_EMAIL = "rastley@infflux.com";
@@ -27,8 +26,12 @@ export const isRickSearch = (search: string) => {
   );
 };
 
+/** Sortie du single au Royaume-Uni. */
 const SINCE = "1987-07-27T12:00:00Z";
-const STREAK = 14000;
+/** Série = jours écoulés depuis la sortie : il ne l'a jamais lâchée. */
+const STREAK = Math.floor((Date.now() - Date.parse(SINCE)) / 86_400_000);
+/** Photos = mois de sortie (juillet). */
+const PHOTOS = 7;
 
 export const RICK_ROW: LeaderboardRow = {
   user_id: RICK_ID,
@@ -37,7 +40,7 @@ export const RICK_ROW: LeaderboardRow = {
   streak: STREAK,
   lunches: STREAK,
   reviews: 1987,
-  photos: 87,
+  photos: PHOTOS,
   achievements: ACHIEVEMENTS.length,
 };
 
@@ -47,7 +50,7 @@ export const RICK_PROFILE: PublicProfile = {
   avatar_path: RICK_AVATAR,
   member_since: SINCE,
   reviews_count: 1987,
-  photos_count: 87,
+  photos_count: PHOTOS,
   lunches_count: STREAK,
   lunch_streak: STREAK,
   achievements: ACHIEVEMENTS.map((a) => ({
@@ -56,23 +59,8 @@ export const RICK_PROFILE: PublicProfile = {
   })),
 };
 
-/** Son unique avis visible, sur un resto qui n'existe pas (le lien mène au
- *  mouton : slug inconnu). */
-export const RICK_REVIEWS: UserReview[] = [
-  {
-    id: -1,
-    restaurant_id: -1,
-    user_id: RICK_ID,
-    rating: 5,
-    comment:
-      "Je ne laisserai jamais tomber cette adresse. Jamais. Et je ne vous mentirai jamais : c'est le meilleur burger depuis 1987.",
-    created_at: SINCE,
-    updated_at: SINCE,
-    restaurant: {
-      name: "Rick's Diner",
-      slug: "ricks-diner",
-      image: null,
-      contributions_enabled: false,
-    },
-  },
-];
+/** Le clip, à la place des succès et des avis (lancé d'office). */
+export const RICK_VIDEO = {
+  id: "dQw4w9WgXcQ",
+  title: "Rick Astley - Never Gonna Give You Up",
+};

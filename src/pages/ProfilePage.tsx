@@ -12,7 +12,7 @@ import {
   RICK_HANDLE,
   RICK_ID,
   RICK_PROFILE,
-  RICK_REVIEWS,
+  RICK_VIDEO,
 } from "@/data/rickAstley";
 
 /**
@@ -73,7 +73,7 @@ const ProfilePage = () => {
           isMe={isMe}
           fake={
             isRick
-              ? { profile: RICK_PROFILE, reviews: RICK_REVIEWS }
+              ? { profile: RICK_PROFILE, video: RICK_VIDEO }
               : undefined
           }
         />

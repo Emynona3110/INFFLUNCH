@@ -25,7 +25,7 @@ const EDITOR_NAME = "LLS";
  * seuls collègues connectés — les personnes concernées au sens du RGPD. Le
  * public (et le bundle JS) ne voit que le pseudonyme : anonymat LCEN préservé.
  */
-const LAST_UPDATE = "11 octobre 2026";
+const LAST_UPDATE = "12 octobre 2026";
 
 const HOST = {
   name: "Render Services, Inc.",
@@ -265,7 +265,8 @@ const Confidentialite = () => {
           stockage — Union européenne), Render (hébergement du site), Cloudflare
           (Turnstile, anti-robots sur la page d'inscription : adresse IP et
           caractéristiques du navigateur), OpenStreetMap (chargement des fonds
-          de carte : adresse IP). Aucune donnée n'est vendue ni utilisée à des
+          de carte : adresse IP), YouTube (lecteur vidéo intégré à certaines
+          pages : adresse IP). Aucune donnée n'est vendue ni utilisée à des
           fins publicitaires.
         </p>
       </Section>
@@ -273,8 +274,8 @@ const Confidentialite = () => {
       <Section title="Transferts hors Union européenne">
         <p>
           Tes données de compte et contributions restent dans l'Union européenne
-          (Supabase, Irlande). Render et Cloudflare sont des sociétés
-          américaines : les données techniques qu'ils traitent peuvent être
+          (Supabase, Irlande). Render, Cloudflare et YouTube (Google) sont des
+          sociétés américaines : les données techniques qu'ils traitent peuvent être
           transférées aux États-Unis, dans le cadre du Data Privacy Framework
           UE-États-Unis ou, à défaut, des clauses contractuelles types de la
           Commission européenne.

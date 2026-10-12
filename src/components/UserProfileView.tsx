@@ -32,6 +32,7 @@ import {
 import useUserNames from "@/hooks/useUserNames";
 import { cn } from "@/lib/utils";
 import RareRing from "@/components/RareRing";
+import YoutubeEmbed from "@/components/YoutubeEmbed";
 import {
   SECTION,
   SECTION_HEAD,
@@ -45,9 +46,12 @@ interface Props {
   userId: string;
   /** Profil de l'utilisateur connecté : tous ses succès lui sont révélés. */
   isMe?: boolean;
-  /** Profil fictif (easter egg Rick Astley) : ces données remplacent la base,
-   *  sans photos ni actions sur les avis. */
-  fake?: { profile: PublicProfile; reviews: UserReview[] };
+  /** Profil fictif (easter egg Rick Astley) : ces données remplacent la base ;
+   *  une vidéo tient lieu de succès, photos et avis. */
+  fake?: {
+    profile: PublicProfile;
+    video: { id: string; title: string };
+  };
 }
 
 /** « septembre 2026 » : la précision du jour n'apporte rien pour une ancienneté. */
@@ -113,7 +117,7 @@ const UserProfileView = ({ userId, isMe = false, fake }: Props) => {
   );
 
   // Tous ses avis, note seule comprise (comme sur une fiche).
-  const visibleReviews = fake?.reviews ?? reviews.data ?? [];
+  const visibleReviews = fake ? [] : (reviews.data ?? []);
 
   const deleteReview = async (review: UserReview) => {
     try {
@@ -196,7 +200,14 @@ const UserProfileView = ({ userId, isMe = false, fake }: Props) => {
 
       {/* Succès obtenus par la personne. Ce qu'on en voit dépend du visiteur :
           le contenu d'un succès ne se dévoile qu'à qui l'a lui-même décroché. */}
-      {unlocked.length > 0 && (
+      {/* Le clip, bord à bord dans sa carte (sans marge intérieure). */}
+      {fake && (
+        <Card className="overflow-hidden p-0">
+          <YoutubeEmbed videoId={fake.video.id} title={fake.video.title} />
+        </Card>
+      )}
+
+      {!fake && unlocked.length > 0 && (
         <section
           className={cn(
             SECTION,
