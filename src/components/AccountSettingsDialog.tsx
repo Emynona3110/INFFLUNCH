@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FiCamera, FiTrash2, FiX } from "react-icons/fi";
 import { cn } from "@/lib/utils";
@@ -22,12 +21,11 @@ interface Props {
 
 /**
  * Réglages du compte (ex-sous-onglet « Compte » de Mon compte) : photo de
- * profil, thème, notifications (admin), mot de passe, déconnexion. Ouvert par
- * le rouage de la navbar, depuis n'importe quelle page.
+ * profil, thème, notifications (admin), mot de passe. Ouvert depuis le menu
+ * du compte (photo de profil de la navbar), qui porte aussi la déconnexion.
  */
 const AccountSettingsDialog = ({ open, onClose }: Props) => {
-  const navigate = useNavigate();
-  const { sessionData, signOut, error } = useSession();
+  const { sessionData } = useSession();
   const { profile, uploadAvatar, removeAvatar } = useProfile();
   const isAdmin = useIsAdmin();
 
@@ -42,20 +40,6 @@ const AccountSettingsDialog = ({ open, onClose }: Props) => {
 
   const email = sessionData?.user?.email;
   const hasAvatar = !!profile?.avatar_path;
-
-  const handleLogout = async () => {
-    await signOut();
-    if (error) {
-      toast({
-        title: "Erreur de déconnexion",
-        description: error,
-        status: "error",
-        duration: 3000,
-      });
-    } else {
-      navigate("/login");
-    }
-  };
 
   const handlePick = async (file?: File) => {
     if (!file) return;
@@ -194,9 +178,6 @@ taille, et absorbe les clics tant qu'on reste sur ce sous-onglet. */}
           {isAdmin && <PushToggle />}
           <Button variant="outline" onClick={() => setDialogOpen(true)}>
             Changer le mot de passe
-          </Button>
-          <Button variant="destructiveSoft" onClick={handleLogout}>
-            Se déconnecter
           </Button>
         </div>
       </Dialog>

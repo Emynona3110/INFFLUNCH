@@ -8,6 +8,7 @@ import {
   FiUser,
   FiShield,
   FiLogOut,
+  FiBookOpen,
 } from "react-icons/fi";
 import { LuMegaphone } from "react-icons/lu";
 import AccountSettingsDialog from "./AccountSettingsDialog";
@@ -24,6 +25,7 @@ import RestaurantDialog from "@/admin/Dialogs/RestaurantDialog";
 import ChefHatPlus from "./icons/ChefHatPlus";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import { toast } from "@/lib/toast";
 import { Tooltip } from "@/components/ui/tooltip";
 import useIsAdmin from "../hooks/useIsAdmin";
 import useAdminPending from "../hooks/useAdminPending";
@@ -345,10 +347,15 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
         </Tooltip>
         <NavMenu
           label="Aide"
-          active={page === "a-propos"}
+          active={page === "faq" || page === "a-propos"}
           items={[
             {
-              label: "Un souci, une idée ?",
+              label: "FAQ",
+              icon: <FiBookOpen />,
+              onSelect: () => setPage("faq"),
+            },
+            {
+              label: "Demande",
               icon: <FiMessageSquare />,
               onSelect: () => setFeedbackOpen(true),
             },
@@ -399,8 +406,15 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
               label: "Se déconnecter",
               icon: <FiLogOut />,
               onSelect: async () => {
-                await signOut();
-                navigate("/login");
+                const error = await signOut();
+                if (error)
+                  toast({
+                    title: "Erreur de déconnexion",
+                    description: error,
+                    status: "error",
+                    duration: 3000,
+                  });
+                else navigate("/login");
               },
             },
           ]}
