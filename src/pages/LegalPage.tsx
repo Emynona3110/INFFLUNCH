@@ -1,5 +1,4 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { FiSettings } from "react-icons/fi";
 import Layout from "../components/Layout";
 import CookieWord from "@/components/CookieWord";
 import { Card } from "@/components/ui/card";
@@ -228,7 +227,7 @@ const Confidentialite = () => {
             </span>{" "}
             : textes et images que tu envoies via « Compte › Demandes », et les
             échanges qui s'ensuivent avec l'administrateur — pour améliorer le
-            site ; restaurants que tu proposes (« Compte › Ajouts ») et
+            site ; restaurants que tu proposes (« Compte › Restos ») et
             la réponse de l'administrateur — pour compléter le catalogue.
           </li>
           <li>
@@ -253,12 +252,7 @@ const Confidentialite = () => {
           relèvent de l'intérêt légitime de l'éditeur à faire fonctionner et
           sécuriser le site ; les notifications push reposent sur le
           consentement de l'administrateur, retirable à tout moment dans les
-          réglages (
-          <FiSettings
-            aria-label="Réglages"
-            className="inline h-3.5 w-3.5 align-[-2px]"
-          />
-          ). Seul l'e-mail est indispensable : sans lui, pas de compte. Tout le
+          Réglages (photo de profil, en haut à droite). Seul l'e-mail est indispensable : sans lui, pas de compte. Tout le
           reste (photo de profil, avis, photos, menus, demandes…) est
           facultatif.
         </p>
@@ -316,9 +310,9 @@ const Confidentialite = () => {
         <p>
           Tu peux accéder à tes données, les rectifier, demander leur effacement
           ou la limitation du traitement, et t'opposer à certains traitements.
-          Tu modifies toi-même ton avatar et ton mot de passe dans « Compte ›
-          Profil », tes avis dans « Compte › Avis », tes photos depuis la fiche
-          du restaurant ; pour le reste (dont la suppression du compte),
+          Tu modifies toi-même ta photo de profil et ton mot de passe dans les
+          Réglages (photo de profil, en haut à droite), tes avis et tes photos
+          depuis la fiche du restaurant ; pour le reste (dont la suppression du compte),
           contacte l'éditeur (<Contact />
           ).
         </p>

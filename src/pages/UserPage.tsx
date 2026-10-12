@@ -15,6 +15,7 @@ import { SortOrder } from "../components/SortSelector";
 import { DEFAULT_PRICE_FILTER, PriceRangeFilter } from "../services/price";
 import MyAccount from "../sections/MyAccount";
 import About from "../sections/About";
+import Faq from "../sections/Faq";
 import Nouveautes from "../sections/Nouveautes";
 import LunchToday from "../sections/LunchToday";
 import Leaderboard from "../sections/Leaderboard";
@@ -43,6 +44,7 @@ export const buildUserSections = (isAdmin: boolean) => [
   ...(isAdmin ? [{ label: "Admin", path: "admin", tab: false }] : []),
   { label: "Nouveautés", path: "nouveautes", tab: false },
   { label: "Compte", path: "mon-compte", tab: false },
+  { label: "FAQ", path: "faq", tab: false },
   { label: "À propos", path: "a-propos", tab: false },
 ];
 
@@ -267,6 +269,7 @@ const UserPage = () => {
           <Route path="restaurant/:slug" element={<RestaurantPage />} />
           <Route path="profil/:handle" element={<ProfilePage />} />
           <Route path="mon-compte" element={<MyAccount />} />
+          <Route path="faq" element={<Faq />} />
           <Route path="a-propos" element={<About />} />
           <Route path="nouveautes" element={<Nouveautes />} />
           {/* Pages admin sous /admin/* derrière un garde unique. */}

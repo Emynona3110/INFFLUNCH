@@ -66,6 +66,9 @@ const useSession = () => {
     }
 
     setLoading(false);
+    // Rendu à l'appelant : l'état `error` n'est pas encore à jour juste après
+    // l'await, il ne peut pas s'y fier pour afficher l'échec.
+    return error?.message ?? null;
   };
 
   return {

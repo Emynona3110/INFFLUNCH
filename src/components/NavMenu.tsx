@@ -81,7 +81,7 @@ const NavMenu = ({ label, children, items, dot, active, className }: Props) => {
             exit={{ opacity: 0, scale: 0.95, y: -4 }}
             transition={{ duration: 0.14, ease: "easeOut" }}
             style={{ originX: 1, originY: 0 }}
-            className="absolute right-0 top-full z-30 mt-1.5 flex min-w-48 flex-col gap-0.5 rounded-2xl border border-border bg-card p-1 shadow-lg"
+            className="absolute right-0 top-full z-30 mt-1.5 flex w-max flex-col gap-0.5 rounded-2xl border border-border bg-card p-1 shadow-lg"
           >
             {items.map((item) => (
               <button
@@ -94,10 +94,10 @@ const NavMenu = ({ label, children, items, dot, active, className }: Props) => {
                   setOpen(false);
                   item.onSelect();
                 }}
-                className="flex w-full cursor-pointer items-center gap-2.5 whitespace-nowrap rounded-xl px-3 py-2 text-left text-sm font-medium text-card-foreground transition hover:bg-muted"
+                className="flex w-full cursor-pointer items-center gap-2.5 whitespace-nowrap rounded-xl pl-3 pr-5 py-2 text-left text-sm font-medium text-card-foreground transition hover:bg-muted"
               >
                 {item.icon && (
-                  <span className="flex h-4 w-4 shrink-0 items-center justify-center text-foreground/50 [&>svg]:h-4 [&>svg]:w-4">
+                  <span className="flex h-4 w-4 shrink-0 items-center justify-center text-foreground opacity-50 [&>svg]:h-4 [&>svg]:w-4">
                     {item.icon}
                   </span>
                 )}
