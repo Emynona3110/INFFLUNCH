@@ -5,7 +5,7 @@ import useSession from "@/hooks/useSession";
 // Soulignés en permanence : en gris clair, c'est ce qui les distingue de la
 // mention « Infflunch 2026 », qui n'est pas cliquable.
 const linkCls =
-  "text-inherit underline underline-offset-2 decoration-foreground/25 visited:text-inherit hover:text-foreground hover:decoration-foreground/60";
+  "text-inherit underline underline-offset-2 decoration-foreground/25 transition-colors duration-200 visited:text-inherit hover:text-foreground hover:decoration-foreground/60";
 
 /**
  * Pied de page présent sur TOUS les écrans (mentions légales obligatoires dès
