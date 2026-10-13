@@ -25,8 +25,8 @@ self.addEventListener("push", (event) => {
   const title = payload.title || "INFFLUNCH";
   const options = {
     body: payload.body || "",
-    icon: "/icons/icon-192-v2.png",
-    badge: "/icons/icon-192-v2.png",
+    icon: "/icons/icon-192-v3.png",
+    badge: "/icons/icon-192-v3.png",
     // Même tag → une notification en remplace une autre au lieu d'empiler.
     tag: payload.tag || "infflunch",
     renotify: true,
