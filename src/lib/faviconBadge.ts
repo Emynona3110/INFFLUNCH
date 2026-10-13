@@ -1,4 +1,4 @@
-import rawIcon from "@/assets/bg-infflux.svg?raw";
+import rawIcon from "@/assets/brand/infflunch-favicon.svg?raw";
 
 /**
  * Pastille sur l'icône d'onglet du navigateur : dès qu'une puce est affichée

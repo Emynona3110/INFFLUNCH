@@ -17,8 +17,12 @@ import NavMenu from "./NavMenu";
 import useSession from "../hooks/useSession";
 import useProfile from "../hooks/useProfile";
 import { AnimatePresence, motion } from "framer-motion";
-import darkLogo from "../assets/infflux.svg";
-import lightLogo from "../assets/w-infflux.svg";
+import monogram from "../assets/brand/infflunch-monogramme.svg";
+import monogramWhite from "../assets/brand/infflunch-monogramme-blanc.svg";
+import logotype from "../assets/brand/infflunch-logotype.svg";
+import logotypeWhite from "../assets/brand/infflunch-logotype-blanc.svg";
+import adminLogotype from "../assets/brand/adminfflunch-logotype.svg";
+import adminLogotypeWhite from "../assets/brand/adminfflunch-logotype-blanc.svg";
 import FeedbackDialog from "./FeedbackDialog";
 import ProposeRestaurantDialog from "./ProposeRestaurantDialog";
 import RestaurantDialog from "@/admin/Dialogs/RestaurantDialog";
@@ -63,6 +67,7 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
   // collaborateur la propose.
   const [addOpen, setAddOpen] = useState(false);
   const isAdmin = useIsAdmin();
+  const brand = isAdmin ? "ADMINFFLUNCH" : "INFFLUNCH";
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const sections = buildUserSections(isAdmin);
@@ -162,18 +167,15 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
             setPage("restaurants");
           }}
         >
-          <img
-            src={darkLogo}
-            alt=""
-            className="block h-7 w-7 dark:hidden sm:h-8 sm:w-8"
-          />
-          <img
-            src={lightLogo}
-            alt=""
-            className="hidden h-7 w-7 dark:block sm:h-8 sm:w-8"
-          />
-          <span className="ml-1 mr-4 hidden font-display text-lg font-extrabold text-[#113894] dark:text-white xl:block">
-            {isAdmin ? "ADMINFFLUNCH" : "INFFLUNCH"}
+          {/* Monogramme sous xl, logotype complet au-delà (ADMINFFLUNCH pour
+              les admins) ; version blanche en thème sombre. */}
+          <span className="contents dark:hidden">
+            <img src={monogram} alt={brand} className="block h-7 w-auto sm:h-8 xl:hidden" />
+            <img src={isAdmin ? adminLogotype : logotype} alt={brand} className="mr-2 hidden h-7 w-auto xl:block" />
+          </span>
+          <span className="hidden dark:contents">
+            <img src={monogramWhite} alt={brand} className="block h-7 w-auto sm:h-8 xl:hidden" />
+            <img src={isAdmin ? adminLogotypeWhite : logotypeWhite} alt={brand} className="mr-2 hidden h-7 w-auto xl:block" />
           </span>
         </div>
 
@@ -189,10 +191,10 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
                   // Données de l'onglet chargées dès le survol.
                   onMouseEnter={() => prefetchSection(item.path)}
                   className={cn(
-                    "relative flex h-full cursor-pointer items-center text-lg transition",
+                    "relative flex h-full cursor-pointer items-center font-display text-lg font-medium transition",
                     isActive
                       ? "text-primary"
-                      : "text-foreground/50 hover:text-foreground",
+                      : "text-foreground/65 hover:text-foreground",
                   )}
                 >
                   {/* Calque fantôme gras : réserve la largeur → pas de saut d'1px.
@@ -294,7 +296,7 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
                           setPage(item.path);
                           setMenuOpen(false);
                         }}
-                        className="relative flex h-8 items-center justify-center whitespace-nowrap rounded-full bg-card px-3 text-sm font-medium text-foreground/80 shadow-sm"
+                        className="relative flex h-8 items-center justify-center whitespace-nowrap rounded-full bg-card px-3 font-display text-sm font-medium text-foreground/80 shadow-sm"
                       >
                         {item.label}
                         {dot && (
