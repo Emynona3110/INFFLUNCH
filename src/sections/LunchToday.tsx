@@ -329,7 +329,9 @@ const LunchToday = () => {
       className="tw-scope mx-auto w-full max-w-2xl"
     >
       {/* Entête : le jour + le compteur, qui « pope » à chaque arrivée. */}
-      <div className="mb-2.5 flex items-end justify-between gap-4 sm:mb-5">
+      {/* `items-baseline-last` : le compteur s'aligne sur la DERNIÈRE ligne de
+          gauche (la date), pas sur le titre. */}
+      <div className="mb-2.5 flex items-baseline-last justify-between gap-4 sm:mb-5">
         <div>
           <div
             role="heading"
@@ -341,15 +343,15 @@ const LunchToday = () => {
           <p className="mb-0 mt-0.5 text-[13px] text-foreground/55 sm:text-sm">{todayLabel()}</p>
         </div>
 
-        {/* `items-end` et non `items-baseline` : une boîte qui rogne son
-            dépassement (le défilé du chiffre) pose sa baseline sur son bord
-            bas, le mot se serait désaligné. Les deux `leading-none` font le
-            reste. */}
+        {/* Alignés sur la ligne de base de la date. `overflow-clip` et non
+            `overflow-hidden` pour rogner le défilé du chiffre : une boîte
+            `hidden` pose sa ligne de base sur son bord bas (le chiffre
+            remontait de la hauteur de sa descente), `clip` garde celle du texte. */}
         {registered.length > 0 && (
-          <div className="flex shrink-0 items-end gap-1.5">
+          <div className="flex shrink-0 items-baseline gap-1.5">
             <RollingNumber
               value={registered.length}
-              className="font-display text-2xl font-extrabold leading-none text-primary sm:text-3xl"
+              className="overflow-clip font-display text-2xl font-extrabold leading-none text-primary sm:text-3xl"
             />
             <span className="text-sm leading-none text-foreground/55">
               inscrit{registered.length > 1 ? "s" : ""}
