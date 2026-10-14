@@ -183,9 +183,12 @@ const AchievementsGallery = () => {
                       aria-label={`Détails du succès ${a.title}`}
                       className="absolute inset-0 cursor-pointer rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                     />
+                    {/* `pointer-events-none` : positionnée (aura des succès
+                        rares, image), l'illustration passerait au-dessus du
+                        bouton de la tuile et avalerait le clic. */}
                     <div
                       className={cn(
-                        "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-xl sm:h-14 sm:w-14 sm:text-3xl",
+                        "pointer-events-none flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-xl sm:h-14 sm:w-14 sm:text-3xl",
                         // Cadre coloré uniquement pour les emojis ; les images
                         // occupent tout l'espace sans fond.
                         unlocked && !a.image && "bg-primary/10",
