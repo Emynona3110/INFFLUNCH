@@ -135,7 +135,7 @@ const BadgeDialog = ({ isOpen, onClose, onSuccess, initialData }: BadgeDialogPro
     (!!initialData && formatLabel(label) === original);
 
   return (
-    <Dialog open={isOpen} onClose={onClose}>
+    <Dialog open={isOpen} onClose={onClose} busy={isSubmitting}>
       <DialogTitle>{initialData ? "Modifier un badge" : "Ajouter un badge"}</DialogTitle>
 
       <form

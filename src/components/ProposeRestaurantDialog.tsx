@@ -165,7 +165,7 @@ const ProposeRestaurantDialog = ({
   };
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className="max-w-2xl">
+    <Dialog open={isOpen} onClose={onClose} className="max-w-2xl" busy={busy}>
       <DialogTitle>{item ? "Modifier la proposition" : "Proposer un restaurant"}</DialogTitle>
 
       <div className="mt-4 space-y-4 sm:mt-5">

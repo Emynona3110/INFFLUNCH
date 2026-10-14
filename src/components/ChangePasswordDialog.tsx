@@ -79,7 +79,7 @@ const ChangePasswordDialog = ({ isOpen, onClose }: ChangePasswordDialogProps) =>
   };
 
   return (
-    <Dialog open={isOpen} onClose={handleClose}>
+    <Dialog open={isOpen} onClose={handleClose} busy={isLoading}>
       <DialogTitle>Changer le mot de passe</DialogTitle>
 
       <form

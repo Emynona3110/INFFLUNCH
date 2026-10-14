@@ -153,7 +153,7 @@ const FeedbackDialog = ({ isOpen, onClose, item }: Props) => {
   };
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className="max-w-lg">
+    <Dialog open={isOpen} onClose={onClose} className="max-w-lg" busy={busy}>
       <DialogTitle>
         {item
           ? "Modifier la demande"

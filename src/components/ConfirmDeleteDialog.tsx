@@ -49,7 +49,8 @@ const ConfirmDeleteDialog = ({
   return (
     <Dialog
       open={open}
-      onClose={busy ? () => {} : onClose}
+      onClose={onClose}
+      busy={busy}
     >
       <DialogTitle>{title}</DialogTitle>
       {description && (

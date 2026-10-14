@@ -597,7 +597,12 @@ const RestaurantDialog = ({
 
   return (
     <>
-    <Dialog open={isOpen} onClose={onClose} className="max-w-3xl">
+    <Dialog
+      open={isOpen}
+      onClose={onClose}
+      className="max-w-3xl"
+      busy={isSubmitting || locationLoading || isDeleting}
+    >
       <DialogTitle>
         {initialData?.id ? "Modifier un restaurant" : "Ajouter un restaurant"}
       </DialogTitle>

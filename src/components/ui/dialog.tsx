@@ -1,6 +1,8 @@
 import { ReactNode, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { FiX } from "react-icons/fi";
+import { AnimatePresence, motion } from "framer-motion";
+import PageLoader from "@/components/brand/PageLoader";
 import { cn } from "@/lib/utils";
 
 interface DialogProps {
@@ -13,6 +15,10 @@ interface DialogProps {
   /** Croix en haut à droite : pour les popups de LECTURE, où un bouton
    *  « Fermer » en bas serait de trop. Les formulaires gardent Annuler. */
   showClose?: boolean;
+  /** Action bloquante en cours (enregistrement, envoi…) : voile aux couleurs
+   *  du thème + monogramme animé par-dessus la popup ; Échap et clic
+   *  extérieur ne ferment plus. */
+  busy?: boolean;
 }
 
 /**
@@ -31,22 +37,23 @@ export function Dialog({
   className,
   closeOnOverlayClick = false,
   showClose = false,
+  busy = false,
 }: DialogProps) {
   useEffect(() => {
-    if (!open) return;
+    if (!open || busy) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  }, [open, onClose, busy]);
 
   if (!open) return null;
 
   return createPortal(
     <div
       className="tw-scope fixed inset-0 z-[1100] flex justify-center overflow-y-auto bg-black/50 p-2.5 sm:p-4"
-      onClick={closeOnOverlayClick ? onClose : undefined}
+      onClick={closeOnOverlayClick && !busy ? onClose : undefined}
     >
       <div
         role="dialog"
@@ -68,6 +75,21 @@ export function Dialog({
           </button>
         )}
         {children}
+        {/* Le voile bloque les clics dès le départ, mais n'apparaît qu'après
+            un court délai : une action rapide ne le fait pas clignoter. */}
+        <AnimatePresence>
+          {busy && (
+            <motion.div
+              key="busy"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, transition: { delay: 0.75, duration: 0.25 } }}
+              exit={{ opacity: 0, transition: { duration: 0.25 } }}
+              className="absolute inset-0 z-20 flex items-center justify-center rounded-[inherit] bg-card/75"
+            >
+              <PageLoader delay={0} />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>,
     document.body

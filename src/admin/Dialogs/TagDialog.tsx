@@ -133,7 +133,7 @@ const TagDialog = ({ isOpen, onClose, onSuccess, initialData }: TagDialogProps) 
   const hint = TAG_CATEGORIES.find((c) => c.value === category)?.hint;
 
   return (
-    <Dialog open={isOpen} onClose={onClose}>
+    <Dialog open={isOpen} onClose={onClose} busy={isSubmitting}>
       <DialogTitle>{initialData ? "Modifier un tag" : "Ajouter un tag"}</DialogTitle>
 
       <form

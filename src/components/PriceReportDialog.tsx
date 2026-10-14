@@ -191,7 +191,7 @@ export default function PriceReportDialog({
   };
 
   return (
-    <Dialog open={isOpen} onClose={onClose}>
+    <Dialog open={isOpen} onClose={onClose} busy={saving}>
       <DialogTitle>Combien dépenses-tu ici ?</DialogTitle>
 
       <p className="mt-2 text-sm text-foreground/60">

@@ -109,7 +109,7 @@ const AdminNoteDialog = ({
   };
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className="max-w-lg">
+    <Dialog open={isOpen} onClose={onClose} className="max-w-lg" busy={busy}>
       <DialogTitle>{note ? "Modifier la note" : "Nouvelle note"}</DialogTitle>
 
       <div className="mt-4 sm:mt-5 space-y-3 sm:space-y-4">

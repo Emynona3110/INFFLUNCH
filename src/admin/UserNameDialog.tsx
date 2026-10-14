@@ -61,7 +61,7 @@ const UserNameDialog = ({ user, onClose, takenTrigrams }: Props) => {
   };
 
   return (
-    <Dialog open={!!user} onClose={busy ? () => {} : onClose}>
+    <Dialog open={!!user} onClose={onClose} busy={busy}>
       <DialogTitle>Nom et trigramme</DialogTitle>
       <p className="mt-1 text-sm text-foreground/60">{user?.email}</p>
       <form

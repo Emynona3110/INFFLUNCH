@@ -163,6 +163,7 @@ export default function LocationEditDialog({
       open={isOpen}
       onClose={onClose}
       className="flex h-[calc(100vh-2rem)] max-w-none flex-col"
+      busy={saving}
     >
       <DialogTitle>Position du restaurant</DialogTitle>
 
