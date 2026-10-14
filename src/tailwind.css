@@ -689,6 +689,17 @@ img[data-fade]:not([data-loaded]) {
     opacity: 1;
   }
 }
+/* Fondu à l'apparition, même pour une image déjà en cache (que `data-fade`
+   affiche d'emblée) : la photo de profil de la navbar remplace son cercle
+   d'attente sans à-coup, si vite qu'elle arrive. */
+.fade-in-mount {
+  animation: fade-in-mount 0.3s ease-out;
+}
+@keyframes fade-in-mount {
+  from {
+    opacity: 0;
+  }
+}
 
 /* Classement : fondu du contenu des cellules au changement de période
    (variables posées sur le <tbody> et les lignes, cf. Leaderboard.tsx).

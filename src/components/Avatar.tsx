@@ -22,16 +22,34 @@ interface Props {
   /** Taille en px (carré). */
   size?: number;
   className?: string;
+  /** Profil pas encore chargé : cercle neutre, ni trigramme ni photo — sinon
+   *  le trigramme s'affichait un instant avant d'être remplacé par la pp. */
+  pending?: boolean;
+  /** Fondu de la photo à l'apparition, même déjà en cache (cf. `pending`). */
+  fadeIn?: boolean;
 }
 
 /**
  * Avatar d'un utilisateur : photo de profil personnalisée si elle existe,
  * sinon trigramme coloré (public.users.trigram, couleur dérivée de l'email).
  */
-const Avatar = ({ email, avatarPath, size = 40, className }: Props) => {
+const Avatar = ({ email, avatarPath, size = 40, className, pending = false, fadeIn = false }: Props) => {
   const { trigramOf } = useUserNames();
   const url = avatarUrl(avatarPath);
   const dim = { height: size, width: size };
+
+  if (pending) {
+    return (
+      <span
+        style={dim}
+        aria-hidden
+        className={cn(
+          "relative block shrink-0 animate-pulse rounded-full bg-foreground/10",
+          className
+        )}
+      />
+    );
+  }
 
   if (url) {
     // Image rendue telle quelle, sans gating JS d'opacité (onLoad/decode) : une
@@ -51,7 +69,7 @@ const Avatar = ({ email, avatarPath, size = 40, className }: Props) => {
           alt=""
           loading="lazy"
           data-fade
-          className="h-full w-full object-cover"
+          className={cn("h-full w-full object-cover", fadeIn && "fade-in-mount")}
         />
       </span>
     );
@@ -68,6 +86,7 @@ const Avatar = ({ email, avatarPath, size = 40, className }: Props) => {
       className={cn(
         "relative flex shrink-0 items-center justify-center rounded-full font-bold",
         avatarColor(email ?? "?"),
+        fadeIn && "fade-in-mount",
         className
       )}
     >

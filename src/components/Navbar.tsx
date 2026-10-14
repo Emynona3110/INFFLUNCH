@@ -70,7 +70,7 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
   // Admin, À propos) passe par les icônes de droite et le pied de page.
   const tabs = sections.filter((item) => item.tab);
   const { sessionData, signOut } = useSession();
-  const { profile } = useProfile();
+  const { profile, isPending: profilePending } = useProfile();
 
   // Puce de l'onglet Admin : allumée dès qu'un de ses sous-onglets a la sienne
   // (demandes d'accès en attente ou demandes de collaborateurs non classées).
@@ -422,6 +422,8 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
           <Avatar
             email={sessionData?.user?.email ?? ""}
             avatarPath={profile?.avatar_path}
+            pending={profilePending}
+            fadeIn
             size={28}
             className={cn(
               "ring-2 ring-offset-1 ring-offset-card transition",
