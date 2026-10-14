@@ -11,7 +11,7 @@ interface Props {
     created_at: string;
   };
   /** Colonne de gauche (pp de l'auteur sur une fiche, vignette du resto sur
-   *  un profil), rendue deux fois : 28 px sur mobile, 44 px à partir de sm. */
+   *  un profil), rendue deux fois : 28 px sur mobile, 40 px à partir de sm. */
   leading: (size: number) => ReactNode;
   /** Ce qui est écrit en tête de l'avis : l'auteur ou le restaurant, cliquable. */
   title: ReactNode;
@@ -32,13 +32,16 @@ const formatDate = (iso: string) =>
  * place de l'auteur).
  */
 const ReviewItem = ({ review, leading, title, onEdit, onDelete }: Props) => (
-  <li className="border-t border-border/60 pt-3 sm:pt-4">
+  // Desktop : pt-2 + les 8 px vides au-dessus du nom (ligne de 28 px) = 16 px,
+  // comme l'espace sous les étoiles avant le filet suivant (space-y-4).
+  <li className="border-t border-border/60 pt-3 sm:pt-2">
     <div className="flex items-stretch gap-2 sm:items-start sm:gap-3">
       {/* Colonne pp : mobile = petite pp (alignée sur le nom) prolongée d'un
-          filet vertical ; desktop = 44 px. */}
+          filet vertical ; desktop = 40 px, du haut du nom (ligne de 28 px,
+          texte centré : ~8 px) au bas des étoiles (28 + 4 + 16 = 48 px). */}
       <div className="flex shrink-0 flex-col items-center">
         <span className="flex sm:hidden">{leading(28)}</span>
-        <span className="hidden sm:flex">{leading(44)}</span>
+        <span className="hidden sm:mt-2 sm:flex">{leading(40)}</span>
         <span
           aria-hidden
           className="mt-1.5 w-px flex-1 rounded-full bg-border sm:hidden"

@@ -26,11 +26,6 @@ export interface ChangelogEntry {
 export const changelog: ChangelogEntry[] = [
   // ──────────────────────── Octobre 2026 ────────────────────────
   {
-    date: "2026-10-14",
-    title: "Photo de profil",
-    points: ["Recadre et zoome ta photo avant de l'appliquer"],
-  },
-  {
     date: "2026-10-12",
     title: "Navigation allégée et FAQ",
     points: [
