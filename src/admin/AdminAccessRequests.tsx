@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import AccessRequestDialog from "./AccessRequestDialog";
 import { sortRows, useTableSort } from "./tableSort";
 import { SortHeader } from "./SortHeader";
+import AdminTableSkeleton from "@/admin/AdminTableSkeleton";
 
 /** Nature d'une demande d'accès : une pastille, comme bug / idée côté Demandes. */
 export const ACCESS_KINDS: Record<RequestType, { label: string; dot: string }> = {
@@ -59,9 +60,7 @@ const AdminAccessRequests = () => {
   return (
     <div className="tw-scope flex h-full w-full flex-col sm:px-4 sm:pb-4">
       {isPending ? (
-        <div className="flex h-[40vh] items-center justify-center">
-          <div className="h-10 w-10 animate-spin rounded-full border-2 border-border border-t-primary" />
-        </div>
+        <AdminTableSkeleton />
       ) : error ? (
         <p className="text-destructive">Erreur : {error.message}</p>
       ) : rows.length === 0 ? (

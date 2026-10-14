@@ -10,6 +10,7 @@ import RowActionsDialog from "./RowActionsDialog";
 import { sortRows, useTableSort } from "./tableSort";
 import { SortHeader } from "./SortHeader";
 import useRealtimeTable from "../hooks/useRealtimeTable";
+import AdminTableSkeleton from "@/admin/AdminTableSkeleton";
 
 interface AdminTableProps {
   tableName: string;
@@ -96,8 +97,8 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
 
   if (loading) {
     return (
-      <div className="tw-scope flex h-full items-center justify-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-border border-t-primary" />
+      <div className="tw-scope">
+        <AdminTableSkeleton cols={columns?.length ?? 4} />
       </div>
     );
   }

@@ -42,6 +42,7 @@ import {
 } from "@/lib/sectionClasses";
 
 import { restaurantPath } from "@/utils/restaurantPath";
+import UserProfileSkeleton from "@/components/UserProfileSkeleton";
 interface Props {
   userId: string;
   /** Profil de l'utilisateur connecté : tous ses succès lui sont révélés. */
@@ -134,11 +135,7 @@ const UserProfileView = ({ userId, isMe = false, fake }: Props) => {
   };
 
   if (!fake && profile.isPending) {
-    return (
-      <Card className="flex justify-center p-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
-      </Card>
-    );
+    return <UserProfileSkeleton />;
   }
 
   if ((!fake && profile.error) || !data) {

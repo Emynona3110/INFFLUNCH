@@ -16,6 +16,7 @@ import { profilePath } from "@/utils/profilePath";
 import { authorTrigram, formatAuthorName } from "@/utils/authorName";
 import { copyTempPassword } from "@/utils/tempPassword";
 import { fnError } from "@/utils/fnError";
+import AdminTableSkeleton from "@/admin/AdminTableSkeleton";
 
 /** Valeurs stockées, avec repli sur le calcul depuis l'email. */
 const nameOf = (u: AppUser) => u.display_name || formatAuthorName(u.email);
@@ -120,9 +121,7 @@ const AdminUsers = () => {
   return (
     <div className="tw-scope flex h-full w-full flex-col sm:px-4 sm:pb-4">
       {isPending ? (
-        <div className="flex h-[40vh] items-center justify-center">
-          <div className="h-10 w-10 animate-spin rounded-full border-2 border-border border-t-primary" />
-        </div>
+        <AdminTableSkeleton />
       ) : error ? (
         <p className="text-destructive">Erreur : {error.message}</p>
       ) : users.length === 0 ? (

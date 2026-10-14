@@ -16,6 +16,7 @@ import {
   SECTION_HEAD,
   SECTION_TITLE,
 } from "@/lib/sectionClasses";
+import TileListSkeleton from "@/components/TileListSkeleton";
 
 /** Mobile : date courte JJ/MM/AA. */
 const formatShortDate = (iso: string) =>
@@ -115,9 +116,7 @@ const MySuggestions = () => {
 
       <div className={SECTION_BODY}>
         {isPending ? (
-          <div className="flex justify-center py-8">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
-          </div>
+          <TileListSkeleton />
         ) : items.length === 0 ? (
           <p className="px-4 py-6 text-center text-sm text-foreground/55">
             Un resto manque à l'appel ? Propose-le en cliquant sur{" "}

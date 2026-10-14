@@ -14,6 +14,7 @@ import AdminNoteViewDialog from "@/components/AdminNoteViewDialog";
 import HoldButton from "@/components/HoldButton";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 /** Glisser en cours. Pointer events et non glisser-déposer natif : ce dernier
  *  impose son image fantôme et son curseur « interdit », qu'on n'éteint jamais
@@ -452,9 +453,18 @@ const AdminNotes = () => {
       </div>
 
       {isPending ? (
-        <div className="flex justify-center py-8">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
-        </div>
+        // Notes en chargement : tuiles de même gabarit (bordure, py-1.5,
+        // une ligne de texte).
+        <ul className="m-0 list-none space-y-2 p-0" role="status" aria-label="Chargement des notes">
+          {[0, 1, 2, 3].map((i) => (
+            <li
+              key={i}
+              className="flex h-9 items-center rounded-xl border border-border bg-background pl-3.5 pr-2"
+            >
+              <Skeleton className="h-3.5 w-2/3" />
+            </li>
+          ))}
+        </ul>
       ) : notes.length === 0 ? (
         <p className="py-6 text-center text-sm text-foreground/55">
           Rien à traiter. Note ici ce que tu repères en naviguant.

@@ -14,6 +14,8 @@ import {
   RICK_PROFILE,
   RICK_VIDEO,
 } from "@/data/rickAstley";
+import UserProfileSkeleton from "@/components/UserProfileSkeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 /**
  * Profil d'un collègue (/profil/:handle — le local-part de son email, ou son
@@ -52,8 +54,11 @@ const ProfilePage = () => {
 
   if (!isRick && !isUuid(handle) && resolved.isPending) {
     return (
-      <div className="flex justify-center py-8 sm:py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
+      <div className="tw-scope mx-auto w-full max-w-2xl">
+        <Skeleton className="mb-4 h-5 w-24" />
+        <div className="space-y-3 sm:space-y-6">
+          <UserProfileSkeleton />
+        </div>
       </div>
     );
   }

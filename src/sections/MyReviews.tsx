@@ -11,6 +11,7 @@ import {
 } from "@/lib/sectionClasses";
 
 import { restaurantPath } from "@/utils/restaurantPath";
+import TileListSkeleton from "@/components/TileListSkeleton";
 /** Mobile : date courte JJ/MM/AA. */
 const formatShortDate = (iso: string) =>
   new Date(iso).toLocaleDateString("fr-FR", {
@@ -67,9 +68,7 @@ const MyReviews = () => {
       </div>
       <div className={SECTION_BODY}>
         {reviewsLoading ? (
-          <div className="flex justify-center py-5 sm:py-8">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
-          </div>
+          <TileListSkeleton />
         ) : reviews.length === 0 ? (
           <p className="py-6 text-center text-sm text-foreground/55">
             Tu n'as encore laissé aucun avis.

@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { SECTION_BODY } from "@/lib/sectionClasses";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
 import { RestaurantFilters, ViewMode } from "../pages/UserPage";
@@ -16,6 +16,7 @@ import RestaurantDialog from "@/admin/Dialogs/RestaurantDialog";
 import ChefHatPlus from "@/components/icons/ChefHatPlus";
 import { FiArrowUpRight, FiChevronDown } from "react-icons/fi";
 import PageLoader from "@/components/brand/PageLoader";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface RestaurantGridProps {
   restaurantFilters: RestaurantFilters;
@@ -41,29 +42,43 @@ const PAGE_SIZE = 12;
  *  fiche resto (retour sur la grille au même endroit), pas au rechargement. */
 let rememberedShown = { key: "", count: PAGE_SIZE };
 
+/** Mêmes dimensions que RestaurantCardTW, mobile (image 128 px, corps
+ *  serré) comme desktop (image 192 px) : la grille ne saute pas à l'arrivée
+ *  des données. */
 const CardSkeleton = () => (
-  <div className="overflow-hidden rounded-card border border-border bg-card">
-    <div className="h-48 w-full animate-pulse bg-foreground/10" />
-    <div className="space-y-3 p-5">
-      <div className="h-6 w-2/3 animate-pulse rounded bg-foreground/10" />
-      <div className="h-4 w-1/2 animate-pulse rounded bg-foreground/10" />
-      <div className="flex gap-2">
-        <div className="h-5 w-14 animate-pulse rounded-full bg-foreground/10" />
-        <div className="h-5 w-12 animate-pulse rounded-full bg-foreground/10" />
+  <div className="flex h-full flex-col overflow-hidden rounded-card border border-border bg-card shadow-[0_10px_30px_-12px_rgba(2,8,40,0.22)]">
+    <Skeleton className="h-32 w-full rounded-none sm:h-48" />
+    <div className="flex grow flex-col gap-1 px-3 py-2 sm:gap-2 sm:px-5 sm:py-4">
+      <div className="flex h-7 items-center sm:h-[2.175rem]">
+        <Skeleton className="h-5 w-2/3 sm:h-6" />
+      </div>
+      <div className="flex h-[22px] items-center gap-2 sm:h-6">
+        <Skeleton className="h-3.5 w-28 sm:h-4" />
+        <Skeleton className="ml-auto h-5 w-14 rounded-full sm:h-6" />
+      </div>
+      <div className="flex h-7 items-center gap-1.5 sm:h-8">
+        <Skeleton className="h-5 w-16 rounded-full" />
+        <Skeleton className="h-5 w-14 rounded-full" />
+        <Skeleton className="ml-auto h-6 w-6 rounded-full sm:h-7 sm:w-7" />
       </div>
     </div>
   </div>
 );
 
+/** Mêmes dimensions que RestaurantRow : sur mobile, ni vignette ni tags. */
 const RowSkeleton = () => (
-  <div className="flex items-center gap-4 p-2 sm:rounded-card sm:border sm:border-border sm:bg-card sm:p-3">
-    <div className="hidden h-20 w-28 shrink-0 animate-pulse rounded-lg bg-foreground/10 sm:block" />
-    <div className="flex-1 space-y-2">
-      <div className="h-5 w-1/3 animate-pulse rounded bg-foreground/10" />
-      <div className="h-4 w-1/4 animate-pulse rounded bg-foreground/10" />
-      <div className="flex gap-2">
-        <div className="h-5 w-14 animate-pulse rounded-full bg-foreground/10" />
-        <div className="h-5 w-12 animate-pulse rounded-full bg-foreground/10" />
+  <div className="flex items-stretch gap-2 p-2 sm:items-center sm:gap-4 sm:rounded-card sm:border sm:border-border sm:bg-card sm:p-3">
+    <Skeleton className="hidden h-20 w-28 shrink-0 rounded-lg sm:block" />
+    <div className="flex min-w-0 flex-1 flex-col justify-between">
+      <div className="flex h-6 items-center sm:h-7">
+        <Skeleton className="h-4 w-1/3 sm:h-5" />
+      </div>
+      <div className="mt-0.5 flex min-h-6 items-center">
+        <Skeleton className="h-3.5 w-1/4" />
+      </div>
+      <div className="mt-1.5 hidden gap-1.5 sm:flex">
+        <Skeleton className="h-5 w-14 rounded-full" />
+        <Skeleton className="h-5 w-12 rounded-full" />
       </div>
     </div>
   </div>
@@ -109,6 +124,32 @@ const RestaurantGrid = ({
     favoritesOnly: restaurantFilters.favoritesOnly,
     viewMode,
   });
+
+  // Squelettes affichés pour cette liste : ils ont déjà joué l'arrivée (fondu
+  // en montant, avec la page). Les tuiles qui les remplacent prennent leur
+  // place telles quelles, sans fondu : un fondu depuis le vide faisait
+  // clignoter la grille (squelette → rien → tuile) ; seules les photos
+  // arrivent en fondu, sur le même gris que le squelette. Les tranches
+  // suivantes (« voir plus ») et les listes servies du cache gardent leur
+  // cascade.
+  const skeletonFor = useRef<string | null>(null);
+  // Oublié dès qu'on change de liste : revenir plus tard sur celle-ci (ex.
+  // décocher les favoris) doit rejouer la cascade, pas l'apparition sur place.
+  if (isLoading) skeletonFor.current = listKey;
+  else if (skeletonFor.current !== listKey) skeletonFor.current = null;
+  const replacesSkeleton = (i: number) =>
+    skeletonFor.current === listKey && i < PAGE_SIZE;
+  const enter = (i: number, y: number, step: number, max: number) =>
+    replacesSkeleton(i)
+      ? { initial: false as const, animate: { opacity: 1, y: 0 } }
+      : {
+          initial: { opacity: 0, y },
+          animate: { opacity: 1, y: 0 },
+          transition: {
+            duration: 0.35,
+            delay: Math.min((i % PAGE_SIZE) * step, max),
+          },
+        };
 
   // Nombre de résultats affichés : remis à une tranche dès que les filtres ou
   // la recherche changent.
@@ -245,13 +286,8 @@ const RestaurantGrid = ({
               : visibleData.map((restaurant, i) => (
                   <motion.div
                     key={restaurant.id}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
                     // Cascade comptée dans la tranche : la suivante démarre aussitôt.
-                    transition={{
-                      duration: 0.25,
-                      delay: Math.min((i % PAGE_SIZE) * 0.02, 0.12),
-                    }}
+                    {...enter(i, 8, 0.02, 0.12)}
                   >
                     <RestaurantRow
                       {...itemProps(restaurant)}
@@ -281,12 +317,7 @@ const RestaurantGrid = ({
             : visibleData.map((restaurant, i) => (
                 <motion.div
                   key={restaurant.id}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    duration: 0.25,
-                    delay: Math.min((i % PAGE_SIZE) * 0.03, 0.15),
-                  }}
+                  {...enter(i, 12, 0.03, 0.15)}
                 >
                   <RestaurantCardTW
                     {...itemProps(restaurant)}

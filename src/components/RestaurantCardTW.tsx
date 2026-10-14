@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { HOVER_ZOOM_IMG } from "@/lib/imageClasses";
 
 import { restaurantPath } from "@/utils/restaurantPath";
+import { Skeleton } from "@/components/ui/skeleton";
 interface Props {
   restaurant: Restaurant;
   topRated: { id: number }[];
@@ -84,8 +85,10 @@ const RestaurantCardTW = ({
       onTouchStart={() => prefetchRestaurant(restaurant.id)}
       className="group flex h-full cursor-pointer select-none flex-col overflow-hidden rounded-card border border-border bg-card shadow-[0_10px_30px_-12px_rgba(2,8,40,0.22)] transition duration-200 transform-gpu [backface-visibility:hidden] hover:-translate-y-1 hover:shadow-[0_18px_44px_-14px_rgba(2,8,40,0.30)]"
     >
-      {/* Image */}
+      {/* Image : le squelette (gris pulsé) reste dessous tant qu'elle charge,
+          puis la photo arrive dessus en fondu — pas de passage par le blanc. */}
       <div className="relative h-32 overflow-hidden sm:h-48">
+        <Skeleton className="absolute inset-0 rounded-none" />
         <img
           loading={priority ? "eager" : "lazy"}
           fetchPriority={priority ? "high" : "auto"}

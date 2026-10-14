@@ -24,6 +24,7 @@ import {
   SECTION_TITLE,
   SECTION_BODY,
 } from "@/lib/sectionClasses";
+import { Skeleton } from "@/components/ui/skeleton";
 
 /** Mobile : date courte JJ/MM/AA. */
 const formatShortDate = (iso: string) =>
@@ -129,9 +130,26 @@ const AchievementsGallery = () => {
       </div>
       <div className={SECTION_BODY}>
         {loading ? (
-          <div className="flex justify-center py-5 sm:py-8">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
-          </div>
+          // Succès en chargement : mêmes lignes (vignette 40/56 px, titre,
+          // description) que les vraies.
+          <ul
+            className="m-0 list-none divide-y divide-border p-0 sm:divide-y-0 sm:space-y-2"
+            role="status"
+            aria-label="Chargement des succès"
+          >
+            {Array.from({ length: 5 }, (_, i) => (
+              <li
+                key={i}
+                className="flex min-h-[60px] items-center gap-3 px-3 py-2.5 sm:min-h-0 sm:rounded-xl sm:border sm:border-border sm:bg-background sm:p-3"
+              >
+                <Skeleton className="h-10 w-10 shrink-0 rounded-lg sm:h-14 sm:w-14" />
+                <div className="min-w-0 flex-1 space-y-2">
+                  <Skeleton className="h-4 w-32 sm:w-44" />
+                  <Skeleton className="h-3.5 w-3/4" />
+                </div>
+              </li>
+            ))}
+          </ul>
         ) : (
           /* Mobile : lignes empilées séparées d'un filet, directement dans le cadre
              de la section ; desktop : tuiles arrondies espacées. */

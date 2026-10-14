@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { HOVER_ZOOM_IMG } from "@/lib/imageClasses";
 
 import { restaurantPath } from "@/utils/restaurantPath";
+import { Skeleton } from "@/components/ui/skeleton";
 interface Props {
   restaurant: Restaurant;
   topRated: { id: number }[];
@@ -73,6 +74,7 @@ const RestaurantRow = ({
     >
       {/* Vignette */}
       <div className="relative hidden h-20 w-28 shrink-0 overflow-hidden rounded-lg sm:block">
+        <Skeleton className="absolute inset-0 rounded-none" />
         <img
           loading={priority ? "eager" : "lazy"}
           fetchPriority={priority ? "high" : "auto"}

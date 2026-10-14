@@ -22,6 +22,7 @@ import useRestaurantSuggestions, {
   suggestionAwaitingAdmin,
 } from "@/hooks/useRestaurantSuggestions";
 import SuggestionAdminDialog from "./SuggestionAdminDialog";
+import AdminTableSkeleton from "@/admin/AdminTableSkeleton";
 
 /** Propositions de restos, rangées avec les demandes : leur propre nature
  *  (pastille jaune-orangé), à côté de bug / amélioration / fonctionnalité. */
@@ -233,9 +234,7 @@ const AdminFeedback = () => {
   return (
     <div className="tw-scope flex h-full w-full flex-col sm:px-4 sm:pb-4">
       {isPending ? (
-        <div className="flex h-[40vh] items-center justify-center">
-          <div className="h-10 w-10 animate-spin rounded-full border-2 border-border border-t-primary" />
-        </div>
+        <AdminTableSkeleton />
       ) : error ? (
         <p className="text-destructive">Erreur : {error.message}</p>
       ) : allRows.length === 0 ? (
