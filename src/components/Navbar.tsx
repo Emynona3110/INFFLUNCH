@@ -17,12 +17,8 @@ import NavMenu from "./NavMenu";
 import useSession from "../hooks/useSession";
 import useProfile from "../hooks/useProfile";
 import { AnimatePresence, motion } from "framer-motion";
-import monogram from "../assets/brand/infflunch-monogramme.svg";
-import monogramWhite from "../assets/brand/infflunch-monogramme-blanc.svg";
-import logotype from "../assets/brand/infflunch-logotype.svg";
-import logotypeWhite from "../assets/brand/infflunch-logotype-blanc.svg";
-import adminLogotype from "../assets/brand/adminfflunch-logotype.svg";
-import adminLogotypeWhite from "../assets/brand/adminfflunch-logotype-blanc.svg";
+import Monogramme from "./brand/Monogramme";
+import Logotype from "./brand/Logotype";
 import FeedbackDialog from "./FeedbackDialog";
 import ProposeRestaurantDialog from "./ProposeRestaurantDialog";
 import RestaurantDialog from "@/admin/Dialogs/RestaurantDialog";
@@ -67,7 +63,6 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
   // collaborateur la propose.
   const [addOpen, setAddOpen] = useState(false);
   const isAdmin = useIsAdmin();
-  const brand = isAdmin ? "ADMINFFLUNCH" : "INFFLUNCH";
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const sections = buildUserSections(isAdmin);
@@ -168,14 +163,16 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
           }}
         >
           {/* Monogramme sous xl, logotype complet au-delà (ADMINFFLUNCH pour
-              les admins) ; version blanche en thème sombre. */}
-          <span className="contents dark:hidden">
-            <img src={monogram} alt={brand} className="block h-7 w-auto sm:h-8 xl:hidden" />
-            <img src={isAdmin ? adminLogotype : logotype} alt={brand} className="mr-2 hidden h-7 w-auto xl:block" />
+              les admins). Pas d'intro ici (réservée à l'écran de connexion) :
+              saut du point au clic ou au toucher. Couleur héritée
+              du texte → blanc en thème sombre. Visibilité portée par les
+              <span> : Logo.css (hors couche Tailwind) impose display:block
+              au <svg>. */}
+          <span className="text-[#113894] xl:hidden dark:text-white">
+            <Monogramme playIntro={false} className="h-7 sm:h-8" />
           </span>
-          <span className="hidden dark:contents">
-            <img src={monogramWhite} alt={brand} className="block h-7 w-auto sm:h-8 xl:hidden" />
-            <img src={isAdmin ? adminLogotypeWhite : logotypeWhite} alt={brand} className="mr-2 hidden h-7 w-auto xl:block" />
+          <span className="mr-2 hidden text-[#113894] xl:block dark:text-white">
+            <Logotype admin={isAdmin} playIntro={false} className="h-7" />
           </span>
         </div>
 

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="6 10 70 80" width="700" height="800">
+  <title>infflunch</title>
+  <style>
+    .rise { animation: rise .65s cubic-bezier(.18,.9,.3,1.12) both; }
+    .rise-knife { animation-delay: .12s; }
+    .fork, .knife { transform-box: fill-box; transform-origin: 50% 100%; }
+    .fork { animation: clink-l .5s 1.2s ease-in-out both; }
+    .knife { animation: clink-r .5s 1.2s ease-in-out both; }
+    .dot { transform-box: fill-box; transform-origin: 50% 50%; animation: drop .8s .5s both; }
+    @keyframes rise { from { transform: translateY(66px); } to { transform: translateY(0); } }
+    @keyframes clink-l { 0%, 100% { transform: rotate(0); } 45% { transform: rotate(3deg); } }
+    @keyframes clink-r { 0%, 100% { transform: rotate(0); } 45% { transform: rotate(-3deg); } }
+    @keyframes drop {
+      0%   { transform: translateY(-34px) rotate(-200deg); opacity: 0; animation-timing-function: cubic-bezier(.5,0,.9,.5); }
+      15%  { opacity: 1; }
+      60%  { transform: translateY(0) rotate(0); animation-timing-function: ease-out; }
+      75%  { transform: translateY(-4px); animation-timing-function: ease-in; }
+      88%  { transform: translateY(0); animation-timing-function: ease-out; }
+      94%  { transform: translateY(-.8px); animation-timing-function: ease-in; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+  </style>
+  <defs><clipPath id="infflunch-base"><rect x="0" y="0" width="100" height="80.2"/></clipPath></defs>
+  <g clip-path="url(#infflunch-base)">
+    <g class="rise"><path class="fork" fill="#FFFFFF" d="M19.393 42.443 L22.533 41.187 V54 A1.6 1.6 0 0 0 25.733 54 V39.907 L30.267 38.093 V54 A1.6 1.6 0 0 0 33.467 54 V36.813 L36.607 35.557 Q38 35 38 36.5 V73 A7 7 0 0 1 31 80 H25 A7 7 0 0 1 18 73 V44.5 Q18 43 19.393 42.443 Z"/></g>
+    <g class="rise rise-knife"><path class="knife" fill="#FFFFFF" d="M51 80 A7 7 0 0 1 44 73 V21.5 Q44 20.1 45.4 20.4 C55 22.5 64 31 64 43 V73 A7 7 0 0 1 57 80 Z"/></g>
+  </g>
+  <path class="dot" fill="#EA580C" d="M19.393 27.443 L36.607 20.557 Q38 20 38 21.5 V28.5 Q38 30 36.607 30.557 L19.393 37.443 Q18 38 18 36.5 V29.5 Q18 28 19.393 27.443 Z"/>
+</svg>

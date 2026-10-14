@@ -7,6 +7,17 @@ import Layout from "../components/Layout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import introRaw from "@/assets/brand/anim/infflunch-anim-intro.svg?raw";
+import introWhiteRaw from "@/assets/brand/anim/infflunch-anim-intro-blanc.svg?raw";
+import introLogotypeRaw from "@/assets/brand/anim/infflunch-logotype-anim.svg?raw";
+import introLogotypeWhiteRaw from "@/assets/brand/anim/infflunch-logotype-anim-blanc.svg?raw";
+import { svgDataUri } from "@/components/brand/inlineSvg";
+
+// Intros embarquées (pas de requête) : elles démarrent avec la page.
+const intro = svgDataUri(introRaw);
+const introWhite = svgDataUri(introWhiteRaw);
+const introLogotype = svgDataUri(introLogotypeRaw);
+const introLogotypeWhite = svgDataUri(introLogotypeWhiteRaw);
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -43,7 +54,18 @@ const LoginPage = () => {
     <Layout centerContent>
       <div className="tw-scope w-full max-w-md">
         <Card className="p-5 sm:p-8">
-          <div className="text-center">
+          <div className="flex flex-col items-center text-center">
+            {/* Intro du logo, jouée seulement ici : monogramme sur mobile
+                (couverts qui sortent, point qui tombe), logotype dès sm
+                (lettres qui s'écrivent). */}
+            <span className="mb-3 sm:hidden">
+              <img src={intro} alt="" className="block h-16 w-auto dark:hidden" />
+              <img src={introWhite} alt="" className="hidden h-16 w-auto dark:block" />
+            </span>
+            <span className="mb-4 hidden sm:block">
+              <img src={introLogotype} alt="" className="block h-10 w-auto dark:hidden" />
+              <img src={introLogotypeWhite} alt="" className="hidden h-10 w-auto dark:block" />
+            </span>
             <div
               role="heading"
               aria-level={1}

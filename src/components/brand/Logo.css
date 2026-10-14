@@ -1,0 +1,111 @@
+.infflunch-logo {
+  display: block;
+  width: auto;
+  overflow: visible; /* le point peut sauter au-dessus du cadre */
+}
+
+.infflunch-logo .il-fork,
+.infflunch-logo .il-knife,
+.infflunch-logo .il-dot {
+  transform-box: fill-box;
+  /* Calques de composition créés une fois pour toutes : sans ça, le
+     navigateur les crée au début de l'animation et les détruit à la fin, ce
+     qui réarrondit au pixel le reste de la page (les cartes « sautaient »
+     d'un pixel à chaque saut du point). */
+  will-change: transform;
+}
+.infflunch-logo .il-fork,
+.infflunch-logo .il-knife {
+  transform-origin: 50% 100%;
+}
+.infflunch-logo .il-dot {
+  transform-origin: 50% 50%;
+}
+
+/* Intro : les lettres s'écrivent, le point tombe, les couverts trinquent */
+.infflunch-logo--intro .il-letter {
+  animation: infflunch-rise 0.55s cubic-bezier(0.18, 0.9, 0.3, 1.15) both;
+}
+.infflunch-logo {
+  --il-dot-delay: 0.91s;
+  --il-clink-delay: 1.51s;
+}
+.infflunch-logo--mono {
+  --il-dot-delay: 0.5s;
+  --il-clink-delay: 1.2s;
+}
+.infflunch-logo--intro .il-dot {
+  animation: infflunch-drop 0.8s var(--il-dot-delay) both;
+}
+.infflunch-logo--intro .il-fork {
+  animation: infflunch-clink-l 0.5s var(--il-clink-delay) ease-in-out both;
+}
+.infflunch-logo--intro .il-knife {
+  animation: infflunch-clink-r 0.5s var(--il-clink-delay) ease-in-out both;
+}
+
+/* Monogramme : pas de masque à la ligne de base, la montée se fait en fondu */
+.infflunch-logo--mono.infflunch-logo--intro .il-letter {
+  animation-name: infflunch-rise-fade;
+}
+@keyframes infflunch-rise-fade {
+  from { transform: translateY(24px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Pas de surlignage gris au toucher sur mobile */
+.infflunch-logo {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Clic / toucher : le point saute, les couverts trinquent à l'atterrissage */
+.infflunch-logo--hop .il-dot {
+  animation: infflunch-hop 0.9s both;
+}
+.infflunch-logo--hop .il-fork {
+  animation: infflunch-clink-l 0.45s 0.5s ease-in-out both;
+}
+.infflunch-logo--hop .il-knife {
+  animation: infflunch-clink-r 0.45s 0.5s ease-in-out both;
+}
+
+@keyframes infflunch-rise {
+  from { transform: translateY(64px); }
+  to { transform: translateY(0); }
+}
+
+@keyframes infflunch-drop {
+  0% { transform: translateY(-40px) rotate(-200deg); opacity: 0; animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.5); }
+  15% { opacity: 1; }
+  60% { transform: translateY(0) rotate(0); animation-timing-function: ease-out; }
+  75% { transform: translateY(-4px); animation-timing-function: ease-in; }
+  88% { transform: translateY(0); animation-timing-function: ease-out; }
+  94% { transform: translateY(-0.8px); animation-timing-function: ease-in; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes infflunch-hop {
+  0% { transform: translateY(0) rotate(0); animation-timing-function: cubic-bezier(0.2, 0.7, 0.4, 1); }
+  40% { transform: translateY(-11px) rotate(180deg); animation-timing-function: cubic-bezier(0.6, 0, 0.8, 0.4); }
+  62% { transform: translateY(0) rotate(360deg); animation-timing-function: ease-out; }
+  76% { transform: translateY(-2px) rotate(360deg); animation-timing-function: ease-in; }
+  88%, 100% { transform: translateY(0) rotate(360deg); }
+}
+
+@keyframes infflunch-clink-l {
+  0%, 100% { transform: rotate(0); }
+  45% { transform: rotate(4deg); }
+}
+@keyframes infflunch-clink-r {
+  0%, 100% { transform: rotate(0); }
+  45% { transform: rotate(-4deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .infflunch-logo .il-letter,
+  .infflunch-logo .il-dot,
+  .infflunch-logo .il-fork,
+  .infflunch-logo .il-knife {
+    animation: none !important;
+  }
+}
