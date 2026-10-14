@@ -37,8 +37,10 @@ export const coverThumbOf = (pathOrUrl: string): string | null => {
   return thumb === pathOrUrl ? null : thumb;
 };
 
-/** Plus grand côté de la miniature de couverture (px) : nette sur une carte en Retina. */
-export const COVER_THUMB_MAX = 800;
+/** Plus grand côté de la miniature de couverture (px). 640 en qualité 0,7 :
+ *  ~45 % plus léger que 800/0,8, pour une netteté encore correcte sur carte. */
+export const COVER_THUMB_MAX = 640;
+export const COVER_THUMB_QUALITY = 0.7;
 
 /** Chemin (sans extension) d'une photo de galerie d'un resto. */
 export const galleryPathBase = (slug: string) =>

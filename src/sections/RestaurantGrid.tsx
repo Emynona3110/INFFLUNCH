@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { SECTION_BODY } from "@/lib/sectionClasses";
-import { useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
 import { RestaurantFilters, ViewMode } from "../pages/UserPage";
@@ -10,13 +10,28 @@ import useFavorites from "../hooks/useFavorites";
 import useIsAdmin from "../hooks/useIsAdmin";
 import RestaurantCardTW from "@/components/RestaurantCardTW";
 import RestaurantRow from "@/components/RestaurantRow";
-import RestaurantsMap from "@/components/RestaurantsMap";
-import RestaurantRoulette from "@/components/RestaurantRoulette";
-import RestaurantDialog from "@/admin/Dialogs/RestaurantDialog";
+import { LazyRestaurantDialog } from "@/components/lazyDialogs";
+import { lazyPage, useOpenedOnce } from "@/lib/lazyPage";
 import ChefHatPlus from "@/components/icons/ChefHatPlus";
 import { FiArrowUpRight, FiChevronDown } from "react-icons/fi";
 import PageLoader from "@/components/brand/PageLoader";
 import { Skeleton } from "@/components/ui/skeleton";
+
+// Attente des vues Carte et Roue (données ou code pas encore là).
+const mapLoader = (
+  <div className="flex h-full items-center justify-center rounded-card border border-border bg-muted/40">
+    <PageLoader />
+  </div>
+);
+const rouletteLoader = (
+  <div className="flex h-full items-center justify-center">
+    <PageLoader />
+  </div>
+);
+
+// Carte (Leaflet) et roue : chargées à part, préchargées en tâche de fond.
+const RestaurantsMap = lazyPage(() => import("@/components/RestaurantsMap"));
+const RestaurantRoulette = lazyPage(() => import("@/components/RestaurantRoulette"));
 
 interface RestaurantGridProps {
   restaurantFilters: RestaurantFilters;
@@ -97,6 +112,10 @@ const RestaurantGrid = ({
   const isAdmin = useIsAdmin();
   const queryClient = useQueryClient();
   const [editTarget, setEditTarget] = useState<Restaurant | null>(null);
+  const editOpened = useOpenedOnce(!!editTarget);
+  useEffect(() => {
+    if (isAdmin) void LazyRestaurantDialog.preload();
+  }, [isAdmin]);
   const {
     restaurantIds: favoriteIds,
     loading: favoritesLoading,
@@ -232,37 +251,29 @@ const RestaurantGrid = ({
 
     // --- Carte globale ---
     if (viewMode === "map") {
-      if (isLoading) {
-        return (
-          <div className="flex h-full items-center justify-center rounded-card border border-border bg-muted/40">
-            <PageLoader />
-          </div>
-        );
-      }
+      if (isLoading) return mapLoader;
       // Les restaurants fermés ne sont pas placés sur la carte.
       return (
-        <RestaurantsMap restaurants={filteredData.filter((r) => !r.closed)} />
+        <Suspense fallback={mapLoader}>
+          <RestaurantsMap restaurants={filteredData.filter((r) => !r.closed)} />
+        </Suspense>
       );
     }
 
     // --- Roue (Surprise du midi) ---
     if (viewMode === "roulette") {
-      if (isLoading) {
-        return (
-          <div className="flex h-full items-center justify-center">
-            <PageLoader />
-          </div>
-        );
-      }
+      if (isLoading) return rouletteLoader;
       return (
-        <RestaurantRoulette
-          pool={filteredData.filter((r) => !r.closed)}
-          excludedIds={rouletteExcluded}
-          onExcludedChange={onRouletteExcludedChange}
-          winnerId={rouletteWinnerId}
-          onWinnerChange={onRouletteWinnerChange}
-          cardProps={itemProps}
-        />
+        <Suspense fallback={rouletteLoader}>
+          <RestaurantRoulette
+            pool={filteredData.filter((r) => !r.closed)}
+            excludedIds={rouletteExcluded}
+            onExcludedChange={onRouletteExcludedChange}
+            winnerId={rouletteWinnerId}
+            onWinnerChange={onRouletteWinnerChange}
+            cardProps={itemProps}
+          />
+        </Suspense>
       );
     }
 
@@ -341,16 +352,18 @@ const RestaurantGrid = ({
     >
       {renderContent()}
 
-      {isAdmin && (
-        <RestaurantDialog
-          isOpen={!!editTarget}
-          onClose={() => setEditTarget(null)}
-          onSuccess={() => {
-            setEditTarget(null);
-            queryClient.invalidateQueries();
-          }}
-          initialData={editTarget ?? undefined}
-        />
+      {isAdmin && editOpened && (
+        <Suspense fallback={null}>
+          <LazyRestaurantDialog
+            isOpen={!!editTarget}
+            onClose={() => setEditTarget(null)}
+            onSuccess={() => {
+              setEditTarget(null);
+              queryClient.invalidateQueries();
+            }}
+            initialData={editTarget ?? undefined}
+          />
+        </Suspense>
       )}
     </div>
   );

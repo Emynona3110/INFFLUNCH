@@ -1,7 +1,8 @@
 // =============================================================================
 // Génère la miniature des couvertures déjà en ligne : pour chaque restaurant
 // dont `image` pointe vers "{slug}/cover-X.{webp,jpg,png}" du bucket, crée
-// "{slug}/cover-X-thumb.webp" (800 px max, WebP) si elle n'existe pas encore.
+// "{slug}/cover-X-thumb.webp" (640 px max, WebP) si elle n'existe pas encore
+// (--force : les régénère toutes, ex. après un changement de taille/qualité).
 // Les nouvelles couvertures ont leur miniature dès l'upload (RestaurantDialog) ;
 // ce script ne sert qu'au rattrapage. Idempotent.
 //
@@ -13,6 +14,7 @@
 // Usage (PowerShell) :
 //   $env:SUPABASE_SERVICE_ROLE_KEY="..."; node scripts/backfill-cover-thumbs.mjs --dry
 //   # (ou) $env:ADMIN_EMAIL="..."; $env:ADMIN_PASSWORD="..."; node scripts/backfill-cover-thumbs.mjs
+//   # régénérer toutes les miniatures (changement de taille/qualité) : ajouter --force
 //
 // URL + clé anon lues depuis .env.local (VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY).
 // =============================================================================
@@ -22,9 +24,10 @@ import { createClient } from "@supabase/supabase-js";
 
 const BUCKET = "restaurant-photos";
 const DRY = process.argv.includes("--dry");
-// Aligné sur COVER_THUMB_MAX (src/services/storagePaths.ts).
-const THUMB_MAX = 800;
-const THUMB_QUALITY = 80;
+const FORCE = process.argv.includes("--force");
+// Aligné sur COVER_THUMB_MAX / COVER_THUMB_QUALITY (src/services/storagePaths.ts).
+const THUMB_MAX = 640;
+const THUMB_QUALITY = 70;
 
 let sharp;
 try {
@@ -133,7 +136,7 @@ for (const r of restaurants) {
   if (!thumb) continue; // pas de couverture du bucket (lien externe, aucune image)
 
   const exists = await fetch(publicUrl(thumb), { method: "HEAD" });
-  if (exists.ok) {
+  if (exists.ok && !FORCE) {
     skipped++;
     continue;
   }
@@ -149,6 +152,9 @@ for (const r of restaurants) {
       .toBuffer();
 
     if (!DRY) {
+      // Remplacement = suppression + envoi : nos policies storage n'ont pas
+      // de droit UPDATE (upsert refusé).
+      if (exists.ok) await supabase.storage.from(BUCKET).remove([thumb]);
       const { error } = await supabase.storage
         .from(BUCKET)
         .upload(thumb, small, { contentType: "image/webp", upsert: false });

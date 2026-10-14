@@ -19,7 +19,7 @@ import {
   bucketPathFromPublicUrl,
   removeFromBucket,
 } from "../../services/uploadImage";
-import { COVER_THUMB_MAX, coverPathBase } from "../../services/storagePaths";
+import { COVER_THUMB_MAX, COVER_THUMB_QUALITY, coverPathBase } from "../../services/storagePaths";
 import { fetchWalkMinutes, estimateWalkMinutes } from "../../services/walkTime";
 import { distanceKmFromInfflux, formatDistance } from "../../services/distance";
 import { FiChevronDown, FiPlus, FiCheck, FiX, FiTrash2 } from "react-icons/fi";
@@ -448,7 +448,7 @@ const RestaurantDialog = ({
         // Best effort : sans miniature, les cartes retombent sur la couverture.
         await uploadImageToBucket(imageFile, `${base}-thumb`, {
           maxSize: COVER_THUMB_MAX,
-          quality: 0.8,
+          quality: COVER_THUMB_QUALITY,
         }).catch(() => undefined);
       } catch (err: any) {
         toast({

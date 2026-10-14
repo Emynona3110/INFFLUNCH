@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import {
   FiMessageSquare,
   FiChevronDown,
@@ -20,8 +20,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import Monogramme from "./brand/Monogramme";
 import Logotype from "./brand/Logotype";
 import FeedbackDialog from "./FeedbackDialog";
-import ProposeRestaurantDialog from "./ProposeRestaurantDialog";
-import RestaurantDialog from "@/admin/Dialogs/RestaurantDialog";
+import { LazyProposeRestaurantDialog, LazyRestaurantDialog } from "./lazyDialogs";
+import { useOpenedOnce } from "@/lib/lazyPage";
 import ChefHatPlus from "./icons/ChefHatPlus";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -62,6 +62,7 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
   // Ajouter un resto, de n'importe quel écran : l'admin crée la fiche, un
   // collaborateur la propose.
   const [addOpen, setAddOpen] = useState(false);
+  const addOpened = useOpenedOnce(addOpen);
   const isAdmin = useIsAdmin();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -439,20 +440,24 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
         isOpen={feedbackOpen}
         onClose={() => setFeedbackOpen(false)}
       />
-      {isAdmin ? (
-        <RestaurantDialog
-          isOpen={addOpen}
-          onClose={() => setAddOpen(false)}
-          onSuccess={(slug) => {
-            setAddOpen(false);
-            queryClient.invalidateQueries();
-            // On enchaîne sur la fiche toute neuve : c'est là qu'on ajoute
-            // photos et menus, autant y être tout de suite.
-            if (slug) navigate(restaurantPath(slug));
-          }}
-        />
-      ) : (
-        <ProposeRestaurantDialog isOpen={addOpen} onClose={() => setAddOpen(false)} />
+      {addOpened && (
+        <Suspense fallback={null}>
+          {isAdmin ? (
+            <LazyRestaurantDialog
+              isOpen={addOpen}
+              onClose={() => setAddOpen(false)}
+              onSuccess={(slug) => {
+                setAddOpen(false);
+                queryClient.invalidateQueries();
+                // On enchaîne sur la fiche toute neuve : c'est là qu'on ajoute
+                // photos et menus, autant y être tout de suite.
+                if (slug) navigate(restaurantPath(slug));
+              }}
+            />
+          ) : (
+            <LazyProposeRestaurantDialog isOpen={addOpen} onClose={() => setAddOpen(false)} />
+          )}
+        </Suspense>
       )}
       <AccountSettingsDialog
         open={settingsOpen}

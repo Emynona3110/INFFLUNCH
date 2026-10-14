@@ -10,30 +10,36 @@ import { isRestaurantDetailPath, restaurantPath } from "@/utils/restaurantPath";
 import RestaurantGrid from "../sections/RestaurantGrid";
 import useMediaQuery from "@/hooks/useMediaQuery";
 import RestaurantsToolbar from "../components/RestaurantsToolbar";
-import RestaurantPage from "./RestaurantPage";
 import PageNotFound from "./PageNotFound";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { SortOrder } from "../components/SortSelector";
 import { DEFAULT_PRICE_FILTER, PriceRangeFilter } from "../services/price";
-import MyAccount from "../sections/MyAccount";
-import About from "../sections/About";
-import Faq from "../sections/Faq";
-import Nouveautes from "../sections/Nouveautes";
-import LunchToday from "../sections/LunchToday";
-import Leaderboard from "../sections/Leaderboard";
 import LeaderboardToolbar from "../components/LeaderboardToolbar";
 import {
   parisMonthKey,
   useLeaderboardFirstMonth,
 } from "../hooks/useLeaderboard";
-import AdminSection from "../sections/AdminSection";
 import AdminGuard from "../components/AdminGuard";
 import Layout from "../components/Layout";
 import Navbar from "../components/Navbar";
-import ProfilePage from "./ProfilePage";
 import PageReveal from "../components/PageReveal";
+import ScreenLoader from "@/components/brand/ScreenLoader";
 import useIsAdmin from "../hooks/useIsAdmin";
 import { cn } from "@/lib/utils";
+import { lazyPage, preloadLazyPages } from "@/lib/lazyPage";
+
+// Seule la liste des restaurants (écran principal) est dans ce chunk ; les
+// autres pages sont téléchargées à part, en tâche de fond une fois l'écran
+// principal prêt (preloadLazyPages), ou à leur ouverture si c'est avant.
+const RestaurantPage = lazyPage(() => import("./RestaurantPage"));
+const ProfilePage = lazyPage(() => import("./ProfilePage"));
+const MyAccount = lazyPage(() => import("../sections/MyAccount"));
+const About = lazyPage(() => import("../sections/About"));
+const Faq = lazyPage(() => import("../sections/Faq"));
+const Nouveautes = lazyPage(() => import("../sections/Nouveautes"));
+const LunchToday = lazyPage(() => import("../sections/LunchToday"));
+const Leaderboard = lazyPage(() => import("../sections/Leaderboard"));
+const AdminSection = lazyPage(() => import("../sections/AdminSection"));
 
 // Sections de la navbar selon le rôle. Les pages réservées aux admins vivent
 // sous /admin/* (garde unique AdminGuard) ; les autres sont à la racine.
@@ -167,6 +173,7 @@ const UserPage = () => {
   useEffect(() => {
     lastTab.current = activeTab;
   }, [activeTab]);
+  useEffect(preloadLazyPages, []);
 
   // à propos = contenu centré ; mon-compte gère lui-même sa mise en page (pills
   // en haut, carte centrée) ; demandes / tables = pleine hauteur avec scroll
@@ -231,61 +238,65 @@ const UserPage = () => {
         ) : undefined
       }
     >
-      {/* Chaque page n'apparaît qu'une fois ses données chargées (fondu en
-          montant) : remontée à chaque changement d'adresse. */}
-      <PageReveal
-        key={location.pathname}
-        className={
-          fillContent
-            ? "h-full"
-            : cn(
-                "flex w-full flex-1 shrink-0 flex-col",
-                centerContent && "items-center justify-center",
-              )
-        }
-      >
-        <Routes>
-          <Route index element={<Navigate to="restaurants" replace />} />
-          <Route
-            path="restaurants"
-            element={
-              <RestaurantGrid
-                restaurantFilters={restaurantFilters}
-                viewMode={viewMode}
-                rouletteExcluded={rouletteExcluded}
-                onRouletteExcludedChange={handleRouletteExcludedChange}
-                rouletteWinnerId={rouletteWinnerId}
-                onRouletteWinnerChange={setRouletteWinnerId}
-              />
-            }
-          />
-          <Route path="dejeuner" element={<LunchToday />} />
-          <Route
-            path="classement"
-            element={
-              <Leaderboard
-                period={leaderboardPeriod}
-                search={leaderboardSearch}
-              />
-            }
-          />
-          {/* Compat : ancien chemin de l'onglet, renommé « Déjeuner ». */}
-          <Route path="midi" element={<Navigate to="/dejeuner" replace />} />
-          <Route path="restaurants/:slug" element={<RestaurantPage />} />
-          {/* Compat : ancien chemin des fiches, /restaurant/<slug>. */}
-          <Route path="restaurant/:slug" element={<RedirectToRestaurant />} />
-          <Route path="profil/:handle" element={<ProfilePage />} />
-          <Route path="mon-compte" element={<MyAccount />} />
-          <Route path="faq" element={<Faq />} />
-          <Route path="a-propos" element={<About />} />
-          <Route path="nouveautes" element={<Nouveautes />} />
-          {/* Pages admin sous /admin/* derrière un garde unique. */}
-          <Route path="admin" element={<AdminGuard />}>
-            <Route index element={<AdminSection />} />
-          </Route>
-          <Route path="*" element={<PageNotFound />} />
-        </Routes>
-      </PageReveal>
+      {/* Page pas encore téléchargée (ouverte avant le préchargement) : le
+          monogramme de chargement, puis PageReveal comme d'habitude. */}
+      <Suspense fallback={<ScreenLoader />}>
+        {/* Chaque page n'apparaît qu'une fois ses données chargées (fondu en
+            montant) : remontée à chaque changement d'adresse. */}
+        <PageReveal
+          key={location.pathname}
+          className={
+            fillContent
+              ? "h-full"
+              : cn(
+                  "flex w-full flex-1 shrink-0 flex-col",
+                  centerContent && "items-center justify-center",
+                )
+          }
+        >
+          <Routes>
+            <Route index element={<Navigate to="restaurants" replace />} />
+            <Route
+              path="restaurants"
+              element={
+                <RestaurantGrid
+                  restaurantFilters={restaurantFilters}
+                  viewMode={viewMode}
+                  rouletteExcluded={rouletteExcluded}
+                  onRouletteExcludedChange={handleRouletteExcludedChange}
+                  rouletteWinnerId={rouletteWinnerId}
+                  onRouletteWinnerChange={setRouletteWinnerId}
+                />
+              }
+            />
+            <Route path="dejeuner" element={<LunchToday />} />
+            <Route
+              path="classement"
+              element={
+                <Leaderboard
+                  period={leaderboardPeriod}
+                  search={leaderboardSearch}
+                />
+              }
+            />
+            {/* Compat : ancien chemin de l'onglet, renommé « Déjeuner ». */}
+            <Route path="midi" element={<Navigate to="/dejeuner" replace />} />
+            <Route path="restaurants/:slug" element={<RestaurantPage />} />
+            {/* Compat : ancien chemin des fiches, /restaurant/<slug>. */}
+            <Route path="restaurant/:slug" element={<RedirectToRestaurant />} />
+            <Route path="profil/:handle" element={<ProfilePage />} />
+            <Route path="mon-compte" element={<MyAccount />} />
+            <Route path="faq" element={<Faq />} />
+            <Route path="a-propos" element={<About />} />
+            <Route path="nouveautes" element={<Nouveautes />} />
+            {/* Pages admin sous /admin/* derrière un garde unique. */}
+            <Route path="admin" element={<AdminGuard />}>
+              <Route index element={<AdminSection />} />
+            </Route>
+            <Route path="*" element={<PageNotFound />} />
+          </Routes>
+        </PageReveal>
+      </Suspense>
     </Layout>
   );
 };

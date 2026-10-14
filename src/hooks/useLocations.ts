@@ -1,14 +1,8 @@
 import { useState } from "react";
-import L from "leaflet";
 import { geocodeAddress, INFFLUX_COORDS, Coords as Coordinates } from "../services/geocode";
+import { distanceKm as getDistanceInKm } from "../services/distance";
 
 const companyCoords = INFFLUX_COORDS;
-
-const getDistanceInKm = (a: Coordinates, b: Coordinates): number => {
-  const pointA = L.latLng(a.lat, a.lng);
-  const pointB = L.latLng(b.lat, b.lng);
-  return pointA.distanceTo(pointB) / 1000;
-};
 
 interface LocationResult {
   coords: Coordinates;
