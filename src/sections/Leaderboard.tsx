@@ -73,7 +73,7 @@ const LeaderboardSkeleton = () => (
     aria-label="Chargement du classement"
   >
     <div className="flex h-10 shrink-0 items-center gap-2 bg-muted px-4 shadow-[inset_0_-1px_0_0_var(--border)]">
-      <Skeleton className="h-3 w-20 sm:w-28" />
+      <Skeleton className="ml-8 h-3 w-20 sm:w-28" />
       <div className="ml-auto flex w-[68%] justify-around">
         {METRICS.map((m) => (
           <Skeleton key={m.key} className="h-3 w-6 sm:w-12" />
@@ -85,6 +85,9 @@ const LeaderboardSkeleton = () => (
         key={i}
         className="flex h-[41px] shrink-0 items-center gap-2 border-t border-border/60 px-4 first:border-t-0"
       >
+        <div className="-ml-4 -mr-2 flex w-12 shrink-0 justify-center">
+          <Skeleton className="h-3.5 w-3.5" />
+        </div>
         <Skeleton className="h-7 w-7 shrink-0 rounded-full" />
         <Skeleton className="h-3.5 w-10 sm:w-28" />
         <div className="ml-auto flex w-[68%] justify-around">
@@ -219,36 +222,52 @@ const Leaderboard = ({ period, search }: Props) => {
   );
 
   const needle = fold(search.trim());
-  // Égalités : départagées d'abord par le total des quatre colonnes, puis par
-  // les autres colonnes chiffrées de gauche à droite, toujours dans le sens
-  // du tri ; enfin par nom (ordre de base, tri stable).
-  type TieKey = ColKey | "total";
+  // Égalités sur la colonne triée : soi-même d'abord, puis le total des quatre
+  // colonnes, puis les autres colonnes chiffrées de gauche à droite, toujours
+  // dans le sens du tri ; enfin par nom (ordre de base, tri stable).
+  type TieKey = ColKey | "total" | "me";
   const tieKeys: TieKey[] = [
+    "me",
     "total",
     ...METRICS.map((m) => m.key).filter((k) => k !== sort.key),
   ];
-  const liveRows = sortRows<LeaderboardRow, TieKey>(
-    needle
-      ? // Nom ou trigramme (celui qu'affiche le mobile). Rick Astley,
-        // collègue fictif, ne se montre qu'à qui le cherche (succès secret).
-        [
-          ...byName.filter(
-            (r) =>
-              fold(nameOf(r.email)).includes(needle) ||
-              fold(trigramOf(r.email)).includes(needle),
-          ),
-          ...(isRickSearch(search) ? [RICK_ROW] : []),
-        ]
-      : byName,
+  // Tri sur la liste entière, recherche ensuite : le rang reste celui du
+  // classement complet. Rick Astley, collègue fictif, ne se montre qu'à qui le
+  // cherche (succès secret).
+  const sorted = sortRows<LeaderboardRow, TieKey>(
+    isRickSearch(search) ? [...byName, RICK_ROW] : byName,
     sort,
     (r, key) =>
       key === "user"
         ? nameOf(r.email)
-        : key === "total"
-          ? METRICS.reduce((sum, m) => sum + r[m.key], 0)
-          : r[key],
+        : key === "me"
+          ? // Signé selon le sens du tri : soi-même en tête dans les deux.
+            Number(r.user_id === myId) * (sort.dir === "asc" ? -1 : 1)
+          : key === "total"
+            ? METRICS.reduce((sum, m) => sum + r[m.key], 0)
+            : r[key],
     tieKeys,
   );
+  // Rang : seule la colonne triée compte, les ex æquo le partagent (1, 1, 3) ;
+  // les autres départages ne fixent que l'ordre d'affichage.
+  const ranks: number[] = [];
+  const liveRows = sorted
+    .map((r, i) => {
+      const prev = sorted[i - 1];
+      ranks[i] =
+        sort.key !== "user" && prev && prev[sort.key] === r[sort.key]
+          ? ranks[i - 1]
+          : i + 1;
+      return { ...r, rank: ranks[i] };
+    })
+    .filter(
+      // Nom ou trigramme (celui qu'affiche le mobile).
+      (r) =>
+        !needle ||
+        r.user_id === RICK_ROW.user_id ||
+        fold(nameOf(r.email)).includes(needle) ||
+        fold(trigramOf(r.email)).includes(needle),
+    );
   // Instantané de ce qui est affiché, rejoué pendant l'effacement.
   const snapshot = useRef({ rows: liveRows, sortKey: sort.key as ColKey });
   if (settled) snapshot.current = { rows: liveRows, sortKey: sort.key };
@@ -271,7 +290,11 @@ const Leaderboard = ({ period, search }: Props) => {
           >
             <table
               className="admin-table w-full border-separate border-spacing-0 text-center text-sm"
-              style={{ ["--admin-min-w" as string]: "560px" }}
+              style={{
+                ["--admin-min-w" as string]: "560px",
+                // Zone du rang : du bord gauche à l'avatar.
+                ["--lb-rank-w" as string]: "3rem",
+              }}
             >
               {/* Colonnes chiffrées de même largeur : sans ça, chacune prend
                   la largeur de son intitulé et les écarts varient. */}
@@ -290,8 +313,9 @@ const Leaderboard = ({ period, search }: Props) => {
                     <th
                       key={c.key}
                       className={cn(
-                        "sticky top-0 z-10 bg-muted px-2 py-3 first:pl-4 last:pr-4 text-center text-xs font-semibold uppercase tracking-wide text-foreground/55 shadow-[inset_0_-1px_0_0_var(--border)]",
-                        c.key === "user" && "text-left",
+                        "sticky top-0 z-10 bg-muted px-2 py-3 last:pr-4 text-center text-xs font-semibold uppercase tracking-wide text-foreground/55 shadow-[inset_0_-1px_0_0_var(--border)]",
+                        // Intitulé aligné sur l'avatar, après la zone du rang.
+                        c.key === "user" && "pl-[var(--lb-rank-w)] text-left",
                       )}
                     >
                       <SortHeader
@@ -372,8 +396,13 @@ const Leaderboard = ({ period, search }: Props) => {
                             l'avatar passe au-dessus de tous les fonds. La
                             table tient sans défiler en largeur (symboles et
                             trigrammes sur mobile). */}
-                        <td className="px-2 py-1.5 first:pl-4 text-left">
+                        <td className="py-1.5 pl-0 pr-2 text-left">
                           <span className="lb-cell flex items-center gap-2">
+                            {/* Rang centré entre le bord et l'avatar (l'écart
+                                du flex est repris par la marge négative). */}
+                            <span className="-mr-2 w-[var(--lb-rank-w)] shrink-0 text-center tabular-nums text-foreground/50">
+                              {r.rank}
+                            </span>
                             {/* Opacité sur un enfant : celle de `.lb-cell`
                                 porte le fondu, on ne la remplace pas. */}
                             <span className={cn("block", idle && "opacity-50")}>

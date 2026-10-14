@@ -298,8 +298,9 @@ const AchievementDialog = ({
             Personne ne l'a encore décroché.
           </p>
         ) : (
-          /* Longue liste : c'est elle qui défile, pas la popup. */
-          <ul className="m-0 mt-2 max-h-[30dvh] list-none space-y-1.5 overflow-y-auto p-0">
+          /* Longue liste : c'est elle qui défile, pas la popup. Marge à
+             droite : sur mobile, la barre flotte par-dessus les dates. */
+          <ul className="m-0 mt-2 max-h-[30dvh] list-none space-y-1.5 overflow-y-auto p-0 pr-3">
             {holders.data.map((h) => (
               <li key={h.user_id} className="flex items-center gap-2.5">
                 <Avatar email={h.email} avatarPath={h.avatar_path} size={28} />
