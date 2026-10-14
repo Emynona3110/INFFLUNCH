@@ -1,5 +1,4 @@
 import { useEffect, useId, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import { FiChevronDown } from "react-icons/fi";
 import { Card } from "@/components/ui/card";
 import { FAQ, FaqItem } from "@/data/faq";
@@ -38,33 +37,35 @@ const FaqQuestion = ({
           )}
         />
       </button>
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            id={panelId}
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.22, ease: "easeOut" }}
-            // La hauteur animée rogne le contenu pendant le glissement ; la
-            // marge basse est dans le bloc intérieur, donc comprise dedans.
-            className="overflow-hidden"
-          >
-            <div className="space-y-1.5 pb-3 pr-7 text-sm leading-relaxed text-foreground/70 sm:text-[15px]">
-              {/* Question regroupée : un sujet par paragraphe. */}
-              {Array.isArray(item.answer) ? (
-                item.answer.map((part, i) => (
-                  <p key={i} className="m-0">
-                    {part}
-                  </p>
-                ))
-              ) : (
-                <p className="m-0">{item.answer}</p>
-              )}
-            </div>
-          </motion.div>
+      {/* Grille 0fr → 1fr en CSS, pas de hauteur « auto » animée par
+          framer-motion : celle-ci mesure le bloc déplié avant d'animer, ce qui
+          fait clignoter la page. Le panneau reste monté, `inert` le sort du
+          clavier et des lecteurs d'écran une fois replié. */}
+      <div
+        id={panelId}
+        inert={!open}
+        className={cn(
+          "grid transition-[grid-template-rows,opacity] duration-[220ms] ease-out",
+          open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
         )}
-      </AnimatePresence>
+      >
+        {/* La hauteur animée rogne le contenu pendant le glissement ; la
+            marge basse est dans le bloc intérieur, donc comprise dedans. */}
+        <div className="min-h-0 overflow-hidden">
+          <div className="space-y-1.5 pb-3 pr-7 text-sm leading-relaxed text-foreground/70 sm:text-[15px]">
+            {/* Question regroupée : un sujet par paragraphe. */}
+            {Array.isArray(item.answer) ? (
+              item.answer.map((part, i) => (
+                <p key={i} className="m-0">
+                  {part}
+                </p>
+              ))
+            ) : (
+              <p className="m-0">{item.answer}</p>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
