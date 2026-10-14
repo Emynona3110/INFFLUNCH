@@ -23,9 +23,40 @@ function versionFile(): Plugin {
   };
 }
 
+/**
+ * Feuilles de style déplacées de <head> vers <body>, juste après #root : une
+ * feuille dans <head> bloque TOUT l'affichage jusqu'à son arrivée, monogramme
+ * de démarrage compris (écran blanc en connexion lente). Dans <body>, elle ne
+ * retient que ce qui la suit (rien de visible), et le script de l'app attend
+ * toujours qu'elle soit chargée avant de s'exécuter : pas de page sans style.
+ */
+function stylesAfterBootLoader(): Plugin {
+  return {
+    name: "infflunch-styles-after-boot-loader",
+    apply: "build",
+    transformIndexHtml: {
+      order: "post",
+      handler(html) {
+        const links: string[] = [];
+        const head = html.replace(/<head>[\s\S]*<\/head>/, (h) =>
+          h.replace(/\s*<link\b(?=[^>]*rel="stylesheet")[^>]*>/g, (link) => {
+            links.push(link.trim());
+            return "";
+          }),
+        );
+        if (!links.length) return html;
+        return head.replace(
+          /(<div id="root">[\s\S]*?<\/div>\s*<\/div>)/,
+          (root) => `${root}\n    ${links.join("\n    ")}`,
+        );
+      },
+    },
+  };
+}
+
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss(), versionFile()],
+  plugins: [react(), tailwindcss(), versionFile(), stylesAfterBootLoader()],
   base: "/",
   define: {
     __BUILD_ID__: JSON.stringify(BUILD_ID),

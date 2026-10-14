@@ -7,6 +7,7 @@ import PasswordField from "./PasswordField";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import PageLoader from "@/components/brand/PageLoader";
 
 interface Props {
   children: ReactNode;
@@ -29,7 +30,7 @@ const ForcePasswordChangeGate = ({ children }: Props) => {
   if (loading) {
     return (
       <div className="tw-scope flex h-screen items-center justify-center bg-background">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-border border-t-primary" />
+        <PageLoader />
       </div>
     );
   }

@@ -15,6 +15,7 @@ import RestaurantRoulette from "@/components/RestaurantRoulette";
 import RestaurantDialog from "@/admin/Dialogs/RestaurantDialog";
 import ChefHatPlus from "@/components/icons/ChefHatPlus";
 import { FiArrowUpRight, FiChevronDown } from "react-icons/fi";
+import PageLoader from "@/components/brand/PageLoader";
 
 interface RestaurantGridProps {
   restaurantFilters: RestaurantFilters;
@@ -193,7 +194,7 @@ const RestaurantGrid = ({
       if (isLoading) {
         return (
           <div className="flex h-full items-center justify-center rounded-card border border-border bg-muted/40">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
+            <PageLoader />
           </div>
         );
       }
@@ -208,7 +209,7 @@ const RestaurantGrid = ({
       if (isLoading) {
         return (
           <div className="flex h-full items-center justify-center">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
+            <PageLoader />
           </div>
         );
       }

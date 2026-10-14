@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Query, useIsFetching, useQueryClient } from "@tanstack/react-query";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import PageLoader from "@/components/brand/PageLoader";
+import { markBootDone } from "@/components/brand/bootState";
 
 /** Au-delà, on montre la page quand même (réseau lent) : mieux vaut un
  *  chargement visible qu'un écran vide. */
@@ -67,15 +69,38 @@ const PageReveal = ({
     return () => clearTimeout(t);
   }, [loading]);
 
+  useEffect(() => {
+    if (ready) markBootDone();
+  }, [ready]);
+
+  // Tant que la page est masquée, le monogramme animé reste au centre de
+  // l'écran — à la place exacte de celui du démarrage (index.html), sans
+  // saut quand la navbar arrive ; la page révélée (ses squelettes d'abord)
+  // le remplace.
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-      transition={{ duration: 0.35, ease: "easeOut" }}
-      className={className}
-    >
-      {children}
-    </motion.div>
+    <div className={className}>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        className={className}
+      >
+        {children}
+      </motion.div>
+      {/* Disparition en fondu, pendant que la page apparaît. */}
+      <AnimatePresence>
+        {!ready && (
+          <motion.div
+            key="loader"
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="pointer-events-none fixed inset-0 flex items-center justify-center"
+          >
+            <PageLoader />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
 
