@@ -80,9 +80,10 @@ const MySuggestions = () => {
   };
 
   const destroy = async (s: RestaurantSuggestion) => {
+    // Optimiste : la fiche se ferme et la tuile part tout de suite.
+    setViewing(null);
     try {
       await cancel.mutateAsync(s);
-      setViewing(null);
       toast({
         title: "Proposition supprimée",
         status: "success",
@@ -186,7 +187,6 @@ const MySuggestions = () => {
         isOpen={!!viewing}
         onClose={() => setViewing(null)}
         item={viewingLive}
-        busy={cancel.isPending}
         onEdit={
           viewingLive && !frozen(viewingLive)
             ? () => {

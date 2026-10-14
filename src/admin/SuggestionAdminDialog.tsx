@@ -89,9 +89,10 @@ const SuggestionAdminDialog = ({
   };
 
   const destroy = async (s: RestaurantSuggestion) => {
+    // Optimiste : la popup se ferme et la ligne part tout de suite.
+    onClose();
     try {
       await remove.mutateAsync(s.id);
-      onClose();
       toast({ title: "Proposition supprimée", status: "success", duration: 2500 });
     } catch (e: any) {
       toast({
@@ -171,7 +172,6 @@ const SuggestionAdminDialog = ({
         onClose={onClose}
         item={viewingLive}
         author={viewingLive ? nameOf(viewingLive.email) : undefined}
-        busy={remove.isPending}
         onDelete={() => viewingLive && destroy(viewingLive)}
       />
 

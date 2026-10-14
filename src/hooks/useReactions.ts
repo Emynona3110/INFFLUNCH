@@ -1,6 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import supabaseClient from "../services/supabaseClient";
 import useSession from "./useSession";
+import {
+  patchQueries,
+  rollbackQueries,
+  settleWhenIdle,
+} from "../lib/optimistic";
 
 export type ReactionTarget = "review" | "photo";
 
@@ -71,42 +76,30 @@ const useReactions = (targetType: ReactionTarget, targetIds: number[]) => {
     return { counts, mine };
   };
 
+  // Écriture optimiste (src/lib/optimistic.ts). L'intention — poser cet
+  // emoji, ou retirer le mien — est fixée AU CLIC, d'après ce qui est affiché :
+  // la requête, elle, ne dépend plus d'ids lus avant (des lignes optimistes
+  // n'en ont pas de vrai). Un seul emoji par cible et par utilisateur : on
+  // efface toujours les miens, puis on pose le nouveau s'il y en a un.
+  const writeKey = ["reactions-write", targetType];
   const mutation = useMutation({
+    mutationKey: writeKey,
+    scope: { id: `reactions-write-${targetType}` },
     mutationFn: async ({
       targetId,
       emoji,
     }: {
       targetId: number;
-      emoji: string;
+      /** null = retirer ma réaction. */
+      emoji: string | null;
     }) => {
       if (!myId) throw new Error("Non connecté");
-      // Un seul emoji par cible et par utilisateur.
-      const myRows = (query.data?.[targetId] ?? []).filter(
-        (r) => r.user_id === myId
-      );
-      const sameEmoji = myRows.find((r) => r.emoji === emoji);
-
-      if (sameEmoji) {
-        // Reclic sur l'emoji actif → on le retire.
-        const { error } = await supabaseClient
-          .from("reactions")
-          .delete()
-          .eq("id", sameEmoji.id);
-        if (error) throw new Error(error.message);
-        return;
-      }
-
-      // On retire l'éventuel autre emoji posé avant d'ajouter le nouveau.
-      if (myRows.length) {
-        const { error: delErr } = await supabaseClient
-          .from("reactions")
-          .delete()
-          .in(
-            "id",
-            myRows.map((r) => r.id)
-          );
-        if (delErr) throw new Error(delErr.message);
-      }
+      const { error: delErr } = await supabaseClient
+        .from("reactions")
+        .delete()
+        .match({ target_type: targetType, target_id: targetId, user_id: myId });
+      if (delErr) throw new Error(delErr.message);
+      if (emoji == null) return;
       const { error } = await supabaseClient.from("reactions").insert({
         target_type: targetType,
         target_id: targetId,
@@ -114,17 +107,50 @@ const useReactions = (targetType: ReactionTarget, targetIds: number[]) => {
       });
       if (error) throw new Error(error.message);
     },
+    onMutate: ({ targetId, emoji }) =>
+      patchQueries(queryClient, [
+        [
+          ["reactions", targetType],
+          (prev: Record<number, ReactionRow[]>) => {
+            if (!(targetId in prev) && !emoji) return prev;
+            const others = (prev[targetId] ?? []).filter(
+              (r) => r.user_id !== myId
+            );
+            return {
+              ...prev,
+              [targetId]: emoji
+                ? [
+                    ...others,
+                    {
+                      id: -Date.now(),
+                      target_type: targetType,
+                      target_id: targetId,
+                      user_id: myId as string,
+                      emoji,
+                    },
+                  ]
+                : others,
+            };
+          },
+        ],
+      ]),
+    onError: (_e, _v, context) => rollbackQueries(queryClient, context),
     // On rafraîchit toutes les réactions de ce type (clé partielle).
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["reactions", targetType] });
-      queryClient.invalidateQueries({ queryKey: ["achievement-metrics"] });
-    },
+    onSettled: () =>
+      settleWhenIdle(queryClient, writeKey, () => {
+        queryClient.invalidateQueries({ queryKey: ["reactions", targetType] });
+        queryClient.invalidateQueries({ queryKey: ["achievement-metrics"] });
+      }),
   });
 
   return {
     summaryFor,
+    // Reclic sur l'emoji actif → on le retire ; sinon il remplace le mien.
     toggle: (targetId: number, emoji: string) =>
-      mutation.mutate({ targetId, emoji }),
+      mutation.mutate({
+        targetId,
+        emoji: summaryFor(targetId).mine.has(emoji) ? null : emoji,
+      }),
     canReact: !!myId,
     isPending: query.isPending,
   };

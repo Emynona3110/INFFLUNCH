@@ -1,6 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import supabaseClient from "../services/supabaseClient";
 import useSession from "./useSession";
+import {
+  patchQueries,
+  rollbackQueries,
+  settleWhenIdle,
+} from "../lib/optimistic";
 
 interface VoteRow {
   id: number;
@@ -45,17 +50,21 @@ const useReviewVotes = (reviewIds: number[]) => {
   const myVoteFor = (reviewId: number): number =>
     (query.data?.[reviewId] ?? []).find((v) => v.user_id === myId)?.value ?? 0;
 
+  // Écriture optimiste (src/lib/optimistic.ts) : le score bouge au clic.
+  // L'intention (voter, ou retirer mon vote = 0) est fixée AU CLIC.
+  const writeKey = ["review-votes-write"];
   const mutation = useMutation({
+    mutationKey: writeKey,
+    scope: { id: "review-votes-write" },
     mutationFn: async ({
       reviewId,
       value,
     }: {
       reviewId: number;
-      value: 1 | -1;
+      value: 1 | -1 | 0;
     }) => {
       if (!myId) throw new Error("Non connecté");
-      // Clic sur le vote déjà actif → on le retire ; sinon on pose/change.
-      if (myVoteFor(reviewId) === value) {
+      if (value === 0) {
         const { error } = await supabaseClient
           .from("review_votes")
           .delete()
@@ -72,15 +81,43 @@ const useReviewVotes = (reviewIds: number[]) => {
         if (error) throw new Error(error.message);
       }
     },
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["review-votes"] }),
+    onMutate: ({ reviewId, value }) =>
+      patchQueries(queryClient, [
+        [
+          ["review-votes"],
+          (prev: Record<number, VoteRow[]>) => {
+            if (!(reviewId in prev) && value === 0) return prev;
+            const others = (prev[reviewId] ?? []).filter(
+              (v) => v.user_id !== myId
+            );
+            return {
+              ...prev,
+              [reviewId]: value
+                ? [
+                    ...others,
+                    { id: -Date.now(), review_id: reviewId, user_id: myId as string, value },
+                  ]
+                : others,
+            };
+          },
+        ],
+      ]),
+    onError: (_e, _v, context) => rollbackQueries(queryClient, context),
+    onSettled: () =>
+      settleWhenIdle(queryClient, writeKey, () =>
+        queryClient.invalidateQueries({ queryKey: ["review-votes"] })
+      ),
   });
 
   return {
     scoreFor,
     myVoteFor,
+    // Clic sur le vote déjà actif → on le retire ; sinon on pose/change.
     vote: (reviewId: number, value: 1 | -1) =>
-      mutation.mutate({ reviewId, value }),
+      mutation.mutate({
+        reviewId,
+        value: myVoteFor(reviewId) === value ? 0 : value,
+      }),
     canVote: !!myId,
   };
 };

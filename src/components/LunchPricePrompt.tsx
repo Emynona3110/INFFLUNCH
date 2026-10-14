@@ -67,7 +67,8 @@ const LunchPricePrompt = ({ restaurant, day, onSkip }: Props) => {
   // vérifier en base, et attendre une seconde lecture retarderait le bloc d'un
   // aller-retour — le temps que son fondu d'ouverture soit déjà joué, sur un
   // bloc encore vide.
-  const { save, saving } = useMyPriceReport(restaurant.id);
+  // Écriture optimiste : la relance s'efface au tap, sans attendre.
+  const { save } = useMyPriceReport(restaurant.id);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const pick = async (value: number) => {
@@ -129,12 +130,10 @@ const LunchPricePrompt = ({ restaurant, day, onSkip }: Props) => {
         <div className="flex flex-wrap items-center gap-2 sm:pl-[52px]">
           <PriceQuickPicks
             values={quickPriceSuggestions(restaurant)}
-            disabled={saving}
             onPick={pick}
           />
           <button
             type="button"
-            disabled={saving}
             onClick={() => setDialogOpen(true)}
             className="cursor-pointer text-sm font-medium text-primary underline-offset-2 transition hover:underline disabled:opacity-50"
           >

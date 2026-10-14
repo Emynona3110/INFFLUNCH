@@ -108,9 +108,10 @@ const RestaurantMenus = ({
   };
 
   const handleDelete = async (menu: RestaurantMenu) => {
+    // Suppression optimiste : la visionneuse se ferme tout de suite.
+    setLightbox((cur) => (cur?.id === menu.id ? null : cur));
     try {
       await remove.mutateAsync(menu);
-      setLightbox((cur) => (cur?.id === menu.id ? null : cur));
       toast({ title: "Menu supprimé", status: "success", duration: 2500 });
     } catch (e: any) {
       toast({

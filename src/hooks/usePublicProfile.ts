@@ -2,7 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import supabaseClient from "../services/supabaseClient";
 import { AchievementId } from "@/data/achievements";
 import { PHOTOS_BUCKET } from "../services/storagePaths";
-import { RestaurantPhoto } from "./useRestaurantPhotos";
+import { RestaurantPhoto, photoPatches } from "./useRestaurantPhotos";
+import { patchQueries, rollbackQueries, settleWhenIdle } from "../lib/optimistic";
 
 export interface PublicProfile {
   email: string | null;
@@ -88,7 +89,23 @@ const usePublicProfile = (userId: string | null) => {
     queryClient.invalidateQueries({ queryKey: ["restaurant-photos"] });
   };
 
+  // Suppression et légende optimistes, même file que la galerie de la fiche
+  // (useRestaurantPhotos) : les deux écrans patchent les mêmes caches.
+  const writes = {
+    mutationKey: ["photos-write"],
+    scope: { id: "photos-write" },
+    onError: (
+      _e: Error,
+      _v: unknown,
+      context?: Awaited<ReturnType<typeof patchQueries>>
+    ) => rollbackQueries(queryClient, context),
+    onSettled: () => settleWhenIdle(queryClient, ["photos-write"], invalidate),
+  };
+
   const remove = useMutation({
+    ...writes,
+    onMutate: (photo: RestaurantPhoto) =>
+      patchQueries(queryClient, photoPatches(photo.id, null)),
     mutationFn: async (photo: RestaurantPhoto) => {
       const { error } = await supabaseClient
         .from("restaurant_photos")
@@ -97,10 +114,15 @@ const usePublicProfile = (userId: string | null) => {
       if (error) throw new Error(error.message);
       await supabaseClient.storage.from(PHOTOS_BUCKET).remove([photo.storage_path]);
     },
-    onSuccess: invalidate,
   });
 
   const setCaption = useMutation({
+    ...writes,
+    onMutate: ({ id, caption }: { id: number; caption: string }) =>
+      patchQueries(
+        queryClient,
+        photoPatches(id, (p) => ({ ...p, caption: caption.trim() || null }))
+      ),
     mutationFn: async ({ id, caption }: { id: number; caption: string }) => {
       const { error } = await supabaseClient
         .from("restaurant_photos")
@@ -108,7 +130,6 @@ const usePublicProfile = (userId: string | null) => {
         .eq("id", id);
       if (error) throw new Error(error.message);
     },
-    onSuccess: invalidate,
   });
 
   return { profile, photos, remove, setCaption };

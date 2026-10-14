@@ -9,6 +9,7 @@ import { removeFromBucket } from "../services/uploadImage";
 import { FEEDBACK_BUCKET } from "../services/storagePaths";
 import useRealtimeTable from "./useRealtimeTable";
 import useSession from "./useSession";
+import { patchQueries, rollbackQueries, settleWhenIdle } from "../lib/optimistic";
 
 /** Un message du fil d'une demande : de l'admin ou de l'auteur, immuable. */
 export interface FeedbackMessage {
@@ -280,7 +281,25 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
   // auteur ne supprime pas côté admin, même une demande en attente jamais
   // lue — elle sort de la liste de l'auteur (`cancelled_at`), l'admin la voit
   // « Annulée » et la supprime de son côté s'il veut.
+  //
+  // Optimiste (src/lib/optimistic.ts) : la demande sort de ma liste au clic,
+  // et passe « Annulée » dans la boîte de réception si elle y est chargée.
   const cancel = useMutation({
+    mutationKey: ["feedback-write"],
+    scope: { id: "feedback-write" },
+    onMutate: (item: Feedback) =>
+      patchQueries(queryClient, [
+        [["feedback", "mine"], (prev: Feedback[]) => prev.filter((f) => f.id !== item.id)],
+        [
+          ["feedback", "admin"],
+          (prev: Feedback[]) =>
+            prev.map((f) =>
+              f.id === item.id ? { ...f, cancelled_at: new Date().toISOString() } : f
+            ),
+        ],
+      ]),
+    onError: (_e, _item, context) => rollbackQueries(queryClient, context),
+    onSettled: () => settleWhenIdle(queryClient, ["feedback-write"], invalidate),
     mutationFn: async (item: Feedback) => {
       const { error } = await supabaseClient
         .from("feedback")
@@ -288,14 +307,30 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
         .eq("id", item.id);
       if (error) throw new Error(error.message);
     },
-    onSuccess: invalidate,
   });
 
   /** Suppression par l'admin : la demande quitte la boîte de réception, mais
    *  la ligne reste (`deleted_at`) — l'auteur garde sa tuile, grisée, avec
    *  tout l'historique. Rien n'est effacé du bucket. La note du carnet, si
    *  elle existe, reste : c'est le backlog qui la gère. */
+  // Optimiste : elle quitte la boîte de réception au clic ; l'auteur la voit
+  // grisée (deleted_at) s'il a sa liste chargée.
   const remove = useMutation({
+    mutationKey: ["feedback-write"],
+    scope: { id: "feedback-write" },
+    onMutate: (item: Feedback) =>
+      patchQueries(queryClient, [
+        [["feedback", "admin"], (prev: Feedback[]) => prev.filter((f) => f.id !== item.id)],
+        [
+          ["feedback", "mine"],
+          (prev: Feedback[]) =>
+            prev.map((f) =>
+              f.id === item.id ? { ...f, deleted_at: new Date().toISOString() } : f
+            ),
+        ],
+      ]),
+    onError: (_e, _item, context) => rollbackQueries(queryClient, context),
+    onSettled: () => settleWhenIdle(queryClient, ["feedback-write"], invalidate),
     mutationFn: async (item: Feedback) => {
       const { error } = await supabaseClient
         .from("feedback")
@@ -303,7 +338,6 @@ const useFeedback = (scope: "mine" | "admin" = "mine", enabled = true) => {
         .eq("id", item.id);
       if (error) throw new Error(error.message);
     },
-    onSuccess: invalidate,
   });
 
   return { ...query, submit, edit, setStatus, reply, editMessage, cancel, remove };

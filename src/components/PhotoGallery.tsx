@@ -167,9 +167,10 @@ const PhotoGallery = ({
 
   const deletePhoto = async (photo: RestaurantPhoto) => {
     if (!onDelete) return;
+    // Suppression optimiste : la visionneuse se ferme tout de suite.
+    setLightbox(null);
     try {
       await onDelete(photo);
-      setLightbox(null);
       toast({ title: "Photo supprimée", status: "success", duration: 2500 });
     } catch (e) {
       toast({

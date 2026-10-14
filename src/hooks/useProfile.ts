@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import supabaseClient from "../services/supabaseClient";
 import useSession from "./useSession";
+import { patchQueries, rollbackQueries } from "../lib/optimistic";
 import { compressImage } from "../utils/imageCompress";
 import { AVATARS_BUCKET, newAvatarPath } from "../services/avatar";
 
@@ -72,7 +73,14 @@ const useProfile = () => {
     onSuccess: invalidate,
   });
 
+  // Retrait optimiste (src/lib/optimistic.ts) : les initiales remplacent la
+  // photo au clic. L'ancien chemin est lu AVANT le patch (options du clic).
   const removeAvatar = useMutation({
+    onMutate: () =>
+      patchQueries(queryClient, [
+        [key, (prev: Profile | null) => prev && { ...prev, avatar_path: null }],
+      ]),
+    onError: (_e, _v, context) => rollbackQueries(queryClient, context),
     mutationFn: async () => {
       if (!userId) throw new Error("Non connecté");
       const oldPath = query.data?.avatar_path ?? null;
@@ -86,7 +94,7 @@ const useProfile = () => {
         await supabaseClient.storage.from(AVATARS_BUCKET).remove([oldPath]);
       }
     },
-    onSuccess: invalidate,
+    onSettled: invalidate,
   });
 
   return {

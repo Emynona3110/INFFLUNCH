@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import supabaseClient from "../services/supabaseClient";
 import useRealtimeTable from "./useRealtimeTable";
 import useSession from "./useSession";
+import { patchQueries, rollbackQueries, settleWhenIdle } from "../lib/optimistic";
 
 export type SuggestionStatus = "nouveau" | "accepte" | "refuse";
 
@@ -153,7 +154,26 @@ const useRestaurantSuggestions = (
    * Auteur, « Supprimer » : la proposition sort de SA liste seulement
    * (`cancelled_at`) — l'admin la garde, « Annulée » si elle attendait encore.
    */
+  // Optimiste (src/lib/optimistic.ts) : elle sort de ma liste au clic.
   const cancel = useMutation({
+    mutationKey: ["suggestions-write"],
+    scope: { id: "suggestions-write" },
+    onMutate: (item: RestaurantSuggestion) =>
+      patchQueries(queryClient, [
+        [
+          ["restaurant-suggestions", "mine"],
+          (prev: RestaurantSuggestion[]) => prev.filter((s) => s.id !== item.id),
+        ],
+        [
+          ["restaurant-suggestions", "admin"],
+          (prev: RestaurantSuggestion[]) =>
+            prev.map((s) =>
+              s.id === item.id ? { ...s, cancelled_at: new Date().toISOString() } : s
+            ),
+        ],
+      ]),
+    onError: (_e, _item, context) => rollbackQueries(queryClient, context),
+    onSettled: () => settleWhenIdle(queryClient, ["suggestions-write"], invalidate),
     mutationFn: async (item: RestaurantSuggestion) => {
       const { error } = await supabaseClient
         .from("restaurant_suggestions")
@@ -161,7 +181,6 @@ const useRestaurantSuggestions = (
         .eq("id", item.id);
       if (error) throw new Error(error.message);
     },
-    onSuccess: invalidate,
   });
 
   /** Admin : accepter (avec la fiche créée), refuser, ou remettre en attente. */
@@ -193,6 +212,17 @@ const useRestaurantSuggestions = (
   /** Admin, « Supprimer » : la proposition sort de SA table seulement
    *  (`deleted_at`) — l'auteur la garde, la fiche créée aussi. */
   const remove = useMutation({
+    mutationKey: ["suggestions-write"],
+    scope: { id: "suggestions-write" },
+    onMutate: (id: number) =>
+      patchQueries(queryClient, [
+        [
+          ["restaurant-suggestions", "admin"],
+          (prev: RestaurantSuggestion[]) => prev.filter((s) => s.id !== id),
+        ],
+      ]),
+    onError: (_e, _id, context) => rollbackQueries(queryClient, context),
+    onSettled: () => settleWhenIdle(queryClient, ["suggestions-write"], invalidate),
     mutationFn: async (id: number) => {
       const { error } = await supabaseClient
         .from("restaurant_suggestions")
@@ -200,7 +230,6 @@ const useRestaurantSuggestions = (
         .eq("id", id);
       if (error) throw new Error(error.message);
     },
-    onSuccess: invalidate,
   });
 
   return { ...query, submit, edit, cancel, decide, remove };

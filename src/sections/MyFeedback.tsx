@@ -107,9 +107,10 @@ const MyFeedback = () => {
    *  (suppressions indépendantes de chaque côté). Ce qui a été porté au carnet
    *  de backlog y reste — c'est l'admin qui le gère. */
   const destroy = async (item: Feedback) => {
+    // Optimiste : la fiche se ferme et la tuile part tout de suite.
+    setViewing(null);
     try {
       await cancel.mutateAsync(item);
-      setViewing(null);
       toast({
         title: "Demande supprimée",
         status: "success",
@@ -237,7 +238,6 @@ const MyFeedback = () => {
         isOpen={!!viewing}
         onClose={() => setViewing(null)}
         item={viewingLive}
-        busy={cancel.isPending}
         currentUserId={userId}
         // Répondre dans le fil, tant que la demande n'est pas figée
         // (terminée, refusée, clôturée) : le fil reste lisible, plus rien

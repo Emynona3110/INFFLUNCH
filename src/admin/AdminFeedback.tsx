@@ -149,8 +149,7 @@ const AdminFeedback = () => {
     setStatus.isPending ||
     addNote.isPending ||
     updateNote.isPending ||
-    removeNote.isPending ||
-    remove.isPending;
+    removeNote.isPending;
 
   /** Accepter = porter la demande au carnet de backlog. Si une note en est
    *  déjà issue (historique), on la met à jour plutôt que d'en créer une
@@ -471,9 +470,10 @@ const AdminFeedback = () => {
         onDelete={
           viewingLive && (!pending(viewingLive) || viewingLive.cancelled_at)
             ? async () => {
+                // Optimiste : la fiche se ferme tout de suite.
+                setViewing(null);
                 try {
                   await remove.mutateAsync(viewingLive);
-                  setViewing(null);
                 } catch (e) {
                   fail(e);
                 }

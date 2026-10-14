@@ -22,6 +22,7 @@ import useSortedTags from "@/hooks/useSortedTags";
 import useSession from "@/hooks/useSession";
 import useIsAdmin from "@/hooks/useIsAdmin";
 import supabaseClient from "@/services/supabaseClient";
+import { patchQueries, rollbackQueries } from "@/lib/optimistic";
 import { defaultRestaurantFilters } from "@/pages/UserPage";
 import badgeMap, { orderBadges } from "@/services/badgeMap";
 import RestaurantMiniMap from "@/components/RestaurantMiniMap";
@@ -172,12 +173,25 @@ const RestaurantPage = () => {
     ? reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews
     : 0;
 
+  // Suppression optimiste (src/lib/optimistic.ts) : l'avis disparaît au
+  // clic, et revient si le serveur refuse.
   const deleteReview = async (id: number) => {
+    const context = await patchQueries(queryClient, [
+      [
+        ["reviews", restaurant.id],
+        (prev: { id: number }[]) => prev.filter((r) => r.id !== id),
+      ],
+      [
+        ["user-reviews"],
+        (prev: { id: number }[]) => prev.filter((r) => r.id !== id),
+      ],
+    ]);
     const { error } = await supabaseClient
       .from("reviews")
       .delete()
       .eq("id", id);
     if (error) {
+      rollbackQueries(queryClient, context);
       toast({
         title: "Erreur",
         description: error.message,
@@ -187,6 +201,7 @@ const RestaurantPage = () => {
       return;
     }
     queryClient.invalidateQueries({ queryKey: ["reviews", restaurant.id] });
+    queryClient.invalidateQueries({ queryKey: ["user-reviews"] });
     queryClient.invalidateQueries({ queryKey: ["restaurants"] });
     toast({ title: "Avis supprimé", status: "success", duration: 2500 });
   };

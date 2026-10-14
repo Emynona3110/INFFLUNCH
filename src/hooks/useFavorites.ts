@@ -1,6 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import useSession from "./useSession";
 import supabaseClient from "../services/supabaseClient";
+import {
+  OptimisticContext,
+  patchQueries,
+  rollbackQueries,
+  settleWhenIdle,
+} from "../lib/optimistic";
 
 interface Favorite {
   id: string;
@@ -37,17 +43,48 @@ const useFavorites = () => {
     queryClient.invalidateQueries({ queryKey: ["achievement-metrics"] });
   };
 
+  // Écritures optimistes (src/lib/optimistic.ts) : le cœur et le filtre
+  // « Favoris » changent au clic ; ajouts et retraits passent dans l'ordre.
+  const writes = {
+    mutationKey: ["favorites-write"],
+    scope: { id: "favorites-write" },
+    onError: (_e: Error, _id: number, context?: OptimisticContext) =>
+      rollbackQueries(queryClient, context),
+    onSettled: () =>
+      settleWhenIdle(queryClient, ["favorites-write"], invalidate),
+  };
+
   const addMutation = useMutation({
+    ...writes,
     mutationFn: async (restaurantId: number) => {
       const { error } = await supabaseClient
         .from("favorites")
         .insert({ user_id: userId, restaurant_id: restaurantId });
-      if (error) throw new Error(error.message);
+      // Déjà en favori (double clic rattrapé par la file) : rien à signaler.
+      if (error && error.code !== "23505") throw new Error(error.message);
     },
-    onSuccess: invalidate,
+    onMutate: (restaurantId: number) =>
+      patchQueries(queryClient, [
+        [
+          queryKey,
+          (prev: Favorite[]) =>
+            prev.some((f) => f.restaurant_id === restaurantId)
+              ? prev
+              : [
+                  ...prev,
+                  {
+                    id: `optimistic-${restaurantId}`,
+                    user_id: userId as string,
+                    restaurant_id: restaurantId,
+                    created_at: new Date().toISOString(),
+                  },
+                ],
+        ],
+      ]),
   });
 
   const removeMutation = useMutation({
+    ...writes,
     mutationFn: async (restaurantId: number) => {
       const { error } = await supabaseClient
         .from("favorites")
@@ -55,7 +92,14 @@ const useFavorites = () => {
         .match({ user_id: userId, restaurant_id: restaurantId });
       if (error) throw new Error(error.message);
     },
-    onSuccess: invalidate,
+    onMutate: (restaurantId: number) =>
+      patchQueries(queryClient, [
+        [
+          queryKey,
+          (prev: Favorite[]) =>
+            prev.filter((f) => f.restaurant_id !== restaurantId),
+        ],
+      ]),
   });
 
   return {

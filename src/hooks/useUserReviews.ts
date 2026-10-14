@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import supabaseClient from "../services/supabaseClient";
 import useIsAdmin from "./useIsAdmin";
+import { patchQueries, rollbackQueries, settleWhenIdle } from "../lib/optimistic";
 
 export interface UserReview {
   id: number;
@@ -55,7 +56,23 @@ const useUserReviews = (userId: string | null) => {
     },
   });
 
+  // Suppression optimiste (src/lib/optimistic.ts) : l'avis disparaît du
+  // profil et de la fiche du resto au clic.
   const remove = useMutation({
+    mutationKey: ["reviews-write"],
+    scope: { id: "reviews-write" },
+    onMutate: (review: UserReview) =>
+      patchQueries(queryClient, [
+        [
+          ["user-reviews", userId],
+          (prev: UserReview[]) => prev.filter((r) => r.id !== review.id),
+        ],
+        [
+          ["reviews", review.restaurant_id],
+          (prev: { id: number }[]) => prev.filter((r) => r.id !== review.id),
+        ],
+      ]),
+    onError: (_e, _r, context) => rollbackQueries(queryClient, context),
     mutationFn: async (review: UserReview) => {
       const { error } = await supabaseClient
         .from("reviews")
@@ -64,14 +81,15 @@ const useUserReviews = (userId: string | null) => {
       if (error) throw new Error(error.message);
       return review;
     },
-    onSuccess: (review) => {
-      queryClient.invalidateQueries({ queryKey: ["user-reviews", userId] });
-      queryClient.invalidateQueries({ queryKey: ["public-profile", userId] });
-      queryClient.invalidateQueries({
-        queryKey: ["reviews", review.restaurant_id],
-      });
-      queryClient.invalidateQueries({ queryKey: ["restaurants"] });
-    },
+    onSettled: (_data, _e, review) =>
+      settleWhenIdle(queryClient, ["reviews-write"], () => {
+        queryClient.invalidateQueries({ queryKey: ["user-reviews", userId] });
+        queryClient.invalidateQueries({ queryKey: ["public-profile", userId] });
+        queryClient.invalidateQueries({
+          queryKey: ["reviews", review.restaurant_id],
+        });
+        queryClient.invalidateQueries({ queryKey: ["restaurants"] });
+      }),
   });
 
   return { reviews, remove };

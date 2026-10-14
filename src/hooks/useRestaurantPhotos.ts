@@ -5,6 +5,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import supabaseClient from "../services/supabaseClient";
+import { patchQueries, rollbackQueries, settleWhenIdle } from "../lib/optimistic";
 import { compressImage } from "../utils/imageCompress";
 import { PHOTOS_BUCKET, galleryPathBase } from "../services/storagePaths";
 
@@ -65,6 +66,20 @@ export const restaurantPhotosQueryOptions = (restaurantId: number | undefined) =
       }));
     },
   });
+
+/** Patches optimistes d'une photo dans TOUS les caches qui la montrent
+ *  (galerie de la fiche, photos d'un profil). `next` null = supprimée. */
+export const photoPatches = (
+  id: number,
+  next: ((p: RestaurantPhoto) => RestaurantPhoto) | null
+): Parameters<typeof patchQueries>[1] =>
+  [["restaurant-photos"], ["public-profile-photos"]].map((key) => [
+    key,
+    (prev: RestaurantPhoto[]) =>
+      next
+        ? prev.map((p) => (p.id === id ? next(p) : p))
+        : prev.filter((p) => p.id !== id),
+  ]);
 
 /**
  * Photos d'un restaurant (galerie collaborateurs), de la plus récente à la plus
@@ -129,7 +144,27 @@ const useRestaurantPhotos = (
     },
   });
 
+  // Suppression et légende optimistes (src/lib/optimistic.ts).
+  const writes = {
+    mutationKey: ["photos-write"],
+    scope: { id: "photos-write" },
+    onError: (
+      _e: Error,
+      _v: unknown,
+      context?: Awaited<ReturnType<typeof patchQueries>>
+    ) => rollbackQueries(queryClient, context),
+    onSettled: () =>
+      settleWhenIdle(queryClient, ["photos-write"], () => {
+        queryClient.invalidateQueries({ queryKey: ["restaurant-photos"] });
+        queryClient.invalidateQueries({ queryKey: ["public-profile-photos"] });
+        queryClient.invalidateQueries({ queryKey: ["public-profile"] });
+      }),
+  };
+
   const remove = useMutation({
+    ...writes,
+    onMutate: (photo: RestaurantPhoto) =>
+      patchQueries(queryClient, photoPatches(photo.id, null)),
     mutationFn: async (photo: RestaurantPhoto) => {
       const { error } = await supabaseClient
         .from("restaurant_photos")
@@ -139,12 +174,17 @@ const useRestaurantPhotos = (
       // Suppression du fichier (best effort : la ligne est déjà partie).
       await supabaseClient.storage.from(PHOTOS_BUCKET).remove([photo.storage_path]);
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: key }),
   });
 
   /** Légende modifiée après coup (auteur ou admin — la RLS tranche, et le
    *  trigger n'autorise que cette colonne). */
   const setCaption = useMutation({
+    ...writes,
+    onMutate: ({ id, caption }: { id: number; caption: string }) =>
+      patchQueries(
+        queryClient,
+        photoPatches(id, (p) => ({ ...p, caption: caption.trim() || null }))
+      ),
     mutationFn: async ({ id, caption }: { id: number; caption: string }) => {
       const { error } = await supabaseClient
         .from("restaurant_photos")
@@ -152,7 +192,6 @@ const useRestaurantPhotos = (
         .eq("id", id);
       if (error) throw new Error(error.message);
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: key }),
   });
 
   return { ...query, upload, remove, setCaption };

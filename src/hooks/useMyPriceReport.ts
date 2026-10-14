@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import useSession from "./useSession";
 import supabaseClient from "../services/supabaseClient";
+import { patchQueries, rollbackQueries, settleWhenIdle } from "../lib/optimistic";
 
 /** Ce qu'une personne déclare dépenser dans un restaurant, au centime près. */
 export interface PriceReport {
@@ -48,7 +49,33 @@ const useMyPriceReport = (restaurantId: number | undefined) => {
     queryClient.invalidateQueries({ queryKey: ["unpriced-lunches"] });
   };
 
+  // Écritures optimistes (src/lib/optimistic.ts) : ma déclaration et la
+  // relance du midi changent au clic. Les fourchettes du resto, calculées en
+  // base, suivent au rechargement.
+  const writeKey = ["price-report-write", restaurantId];
+  const writes = {
+    mutationKey: writeKey,
+    scope: { id: `price-report-write-${restaurantId}` },
+    onError: (_e: Error, _v: unknown, context?: Awaited<ReturnType<typeof patchQueries>>) =>
+      rollbackQueries(queryClient, context),
+    onSettled: () => settleWhenIdle(queryClient, writeKey, invalidate),
+  };
+
   const saveMutation = useMutation({
+    ...writes,
+    onMutate: ({ min, max }: PriceReport) =>
+      patchQueries(queryClient, [
+        [queryKey, () => ({ min, max })],
+        // La relance de ce restaurant est complétée : elle s'efface tout de
+        // suite (même champ que celui calculé par useUnpricedLunches).
+        [
+          ["unpriced-lunches", userId],
+          (prev: { restaurantId: number; priced: boolean }[]) =>
+            prev.map((l) =>
+              l.restaurantId === restaurantId ? { ...l, priced: true } : l
+            ),
+        ],
+      ]),
     mutationFn: async ({ min, max }: PriceReport) => {
       const { error } = await supabaseClient.from("restaurant_prices").upsert(
         {
@@ -61,10 +88,11 @@ const useMyPriceReport = (restaurantId: number | undefined) => {
       );
       if (error) throw new Error(error.message);
     },
-    onSuccess: invalidate,
   });
 
   const removeMutation = useMutation({
+    ...writes,
+    onMutate: () => patchQueries(queryClient, [[queryKey, () => null]]),
     mutationFn: async () => {
       const { error } = await supabaseClient
         .from("restaurant_prices")
@@ -72,14 +100,13 @@ const useMyPriceReport = (restaurantId: number | undefined) => {
         .match({ restaurant_id: restaurantId, user_id: userId });
       if (error) throw new Error(error.message);
     },
-    onSuccess: invalidate,
   });
 
   return {
     report,
     loading: isPending,
     save: saveMutation.mutateAsync,
-    remove: removeMutation.mutateAsync,
+    remove: () => removeMutation.mutateAsync(undefined),
     saving: saveMutation.isPending || removeMutation.isPending,
   };
 };

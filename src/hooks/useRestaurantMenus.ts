@@ -5,6 +5,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import supabaseClient from "../services/supabaseClient";
+import { patchQueries, rollbackQueries, settleWhenIdle } from "../lib/optimistic";
 import { compressImage } from "../utils/imageCompress";
 import { PHOTOS_BUCKET, menuPathBase } from "../services/storagePaths";
 
@@ -164,7 +165,15 @@ const useRestaurantMenus = (restaurantId: number | undefined, slug?: string) => 
     onSuccess: () => queryClient.invalidateQueries({ queryKey: key }),
   });
 
+  // Suppression optimiste (src/lib/optimistic.ts) : le menu disparaît au clic.
   const remove = useMutation({
+    mutationKey: ["menus-write"],
+    scope: { id: "menus-write" },
+    onMutate: (menu: RestaurantMenu) =>
+      patchQueries(queryClient, [
+        [key, (prev: RestaurantMenu[]) => prev.filter((m) => m.id !== menu.id)],
+      ]),
+    onError: (_e, _m, context) => rollbackQueries(queryClient, context),
     mutationFn: async (menu: RestaurantMenu) => {
       const { error } = await supabaseClient
         .from("restaurant_menus")
@@ -176,7 +185,10 @@ const useRestaurantMenus = (restaurantId: number | undefined, slug?: string) => 
         await supabaseClient.storage.from(PHOTOS_BUCKET).remove([menu.storage_path]);
       }
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: key }),
+    onSettled: () =>
+      settleWhenIdle(queryClient, ["menus-write"], () =>
+        queryClient.invalidateQueries({ queryKey: key })
+      ),
   });
 
   return { ...query, add, remove };
