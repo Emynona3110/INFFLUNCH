@@ -46,8 +46,8 @@ export default function PageLoader({ delay: delayProp }: { delay?: number }) {
       animate={{ opacity: 1 }}
       transition={{ duration: fade.duration, ease: "linear" }}
     >
-      <img src={loader} alt="" className="block h-20 w-auto dark:hidden" />
-      <img src={loaderWhite} alt="" className="hidden h-20 w-auto dark:block" />
+      <img src={loader} alt="" className="block h-[5.375rem] w-auto dark:hidden" />
+      <img src={loaderWhite} alt="" className="hidden h-[5.375rem] w-auto dark:block" />
     </motion.div>
   );
 }

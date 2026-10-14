@@ -2,7 +2,7 @@ import { useEffect, useState, type AnimationEvent } from "react";
 import { shouldPlayIntro } from "./introOnce";
 import "./Logo.css";
 
-const INTRO_DURATION = 1800; // ms
+const INTRO_DURATION = 1700; // ms
 
 const P = {
   fork: "M19.393 42.443 L22.533 41.187 V54 A1.6 1.6 0 0 0 25.733 54 V39.907 L30.267 38.093 V54 A1.6 1.6 0 0 0 33.467 54 V36.813 L36.607 35.557 Q38 35 38 36.5 V73 A7 7 0 0 1 31 80 H25 A7 7 0 0 1 18 73 V44.5 Q18 43 19.393 42.443 Z",
@@ -24,8 +24,10 @@ type Props = {
 
 /**
  * Monogramme infflunch (en-tête mobile).
- * - Intro à chaque chargement de page : fourchette et couteau sortent, le point tombe.
- * - Au clic (souris) ou au toucher (doigt) : le point saute et les couverts trinquent.
+ * - Intro à chaque chargement de page : fourchette et couteau sortent,
+ *   le point sort avec la fourchette et décolle sur son élan.
+ * - Au clic (souris) ou au toucher (doigt) : les couverts s'écartent et lancent le point,
+ *   qui retombe sur la fourchette avant que les couverts trinquent.
  *
  * props : size (hauteur en px), color (couverts), accent (point), className
  */
@@ -44,7 +46,7 @@ export default function Monogramme({ size = 36, color = "currentColor", accent =
   };
 
   const endHop = (e: AnimationEvent<SVGSVGElement>) => {
-    if (hop && e.animationName === "infflunch-clink-r") setHop(false);
+    if (hop && e.animationName === "infflunch-hop-knife") setHop(false);
   };
 
   const classes = [
@@ -68,6 +70,7 @@ export default function Monogramme({ size = 36, color = "currentColor", accent =
       <g className="il-letter">
         <g className="il-fork">
           <path fill={color} d={P.fork} />
+          <path className="il-dot" fill={accent} d={P.dot} />
         </g>
       </g>
       <g className="il-letter" style={{ animationDelay: "0.12s" }}>
@@ -75,7 +78,6 @@ export default function Monogramme({ size = 36, color = "currentColor", accent =
           <path fill={color} d={P.knife} />
         </g>
       </g>
-      <path className="il-dot" fill={accent} d={P.dot} />
     </svg>
   );
 }

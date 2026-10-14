@@ -2,7 +2,7 @@ import { useEffect, useId, useState, type AnimationEvent, type CSSProperties } f
 import { shouldPlayIntro } from "./introOnce";
 import "./Logo.css";
 
-const INTRO_DURATION = 2100; // ms, durée totale de l'intro
+const INTRO_DURATION = 1700; // ms, durée totale de l'intro
 const LETTER_STEP = 0.08; // s, écart entre deux lettres à l'intro
 
 const P = {
@@ -60,8 +60,10 @@ const ADMIN_LETTERS: Letter[] = [
 
 /**
  * Logotype infflunch (ou adminfflunch avec `admin`).
- * - Intro « écriture » à chaque chargement de page.
- * - Au clic (souris) ou au toucher (doigt) : le point saute et les couverts trinquent.
+ * - Intro « écriture » à chaque chargement de page : le point sort avec le « i »,
+ *   décolle sur son élan et retombe sur la fourchette avant que les couverts trinquent.
+ * - Au clic (souris) ou au toucher (doigt) : les couverts s'écartent et lancent le point,
+ *   qui retombe sur la fourchette avant que les couverts trinquent.
  *
  * props : height (px), color (lettres), accent (point), className
  */
@@ -88,7 +90,7 @@ export default function Logotype({ height = 40, color = "currentColor", accent =
   };
 
   const endHop = (e: AnimationEvent<SVGSVGElement>) => {
-    if (hop && e.animationName === "infflunch-clink-r") setHop(false);
+    if (hop && e.animationName === "infflunch-hop-knife") setHop(false);
   };
 
   const classes = [
@@ -102,7 +104,7 @@ export default function Logotype({ height = 40, color = "currentColor", accent =
     <svg
       className={classes}
       viewBox={admin ? "-6 14 578 72" : "-6 14 384 72"}
-      style={admin ? ({ "--il-dot-delay": `${0.91 + extra}s`, "--il-clink-delay": `${1.51 + extra}s` } as CSSProperties) : undefined}
+      style={admin ? ({ "--il-dot-delay": `${0.2 + extra}s`, "--il-clink-delay": `${1.16 + extra}s` } as CSSProperties) : undefined}
       height={height}
       role="img"
       aria-label={admin ? "adminfflunch" : "infflunch"}
@@ -117,16 +119,19 @@ export default function Logotype({ height = 40, color = "currentColor", accent =
       <g clipPath={`url(#${clipId})`}>
         {letters.map((l, i) => (
           <g key={i} className="il-letter" style={{ animationDelay: `${i * LETTER_STEP}s` }}>
+            {/* Le point est dans le groupe de la fourchette : il suit tous ses mouvements. */}
             <g className={l.role ? `il-${l.role}` : undefined}>
               {l.d.map((d, j) => (
                 <path key={j} transform={`translate(${l.x} 0)`} fill={l.accent ? accent : color} d={d} />
               ))}
+              {l.role === "fork" && (
+                <g transform={`translate(${l.x} 0)`}>
+                  <path className="il-dot" fill={accent} d={P.dot} />
+                </g>
+              )}
             </g>
           </g>
         ))}
-      </g>
-      <g transform={`translate(${shift - 18} 0)`}>
-        <path className="il-dot" fill={accent} d={P.dot} />
       </g>
     </svg>
   );

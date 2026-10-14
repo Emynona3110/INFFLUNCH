@@ -1,23 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="6 6 70 84" width="700" height="840">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="6 0 70 90" width="700" height="900">
   <title>Chargement infflunch</title>
-  <style>
-    .fork, .knife, .dot { transform-box: fill-box; }
-    .fork, .knife { transform-origin: 50% 100%; }
-    .fork { animation: clink-l 1.6s ease-in-out infinite; }
-    .knife { animation: clink-r 1.6s ease-in-out infinite; }
-    .dot { transform-origin: 50% 50%; animation: hop 1.6s infinite; }
-    @keyframes hop {
-      0%, 20% { transform: translateY(0) rotate(0); animation-timing-function: cubic-bezier(.2,.7,.4,1); }
-      45%     { transform: translateY(-12px) rotate(180deg); animation-timing-function: cubic-bezier(.6,0,.8,.4); }
-      68%     { transform: translateY(0) rotate(360deg); animation-timing-function: ease-out; }
-      76%     { transform: translateY(-2px) rotate(360deg); animation-timing-function: ease-in; }
-      84%, 100% { transform: translateY(0) rotate(360deg); }
-    }
-    @keyframes clink-l { 0%, 66%, 90%, 100% { transform: rotate(0); } 76% { transform: rotate(3deg); } }
-    @keyframes clink-r { 0%, 66%, 90%, 100% { transform: rotate(0); } 76% { transform: rotate(-3deg); } }
-    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
-  </style>
-  <path class="fork" fill="#113894" d="M19.393 42.443 L22.533 41.187 V54 A1.6 1.6 0 0 0 25.733 54 V39.907 L30.267 38.093 V54 A1.6 1.6 0 0 0 33.467 54 V36.813 L36.607 35.557 Q38 35 38 36.5 V73 A7 7 0 0 1 31 80 H25 A7 7 0 0 1 18 73 V44.5 Q18 43 19.393 42.443 Z"/>
-  <path class="knife" fill="#113894" d="M51 80 A7 7 0 0 1 44 73 V21.5 Q44 20.1 45.4 20.4 C55 22.5 64 31 64 43 V73 A7 7 0 0 1 57 80 Z"/>
-  <path class="dot" fill="#EA580C" d="M19.393 27.443 L36.607 20.557 Q38 20 38 21.5 V28.5 Q38 30 36.607 30.557 L19.393 37.443 Q18 38 18 36.5 V29.5 Q18 28 19.393 27.443 Z"/>
+  <style>.m-fork,.m-knife,.m-dot{transform-box:fill-box}.m-fork,.m-knife{transform-origin:50% 100%}.m-dot{transform-origin:50% 50%}.m-fork{animation:m-loop-fork 1.8s infinite}.m-knife{animation:m-loop-knife 1.8s infinite}.m-dot{animation:m-loop-dot 1.8s infinite}@keyframes m-loop-fork{0%{transform:translateY(0) rotate(0);animation-timing-function:cubic-bezier(.2,.8,.4,1)}6.1%{transform:translateY(-5px) rotate(0);animation-timing-function:cubic-bezier(.6,0,.9,.5)}13.9%{transform:translateY(0) rotate(0)}61.1%{transform:translateY(0) rotate(0);animation-timing-function:ease-in-out}73.6%{transform:translateY(0) rotate(2.9deg);animation-timing-function:ease-in-out}88.9%,100%{transform:translateY(0) rotate(0)}}@keyframes m-loop-knife{0%,61.1%{transform:rotate(0);animation-timing-function:ease-in-out}73.6%{transform:rotate(-2.9deg);animation-timing-function:ease-in-out}88.9%,100%{transform:rotate(0)}}@keyframes m-loop-dot{0%,4.4%{transform:translateY(0) rotate(0);animation-timing-function:cubic-bezier(.15,.6,.35,1)}26.7%{transform:translateY(-16px) rotate(180deg);animation-timing-function:cubic-bezier(.6,0,.8,.4)}43.3%{transform:translateY(0) rotate(360deg);animation-timing-function:ease-out}48.3%{transform:translateY(-2.5px) rotate(360deg);animation-timing-function:ease-in}52.8%{transform:translateY(0) rotate(360deg);animation-timing-function:ease-out}56.1%{transform:translateY(-.6px) rotate(360deg);animation-timing-function:ease-in}60%,100%{transform:translateY(0) rotate(360deg)}}@media (prefers-reduced-motion:reduce){.m-l,.m-fork,.m-knife,.m-dot{animation:none!important}}</style>
+  <g class="m-fork"><path fill="#113894" d="M19.393 42.443 L22.533 41.187 V54 A1.6 1.6 0 0 0 25.733 54 V39.907 L30.267 38.093 V54 A1.6 1.6 0 0 0 33.467 54 V36.813 L36.607 35.557 Q38 35 38 36.5 V73 A7 7 0 0 1 31 80 H25 A7 7 0 0 1 18 73 V44.5 Q18 43 19.393 42.443 Z"></path><path class="m-dot" fill="#EA580C" d="M19.393 27.443 L36.607 20.557 Q38 20 38 21.5 V28.5 Q38 30 36.607 30.557 L19.393 37.443 Q18 38 18 36.5 V29.5 Q18 28 19.393 27.443 Z"></path></g><g class="m-knife"><path fill="#113894" d="M51 80 A7 7 0 0 1 44 73 V21.5 Q44 20.1 45.4 20.4 C55 22.5 64 31 64 43 V73 A7 7 0 0 1 57 80 Z"></path></g>
 </svg>

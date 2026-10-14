@@ -59,12 +59,12 @@ const LoginPage = () => {
                 (couverts qui sortent, point qui tombe), logotype dès sm
                 (lettres qui s'écrivent). */}
             <span className="mb-3 sm:hidden">
-              <img src={intro} alt="" className="block h-16 w-auto dark:hidden" />
-              <img src={introWhite} alt="" className="hidden h-16 w-auto dark:block" />
+              <img src={intro} alt="" className="block h-18 w-auto dark:hidden" />
+              <img src={introWhite} alt="" className="hidden h-18 w-auto dark:block" />
             </span>
             <span className="mb-4 hidden sm:block">
-              <img src={introLogotype} alt="" className="block h-10 w-auto dark:hidden" />
-              <img src={introLogotypeWhite} alt="" className="hidden h-10 w-auto dark:block" />
+              <img src={introLogotype} alt="" className="block h-12 w-auto dark:hidden" />
+              <img src={introLogotypeWhite} alt="" className="hidden h-12 w-auto dark:block" />
             </span>
             <div
               role="heading"
