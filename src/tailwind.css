@@ -87,6 +87,10 @@
 html,
 body {
   margin: 0;
+  /* Graisse de base 500 : le 400 était trop fin. Le site n'en utilise que
+     trois (500 texte et interface, 600 petites mises en avant, 700 titres et
+     noms), seules chargées dans index.html. */
+  font-weight: 500;
   background-color: var(--background);
   overflow-x: clip;
   overscroll-behavior: none;
@@ -255,6 +259,7 @@ input:-webkit-autofill:active {
   }
   .tw-scope {
     font-family: var(--font-sans);
+    font-weight: 500;
     color: var(--foreground);
   }
 

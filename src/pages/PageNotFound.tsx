@@ -11,7 +11,7 @@ const PageNotFound = () => {
         <div
           role="heading"
           aria-level={1}
-          className="font-display text-4xl font-extrabold text-foreground"
+          className="font-display text-4xl font-bold text-foreground"
         >
           404 — Page introuvable
         </div>

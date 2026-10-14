@@ -10,7 +10,7 @@ const About = () => {
         <div
           role="heading"
           aria-level={1}
-          className="text-center font-display text-lg font-extrabold text-card-foreground sm:text-2xl"
+          className="text-center font-display text-lg font-bold text-card-foreground sm:text-2xl"
         >
           À propos d'INFFLUNCH
         </div>

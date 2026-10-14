@@ -336,7 +336,7 @@ const LunchToday = () => {
           <div
             role="heading"
             aria-level={1}
-            className="font-display text-lg font-extrabold text-foreground sm:text-2xl"
+            className="font-display text-lg font-bold text-foreground sm:text-2xl"
           >
             Qui déjeune où
           </div>
@@ -351,7 +351,7 @@ const LunchToday = () => {
           <div className="flex shrink-0 items-baseline gap-1.5">
             <RollingNumber
               value={registered.length}
-              className="overflow-clip font-display text-2xl font-extrabold leading-none text-primary sm:text-3xl"
+              className="overflow-clip font-display text-2xl font-bold leading-none text-primary sm:text-3xl"
             />
             <span className="text-sm leading-none text-foreground/55">
               inscrit{registered.length > 1 ? "s" : ""}

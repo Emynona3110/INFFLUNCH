@@ -90,7 +90,7 @@ const FilterDialog = ({ restaurantFilters, onFilterChange }: FilterDialogProps) 
         <div className="mt-4 sm:mt-5 space-y-4 sm:space-y-5">
           {/* Tri */}
           <div>
-            <span className="text-sm font-bold text-foreground">Trier par</span>
+            <span className="text-sm font-semibold text-foreground">Trier par</span>
             <div className="mt-1.5">
               <SortSelector
                 value={localQuery.sortOrder}
@@ -101,7 +101,7 @@ const FilterDialog = ({ restaurantFilters, onFilterChange }: FilterDialogProps) 
 
           {/* Note minimum */}
           <div>
-            <span className="text-sm font-bold text-foreground">
+            <span className="text-sm font-semibold text-foreground">
               Note minimum
             </span>
             <div className="mt-1.5">
@@ -116,7 +116,7 @@ const FilterDialog = ({ restaurantFilters, onFilterChange }: FilterDialogProps) 
               ne filtre rien ; la borne haute au maximum vaut « et plus ». */}
           <div>
             <div className="flex items-baseline justify-between gap-2">
-              <span className="text-sm font-bold text-foreground">
+              <span className="text-sm font-semibold text-foreground">
                 Prix du midi
               </span>
               <span
@@ -147,7 +147,7 @@ const FilterDialog = ({ restaurantFilters, onFilterChange }: FilterDialogProps) 
 
           {/* Tags */}
           <div>
-            <span className="text-sm font-bold text-foreground">Tags</span>
+            <span className="text-sm font-semibold text-foreground">Tags</span>
             <div className="mb-2 mt-1.5 flex min-h-6 flex-wrap gap-1.5">
               {localQuery.tags.length > 0 ? (
                 localQuery.tags.map((tag) => (
@@ -190,7 +190,7 @@ const FilterDialog = ({ restaurantFilters, onFilterChange }: FilterDialogProps) 
 
           {/* Badges */}
           <div>
-            <span className="text-sm font-bold text-foreground">Badges</span>
+            <span className="text-sm font-semibold text-foreground">Badges</span>
             <div className="mt-1.5">
               <BadgesToggles
                 selected={localQuery.badges}

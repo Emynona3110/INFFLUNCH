@@ -361,7 +361,7 @@ export default function LegalPage({ kind }: { kind: Kind }) {
           <div
             role="heading"
             aria-level={1}
-            className="font-display text-base font-extrabold text-card-foreground sm:text-xl"
+            className="font-display text-base font-bold text-card-foreground sm:text-xl"
           >
             {TITLES[kind]}
           </div>

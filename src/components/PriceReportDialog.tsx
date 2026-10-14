@@ -225,7 +225,7 @@ export default function PriceReportDialog({
         <label className="flex flex-col gap-1.5">
           <span className="text-sm font-medium text-foreground">
             Jusqu'à{" "}
-            <span className="font-normal text-foreground/50">(facultatif)</span>
+            <span className="text-foreground/50">(facultatif)</span>
           </span>
           <EuroInput
             value={max}

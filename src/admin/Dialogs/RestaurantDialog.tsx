@@ -698,7 +698,7 @@ const RestaurantDialog = ({
         <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
           {/* Tags */}
           <div>
-            <span className="text-sm font-bold text-foreground">Tags</span>
+            <span className="text-sm font-semibold text-foreground">Tags</span>
             <div className="mb-2 mt-1.5 flex flex-wrap gap-1.5">
               {tags.map((t) => (
                 <span
@@ -803,7 +803,7 @@ const RestaurantDialog = ({
 
           {/* Badges */}
           <div>
-            <span className="text-sm font-bold text-foreground">Badges</span>
+            <span className="text-sm font-semibold text-foreground">Badges</span>
             <div className="mt-1.5">
               {/* Le badge Click & Collect se déduit de l'URL de commande. */}
               <BadgesToggles

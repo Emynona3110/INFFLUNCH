@@ -94,7 +94,7 @@ const Faq = () => {
         <div
           role="heading"
           aria-level={1}
-          className="text-center font-display text-lg font-extrabold text-card-foreground sm:text-2xl"
+          className="text-center font-display text-lg font-bold text-card-foreground sm:text-2xl"
         >
           Questions fréquentes
         </div>

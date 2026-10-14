@@ -69,7 +69,7 @@ const LoginPage = () => {
             <div
               role="heading"
               aria-level={1}
-              className="font-display text-xl font-extrabold text-card-foreground sm:text-2xl"
+              className="font-display text-xl font-bold text-card-foreground sm:text-2xl"
             >
               Connexion
             </div>

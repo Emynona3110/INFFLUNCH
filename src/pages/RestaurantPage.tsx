@@ -271,7 +271,7 @@ const RestaurantPage = () => {
             <div
               role="heading"
               aria-level={1}
-              className="font-display text-xl font-extrabold leading-tight text-white drop-shadow sm:text-3xl md:text-4xl"
+              className="font-display text-xl font-bold leading-tight text-white drop-shadow sm:text-3xl md:text-4xl"
             >
               {restaurant.name}
             </div>
