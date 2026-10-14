@@ -135,10 +135,12 @@ const Leaderboard = ({ period, search }: Props) => {
     sort: chosen,
     toggle,
     firstDir,
-  } = useTableSort<ColKey>(
+  } = useTableSort<Metric>(
     "leaderboard",
     { key: "lunches", dir: "desc" },
-    (key) => (key === "user" ? "asc" : "desc"),
+    // Pas de tri par nom (un classement alphabétique n'a pas de sens) :
+    // seules les colonnes chiffrées se trient, du plus grand au plus petit.
+    () => "desc",
   );
 
   // Colonne triée vide sur la période (que des 0, ex. aucun midi ce mois-là) :
@@ -146,7 +148,7 @@ const Leaderboard = ({ period, search }: Props) => {
   // Succès, en boucle). Le tri choisi reste retenu et revient dès qu'il a de
   // quoi trier ; le chevron, lui, montre le tri appliqué.
   const sort = useMemo(() => {
-    if (chosen.key === "user" || data.length === 0) return chosen;
+    if (data.length === 0) return chosen;
     const start = METRICS.findIndex((m) => m.key === chosen.key);
     for (let i = 0; i < METRICS.length; i++) {
       const key = METRICS[(start + i) % METRICS.length].key;
@@ -255,7 +257,7 @@ const Leaderboard = ({ period, search }: Props) => {
     .map((r, i) => {
       const prev = sorted[i - 1];
       ranks[i] =
-        sort.key !== "user" && prev && prev[sort.key] === r[sort.key]
+        prev && prev[sort.key] === r[sort.key]
           ? ranks[i - 1]
           : i + 1;
       return { ...r, rank: ranks[i] };
@@ -289,12 +291,10 @@ const Leaderboard = ({ period, search }: Props) => {
             style={{ ["--grid-right" as string]: "0px" }}
           >
             <table
-              className="admin-table w-full border-separate border-spacing-0 text-center text-sm"
-              style={{
-                ["--admin-min-w" as string]: "560px",
-                // Zone du rang : du bord gauche à l'avatar.
-                ["--lb-rank-w" as string]: "3rem",
-              }}
+              // Zone du rang (--lb-rank-w) : du bord gauche à l'avatar, rang
+              // centré dedans ; plus étroite sur mobile, où il se colle au bord.
+              className="admin-table w-full border-separate border-spacing-0 text-center text-sm [--lb-rank-w:2rem] sm:[--lb-rank-w:3rem]"
+              style={{ ["--admin-min-w" as string]: "560px" }}
             >
               {/* Colonnes chiffrées de même largeur : sans ça, chacune prend
                   la largeur de son intitulé et les écarts varient. */}
@@ -314,23 +314,25 @@ const Leaderboard = ({ period, search }: Props) => {
                       key={c.key}
                       className={cn(
                         "sticky top-0 z-10 bg-muted px-2 py-3 last:pr-4 text-center text-xs font-semibold uppercase tracking-wide text-foreground/55 shadow-[inset_0_-1px_0_0_var(--border)]",
-                        // Intitulé aligné sur l'avatar, après la zone du rang.
-                        c.key === "user" && "pl-[var(--lb-rank-w)] text-left",
+                        // Intitulé : au bord, sur les rangs, sur mobile ;
+                        // aligné sur l'avatar, après la zone du rang, sur
+                        // desktop (« ! » : prime sur la marge de `.admin-table`).
+                        c.key === "user" && "pl-2! text-left sm:pl-[var(--lb-rank-w)]!",
                       )}
                     >
-                      <SortHeader
-                        // Nombre de lignes affichées (période, recherche).
-                        label={
-                          c.key === "user"
-                            ? `${c.label} (${rows.length})`
-                            : c.label
-                        }
-                        icon={c.icon}
-                        dir={sort.key === c.key ? sort.dir : null}
-                        idleDir={firstDir(c.key)}
-                        disabled={emptyCols.has(c.key)}
-                        onClick={() => toggle(c.key, sort)}
-                      />
+                      {c.key === "user" ? (
+                        // Pas triable : simple intitulé.
+                        c.label
+                      ) : (
+                        <SortHeader
+                          label={c.label}
+                          icon={c.icon}
+                          dir={sort.key === c.key ? sort.dir : null}
+                          idleDir={firstDir(c.key)}
+                          disabled={emptyCols.has(c.key)}
+                          onClick={() => toggle(c.key as Metric, sort)}
+                        />
+                      )}
                     </th>
                   ))}
                 </tr>
@@ -396,7 +398,7 @@ const Leaderboard = ({ period, search }: Props) => {
                             l'avatar passe au-dessus de tous les fonds. La
                             table tient sans défiler en largeur (symboles et
                             trigrammes sur mobile). */}
-                        <td className="py-1.5 pl-0 pr-2 text-left">
+                        <td className="py-1.5 pl-0! pr-2 text-left">
                           <span className="lb-cell flex items-center gap-2">
                             {/* Rang centré entre le bord et l'avatar (l'écart
                                 du flex est repris par la marge négative). */}
