@@ -147,8 +147,7 @@ const MentionsLegales = () => {
           <Ext href="https://www.openstreetmap.org/copyright">
             OpenStreetMap
           </Ext>{" "}
-          (© OpenStreetMap contributors, licence ODbL). Le nom et l'identité
-          visuelle d'INFFLUX appartiennent à la société INFFLUX. Les
+          (© OpenStreetMap contributors, licence ODbL). Les
           illustrations des succès et les images de référence associées
           renvoient à des œuvres, personnages et marques qui restent la
           propriété de leurs auteurs et ayants droit respectifs ; elles sont
