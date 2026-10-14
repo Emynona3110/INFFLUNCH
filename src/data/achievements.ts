@@ -468,6 +468,7 @@ const ALL_ACHIEVEMENTS: Achievement[] = [
     image: "/achievements/remy.svg",
     reference: "Rémy",
     referenceWork: "Ratatouille",
+    referenceImage: "/achievements/sources/remy.webp",
     secret: true,
   },
   {
