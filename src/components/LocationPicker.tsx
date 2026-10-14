@@ -7,7 +7,6 @@ import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import MapZoomControl from "@/components/MapZoomControl";
 import OsmAttribution from "@/components/OsmAttribution";
-import inffluxLogo from "@/assets/infflux.svg";
 
 /**
  * Sélecteur de position (dialog Carte) : carte avec une épingle resto
@@ -16,19 +15,18 @@ import inffluxLogo from "@/assets/infflux.svg";
  * Layout flexible : la carte occupe toute la hauteur dispo (flex-1).
  */
 
-const restoIcon = L.divIcon({
-  className: "",
-  html: `<div style="width:22px;height:22px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#EA580C;box-shadow:0 3px 6px rgba(2,8,40,.45);border:2px solid #fff"></div>`,
-  iconSize: [22, 22],
-  iconAnchor: [11, 22],
-});
+// Couleurs de l'app, comme sur les autres cartes : resto en bleu, INFFLUX
+// en orange (même goutte).
+const pinIcon = (color: string) =>
+  L.divIcon({
+    className: "",
+    html: `<div style="width:22px;height:22px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${color};box-shadow:0 3px 6px rgba(2,8,40,.45);border:2px solid #fff"></div>`,
+    iconSize: [22, 22],
+    iconAnchor: [11, 22],
+  });
 
-const inffluxIcon = L.divIcon({
-  className: "",
-  html: `<div style="width:28px;height:28px;border-radius:9999px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(2,8,40,.45);border:2px solid #113894"><img src="${inffluxLogo}" alt="" style="width:16px;height:16px" /></div>`,
-  iconSize: [28, 28],
-  iconAnchor: [14, 14],
-});
+const restoIcon = pinIcon("#113894");
+const inffluxIcon = pinIcon("#EA580C");
 
 // Récupère l'instance de carte (pour le contrôle zoom partagé).
 function MapRef({ onReady }: { onReady: (m: L.Map) => void }) {

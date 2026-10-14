@@ -35,17 +35,18 @@ const pinIcon = (color: string) =>
     iconAnchor: [10, 20],
   });
 
-// Marqueur INFFLUX : même goutte que les restos, en bleu de marque.
-const inffluxIcon = pinIcon("#113894");
+// Couleurs de l'app : restos en bleu, INFFLUX en orange (même goutte).
+const RESTO_PIN = "#113894";
+const inffluxIcon = pinIcon("#EA580C");
 
 /** Groupe de restaurants trop proches pour être distingués : une pastille
- *  ronde portant leur nombre, dans l'orange des pins qu'elle remplace. Elle
+ *  ronde portant leur nombre, dans le bleu des pins qu'elle remplace. Elle
  *  s'ancre en son centre, là où une goutte s'ancre sur sa pointe. */
 const clusterIcon = (count: number) => {
   const size = count >= 10 ? 38 : 32;
   return L.divIcon({
     className: "",
-    html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:#f79220;border:2px solid #fff;box-shadow:0 3px 8px rgba(2,8,40,.45);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:${
+    html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${RESTO_PIN};border:2px solid #fff;box-shadow:0 3px 8px rgba(2,8,40,.45);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:${
       count >= 10 ? 14 : 13
     }px">${count}</div>`,
     iconSize: [size, size],
@@ -319,7 +320,7 @@ const RestaurantsMap = ({ restaurants }: Props) => {
             <Marker
               key={r.id}
               position={[r.lat as number, r.lng as number]}
-              icon={pinIcon("#f79220")}
+              icon={pinIcon(RESTO_PIN)}
               keyboard={false}
               eventHandlers={{
                 click: () => {

@@ -39,8 +39,8 @@ const pinIcon = (color: string) =>
     iconAnchor: [10, 20],
   });
 
-// Marqueur INFFLUX : même goutte que le resto, en bleu de marque.
-const inffluxIcon = pinIcon("#113894");
+// Couleurs de l'app : resto en bleu, INFFLUX en orange (même goutte).
+const inffluxIcon = pinIcon("#EA580C");
 
 // Récupère l'instance de carte une fois prête (pour le recentrage).
 const MapReady = ({ onReady }: { onReady: (m: L.Map) => void }) => {
@@ -165,7 +165,7 @@ const RestaurantMiniMap = ({
           position={[INFFLUX_COORDS.lat, INFFLUX_COORDS.lng]}
           icon={inffluxIcon}
         />
-        <Marker position={[coords.lat, coords.lng]} icon={pinIcon("#EA580C")} />
+        <Marker position={[coords.lat, coords.lng]} icon={pinIcon("#113894")} />
       </MapContainer>
 
       {/* Zoom +/- */}
