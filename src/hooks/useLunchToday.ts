@@ -23,6 +23,9 @@ export interface LunchParticipant {
   /** Qualification du « pas au restaurant » (null quand un restaurant est
    *  choisi, ou pour les lignes d'avant le 2026-09-25 : non précisé). */
   off_reason: LunchOffReason | null;
+  /** Heure de départ "HH:MM" (tranche de 15 min, 11:30-14:00), null = « je ne
+   *  sais pas ». Toujours null hors restaurant. */
+  departure_time: string | null;
   /** Email (jointure public.users), pour le nom affiché. */
   email: string | null;
   /** profiles.avatar_path, null = initiales. */
@@ -67,6 +70,21 @@ export const LUNCH_CUTOFF_HOUR = 14;
  *  basculement attend la prochaine interaction — personne ne regarde l'écran
  *  en espérant qu'il change tout seul. */
 export const isAfterLunch = () => parisHour() >= LUNCH_CUTOFF_HOUR;
+
+/** TEMPORAIRE (tests) : la popup d'heure de départ s'ouvre à toute heure.
+ *  Repasser à false après les tests : passé 14 h, on note son midi après coup
+ *  et l'heure de départ n'a plus d'intérêt. */
+const DEPARTURE_ASK_ANYTIME = true;
+
+/** Demander l'heure de départ après avoir créé ou rejoint une tablée ? */
+export const shouldAskDeparture = () =>
+  DEPARTURE_ASK_ANYTIME || !isAfterLunch();
+
+/** "12:00" → "12h", "12:15" → "12h15". */
+export const formatDeparture = (time: string) => {
+  const [h, m] = time.split(":");
+  return `${Number(h)}h${m === "00" ? "" : m}`;
+};
 
 /* ---------------------------- canal Realtime ----------------------------- */
 // Le hook est monté par la page /dejeuner, la fiche resto et chaque card : on
@@ -118,7 +136,7 @@ export const lunchTodayQueryOptions = (day: string) =>
     queryFn: async () => {
       const { data, error } = await supabaseClient
         .from("lunch_plans")
-        .select("user_id, restaurant_id, off_reason")
+        .select("user_id, restaurant_id, off_reason, departure_time")
         .eq("day", day);
       if (error) throw new Error(error.message);
 
@@ -126,6 +144,7 @@ export const lunchTodayQueryOptions = (day: string) =>
         user_id: string;
         restaurant_id: number | null;
         off_reason: LunchOffReason | null;
+        departure_time: string | null;
       }[];
       if (rows.length === 0) return [];
 
@@ -148,11 +167,24 @@ export const lunchTodayQueryOptions = (day: string) =>
 
       return rows.map((r) => ({
         ...r,
+        // Postgres renvoie "12:15:00" : on ne garde que les heures et minutes.
+        departure_time: r.departure_time?.slice(0, 5) ?? null,
         email: emailById[r.user_id] ?? null,
         avatar_path: avatarById[r.user_id] ?? null,
       }));
     },
   });
+
+/** File commune des écritures du midi (cf. « écritures optimistes »). */
+const LUNCH_MUTATION_KEY = ["lunch-plan-write"];
+const LUNCH_MUTATION_SCOPE = { id: "lunch-plan-write" };
+
+type PlanFields = Pick<
+  LunchParticipant,
+  "restaurant_id" | "off_reason" | "departure_time"
+>;
+/** Ma ligne du jour telle qu'on l'écrit, + l'heure abandonnée au passage. */
+type PlanRow = PlanFields & { dropped: string | null };
 
 /**
  * « Qui déjeune où aujourd'hui » : la journée entière (≤ 100 lignes) est
@@ -177,10 +209,28 @@ const useLunchToday = () => {
     enabled: !!userId,
   });
 
+  const myPlan = participants.find((p) => p.user_id === userId) ?? null;
+
+  // Heure que j'avais avant de changer de tablée : l'heure est effacée au
+  // changement, mais la popup la repropose. Dans le cache (et non un state)
+  // pour être partagée par toutes les instances du hook, dialogue compris.
+  const prevDepartureKey = ["lunch-prev-departure", day];
+  const { data: previousDeparture = null } = useQuery<string | null>({
+    queryKey: prevDepartureKey,
+    queryFn: () => null,
+    enabled: false,
+    staleTime: Infinity,
+  });
+
   // Abonnement Realtime partagé : les avatars apparaissent sans recharger.
   useEffect(() => {
     if (!userId) return;
-    const onChange = () => queryClient.invalidateQueries({ queryKey });
+    // Pendant mes écritures, on laisse passer : le rechargement de fin de file
+    // ramènera aussi les changements des autres.
+    const onChange = () => {
+      if (queryClient.isMutating({ mutationKey: LUNCH_MUTATION_KEY }) > 0) return;
+      queryClient.invalidateQueries({ queryKey });
+    };
     listeners.add(onChange);
     refCount += 1;
     if (refCount === 1) openChannel();
@@ -232,44 +282,155 @@ const useLunchToday = () => {
   // Une déclaration, deux formes : un restaurant, ou une absence de restaurant
   // qualifiée (« pas de restaurant » / « pas sur site »). Les deux s'excluent, la
   // contrainte lunch_plans_off_reason_coherent le garantit en base.
+  /* ------------------------- écritures optimistes ------------------------
+   * Choisir, rejoindre, « pas de resto », retirer, l'heure : l'écran change
+   * au clic, le serveur suit. En cas de refus, on rétablit la liste d'avant
+   * et l'appelant affiche l'erreur.
+   *
+   * Toutes ces écritures partagent un `scope` : TanStack les exécute l'une
+   * après l'autre, dans l'ordre des clics. Sans cela, rejoindre puis donner
+   * son heure aussitôt pouvait envoyer l'heure AVANT que la ligne existe
+   * (update sans effet), et deux changements rapides arriver dans le désordre.
+   * Pour la même raison, on ne recharge la liste qu'une fois la dernière
+   * écriture terminée : un rechargement intermédiaire effacerait l'état
+   * optimiste des suivantes, l'écran ferait des allers-retours. */
+  const meInCache = () =>
+    queryClient
+      .getQueryData<LunchParticipant[]>(queryKey)
+      ?.find((p) => p.user_id === userId) ?? null;
+
+  /** Écrit ma ligne dans le cache (création si besoin), rend l'ancienne liste. */
+  const patchMe = async (patch: PlanFields | null) => {
+    await queryClient.cancelQueries({ queryKey });
+    const previous = queryClient.getQueryData<LunchParticipant[]>(queryKey);
+    queryClient.setQueryData<LunchParticipant[]>(queryKey, (prev = []) => {
+      if (patch == null) return prev.filter((p) => p.user_id !== userId);
+      if (prev.some((p) => p.user_id === userId))
+        return prev.map((p) => (p.user_id === userId ? { ...p, ...patch } : p));
+      // Première déclaration du jour : nom et avatar pris dans la session et
+      // le profil déjà chargés, le refetch les confirmera.
+      return [
+        ...prev,
+        {
+          user_id: userId as string,
+          ...patch,
+          email: sessionData?.user?.email ?? null,
+          avatar_path:
+            queryClient.getQueryData<{ avatar_path: string | null } | null>([
+              "profile",
+              userId,
+            ])?.avatar_path ?? null,
+        },
+      ];
+    });
+    return { previous };
+  };
+
+  const rollback = (context?: { previous?: LunchParticipant[] }) => {
+    if (context) queryClient.setQueryData(queryKey, context.previous);
+  };
+
+  /** Rechargement après la DERNIÈRE écriture en file (cf. plus haut). Pendant
+   *  onSettled, l'écriture qui se termine compte encore parmi les en-cours. */
+  const settle = () => {
+    if (queryClient.isMutating({ mutationKey: LUNCH_MUTATION_KEY }) <= 1)
+      invalidate();
+  };
+
+  /** Ligne à écrire pour ce choix, calculée À L'APPEL depuis le cache (qui
+   *  contient déjà les écritures précédentes encore en route). L'heure de
+   *  départ appartient à la tablée : gardée si l'on redéclare le même
+   *  restaurant, effacée (et mise en réserve) si l'on en change. */
+  const planRow = (
+    restaurantId: number | null,
+    offReason: LunchOffReason | null
+  ): PlanRow => {
+    const me = meInCache();
+    const keep = restaurantId != null && restaurantId === me?.restaurant_id;
+    return {
+      restaurant_id: restaurantId,
+      off_reason: offReason,
+      departure_time: keep ? me?.departure_time ?? null : null,
+      dropped: keep ? null : me?.departure_time ?? null,
+    };
+  };
+
+  // Une déclaration, deux formes : un restaurant, ou une absence de restaurant
+  // qualifiée (« pas de restaurant » / « pas sur site »). Les deux s'excluent, la
+  // contrainte lunch_plans_off_reason_coherent le garantit en base.
   const setMutation = useMutation({
-    mutationFn: async (plan: {
-      restaurantId: number | null;
-      offReason: LunchOffReason | null;
-    }) => {
+    mutationKey: LUNCH_MUTATION_KEY,
+    scope: LUNCH_MUTATION_SCOPE,
+    mutationFn: async (plan: PlanRow) => {
       if (!userId) throw new Error("Session expirée, reconnecte-toi.");
       const { error } = await supabaseClient.from("lunch_plans").upsert(
         {
           user_id: userId,
           day,
-          restaurant_id: plan.restaurantId,
-          off_reason: plan.offReason,
+          restaurant_id: plan.restaurant_id,
+          off_reason: plan.off_reason,
+          departure_time: plan.departure_time,
         },
         { onConflict: "user_id,day" }
       );
       if (error) throw new Error(error.message);
     },
+    onMutate: async (plan) => {
+      // Changement de tablée avec une heure posée : on la garde en réserve,
+      // la popup la repropose.
+      if (plan.dropped) queryClient.setQueryData(prevDepartureKey, plan.dropped);
+      dropTodayPriceAsk();
+      return patchMe({
+        restaurant_id: plan.restaurant_id,
+        off_reason: plan.off_reason,
+        departure_time: plan.departure_time,
+      });
+    },
+    onError: (_e, _plan, context) => rollback(context),
     onSuccess: (_data, plan) => {
+      if (plan.restaurant_id == null) return;
       // Redéclarer un déjeuner ici lève le refus posé sur la relance de prix :
       // on a pu annuler son midi, puis revenir dans ce restaurant — à ce
       // moment-là, la question du prix se pose de nouveau. Fermer la relance
       // voulait dire « pas celle-là », pas « plus jamais pour ce resto ».
-      if (plan.restaurantId != null) {
-        clearLunchPriceSkip(userId, plan.restaurantId);
-      }
-      dropTodayPriceAsk();
-      invalidate();
+      clearLunchPriceSkip(userId, plan.restaurant_id);
       // Succès secrets des deux extrêmes de la journée : un RESTAURANT (pas
       // « pas au resto ») choisi très tôt ou après que le déjeuner soit passé.
       // Heure de Paris ; « après 14 h » = le seuil du midi (isAfterLunch).
-      if (plan.restaurantId != null) {
-        if (parisHour() < SPRINTER_HOUR) unlock("lunch_early");
-        else if (isAfterLunch()) unlock("lunch_late");
-      }
+      if (parisHour() < SPRINTER_HOUR) unlock("lunch_early");
+      else if (isAfterLunch()) unlock("lunch_late");
     },
+    onSettled: settle,
+  });
+
+  // Heure de départ seule : la ligne existe déjà, ou est en route (même file).
+  const departureMutation = useMutation({
+    mutationKey: LUNCH_MUTATION_KEY,
+    scope: LUNCH_MUTATION_SCOPE,
+    mutationFn: async (time: string | null) => {
+      if (!userId) throw new Error("Session expirée, reconnecte-toi.");
+      const { error } = await supabaseClient
+        .from("lunch_plans")
+        .update({ departure_time: time })
+        .match({ user_id: userId, day });
+      if (error) throw new Error(error.message);
+    },
+    onMutate: async (time) => {
+      const me = meInCache();
+      if (!me) return undefined;
+      return patchMe({
+        restaurant_id: me.restaurant_id,
+        off_reason: me.off_reason,
+        departure_time: time,
+      });
+    },
+    onError: (_e, _time, context) => rollback(context),
+    onSettled: settle,
   });
 
   const clearMutation = useMutation({
+    mutationKey: LUNCH_MUTATION_KEY,
+    scope: LUNCH_MUTATION_SCOPE,
     mutationFn: async () => {
       if (!userId) throw new Error("Session expirée, reconnecte-toi.");
       const { error } = await supabaseClient
@@ -278,10 +439,12 @@ const useLunchToday = () => {
         .match({ user_id: userId, day });
       if (error) throw new Error(error.message);
     },
-    onSuccess: () => {
+    onMutate: async () => {
       dropTodayPriceAsk();
-      invalidate();
+      return patchMe(null);
     },
+    onError: (_e, _v, context) => rollback(context),
+    onSettled: settle,
   });
 
   /** Participants groupés par restaurant, dans l'ordre d'arrivée. */
@@ -295,8 +458,6 @@ const useLunchToday = () => {
     });
     return map;
   }, [participants]);
-
-  const myPlan = participants.find((p) => p.user_id === userId) ?? null;
 
   // Succès secret « Cowabunga ! » (tablée de COWABUNGA_TABLE) : décerné côté
   // serveur par un trigger sur lunch_plans, à toute la tablée, même à qui ne
@@ -312,6 +473,10 @@ const useLunchToday = () => {
     hasPlan: !!myPlan,
     /** Restaurant où je déjeune, null si je n'ai pas choisi OU pas de resto. */
     myRestaurantId: myPlan?.restaurant_id ?? null,
+    /** Mon heure de départ "HH:MM", null si non précisée. */
+    myDeparture: myPlan?.departure_time ?? null,
+    /** Mon heure dans la tablée que je viens de quitter (proposée à nouveau). */
+    previousDeparture,
     /** Ma raison de ne pas aller au resto, null si je vais au resto ou n'ai
      *  rien déclaré. Une ancienne ligne sans raison est traitée comme
      *  « pas de restaurant » (sur site), le cas le plus courant. */
@@ -319,14 +484,15 @@ const useLunchToday = () => {
       ? myPlan.off_reason ?? "on_site"
       : null,
     loading: isPending,
-    saving: setMutation.isPending || clearMutation.isPending,
     /** « Je déjeune dans ce restaurant. » */
     setLunch: (restaurantId: number) =>
-      setMutation.mutateAsync({ restaurantId, offReason: null }),
+      setMutation.mutateAsync(planRow(restaurantId, null)),
     /** « Je ne vais pas au resto », en disant lequel des deux cas. */
     setLunchOff: (offReason: LunchOffReason) =>
-      setMutation.mutateAsync({ restaurantId: null, offReason }),
+      setMutation.mutateAsync(planRow(null, offReason)),
     clearLunch: clearMutation.mutateAsync,
+    /** Mon heure de départ ("HH:MM"), null = « je ne sais pas ». */
+    setDeparture: departureMutation.mutateAsync,
   };
 };
 

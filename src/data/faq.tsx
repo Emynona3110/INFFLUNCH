@@ -138,6 +138,7 @@ export const FAQ: FaqSection[] = [
         answer: [
           "Elle montre où chacun déjeune aujourd'hui. Choisis ton restaurant, ou indique « Pas de restaurant » (tu manges sur site autrement) ou « Pas sur site ».",
           "« Rejoindre » t'ajoute à la tablée d'un collègue, et « Retirer » annule ton choix.",
+          "En créant ou en rejoignant une tablée, tu peux indiquer ton heure de départ approximative (entre 11h30 et 14h). « Heure » permet de la changer ensuite.",
           "Tous les collègues connectés voient ces choix.",
           "Une pastille te le rappelle tant que ton midi n'est pas déclaré, les jours de semaine.",
         ],

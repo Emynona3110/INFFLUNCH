@@ -18,7 +18,7 @@ const WORDING: Record<
 > = {
   switch: {
     title: "Changer de restaurant ?",
-    body: `Il est plus de ${LUNCH_CUTOFF_HOUR} h, le déjeuner est passé. Ton choix du jour sera remplacé — et c'est lui que tes collègues ont vu.`,
+    body: `Il est plus de ${LUNCH_CUTOFF_HOUR} h, le déjeuner est passé. Ton choix du jour sera remplacé.`,
     confirm: "Changer",
     destructive: false,
   },

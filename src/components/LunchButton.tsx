@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { LuUtensils, LuUtensilsCrossed } from "react-icons/lu";
-import useLunchToday, { isWeekend } from "@/hooks/useLunchToday";
+import useLunchToday, { isWeekend, shouldAskDeparture } from "@/hooks/useLunchToday";
+import LunchDepartureDialog from "@/components/LunchDepartureDialog";
 import { useLateLunchConfirm } from "@/components/LateLunchConfirm";
 import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
@@ -15,12 +17,12 @@ interface Props {
  * choix (upsert côté hook).
  */
 const LunchButton = ({ restaurantId, className }: Props) => {
-  const { hasPlan, myRestaurantId, saving, setLunch, clearLunch } =
-    useLunchToday();
+  const { hasPlan, myRestaurantId, setLunch, clearLunch } = useLunchToday();
   // Même garde-fou que la page du midi : après 14 h, on ne défait pas sa
   // journée d'un clic. La fiche resto est le second endroit d'où l'on peut
   // basculer son midi, elle ne peut pas être la porte dérobée.
   const { confirmLateChange, lateLunchDialog } = useLateLunchConfirm();
+  const [departureOpen, setDepartureOpen] = useState(false);
   const active = myRestaurantId === restaurantId;
   // Week-end : personne ne déjeune au bureau, le bouton est bloqué (couverts
   // croisés, même signal que l'encart de la page du midi). Un choix déjà posé
@@ -33,8 +35,19 @@ const LunchButton = ({ restaurantId, className }: Props) => {
         await clearLunch();
         toast({ title: "Tu ne déjeunes plus ici", status: "success", duration: 2000 });
       } else {
-        await setLunch(restaurantId);
-        toast({ title: "C'est noté pour ce midi", status: "success", duration: 2000 });
+        // Tablée créée ou rejointe : à quelle heure part-on ? (pas après 14 h)
+        // Écriture optimiste : la popup s'ouvre sans attendre le serveur.
+        const ask = shouldAskDeparture();
+        if (ask) setDepartureOpen(true);
+        try {
+          await setLunch(restaurantId);
+        } catch (e) {
+          setDepartureOpen(false);
+          throw e;
+        }
+        // La popup tient lieu de confirmation ; sans elle, un toast.
+        if (!ask)
+          toast({ title: "C'est noté pour ce midi", status: "success", duration: 2000 });
       }
     } catch (e) {
       toast({
@@ -54,7 +67,7 @@ const LunchButton = ({ restaurantId, className }: Props) => {
       <button
         type="button"
         onClick={onClick}
-        disabled={saving || weekendOff}
+        disabled={weekendOff}
         aria-pressed={active}
         aria-label={
           active
@@ -87,6 +100,12 @@ const LunchButton = ({ restaurantId, className }: Props) => {
           {active ? "J'y déjeune" : "Je déjeune ici"}
         </span>
       </button>
+
+      <LunchDepartureDialog
+        open={departureOpen}
+        onClose={() => setDepartureOpen(false)}
+        restaurantId={restaurantId}
+      />
 
       {lateLunchDialog}
     </>

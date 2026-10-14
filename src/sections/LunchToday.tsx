@@ -1,13 +1,16 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { LuMapPinOff, LuSandwich, LuUtensils, LuUtensilsCrossed } from "react-icons/lu";
+import { LuClock, LuMapPinOff, LuSandwich, LuUtensils, LuUtensilsCrossed } from "react-icons/lu";
 import { FiPlus } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import Avatar from "@/components/Avatar";
 import LunchPickDialog from "@/components/LunchPickDialog";
 import LunchOffDialog from "@/components/LunchOffDialog";
+import LunchDepartureDialog from "@/components/LunchDepartureDialog";
 import useLunchToday, {
+  formatDeparture,
+  shouldAskDeparture,
   isWeekend,
   LunchOffReason,
   LunchParticipant,
@@ -55,29 +58,17 @@ const spring = { type: "spring" as const, stiffness: 380, damping: 30 };
  * sur un bloc encore invisible — et le contenu n'apparaît qu'une fois la place
  * prise. À la fermeture, l'inverse : il s'efface, puis la page se referme.
  *
- * Des DURÉES et non un ressort : un ressort n'a pas de fin nette, on ne peut
- * pas caler le second temps sur la fin du premier.
+ * En CSS (grille 0fr → 1fr) et non en hauteur « auto » animée par
+ * framer-motion : celle-ci mesure le bloc déplié avant d'animer, et la page
+ * clignotait à l'apparition. Courbe lent-rapide-lent : ce sont les tuiles du
+ * dessous qu'on regarde glisser, elles démarrent et s'arrêtent en douceur.
  */
-const PROMPT_SLIDE = 0.34;
-const PROMPT_FADE = 0.18;
-
-/**
- * Lent, rapide, lent. Ce sont les tuiles du dessous qu'on regarde pendant que
- * la hauteur s'ouvre, et une vitesse constante leur donnait l'air d'être
- * poussées par un vérin : elles démarrent et s'arrêtent maintenant en douceur,
- * l'essentiel du chemin se faisant au milieu.
- */
-const EASE_IN_OUT: [number, number, number, number] = [0.65, 0, 0.35, 1];
-
-const promptEnter = {
-  height: { duration: PROMPT_SLIDE, ease: EASE_IN_OUT },
-  opacity: { duration: PROMPT_FADE, delay: PROMPT_SLIDE },
-};
-
-const promptExit = {
-  opacity: { duration: PROMPT_FADE },
-  height: { duration: PROMPT_SLIDE, ease: EASE_IN_OUT, delay: PROMPT_FADE },
-};
+const PROMPT_ROWS_OPEN =
+  "grid-rows-[1fr] duration-[340ms] ease-[cubic-bezier(0.65,0,0.35,1)]";
+const PROMPT_ROWS_CLOSED =
+  "grid-rows-[0fr] delay-[180ms] duration-[340ms] ease-[cubic-bezier(0.65,0,0.35,1)]";
+const PROMPT_FADE_OPEN = "opacity-100 delay-[340ms] duration-[180ms]";
+const PROMPT_FADE_CLOSED = "opacity-0 duration-[180ms]";
 
 /**
  * Ligne « hors restaurant » : même gabarit qu'une tablée, mais sans image, sans
@@ -184,6 +175,7 @@ const LunchToday = () => {
   const navigate = useNavigate();
   const [pickOpen, setPickOpen] = useState(false);
   const [offOpen, setOffOpen] = useState(false);
+  const [departureOpen, setDepartureOpen] = useState(false);
 
   const { data: restaurants, loading: restaurantsLoading } = useRestaurants(
     defaultRestaurantFilters
@@ -194,8 +186,8 @@ const LunchToday = () => {
     hasPlan,
     myRestaurantId,
     myOffReason,
+    myDeparture,
     loading,
-    saving,
     setLunch,
     setLunchOff,
     clearLunch,
@@ -283,6 +275,15 @@ const LunchToday = () => {
     return null;
   }, [unpricedLunches, restById]);
 
+  // La relance reste rendue pendant son repli : on garde la dernière affichée
+  // (mise à jour pendant le rendu, pas dans un effet, sinon une image de
+  // retard). Elle change de contenu sans se replier si une autre la remplace.
+  const priceOpen = !loading && priceToAsk != null;
+  const priceKey = priceToAsk && `${priceToAsk.restaurant.id}-${priceToAsk.day}`;
+  const [shownPrice, setShownPrice] = useState(priceToAsk);
+  const shownKey = shownPrice && `${shownPrice.restaurant.id}-${shownPrice.day}`;
+  if (priceToAsk && priceKey !== shownKey) setShownPrice(priceToAsk);
+
   const guard = async (action: () => Promise<unknown>) => {
     try {
       await action();
@@ -301,10 +302,20 @@ const LunchToday = () => {
   // chaque tablée), et tout retirer coupe la série de midis déclarés.
   const { confirmLateChange, lateLunchDialog } = useLateLunchConfirm();
 
+  // Une fois la tablée créée ou rejointe, on demande l'heure de départ — sauf
+  // passé 14 h, où le midi est déjà joué. Écriture optimiste : la popup
+  // s'ouvre sans attendre le serveur, et se referme s'il refuse (la tablée
+  // est alors rétablie par le hook).
   const join = (restaurantId: number) =>
-    confirmLateChange("switch", hasPlan, () =>
-      guard(() => setLunch(restaurantId))
-    );
+    confirmLateChange("switch", hasPlan, () => {
+      if (shouldAskDeparture()) setDepartureOpen(true);
+      return guard(() =>
+        setLunch(restaurantId).catch((e) => {
+          setDepartureOpen(false);
+          throw e;
+        })
+      );
+    });
   /** « Je ne mange pas au resto », en disant lequel des deux cas. */
   const skip = (reason: LunchOffReason) =>
     confirmLateChange("off", hasPlan, () => guard(() => setLunchOff(reason)));
@@ -454,6 +465,11 @@ const LunchToday = () => {
                 {myRestaurantName ? (
                   <div className="truncate font-display text-base font-bold sm:text-lg text-card-foreground">
                     {myRestaurantName}
+                    {myDeparture && (
+                      <span className="font-sans text-sm font-semibold text-primary">
+                        {" "}· {formatDeparture(myDeparture)}
+                      </span>
+                    )}
                   </div>
                 ) : (
                   <div className="mt-1 h-5 w-40 animate-pulse rounded bg-foreground/10" />
@@ -492,19 +508,31 @@ const LunchToday = () => {
                 className="flex w-full items-center gap-2 sm:w-auto"
               >
                 {hasPlan ? (
-                  <Button
-                    variant="outline"
-                    onClick={leave}
-                    loading={saving}
-                    className="flex-1 sm:flex-none"
-                  >
-                    Retirer
-                  </Button>
+                  <>
+                    {/* L'heure de départ se change ici à tout moment. */}
+                    {myRestaurantId != null && (
+                      <Button
+                        variant="outline"
+                        onClick={() => setDepartureOpen(true)}
+                        className="flex-1 sm:flex-none"
+                      >
+                        <LuClock className="h-4 w-4" />
+                        Heure
+                      </Button>
+                    )}
+                    <Button
+                      variant="outline"
+                      onClick={leave}
+                      className="flex-1 sm:flex-none"
+                    >
+                      Retirer
+                    </Button>
+                  </>
                 ) : (
                   <>
                     <Button
                       onClick={() => setPickOpen(true)}
-                      disabled={saving || restaurantsLoading}
+                      disabled={restaurantsLoading}
                       className="flex-1 sm:flex-none"
                     >
                       <span className="sm:hidden">Choisir</span>
@@ -515,7 +543,6 @@ const LunchToday = () => {
                     <Button
                       variant="outline"
                       onClick={() => setOffOpen(true)}
-                      disabled={saving}
                       className="flex-1 sm:flex-none"
                     >
                       Pas de resto
@@ -534,30 +561,33 @@ const LunchToday = () => {
           précédents : beaucoup ne repassent que le lendemain. Une seule
           relance à la fois, la plus récente — la suivante prendra sa place une
           fois celle-ci traitée. */}
-      {/* `overflow-hidden` : la hauteur animée rogne le bloc pendant qu'il
-          s'ouvre, et la marge basse du bloc est comprise dans la mesure (le
-          dépassement crée un contexte de formatage, les marges ne s'échappent
-          pas). Les tuiles du dessous suivent donc le flux, en glissant.
-          `mode="wait"` : quand une relance en remplace une autre (resto
-          chiffré, midi suivant), la première part avant que la seconde
-          n'arrive — sinon les deux se chevauchent le temps du fondu. */}
-      <AnimatePresence initial={false} mode="wait">
-        {!loading && priceToAsk && (
-          <motion.div
-            key={`${priceToAsk.restaurant.id}-${priceToAsk.day}`}
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto", transition: promptEnter }}
-            exit={{ opacity: 0, height: 0, transition: promptExit }}
-            className="overflow-hidden"
-          >
-            <LunchPricePrompt
-              restaurant={priceToAsk.restaurant}
-              day={priceToAsk.day}
-              onSkip={() => skipPriceAsk(priceToAsk.restaurant.id)}
-            />
-          </motion.div>
+      {/* `overflow-hidden` sur le bloc intérieur : la grille rogne la relance
+          pendant qu'elle s'ouvre, marge basse comprise (le dépassement crée un
+          contexte de formatage, la marge ne s'échappe pas). Les tuiles du
+          dessous suivent le flux, en glissant. `inert` une fois repliée. */}
+      <div
+        inert={!priceOpen}
+        className={cn(
+          "grid transition-[grid-template-rows]",
+          priceOpen ? PROMPT_ROWS_OPEN : PROMPT_ROWS_CLOSED
         )}
-      </AnimatePresence>
+      >
+        <div
+          className={cn(
+            "min-h-0 overflow-hidden transition-opacity",
+            priceOpen ? PROMPT_FADE_OPEN : PROMPT_FADE_CLOSED
+          )}
+        >
+          {shownPrice && (
+            <LunchPricePrompt
+              key={shownKey}
+              restaurant={shownPrice.restaurant}
+              day={shownPrice.day}
+              onSkip={() => skipPriceAsk(shownPrice.restaurant.id)}
+            />
+          )}
+        </div>
+      </div>
 
       {/* Tablées du jour. */}
       {loading ? (
@@ -606,6 +636,13 @@ const LunchToday = () => {
           <AnimatePresence initial={false}>
             {tables.map(({ restaurant, people }) => {
               const mine = restaurant.id === myRestaurantId;
+              // Heures de départ de la tablée, chacune une fois, dans l'ordre
+              // de la journée. Aucune ligne si personne n'en a donné.
+              const departures = [
+                ...new Set(
+                  people.flatMap((p) => (p.departure_time ? [p.departure_time] : []))
+                ),
+              ].sort();
               return (
                 <motion.article
                   key={restaurant.id}
@@ -646,8 +683,21 @@ const LunchToday = () => {
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <div className="truncate font-display text-base font-bold sm:text-lg text-card-foreground">
-                      {restaurant.name}
+                    {/* Nom du resto | heures de départ : c'est le nom qui se
+                        tronque, les heures restent lisibles en entier. */}
+                    <div className="flex min-w-0 items-baseline gap-2">
+                      <span className="truncate font-display text-base font-bold sm:text-lg text-card-foreground">
+                        {restaurant.name}
+                      </span>
+                      {departures.length > 0 && (
+                        <span className="shrink-0 whitespace-nowrap text-xs text-foreground/55 sm:text-sm">
+                          <span aria-hidden className="mr-2 text-foreground/25">|</span>
+                          {departures.length > 1 ? "Départs" : "Départ"} :{" "}
+                          <span className="font-semibold text-card-foreground">
+                            {departures.map(formatDeparture).join(", ")}
+                          </span>
+                        </span>
+                      )}
                     </div>
 
                     <div className="mt-1 flex items-center gap-2">
@@ -697,7 +747,6 @@ const LunchToday = () => {
                     <Button
                       aria-label="Rejoindre"
                       className="h-9 w-9 shrink-0 rounded-full px-0 sm:h-10 sm:w-auto sm:rounded-lg sm:px-4"
-                      disabled={saving}
                       onClick={(e) => {
                         e.stopPropagation();
                         join(restaurant.id);
@@ -760,6 +809,12 @@ const LunchToday = () => {
           setOffOpen(false);
           skip(reason);
         }}
+      />
+
+      <LunchDepartureDialog
+        open={departureOpen}
+        onClose={() => setDepartureOpen(false)}
+        restaurantId={myRestaurantId}
       />
 
       {lateLunchDialog}
