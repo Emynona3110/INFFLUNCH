@@ -195,24 +195,13 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
                       : "text-foreground/65 hover:text-foreground",
                   )}
                 >
-                  {/* Calque fantôme gras : réserve la largeur → pas de saut d'1px.
+                  {/* Même graisse actif ou non : l'onglet courant se repère
+                      à sa couleur et au trait (un changement de graisse,
+                      non animable, donnait l'impression d'une autre police).
                       La puce s'accroche au libellé (coin haut-droit, juste
                       au-delà du texte), pas à toute la hauteur de la barre. */}
-                  <span className="relative grid">
-                    <span
-                      className={cn(
-                        "col-start-1 row-start-1",
-                        isActive && "font-semibold",
-                      )}
-                    >
-                      {item.label}
-                    </span>
-                    <span
-                      aria-hidden
-                      className="invisible col-start-1 row-start-1 font-semibold"
-                    >
-                      {item.label}
-                    </span>
+                  <span className="relative">
+                    {item.label}
                     {dotFor(item.path) && (
                       <span
                         className={cn(
