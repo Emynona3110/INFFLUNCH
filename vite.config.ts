@@ -24,7 +24,8 @@ function versionFile(): Plugin {
 }
 
 /**
- * Feuilles de style déplacées de <head> vers <body>, juste après #root : une
+ * Feuilles de style déplacées de <head> vers <body>, juste après le
+ * monogramme de démarrage (#boot-loader) et #root : une
  * feuille dans <head> bloque TOUT l'affichage jusqu'à son arrivée, monogramme
  * de démarrage compris (écran blanc en connexion lente). Dans <body>, elle ne
  * retient que ce qui la suit (rien de visible), et le script de l'app attend
@@ -46,7 +47,7 @@ function stylesAfterBootLoader(): Plugin {
         );
         if (!links.length) return html;
         return head.replace(
-          /(<div id="root">[\s\S]*?<\/div>\s*<\/div>)/,
+          /<div id="root"><\/div>/,
           (root) => `${root}\n    ${links.join("\n    ")}`,
         );
       },

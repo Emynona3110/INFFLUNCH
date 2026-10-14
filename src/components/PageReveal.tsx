@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Query, useIsFetching, useQueryClient } from "@tanstack/react-query";
-import { AnimatePresence, motion } from "framer-motion";
-import PageLoader from "@/components/brand/PageLoader";
+import { motion } from "framer-motion";
+import ScreenLoader from "@/components/brand/ScreenLoader";
 import { markBootDone } from "@/components/brand/bootState";
 
 /** Au-delà, on montre la page quand même (réseau lent) : mieux vaut un
@@ -73,10 +73,9 @@ const PageReveal = ({
     if (ready) markBootDone();
   }, [ready]);
 
-  // Tant que la page est masquée, le monogramme animé reste au centre de
-  // l'écran — à la place exacte de celui du démarrage (index.html), sans
-  // saut quand la navbar arrive ; la page révélée (ses squelettes d'abord)
-  // le remplace.
+  // Tant que la page est masquée, le monogramme de chargement (unique, au
+  // centre de l'écran, cf. screenLoaderControl.ts) reste affiché ; la page révélée
+  // (ses squelettes d'abord) le remplace pendant qu'il s'efface.
   return (
     <div className={className}>
       <motion.div
@@ -87,19 +86,7 @@ const PageReveal = ({
       >
         {children}
       </motion.div>
-      {/* Disparition en fondu, pendant que la page apparaît. */}
-      <AnimatePresence>
-        {!ready && (
-          <motion.div
-            key="loader"
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className="pointer-events-none fixed inset-0 flex items-center justify-center"
-          >
-            <PageLoader />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {!ready && <ScreenLoader />}
     </div>
   );
 };

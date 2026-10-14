@@ -8,6 +8,8 @@ import ForcePasswordChangeGate from "./components/ForcePasswordChangeGate";
 import RequestAccessPage from "./pages/RequestAccessPage";
 import LegalPage from "./pages/LegalPage";
 import { useVersionCheck } from "./hooks/useVersionCheck";
+import { useEffect } from "react";
+import { releaseBoot } from "./components/brand/screenLoaderControl";
 
 /** Redirige les anciennes URL /user/* vers la racine (compat liens existants). */
 function RedirectFromUser() {
@@ -17,6 +19,10 @@ function RedirectFromUser() {
 }
 
 function App() {
+  // Après le premier rendu (effets des enfants passés : les écrans d'attente
+  // ont déjà réclamé le monogramme) : fin du démarrage. Sans relais, le
+  // monogramme d'index.html s'efface (page de connexion…).
+  useEffect(releaseBoot, []);
   useVersionCheck();
   return (
     <Routes>

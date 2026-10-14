@@ -1,7 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { ReactNode } from "react";
 import useAuth from "../hooks/useAuth";
-import PageLoader from "@/components/brand/PageLoader";
+import ScreenLoader from "@/components/brand/ScreenLoader";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -13,7 +13,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   if (loading) {
     return (
       <div className="tw-scope flex h-screen items-center justify-center bg-background">
-        <PageLoader />
+        <ScreenLoader />
       </div>
     );
   }

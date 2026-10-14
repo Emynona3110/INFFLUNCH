@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from "react-router-dom";
 import useSession from "../hooks/useSession";
-import PageLoader from "@/components/brand/PageLoader";
+import ScreenLoader from "@/components/brand/ScreenLoader";
 
 /**
  * Garde unique des routes admin (`/admin/*`). Laisse passer si l'utilisateur a
@@ -13,7 +13,7 @@ const AdminGuard = () => {
   if (loading) {
     return (
       <div className="tw-scope pointer-events-none fixed inset-0 flex items-center justify-center">
-        <PageLoader />
+        <ScreenLoader />
       </div>
     );
   }

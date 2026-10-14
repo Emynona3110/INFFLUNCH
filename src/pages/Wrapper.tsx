@@ -4,7 +4,7 @@ import supabaseClient from "../services/supabaseClient";
 import AchievementTriggers from "../components/AchievementTriggers";
 import RestaurantsPrefetch from "../components/RestaurantsPrefetch";
 import ShootingStarsTrail from "../components/ShootingStarsTrail";
-import PageLoader from "@/components/brand/PageLoader";
+import ScreenLoader from "@/components/brand/ScreenLoader";
 
 interface WrapperProps {
   children: ReactNode;
@@ -22,7 +22,7 @@ const Wrapper = ({ children }: WrapperProps) => {
   if (authenticated === null) {
     return (
       <div className="tw-scope flex h-screen items-center justify-center bg-background">
-        <PageLoader />
+        <ScreenLoader />
       </div>
     );
   }
