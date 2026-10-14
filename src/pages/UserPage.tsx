@@ -29,6 +29,7 @@ import {
 import AdminSection from "../sections/AdminSection";
 import AdminGuard from "../components/AdminGuard";
 import Layout from "../components/Layout";
+import Navbar from "../components/Navbar";
 import ProfilePage from "./ProfilePage";
 import PageReveal from "../components/PageReveal";
 import useIsAdmin from "../hooks/useIsAdmin";
@@ -184,7 +185,6 @@ const UserPage = () => {
 
   return (
     <Layout
-      withNavbar
       centerContent={centerContent}
       fillContent={fillContent}
       // Liste/grille des restos et fiche resto : tirer vers le bas = refetch.
@@ -196,12 +196,15 @@ const UserPage = () => {
       // Mon compte mobile : chaque panneau du pager affiche le footer en fin de
       // contenu (scroll interne) ; pas de footer permanent sous le pager.
       footer={!(currentPage === "mon-compte" && !isDesktop)}
-      navbarProps={{
-        page: activeTab,
-        setPage: (page) => navigate("/" + page),
-        onFilterChange: (query) =>
-          setRestaurantFilters({ ...restaurantFilters, ...query }),
-      }}
+      navbar={
+        <Navbar
+          page={activeTab}
+          setPage={(page) => navigate("/" + page)}
+          onFilterChange={(query) =>
+            setRestaurantFilters({ ...restaurantFilters, ...query })
+          }
+        />
+      }
       toolbar={
         currentPage === "restaurants" ? (
           <RestaurantsToolbar

@@ -1,6 +1,4 @@
 import Footer from "./Footer";
-import Navbar from "./Navbar";
-import { RestaurantFilters } from "../pages/UserPage";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { useLocation, useNavigationType } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
@@ -15,12 +13,12 @@ interface LayoutProps {
    * À L'INTÉRIEUR du contenu (tables admin). Sinon la page scrolle (grille, etc.).
    */
   fillContent?: boolean;
-  withNavbar?: boolean;
-  navbarProps?: {
-    page: string;
-    setPage: (page: string) => void;
-    onFilterChange: (query: RestaurantFilters) => void;
-  };
+  /**
+   * Navbar déjà construite, fournie par la page (UserPage). Layout ne
+   * l'importe pas : les pages publiques (connexion…) qui utilisent Layout
+   * n'embarquent ainsi pas la navbar et tout le site qu'elle tire.
+   */
+  navbar?: React.ReactNode;
   /**
    * Barre d'outils propre à une page (ex. Restaurants), rendue dans un second
    * bandeau sticky sous la navbar. La navbar reste dédiée à la navigation.
@@ -52,8 +50,7 @@ const Layout = ({
   children,
   centerContent = false,
   fillContent = false,
-  withNavbar = false,
-  navbarProps,
+  navbar,
   toolbar,
   pullToRefresh = false,
   toolbarPortal = false,
@@ -118,9 +115,9 @@ const Layout = ({
     // `relative` : repère du bandeau d'outils sorti de la mise en page
     // pendant sa disparition (AnimatePresence `popLayout`).
     <div className="tw-scope relative flex h-dvh flex-col bg-background text-foreground">
-      {withNavbar && navbarProps && (
+      {navbar && (
         <header className="sticky top-0 z-[1000] flex h-12 shrink-0 items-center border-b border-border bg-card px-3 shadow-sm sm:h-[60px] sm:px-4">
-          <Navbar {...navbarProps} />
+          {navbar}
         </header>
       )}
 
