@@ -1,3 +1,5 @@
+import { IconType } from "react-icons";
+import { FiCheck, FiClock, FiX } from "react-icons/fi";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import supabaseClient from "../services/supabaseClient";
 import useRealtimeTable from "./useRealtimeTable";
@@ -53,18 +55,21 @@ export const suggestionAwaitingAdmin = (s: RestaurantSuggestion) =>
 
 export const SUGGESTION_STATUSES: Record<
   SuggestionStatus,
-  { label: string; chip: string }
+  { label: string; Icon: IconType; chip: string }
 > = {
   nouveau: {
     label: "En attente",
+    Icon: FiClock,
     chip: "bg-amber-500/12 text-amber-600 dark:text-amber-400",
   },
   accepte: {
     label: "Terminée",
+    Icon: FiCheck,
     chip: "bg-emerald-500/12 text-emerald-600 dark:text-emerald-400",
   },
   refuse: {
     label: "Refusée",
+    Icon: FiX,
     chip: "bg-rose-500/12 text-rose-600 dark:text-rose-400",
   },
 };

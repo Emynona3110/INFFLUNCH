@@ -23,6 +23,7 @@ import useRestaurantSuggestions, {
 } from "@/hooks/useRestaurantSuggestions";
 import SuggestionAdminDialog from "./SuggestionAdminDialog";
 import AdminTableSkeleton from "@/admin/AdminTableSkeleton";
+import StateChip from "./StateChip";
 
 /** Propositions de restos, rangées avec les demandes : leur propre nature
  *  (pastille jaune-orangé), à côté de bug / amélioration / fonctionnalité. */
@@ -314,14 +315,7 @@ const AdminFeedback = () => {
                           {s.email ? nameOf(s.email) : "—"}
                         </td>
                         <td className="whitespace-nowrap px-2 py-1.5 first:pl-4 last:pr-4">
-                          <span
-                            className={cn(
-                              "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium",
-                              state.chip,
-                            )}
-                          >
-                            {state.label}
-                          </span>
+                          <StateChip state={state} />
                         </td>
                       </tr>
                     );
@@ -379,14 +373,7 @@ const AdminFeedback = () => {
                           c'est le traitement qui compte — il continue, et son
                           auteur n'en saura simplement rien. */}
                       <td className="whitespace-nowrap px-2 py-1.5 first:pl-4 last:pr-4">
-                        <span
-                          className={cn(
-                            "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium",
-                            cancelled ? FEEDBACK_CANCELLED.chip : status.chip,
-                          )}
-                        >
-                          {cancelled ? FEEDBACK_CANCELLED.label : status.label}
-                        </span>
+                        <StateChip state={cancelled ? FEEDBACK_CANCELLED : status} />
                       </td>
                     </tr>
                   );

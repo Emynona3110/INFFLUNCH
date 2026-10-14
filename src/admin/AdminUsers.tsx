@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { FiShield, FiUser } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/lib/toast";
@@ -17,6 +18,14 @@ import { authorTrigram, formatAuthorName } from "@/utils/authorName";
 import { copyTempPassword } from "@/utils/tempPassword";
 import { fnError } from "@/utils/fnError";
 import AdminTableSkeleton from "@/admin/AdminTableSkeleton";
+import StateChip from "./StateChip";
+
+/** Rôle : libellé à partir de sm, icône sur mobile (bouclier, comme l'entrée
+ *  Admin du menu du compte). */
+const ROLES = {
+  admin: { label: "Admin", Icon: FiShield, chip: "bg-primary/10 text-primary" },
+  member: { label: "Membre", Icon: FiUser, chip: "bg-muted text-foreground/60", iconClass: "text-foreground opacity-60" },
+} as const;
 
 /** Valeurs stockées, avec repli sur le calcul depuis l'email. */
 const nameOf = (u: AppUser) => u.display_name || formatAuthorName(u.email);
@@ -59,6 +68,21 @@ const AdminUsers = () => {
     for (const u of users) m.set(trigramOf(u), (m.get(trigramOf(u)) ?? 0) + 1);
     return m;
   }, [users]);
+  /** Trigramme (surligné s'il est en double), entre parenthèses sur mobile
+   *  où il suit le nom. */
+  const trigram = (u: AppUser, paren = false) => {
+    const t = paren ? `(${trigramOf(u)})` : trigramOf(u);
+    return (trigramCount.get(trigramOf(u)) ?? 0) > 1 ? (
+      <span
+        className="rounded bg-amber-100 px-1.5 py-0.5 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300"
+        aria-label={`${trigramOf(u)} (trigramme en double)`}
+      >
+        {t}
+      </span>
+    ) : (
+      <span className="text-foreground/70">{t}</span>
+    );
+  };
   const [editing, setEditing] = useState<AppUser | null>(null);
   const takenTrigrams = useMemo(
     () => new Set(users.filter((u) => u.id !== editing?.id).map(trigramOf)),
@@ -150,13 +174,17 @@ const AdminUsers = () => {
                     [
                       { key: "user", label: "Utilisateur" },
                       { key: "trigram", label: "Trigramme" },
-                      { key: "role", label: "Rôle" },
                       { key: "created", label: "Inscrit le" },
+                      { key: "role", label: "Rôle" },
                     ] as const
                   ).map((c) => (
                     <th
                       key={c.key}
-                      className="sticky top-0 z-10 bg-muted px-2 py-3 first:pl-4 last:pr-4 text-center text-xs font-semibold uppercase tracking-wide text-foreground/55 shadow-[inset_0_-1px_0_0_var(--border)]"
+                      className={cn(
+                        "sticky top-0 z-10 bg-muted px-2 py-3 first:pl-4 last:pr-4 text-center text-xs font-semibold uppercase tracking-wide text-foreground/55 shadow-[inset_0_-1px_0_0_var(--border)]",
+                        // Mobile : pas de colonne trigramme, il suit le nom.
+                        c.key === "trigram" && "hidden sm:table-cell",
+                      )}
                     >
                       <SortHeader
                         label={c.label}
@@ -182,33 +210,20 @@ const AdminUsers = () => {
                     >
                       <td className="px-2 py-1.5 first:pl-4 last:pr-4 text-foreground/90">
                         {nameOf(u)}
-                      </td>
-                      <td className="px-2 py-1.5 first:pl-4 last:pr-4">
-                        {(trigramCount.get(trigramOf(u)) ?? 0) > 1 ? (
-                          <span
-                            className="rounded bg-amber-100 px-1.5 py-0.5 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300"
-                            aria-label={`${trigramOf(u)} (trigramme en double)`}
-                          >
-                            {trigramOf(u)}
-                          </span>
-                        ) : (
-                          <span className="text-foreground/70">{trigramOf(u)}</span>
-                        )}
-                      </td>
-                      <td className="px-2 py-1.5 first:pl-4 last:pr-4">
-                        <span
-                          className={cn(
-                            "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium",
-                            isAdmin
-                              ? "bg-primary/10 text-primary"
-                              : "bg-muted text-foreground/60"
-                          )}
-                        >
-                          {isAdmin ? "Admin" : "Membre"}
+                        {/* Mobile : trigramme entre parenthèses après le nom. */}
+                        <span className="whitespace-nowrap sm:hidden">
+                          {" "}
+                          {trigram(u, true)}
                         </span>
+                      </td>
+                      <td className="hidden px-2 py-1.5 first:pl-4 last:pr-4 sm:table-cell">
+                        {trigram(u)}
                       </td>
                       <td className="whitespace-nowrap px-2 py-1.5 first:pl-4 last:pr-4 text-foreground/70">
                         {formatDate(u.created_at)}
+                      </td>
+                      <td className="px-2 py-1.5 first:pl-4 last:pr-4">
+                        <StateChip state={isAdmin ? ROLES.admin : ROLES.member} />
                       </td>
                     </tr>
                   );

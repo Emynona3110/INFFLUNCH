@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { FiCheck, FiClock, FiX } from "react-icons/fi";
 import useAccessRequests, {
   AccessRequest,
   RequestType,
@@ -10,6 +11,7 @@ import AccessRequestDialog from "./AccessRequestDialog";
 import { sortRows, useTableSort } from "./tableSort";
 import { SortHeader } from "./SortHeader";
 import AdminTableSkeleton from "@/admin/AdminTableSkeleton";
+import StateChip from "./StateChip";
 
 /** Nature d'une demande d'accès : une pastille, comme bug / idée côté Demandes. */
 export const ACCESS_KINDS: Record<RequestType, { label: string; dot: string }> = {
@@ -18,9 +20,9 @@ export const ACCESS_KINDS: Record<RequestType, { label: string; dot: string }> =
 };
 
 const ACCESS_STATES = {
-  Waiting: { label: "En attente", chip: "bg-amber-500/12 text-amber-600 dark:text-amber-400" },
-  Accepted: { label: "Acceptée", chip: "bg-emerald-500/12 text-emerald-600 dark:text-emerald-400" },
-  Rejected: { label: "Refusée", chip: "bg-rose-500/12 text-rose-600 dark:text-rose-400" },
+  Waiting: { label: "En attente", Icon: FiClock, chip: "bg-amber-500/12 text-amber-600 dark:text-amber-400" },
+  Accepted: { label: "Acceptée", Icon: FiCheck, chip: "bg-emerald-500/12 text-emerald-600 dark:text-emerald-400" },
+  Rejected: { label: "Refusée", Icon: FiX, chip: "bg-rose-500/12 text-rose-600 dark:text-rose-400" },
 } as const;
 
 const formatDate = (iso: string) =>
@@ -133,14 +135,7 @@ const AdminAccessRequests = () => {
                         {nameOf(req.email)}
                       </td>
                       <td className="whitespace-nowrap px-2 py-1.5 first:pl-4 last:pr-4">
-                        <span
-                          className={cn(
-                            "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium",
-                            state.chip,
-                          )}
-                        >
-                          {state.label}
-                        </span>
+                        <StateChip state={state} />
                       </td>
                     </tr>
                   );

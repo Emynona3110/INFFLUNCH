@@ -1,3 +1,12 @@
+import {
+  FiArchive,
+  FiCheck,
+  FiClock,
+  FiMessageCircle,
+  FiSlash,
+  FiThumbsUp,
+  FiX,
+} from "react-icons/fi";
 import { NoteCategory } from "./noteCategories";
 
 /**
@@ -63,32 +72,39 @@ export const FEEDBACK_STATUSES = [
   {
     value: "nouveau",
     label: "En attente",
+    Icon: FiClock,
     chip: "bg-amber-500/12 text-amber-600 dark:text-amber-400",
   },
   {
     value: "repondu",
     label: "Répondue",
+    Icon: FiMessageCircle,
     chip: "bg-indigo-500/12 text-indigo-600 dark:text-indigo-400",
   },
   {
     value: "accepte",
     label: "Acceptée",
+    Icon: FiThumbsUp,
     chip: "bg-sky-500/12 text-sky-600 dark:text-sky-400",
   },
   {
     value: "termine",
     label: "Terminée",
+    Icon: FiCheck,
     chip: "bg-emerald-500/12 text-emerald-600 dark:text-emerald-400",
   },
   {
     value: "refuse",
     label: "Refusée",
+    Icon: FiX,
     chip: "bg-rose-500/12 text-rose-600 dark:text-rose-400",
   },
   {
     value: "clos",
     label: "Clôturée",
+    Icon: FiArchive,
     chip: "bg-muted text-foreground/55",
+    iconClass: "text-foreground opacity-55",
   },
 ] as const;
 
@@ -105,7 +121,9 @@ export const isFeedbackFrozen = (status: FeedbackStatus) =>
  *  l'admin la garde sous les yeux (et son backlog, s'il y en a un). */
 export const FEEDBACK_CANCELLED = {
   label: "Annulée",
+  Icon: FiSlash,
   chip: "bg-muted text-foreground/55",
+  iconClass: "text-foreground opacity-55",
 } as const;
 
 /** Demande supprimée par l'admin : elle quitte la boîte de réception, mais
