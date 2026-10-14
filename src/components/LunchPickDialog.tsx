@@ -4,7 +4,7 @@ import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Restaurant } from "@/hooks/useRestaurants";
 import { slugify } from "@/utils/slugify";
-import noImage from "@/assets/no-image.jpg";
+import noImage from "@/assets/no-image-thumb.webp";
 import { resizedImgProps, IMG_THUMB } from "@/lib/imageUrl";
 import { cn } from "@/lib/utils";
 

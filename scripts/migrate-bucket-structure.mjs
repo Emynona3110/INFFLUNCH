@@ -180,7 +180,12 @@ if (CLEAN) {
   for (const ph of photos) referenced.add(ph.storage_path);
   for (const r of restaurants) {
     const p = pathFromPublicUrl(r.image);
-    if (p) referenced.add(p);
+    if (p) {
+      referenced.add(p);
+      // Miniature de la couverture (cf. coverThumbOf, storagePaths.ts).
+      const thumb = p.replace(/(\/cover-[^/?.]+)\.(webp|jpe?g|png)$/i, "$1-thumb.webp");
+      if (thumb !== p) referenced.add(thumb);
+    }
   }
   const all = await listAll("");
   const orphans = all.filter((p) => !referenced.has(p));

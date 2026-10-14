@@ -4,7 +4,7 @@ import { FaStar } from "react-icons/fa";
 import { FiEdit2 } from "react-icons/fi";
 import { HiOutlineLocationMarker } from "react-icons/hi";
 import { Restaurant } from "@/hooks/useRestaurants";
-import noImage from "@/assets/no-image.jpg";
+import noImage from "@/assets/no-image-thumb.webp";
 import { resizedImgProps, IMG_THUMB } from "@/lib/imageUrl";
 import badgeMap, { orderBadges } from "@/services/badgeMap";
 import { Tooltip } from "@/components/ui/tooltip";

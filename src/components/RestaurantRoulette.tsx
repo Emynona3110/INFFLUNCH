@@ -7,7 +7,7 @@ import RestaurantCardTW from "@/components/RestaurantCardTW";
 import RouletteSelectionDialog from "@/components/RouletteSelectionDialog";
 import { Restaurant } from "@/hooks/useRestaurants";
 import useAchievements from "@/hooks/useAchievements";
-import noImage from "@/assets/no-image.jpg";
+import noImage from "@/assets/no-image-thumb.webp";
 import { resizedImgProps, IMG_THUMB } from "@/lib/imageUrl";
 
 const ITEM_H = 88; // hauteur d'une ligne de la roulette (px)

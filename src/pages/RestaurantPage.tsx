@@ -50,7 +50,7 @@ import { Tooltip } from "@/components/ui/tooltip";
 import Avatar from "@/components/Avatar";
 import AuthorButton from "@/components/AuthorButton";
 import { toast } from "@/lib/toast";
-import noImage from "@/assets/no-image.jpg";
+import noImage from "@/assets/no-image.webp";
 import { resizedImgProps, IMG_HERO } from "@/lib/imageUrl";
 import { cn } from "@/lib/utils";
 import {

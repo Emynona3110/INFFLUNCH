@@ -17,7 +17,7 @@ import ReviewItem from "@/components/ReviewItem";
 import ReviewForm from "@/components/ReviewForm";
 import useUserReviews, { UserReview } from "@/hooks/useUserReviews";
 import { toast } from "@/lib/toast";
-import noImage from "@/assets/no-image.jpg";
+import noImage from "@/assets/no-image-thumb.webp";
 import { resizedImgProps, IMG_THUMB } from "@/lib/imageUrl";
 import useAchievements from "@/hooks/useAchievements";
 import useAchievementStats from "@/hooks/useAchievementStats";

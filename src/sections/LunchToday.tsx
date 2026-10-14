@@ -21,7 +21,7 @@ import useRestaurants from "@/hooks/useRestaurants";
 import { defaultRestaurantFilters } from "@/pages/UserPage";
 import AuthorButton from "@/components/AuthorButton";
 import { toast } from "@/lib/toast";
-import noImage from "@/assets/no-image.jpg";
+import noImage from "@/assets/no-image-thumb.webp";
 import { resizedImgProps, IMG_THUMB } from "@/lib/imageUrl";
 import { cn } from "@/lib/utils";
 import useUserNames from "@/hooks/useUserNames";

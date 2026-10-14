@@ -19,7 +19,7 @@ import {
   bucketPathFromPublicUrl,
   removeFromBucket,
 } from "../../services/uploadImage";
-import { coverPathBase } from "../../services/storagePaths";
+import { COVER_THUMB_MAX, coverPathBase } from "../../services/storagePaths";
 import { fetchWalkMinutes, estimateWalkMinutes } from "../../services/walkTime";
 import { distanceKmFromInfflux, formatDistance } from "../../services/distance";
 import { FiChevronDown, FiPlus, FiCheck, FiX, FiTrash2 } from "react-icons/fi";
@@ -433,16 +433,23 @@ const RestaurantDialog = ({
       if (walkMinutes == null) walkMinutes = estimateWalkMinutes(location.distanceKm);
     }
 
-    // Upload de la couverture (si un fichier a été choisi) → "{slug}/cover-...".
+    // Upload de la couverture (si un fichier a été choisi) → "{slug}/cover-...",
+    // et de sa miniature "{slug}/cover-...-thumb" (cartes et listes).
     let finalImage: string | null = image || null;
     if (imageFile) {
       try {
+        const base = coverPathBase(slug);
         finalImage = (
-          await uploadImageToBucket(imageFile, coverPathBase(slug), {
+          await uploadImageToBucket(imageFile, base, {
             maxSize: 2000,
             quality: 0.9,
           })
         ).url;
+        // Best effort : sans miniature, les cartes retombent sur la couverture.
+        await uploadImageToBucket(imageFile, `${base}-thumb`, {
+          maxSize: COVER_THUMB_MAX,
+          quality: 0.8,
+        }).catch(() => undefined);
       } catch (err: any) {
         toast({
           title: "Échec de l'envoi de l'image",

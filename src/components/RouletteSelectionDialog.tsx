@@ -2,7 +2,7 @@ import { FiCheck } from "react-icons/fi";
 import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Restaurant } from "@/hooks/useRestaurants";
-import noImage from "@/assets/no-image.jpg";
+import noImage from "@/assets/no-image-thumb.webp";
 import { resizedImgProps, IMG_THUMB } from "@/lib/imageUrl";
 import { cn } from "@/lib/utils";
 

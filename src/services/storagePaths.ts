@@ -24,6 +24,22 @@ const shortId = () => Math.random().toString(36).slice(2, 6);
 /** Chemin (sans extension) de l'image de couverture d'un resto. */
 export const coverPathBase = (slug: string) => `${slug}/cover-${storageStamp()}`;
 
+/**
+ * Miniature d'une couverture (chemin ou URL) : `cover-X.webp|jpg|png` →
+ * `cover-X-thumb.webp`, rangée à côté. Affichée dans les cartes et listes à la
+ * place de la couverture pleine taille (~250 Ko contre ~30 Ko). null si ce
+ * n'est pas une couverture du bucket (lien externe, image locale).
+ * ⚠️ Même règle dans scripts/backfill-cover-thumbs.mjs et
+ * scripts/migrate-bucket-structure.mjs (--clean).
+ */
+export const coverThumbOf = (pathOrUrl: string): string | null => {
+  const thumb = pathOrUrl.replace(/(\/cover-[^/?.]+)\.(webp|jpe?g|png)$/i, "$1-thumb.webp");
+  return thumb === pathOrUrl ? null : thumb;
+};
+
+/** Plus grand côté de la miniature de couverture (px) : nette sur une carte en Retina. */
+export const COVER_THUMB_MAX = 800;
+
 /** Chemin (sans extension) d'une photo de galerie d'un resto. */
 export const galleryPathBase = (slug: string) =>
   `${slug}/${storageStamp()}-${shortId()}`;
