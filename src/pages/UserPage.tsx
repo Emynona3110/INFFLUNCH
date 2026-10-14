@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 import { isRestaurantDetailPath, restaurantPath } from "@/utils/restaurantPath";
 import RestaurantGrid from "../sections/RestaurantGrid";
-import useMediaQuery from "@/hooks/useMediaQuery";
+import { useIsDesktop } from "@/hooks/useMediaQuery";
 import RestaurantsToolbar from "../components/RestaurantsToolbar";
 import PageNotFound from "./PageNotFound";
 import { Suspense, useEffect, useRef, useState } from "react";
@@ -180,7 +180,7 @@ const UserPage = () => {
   // interne (pas de scroll de page) ; restaurants/fiche = scroll de page.
   const centerContent = currentPage === "a-propos";
   // La carte globale et la roue occupent toute la hauteur (pas de scroll de page).
-  const isDesktop = useMediaQuery("(min-width: 640px)");
+  const isDesktop = useIsDesktop();
   const fillContent =
     currentPage === "admin" ||
     // Classement : table pleine hauteur à scroll interne, comme l'admin.

@@ -12,6 +12,16 @@
 /* Dark mode : classe .dark posée sur <html> par le ThemeProvider maison */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Seuil UNIQUE mobile ↔ desktop : tout élément qui a une version compacte
+   bascule au même moment, sur `sm:`. Relevé de 640 à 768 px : c'est la largeur
+   où la navbar desktop tient en entier (logotype ADMINFFLUNCH + onglets +
+   icônes). Même valeur côté JS : DESKTOP_QUERY (hooks/useMediaQuery).
+   Seules exceptions voulues, qui s'étoffent avec la place : colonnes de la
+   grille des restos (md, xl) et colonne latérale d'une fiche resto (lg). */
+@theme {
+  --breakpoint-sm: 48rem;
+}
+
 /* Tokens exposés comme utilitaires Tailwind (bg-card, text-foreground, ...) */
 @theme inline {
   --color-background: var(--background);
@@ -149,7 +159,7 @@ body {
 
    Au doigt, la carte dépasse rarement 340 px : aux gouttières du bureau, ces
    tables débordaient dès la première ligne et ne se lisaient qu'en défilant.
-   Sous 640 px on resserre donc les colonnes — gouttières réduites, texte d'un
+   Sous le seuil desktop (768 px) on resserre donc les colonnes — gouttières réduites, texte d'un
    cran plus petit — pour qu'elles tiennent dans la largeur disponible.
 
    Le plancher de largeur (--admin-min-w) empêche les colonnes de s'écraser sur
@@ -157,12 +167,12 @@ body {
    défilement à lui seul, d'où la media query. En dessous, la table reprend sa
    largeur naturelle : elle tient si elle peut, et défile sinon.
 --------------------------------------------------------------------------- */
-@media (min-width: 640px) {
+@media (width >= 48rem) {
   .admin-table {
     min-width: var(--admin-min-w, 0);
   }
 }
-@media (max-width: 639px) {
+@media (width < 48rem) {
   .admin-table {
     font-size: 0.8125rem; /* 13px ; les en-têtes gardent leur `text-xs` */
   }

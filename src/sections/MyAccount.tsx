@@ -10,7 +10,7 @@ import {
   MobileTabSwitcher,
   useSwipeTabs,
 } from "@/components/MobileTabSwitcher";
-import useMediaQuery from "@/hooks/useMediaQuery";
+import { useIsDesktop } from "@/hooks/useMediaQuery";
 import UserProfileView from "@/components/UserProfileView";
 import PageReveal from "@/components/PageReveal";
 import useIsAdmin from "../hooks/useIsAdmin";
@@ -113,7 +113,7 @@ const MyAccount = () => {
     if (active === "succes") markSeen();
   }, [active, markSeen]);
 
-  const isDesktop = useMediaQuery("(min-width: 640px)");
+  const isDesktop = useIsDesktop();
   const indexOf = (key: SubTabKey) =>
     visibleTabs.findIndex((t) => t.key === key);
   const changeTab = (key: SubTabKey) => setActive(key);

@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 
-/** Suit une media query CSS (ex. "(min-width: 640px)") ; SSR-safe (false). */
+/** Seuil unique mobile ↔ desktop, le même que `sm:` (cf. tailwind.css). */
+export const DESKTOP_QUERY = "(width >= 48rem)";
+
+/** Suit une media query CSS (ex. DESKTOP_QUERY) ; SSR-safe (false). */
 export default function useMediaQuery(query: string): boolean {
   const get = () =>
     typeof window !== "undefined" && window.matchMedia(query).matches;
@@ -14,3 +17,6 @@ export default function useMediaQuery(query: string): boolean {
   }, [query]);
   return matches;
 }
+
+/** Vrai au-dessus du seuil desktop (même bascule que les classes `sm:`). */
+export const useIsDesktop = () => useMediaQuery(DESKTOP_QUERY);

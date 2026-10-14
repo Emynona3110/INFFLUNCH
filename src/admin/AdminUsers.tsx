@@ -164,7 +164,7 @@ const AdminUsers = () => {
               // rapprochent quand l'écran rétrécit (répartition naturelle de
               // `w-full`). Ce plancher n'est qu'un filet : en dessous, la
               // ScrollArea reprend la main plutôt que d'écraser les colonnes.
-              // Il ne vaut qu'à partir de 640 px : sur mobile il dépassait la
+              // Il ne vaut qu'à partir de 768 px : sur mobile il dépassait la
               // carte et imposait le défilement à lui seul (cf. `.admin-table`).
               style={{ ["--admin-min-w" as string]: "400px" }}
             >

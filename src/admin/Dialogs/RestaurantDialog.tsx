@@ -641,7 +641,7 @@ const RestaurantDialog = ({
             }}
           />
         )}
-        <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
           <label className="flex flex-col gap-1.5">
             <span className="text-sm font-medium text-foreground">Nom</span>
             <Input
@@ -658,7 +658,7 @@ const RestaurantDialog = ({
               placeholder="Adresse"
             />
           </label>
-          <div className="flex flex-col gap-1.5 md:col-span-2">
+          <div className="flex flex-col gap-1.5 sm:col-span-2">
             <span className="text-sm font-medium text-foreground">Image</span>
             <ImageUploadField
               previewUrl={imagePreview ?? (image || null)}
@@ -695,7 +695,7 @@ const RestaurantDialog = ({
           </label>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
           {/* Tags */}
           <div>
             <span className="text-sm font-semibold text-foreground">Tags</span>

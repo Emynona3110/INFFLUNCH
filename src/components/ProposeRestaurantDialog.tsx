@@ -179,7 +179,7 @@ const ProposeRestaurantDialog = ({
           autoFocus
         />
 
-        <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
           <label className="flex flex-col gap-1.5">
             <span className="text-sm font-medium text-foreground">Nom *</span>
             <Input

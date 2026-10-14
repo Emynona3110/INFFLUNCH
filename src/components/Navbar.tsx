@@ -163,22 +163,22 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
             setPage("restaurants");
           }}
         >
-          {/* Monogramme sous xl, logotype complet au-delà (ADMINFFLUNCH pour
+          {/* Monogramme sur mobile, logotype complet au-delà (ADMINFFLUNCH pour
               les admins). Pas d'intro ici (réservée à l'écran de connexion) :
               saut du point au clic ou au toucher. Couleur héritée
               du texte → blanc en thème sombre. Visibilité portée par les
               <span> : Logo.css (hors couche Tailwind) impose display:block
               au <svg>. */}
-          <span className="text-[#113894] xl:hidden dark:text-white">
-            <Monogramme playIntro={false} className="h-7 sm:h-8" />
+          <span className="text-[#113894] sm:hidden dark:text-white">
+            <Monogramme playIntro={false} className="h-7" />
           </span>
-          <span className="mr-2 hidden text-[#113894] xl:block dark:text-white">
+          <span className="mr-2 hidden text-[#113894] sm:block dark:text-white">
             <Logotype admin={isAdmin} playIntro={false} className="h-7" />
           </span>
         </div>
 
-        {/* Onglets desktop/tablette (masqués sur mobile < md → menu burger) */}
-        <nav className="hidden h-full items-center md:flex">
+        {/* Onglets desktop/tablette (masqués sur mobile < sm → menu déroulant) */}
+        <nav className="hidden h-full items-center sm:flex">
           {tabs.map((item) => {
             const isActive = item.path === page;
             return (
@@ -226,11 +226,11 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
           })}
         </nav>
 
-        {/* Mobile (< md) : nom de l'onglet courant, à gauche ; au tap, les autres
+        {/* Mobile (< sm) : nom de l'onglet courant, à gauche ; au tap, les autres
             onglets se déroulent dessous (même animation que le sélecteur de vue). */}
         <div
           ref={menuRef}
-          className="relative ml-1 flex h-full items-center md:hidden"
+          className="relative ml-1 flex h-full items-center sm:hidden"
         >
           <button
             type="button"

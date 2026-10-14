@@ -317,7 +317,7 @@ const RestaurantGrid = ({
       <>
         <div
           key={listKey}
-          className="grid grid-flow-dense grid-cols-1 gap-2.5 sm:gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-3"
+          className="grid grid-flow-dense grid-cols-1 gap-2.5 sm:gap-6 md:grid-cols-2 xl:grid-cols-3"
         >
           {isLoading
             ? Array.from({ length: 6 }, (_, i) => (

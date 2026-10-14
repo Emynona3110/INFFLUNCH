@@ -87,7 +87,7 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
   // Plancher, pas une largeur cible : les colonnes s'étalent sur la largeur
   // disponible et se rapprochent quand l'écran rétrécit ; en dessous, la
   // ScrollArea reprend la main. 110 px par colonne. Appliqué seulement à partir
-  // de 640 px : sur mobile ce plancher dépassait la carte (cf. `.admin-table`).
+  // de 768 px : sur mobile ce plancher dépassait la carte (cf. `.admin-table`).
   const minWidth = visibleColumns.length * 110;
   // Une cellule peut porter un tableau (tags, badges) : on trie sur son texte.
   const rows = sortRows(data, sort, (row, key) => {

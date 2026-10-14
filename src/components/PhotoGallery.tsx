@@ -16,7 +16,7 @@ import ZoomableImage from "@/components/ZoomableImage";
 import { PHOTO_CAPTION_MAX } from "@/services/textLimits";
 import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
-import useMediaQuery from "@/hooks/useMediaQuery";
+import { useIsDesktop } from "@/hooks/useMediaQuery";
 import { HOVER_ZOOM_IMG } from "@/lib/imageClasses";
 
 interface Props {
@@ -131,7 +131,7 @@ const PhotoGallery = ({
 
   // Mobile : toujours une grille façon Instagram (3 colonnes, carrés collés,
   // sans arrondi) ; le carrousel n'a de sens qu'avec de la largeur.
-  const isDesktop = useMediaQuery("(min-width: 640px)");
+  const isDesktop = useIsDesktop();
   const layout = isDesktop ? layoutProp : "grid";
 
   // Carrousel : fenêtre de 3 photos, sauts de 3 (clampés pour rester pleine et

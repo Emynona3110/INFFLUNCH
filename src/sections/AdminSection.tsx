@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import useRememberedTab from "@/hooks/useRememberedTab";
-import useMediaQuery from "@/hooks/useMediaQuery";
+import { useIsDesktop } from "@/hooks/useMediaQuery";
 import { MobileTabSwitcher } from "@/components/MobileTabSwitcher";
 import DataManager from "../admin/DataManager";
 import AdminUsers from "../admin/AdminUsers";
@@ -61,7 +61,7 @@ const AdminSection = () => {
         ? waitingAccess
         : 0;
 
-  const isDesktop = useMediaQuery("(min-width: 640px)");
+  const isDesktop = useIsDesktop();
   const index = tabs.findIndex((t) => t.key === active);
 
   // Cible du portail. Le bandeau appartient au Layout, qui décide de le monter

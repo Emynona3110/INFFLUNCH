@@ -26,14 +26,14 @@ export default function RestaurantPageSkeleton() {
       <Skeleton className="mb-3 h-5 w-40 sm:mb-4" />
 
       {/* Hero */}
-      <div className="relative h-[220px] overflow-hidden rounded-card border border-border sm:h-[300px] md:h-[380px]">
+      <div className="relative h-[220px] overflow-hidden rounded-card border border-border sm:h-[380px]">
         <Skeleton className="h-full w-full rounded-none" />
-        <div className="absolute inset-x-0 bottom-0 p-3 sm:p-5 md:p-7">
+        <div className="absolute inset-x-0 bottom-0 p-3 sm:p-7">
           <div className="mb-2 flex gap-1 sm:mb-3 sm:gap-1.5">
             <Skeleton className="h-5 w-16 rounded-full sm:h-6" />
             <Skeleton className="h-5 w-20 rounded-full sm:h-6" />
           </div>
-          <Skeleton className="h-7 w-48 sm:h-9 sm:w-72 md:h-10" />
+          <Skeleton className="h-7 w-48 sm:h-10 sm:w-72" />
         </div>
       </div>
 

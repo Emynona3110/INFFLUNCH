@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { Spinner } from "@/components/ui/spinner";
 import { Dialog, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import useMediaQuery from "@/hooks/useMediaQuery";
+import { useIsDesktop } from "@/hooks/useMediaQuery";
 
 interface Props {
   /** Action déclenchée après l'appui maintenu. */
@@ -49,7 +49,7 @@ const HoldToDeleteButton = ({
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Mobile : l'appui long est facile à déclencher par erreur (scroll, doigt
   // posé) → on demande une validation explicite en plus.
-  const isMobile = useMediaQuery("(max-width: 639px)");
+  const isMobile = !useIsDesktop();
 
   const run = async () => {
     setBusy(true);

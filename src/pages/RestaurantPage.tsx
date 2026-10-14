@@ -218,7 +218,7 @@ const RestaurantPage = () => {
       />
 
       {/* Hero */}
-      <div className="relative h-[220px] overflow-hidden rounded-card border border-border sm:h-[300px] md:h-[380px]">
+      <div className="relative h-[220px] overflow-hidden rounded-card border border-border sm:h-[380px]">
         <img
           {...resizedImgProps(restaurant.image ?? noImage, IMG_HERO)}
           alt={restaurant.name}
@@ -250,11 +250,11 @@ const RestaurantPage = () => {
           }}
           iconClassName="h-4 w-4 sm:h-5 sm:w-5"
           emptyClassName="text-foreground/60"
-          className="absolute bottom-3 right-3 z-10 h-9 w-9 bg-card/85 shadow-md backdrop-blur hover:bg-card sm:bottom-5 sm:right-5 sm:h-11 sm:w-11 md:bottom-7 md:right-7"
+          className="absolute bottom-3 right-3 z-10 h-9 w-9 bg-card/85 shadow-md backdrop-blur hover:bg-card sm:bottom-7 sm:right-7 sm:h-11 sm:w-11"
         />
 
         {/* Bandeau bas */}
-        <div className="absolute inset-x-0 bottom-0 p-3 sm:p-5 md:p-7">
+        <div className="absolute inset-x-0 bottom-0 p-3 sm:p-7">
           {tags.length > 0 && (
             <div className="mb-2 flex max-w-[16rem] flex-wrap gap-1 sm:mb-3 sm:gap-1.5">
               {tags.map((tag) => (
@@ -271,7 +271,7 @@ const RestaurantPage = () => {
             <div
               role="heading"
               aria-level={1}
-              className="font-display text-xl font-bold leading-tight text-white drop-shadow sm:text-3xl md:text-4xl"
+              className="font-display text-xl font-bold leading-tight text-white drop-shadow sm:text-4xl"
             >
               {restaurant.name}
             </div>
