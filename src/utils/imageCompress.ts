@@ -100,3 +100,28 @@ export const compressImage = async (
 
   return { blob, width, height, ext: "webp" };
 };
+
+/**
+ * Recadre un carré (coordonnées en px natifs) d'une image déjà chargée et le
+ * réencode en WebP, borné à `maxSize` (jamais agrandi). Sert à la pp.
+ */
+export const cropSquare = async (
+  img: HTMLImageElement,
+  crop: { x: number; y: number; size: number },
+  { maxSize = 512, quality = 0.85 }: CompressOptions = {}
+): Promise<Blob> => {
+  const out = Math.max(1, Math.min(maxSize, Math.round(crop.size)));
+  const canvas = document.createElement("canvas");
+  canvas.width = out;
+  canvas.height = out;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas non supporté");
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(img, crop.x, crop.y, crop.size, crop.size, 0, 0, out, out);
+
+  const blob = await new Promise<Blob | null>((resolve) =>
+    canvas.toBlob(resolve, "image/webp", quality)
+  );
+  if (!blob) throw new Error("Échec de la compression");
+  return blob;
+};

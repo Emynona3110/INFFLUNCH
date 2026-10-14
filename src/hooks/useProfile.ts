@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import supabaseClient from "../services/supabaseClient";
 import useSession from "./useSession";
 import { patchQueries, rollbackQueries } from "../lib/optimistic";
-import { compressImage } from "../utils/imageCompress";
 import { AVATARS_BUCKET, newAvatarPath } from "../services/avatar";
 
 export interface Profile {
@@ -12,7 +11,8 @@ export interface Profile {
 
 /**
  * Profil de l'utilisateur courant (avatar) + actions upload/suppression de la pp.
- * L'avatar est compressé (limite HAUTE seulement) et stocké sous un nom ALÉATOIRE
+ * L'avatar arrive déjà recadré et compressé (AvatarCropDialog → cropSquare,
+ * WebP ≤ 512 px) ; il est stocké sous un nom ALÉATOIRE
  * "{userId}/{uuid}.webp" (URL non devinable). À chaque changement/retrait,
  * l'ANCIEN fichier est supprimé du bucket (chemin courant gardé dans profiles).
  */
@@ -43,14 +43,8 @@ const useProfile = () => {
   };
 
   const uploadAvatar = useMutation({
-    mutationFn: async (file: File) => {
+    mutationFn: async (blob: Blob) => {
       if (!userId) throw new Error("Non connecté");
-      if (!file.type.startsWith("image/"))
-        throw new Error("Le fichier doit être une image");
-
-      // Avatar = petit : on borne juste la taille haute (jamais d'agrandissement
-      // ni de rejet pour une image trop petite).
-      const { blob } = await compressImage(file, { maxSize: 512, quality: 0.85 });
 
       const oldPath = query.data?.avatar_path ?? null;
       const path = newAvatarPath(userId);

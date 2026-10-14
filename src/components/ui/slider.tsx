@@ -52,3 +52,46 @@ export function RangeSlider({
     </SliderPrimitive.Root>
   );
 }
+
+interface SliderProps {
+  value: number;
+  onChange: (value: number) => void;
+  min?: number;
+  max?: number;
+  step?: number;
+  label?: string;
+  className?: string;
+}
+
+/** Curseur à une poignée, même style que `RangeSlider`. */
+export function Slider({
+  value,
+  onChange,
+  min = 0,
+  max = 100,
+  step = 1,
+  label,
+  className,
+}: SliderProps) {
+  return (
+    <SliderPrimitive.Root
+      value={[value]}
+      onValueChange={(v) => onChange(v[0])}
+      min={min}
+      max={max}
+      step={step}
+      className={cn(
+        "relative flex w-full touch-none select-none items-center py-2",
+        className,
+      )}
+    >
+      <SliderPrimitive.Track className="relative h-1.5 w-full grow rounded-full bg-muted">
+        <SliderPrimitive.Range className="absolute h-full rounded-full bg-primary" />
+      </SliderPrimitive.Track>
+      <SliderPrimitive.Thumb
+        aria-label={label}
+        className="block h-4 w-4 cursor-grab rounded-full border-2 border-primary bg-card shadow-sm transition-shadow outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:cursor-grabbing"
+      />
+    </SliderPrimitive.Root>
+  );
+}

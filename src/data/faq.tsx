@@ -282,7 +282,7 @@ export const FAQ: FaqSection[] = [
       {
         question: "Comment accéder aux réglages ?",
         answer:
-          "Clique sur ta photo de profil en haut à droite, puis Réglages : tu peux y modifier ta photo de profil, le thème et ton mot de passe.",
+          "Clique sur ta photo de profil en haut à droite, puis Réglages : tu peux y changer ta photo de profil (et la recadrer), le thème et ton mot de passe.",
       },
       {
         question: "J'ai oublié mon mot de passe, comment faire ?",

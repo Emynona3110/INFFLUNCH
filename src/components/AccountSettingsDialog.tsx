@@ -7,6 +7,7 @@ import useSession from "@/hooks/useSession";
 import useProfile from "@/hooks/useProfile";
 import useIsAdmin from "@/hooks/useIsAdmin";
 import Avatar from "@/components/Avatar";
+import AvatarCropDialog from "@/components/AvatarCropDialog";
 import ColorModeSwitch from "@/components/ColorModeSwitch";
 import HoldToDeleteButton from "@/components/HoldToDeleteButton";
 import ChangePasswordDialog from "@/components/ChangePasswordDialog";
@@ -41,10 +42,42 @@ const AccountSettingsDialog = ({ open, onClose }: Props) => {
   const email = sessionData?.user?.email;
   const hasAvatar = !!profile?.avatar_path;
 
+  // Photo choisie, en attente de recadrage (URL objet révoquée à la fermeture).
+  const [crop, setCrop] = useState<{ img: HTMLImageElement; src: string } | null>(
+    null,
+  );
+  const closeCrop = () => {
+    if (crop) URL.revokeObjectURL(crop.src);
+    setCrop(null);
+  };
+
   const handlePick = async (file?: File) => {
     if (!file) return;
+    const src = URL.createObjectURL(file);
     try {
-      await uploadAvatar.mutateAsync(file);
+      if (!file.type.startsWith("image/"))
+        throw new Error("Le fichier doit être une image.");
+      const img = new Image();
+      img.src = src;
+      await img.decode().catch(() => {
+        throw new Error("Image illisible.");
+      });
+      setCrop({ img, src });
+    } catch (e) {
+      URL.revokeObjectURL(src);
+      toast({
+        title: "Échec",
+        description: e instanceof Error ? e.message : "Réessaie.",
+        status: "error",
+        duration: 5000,
+      });
+    }
+  };
+
+  const handleCropped = async (blob: Blob) => {
+    try {
+      await uploadAvatar.mutateAsync(blob);
+      closeCrop();
       toast({
         title: "Photo de profil mise à jour",
         status: "success",
@@ -181,6 +214,16 @@ taille, et absorbe les clics tant qu'on reste sur ce sous-onglet. */}
           </Button>
         </div>
       </Dialog>
+
+      {crop && (
+        <AvatarCropDialog
+          img={crop.img}
+          src={crop.src}
+          busy={uploadAvatar.isPending}
+          onCancel={closeCrop}
+          onConfirm={handleCropped}
+        />
+      )}
 
       <ChangePasswordDialog
         isOpen={isDialogOpen}
