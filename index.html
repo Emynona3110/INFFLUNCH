@@ -31,14 +31,14 @@
       } catch (e) {}
     </script>
     <!-- Monogramme de chargement : servi avec la page elle-même (visible
-         pendant le téléchargement du code, après 750 ms), puis réutilisé
+         pendant le téléchargement du code, après 1 s), puis réutilisé
          par l'app pour toutes ses attentes plein écran (screenLoaderControl.ts) :
          un seul élément, une animation qui ne repart jamais du début. -->
     <style>
       html { background: #f4f7fc; }
       html.dark { background: #0a1024; }
       #boot-loader { position: fixed; inset: 0; z-index: 900; display: flex; align-items: center; justify-content: center; pointer-events: none; opacity: 0; transition: opacity 0.25s linear; }
-      #boot-loader.booting { animation: boot-in 0.25s linear 0.75s forwards; }
+      #boot-loader.booting { animation: boot-in 0.25s linear 1s forwards; }
       #boot-loader img { height: 5.375rem; width: auto; }
       #boot-loader .w, html.dark #boot-loader .b { display: none; }
       html.dark #boot-loader .w { display: block; }

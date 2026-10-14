@@ -10,7 +10,7 @@ const loaderWhite = svgDataUri(loaderWhiteRaw);
 
 // Sous ce délai, rien ne s'affiche : un chargement court ferait clignoter
 // l'animation une fraction de seconde.
-const DELAY_MS = 750;
+const DELAY_MS = 1000;
 /** Durée des fondus d'apparition et de disparition (s). */
 const FADE_S = 0.25;
 

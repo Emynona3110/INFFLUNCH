@@ -82,7 +82,7 @@ export function Dialog({
             <motion.div
               key="busy"
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1, transition: { delay: 0.75, duration: 0.25 } }}
+              animate={{ opacity: 1, transition: { delay: 1, duration: 0.25 } }}
               exit={{ opacity: 0, transition: { duration: 0.25 } }}
               className="absolute inset-0 z-20 flex items-center justify-center rounded-[inherit] bg-card/75"
             >

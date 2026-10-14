@@ -8,7 +8,7 @@
  */
 
 // Même délai et même fondu que PageLoader et que l'apparition au démarrage.
-const DELAY_MS = 750;
+const DELAY_MS = 1000;
 // Un écran d'attente qui disparaît est souvent aussitôt relayé par un autre
 // (même rendu React) : on attend un instant avant de masquer.
 const HANDOFF_MS = 60;
