@@ -84,7 +84,7 @@ const EmojiReactions = ({ summary, onToggle, disabled, onDark }: Props) => {
                 ? "border-primary/40 bg-primary/10 text-primary"
                 : onDark
                   ? "border-white/25 text-white/80"
-                  : "border-border text-foreground/60",
+                  : "border-border text-[color-mix(in_oklab,var(--foreground)_60%,var(--card))]",
               disabled
                 ? "cursor-default"
                 : cn(

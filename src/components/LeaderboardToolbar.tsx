@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { FiChevronDown, FiX, FiSearch, FiUsers } from "react-icons/fi";
-import { LuStore } from "react-icons/lu";
+import ChefHat from "./icons/ChefHat";
 import SearchInput from "./SearchInput";
 import RollingNumber from "./RollingNumber";
 import {
@@ -62,9 +62,18 @@ const shortLabel = (key: string) =>
  * sur le mois ouvre la liste de tous les mois, du mois en cours au premier
  * ayant du contenu, au style de la liste de tri des restos.
  */
+/**
+ * Segment inactif des toggles : même teinte que `text-foreground/55`, mais
+ * opaque (mélangée au fond du toggle). Une couleur semi-transparente change
+ * le lissage du texte (plus de lissage sous-pixel) : le libellé paraissait
+ * plus maigre qu'une fois actif — graisse constante voulue.
+ */
+const INACTIVE =
+  "text-[color-mix(in_oklab,var(--foreground)_55%,var(--muted))] hover:text-foreground";
+
 const KINDS: { kind: LeaderboardKind; label: string; icon: React.ReactNode }[] = [
   { kind: "users", label: "Utilisateurs", icon: <FiUsers className="h-4 w-4" /> },
-  { kind: "restaurants", label: "Restaurants", icon: <LuStore className="h-4 w-4" /> },
+  { kind: "restaurants", label: "Restaurants", icon: <ChefHat className="h-4 w-4" /> },
 ];
 
 /**
@@ -130,13 +139,24 @@ const KindToggle = ({
           aria-label={k.label}
           onClick={() => onChange(k.kind)}
           className={cn(
-            "relative flex h-8 cursor-pointer items-center whitespace-nowrap rounded-full px-2.5 text-sm font-medium transition-colors sm:px-3",
+            "group relative flex h-8 cursor-pointer items-center whitespace-nowrap rounded-full px-2.5 text-sm font-medium transition-colors sm:px-3",
             kind === k.kind
               ? "text-primary"
-              : "text-foreground/55 hover:text-foreground",
+              : INACTIVE,
           )}
         >
-          <span className="relative sm:hidden">{k.icon}</span>
+          {/* Symbole inactif : couleur pleine + opacité, pas la couleur
+              semi-transparente du bouton (les traits qui se croisent de la
+              toque s'assombrissaient). */}
+          <span
+            className={cn(
+              "relative transition-opacity sm:hidden",
+              kind !== k.kind &&
+                "text-foreground opacity-55 group-hover:opacity-100",
+            )}
+          >
+            {k.icon}
+          </span>
           <span className="relative hidden sm:inline">{k.label}</span>
         </button>
       ))}
@@ -328,7 +348,7 @@ const LeaderboardToolbar = ({
             onClick={() => (all ? pickMonth(month) : setListOpen((o) => !o))}
             className={cn(
               "relative flex h-8 cursor-pointer items-center whitespace-nowrap rounded-full px-3 text-sm font-medium transition-colors",
-              all ? "text-foreground/55 hover:text-foreground" : "text-primary",
+              all ? INACTIVE : "text-primary",
             )}
           >
             <span className="relative flex items-center gap-1">
@@ -400,7 +420,7 @@ const LeaderboardToolbar = ({
           }}
           className={cn(
             "relative flex h-8 cursor-pointer items-center whitespace-nowrap rounded-full px-3 text-sm font-medium transition-colors",
-            all ? "text-primary" : "text-foreground/55 hover:text-foreground",
+            all ? "text-primary" : INACTIVE,
           )}
         >
           <span className="relative hidden sm:inline">Depuis toujours</span>

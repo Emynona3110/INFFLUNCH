@@ -208,7 +208,7 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
                     "relative flex h-full cursor-pointer items-center font-display text-lg font-medium transition",
                     isActive
                       ? "text-primary"
-                      : "text-foreground/65 hover:text-foreground",
+                      : "text-[color-mix(in_oklab,var(--foreground)_65%,var(--card))] hover:text-foreground",
                   )}
                 >
                   {/* Même graisse actif ou non : l'onglet courant se repère

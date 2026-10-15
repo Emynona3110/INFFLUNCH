@@ -40,7 +40,7 @@ const PriceQuickPicks = ({
             "inline-flex cursor-pointer items-center rounded-full border px-3 py-1.5 text-sm font-semibold leading-none tabular-nums transition disabled:cursor-not-allowed disabled:opacity-50",
             active
               ? "border-primary bg-primary/10 text-primary"
-              : "border-border text-foreground/80 hover:border-primary/50 hover:bg-primary/5 hover:text-primary"
+              : "border-border text-[color-mix(in_oklab,var(--foreground)_80%,var(--card))] hover:border-primary/50 hover:bg-primary/5 hover:text-primary"
           )}
         >
           {formatAmount(value)} €

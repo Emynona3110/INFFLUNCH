@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import useSession from "@/hooks/useSession";
-import { useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import {
   screenLoaderBusy,
   subscribeScreenLoader,
@@ -19,6 +19,9 @@ const linkCls =
  * pleine hauteur (carte, roue, admin, Mon compte mobile) où il est déjà calé
  * en bas — même rendu sinon.
  */
+/** Délai sans chargement avant d'afficher le décor d'évènement (ms). */
+const DECOR_SETTLE_MS = 80;
+
 export const Footer = ({ compact = false }: { compact?: boolean }) => {
   // Depuis une page légale, l'autre s'ouvre en `replace` : les deux pages ne
   // s'empilent pas dans l'historique, « Retour » ramène à l'écran d'origine.
@@ -36,6 +39,18 @@ export const Footer = ({ compact = false }: { compact?: boolean }) => {
   // au-dessus pour lui. Pas sur les écrans pleine hauteur (`compact`) : il
   // mordrait sur la carte, la roue…
   const Decor = compact ? undefined : eventTheme()?.FooterDecor;
+  // Le décor n'arrive que pied de page au repos : en venant d'un écran sans
+  // décor (admin…), la page qui s'ouvre réclame son chargement une image
+  // APRÈS ce rendu — le décor apparaissait pendant que le pied de page
+  // s'effaçait. On attend donc un court instant sans chargement ; une fois là,
+  // il reste (et s'efface avec le pied de page comme le reste).
+  const [decorShown, setDecorShown] = useState(false);
+  if (!Decor && decorShown) setDecorShown(false);
+  useEffect(() => {
+    if (!Decor || busy || decorShown) return;
+    const t = setTimeout(() => setDecorShown(true), DECOR_SETTLE_MS);
+    return () => clearTimeout(t);
+  }, [Decor, busy, decorShown]);
   // Séparateur « · » : sur une ligne (desktop) seulement. Sur mobile, les
   // liens passent à la ligne et un point en bout de ligne flotterait.
   const dot = (
@@ -62,7 +77,7 @@ export const Footer = ({ compact = false }: { compact?: boolean }) => {
         !compact && (Decor ? "mt-10 sm:mt-12" : "mt-4 sm:mt-8"),
       )}
     >
-      {Decor && <Decor />}
+      {Decor && decorShown && <Decor />}
       <span className="order-last sm:order-none">Infflunch 2026</span>
       {dot}
       <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 sm:gap-x-2">

@@ -147,7 +147,7 @@ const AdminSection = () => {
                   "relative inline-flex cursor-pointer items-center rounded-full px-4 py-1.5 text-sm font-medium transition",
                   isActive
                     ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-foreground/70 hover:bg-muted/70"
+                    : "bg-muted text-[color-mix(in_oklab,var(--foreground)_70%,var(--muted))] hover:bg-muted/70"
                 )}
               >
                 {t.label}

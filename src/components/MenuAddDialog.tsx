@@ -188,7 +188,7 @@ const MenuAddDialog = ({ isOpen, onClose, isAdmin, onSubmit }: Props) => {
                 "flex flex-1 items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition",
                 kind === value
                   ? "border-primary bg-primary/10 text-primary"
-                  : "border-border text-foreground/60 hover:bg-muted"
+                  : "border-border text-[color-mix(in_oklab,var(--foreground)_60%,var(--card))] hover:bg-muted"
               )}
             >
               <Icon className="h-4 w-4" />

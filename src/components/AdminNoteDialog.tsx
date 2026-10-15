@@ -132,7 +132,7 @@ const AdminNoteDialog = ({
                     "inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition",
                     active
                       ? "border-primary bg-primary/10 text-primary"
-                      : "border-border text-foreground/70 hover:bg-muted"
+                      : "border-border text-[color-mix(in_oklab,var(--foreground)_70%,var(--card))] hover:bg-muted"
                   )}
                 >
                   <span className={cn("h-2 w-2 rounded-full", c.dot)} />

@@ -43,6 +43,13 @@
   position: absolute;
   inset: 0 0 auto 0;
   height: 0;
+  /* Arrivée en fondu (même durée que le pied de page) : en passant d'un écran
+     sans déco (admin…) à un écran avec, elle apparaissait d'un coup, une image
+     avant que le pied de page ne s'efface pour le chargement. */
+  animation: hl-decor-in 0.3s ease-out both;
+}
+@keyframes hl-decor-in {
+  from { opacity: 0; }
 }
 @media (min-width: 768px) {
   .hl-candles { --hl-s: 0.12; }
