@@ -213,7 +213,7 @@ export const FAQ: FaqSection[] = [
       {
         question: "Comment fonctionne le classement ?",
         answer:
-          "Il compte, pour chaque collègue, les succès, les avis, les photos et les midis déclarés. Choisis un mois, ou « Depuis toujours » pour le total.",
+          "Il compte, pour chaque collègue, les succès, les avis, les photos et les midis déclarés. Bascule sur « Restaurants » pour classer les restos : midis déclarés chez eux, avis, photos et nombre de favoris. Choisis un mois, ou « Depuis toujours » pour le total.",
       },
     ],
   },

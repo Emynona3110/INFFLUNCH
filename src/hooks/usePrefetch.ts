@@ -4,7 +4,11 @@ import { reviewsQueryOptions } from "./useReviews";
 import { restaurantPhotosQueryOptions } from "./useRestaurantPhotos";
 import { restaurantMenusQueryOptions } from "./useRestaurantMenus";
 import { lunchTodayQueryOptions, parisDay } from "./useLunchToday";
-import { leaderboardQueryOptions, parisMonthKey } from "./useLeaderboard";
+import {
+  leaderboardQueryOptions,
+  parisMonthKey,
+  restaurantLeaderboardQueryOptions,
+} from "./useLeaderboard";
 
 /**
  * Préchargement à l'intention (survol souris, début de toucher) : les données
@@ -30,9 +34,14 @@ const usePrefetch = () => {
     (path: string) => {
       if (path === "dejeuner")
         queryClient.prefetchQuery(lunchTodayQueryOptions(parisDay()));
-      // Classement : la période ouverte par défaut (le mois en cours).
-      if (path === "classement")
+      // Classement : la période ouverte par défaut (le mois en cours), des
+      // collègues et des restaurants.
+      if (path === "classement") {
         queryClient.prefetchQuery(leaderboardQueryOptions(parisMonthKey()));
+        queryClient.prefetchQuery(
+          restaurantLeaderboardQueryOptions(parisMonthKey()),
+        );
+      }
     },
     [queryClient],
   );

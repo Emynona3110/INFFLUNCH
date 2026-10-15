@@ -16,6 +16,7 @@ import { SortOrder } from "../components/SortSelector";
 import { DEFAULT_PRICE_FILTER, PriceRangeFilter } from "../services/price";
 import LeaderboardToolbar from "../components/LeaderboardToolbar";
 import {
+  LeaderboardKind,
   parisMonthKey,
   useLeaderboardFirstMonth,
 } from "../hooks/useLeaderboard";
@@ -130,6 +131,8 @@ const UserPage = () => {
   // Mois retenu même en « Depuis toujours » : y revenir retrouve le même.
   const [leaderboardMonth, setLeaderboardMonth] = useState(parisMonthKey);
   const [leaderboardAll, setLeaderboardAll] = useState(false);
+  const [leaderboardKind, setLeaderboardKind] =
+    useState<LeaderboardKind>("users");
   const [leaderboardSearch, setLeaderboardSearch] = useState("");
   const leaderboardPeriod = leaderboardAll ? "all" : leaderboardMonth;
   // Ne part qu'une fois sur l'onglet (puis reste en cache).
@@ -227,6 +230,13 @@ const UserPage = () => {
           />
         ) : currentPage === "classement" ? (
           <LeaderboardToolbar
+            kind={leaderboardKind}
+            onKindChange={(kind) => {
+              // Recherche propre à chaque classement (un collègue n'est pas
+              // un resto) : effacée à la bascule.
+              setLeaderboardKind(kind);
+              setLeaderboardSearch("");
+            }}
             month={leaderboardMonth}
             onMonthChange={setLeaderboardMonth}
             all={leaderboardAll}
@@ -274,6 +284,7 @@ const UserPage = () => {
               path="classement"
               element={
                 <Leaderboard
+                  kind={leaderboardKind}
                   period={leaderboardPeriod}
                   search={leaderboardSearch}
                 />

@@ -1,57 +1,92 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { FiAward, FiCamera, FiStar } from "react-icons/fi";
+import { FiAward, FiCamera, FiHeart, FiStar } from "react-icons/fi";
 import { LuUtensils } from "react-icons/lu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import StreakAvatar from "@/components/StreakAvatar";
 import { SortHeader } from "@/admin/SortHeader";
 import { sortRows, useTableSort } from "@/admin/tableSort";
 import useLeaderboard, {
+  LeaderboardKind,
   LeaderboardPeriod,
   LeaderboardRow,
+  RestaurantLeaderboardRow,
+  useRestaurantLeaderboard,
 } from "@/hooks/useLeaderboard";
 import useSession from "@/hooks/useSession";
 import useRealtimeTable from "@/hooks/useRealtimeTable";
 import useUserNames from "@/hooks/useUserNames";
+import usePrefetch from "@/hooks/usePrefetch";
 import { profilePath } from "@/utils/profilePath";
+import { restaurantPath } from "@/utils/restaurantPath";
 import { isRickSearch, RICK_ROW } from "@/data/rickAstley";
+import noImage from "@/assets/no-image-thumb.webp";
+import { resizedImgProps, IMG_THUMB } from "@/lib/imageUrl";
 import { cn } from "@/lib/utils";
 import { useScreenLoader } from "@/components/brand/ScreenLoader";
 
-type Metric = Exclude<
-  keyof LeaderboardRow,
-  "user_id" | "email" | "avatar_path" | "streak"
->;
-type ColKey = "user" | Metric;
+type Metric = "lunches" | "reviews" | "photos" | "achievements" | "favorites";
+type ColKey = "name" | Metric;
 
 // Sur mobile, les colonnes chiffrées s'intitulent par leur symbole (ceux des
 // compteurs du profil) : la table tient sans défiler en largeur.
 const ICON = "h-4 w-4";
-const COLUMNS: { key: ColKey; label: string; icon?: React.ReactNode }[] = [
-  { key: "user", label: "Utilisateurs" },
+type Column = { key: ColKey; label: string; icon?: React.ReactNode };
+const COUNTS: Column[] = [
   { key: "lunches", label: "Midis", icon: <LuUtensils className={ICON} /> },
   { key: "reviews", label: "Avis", icon: <FiStar className={ICON} /> },
   { key: "photos", label: "Photos", icon: <FiCamera className={ICON} /> },
-  { key: "achievements", label: "Succès", icon: <FiAward className={ICON} /> },
 ];
-const METRICS = COLUMNS.filter((c) => c.key !== "user") as {
-  key: Metric;
-  label: string;
-  icon: React.ReactNode;
-}[];
+// Restaurants : mêmes colonnes que les collègues, les favoris à la place des
+// succès.
+const COLUMNS: Record<LeaderboardKind, Column[]> = {
+  users: [
+    { key: "name", label: "Utilisateurs" },
+    ...COUNTS,
+    { key: "achievements", label: "Succès", icon: <FiAward className={ICON} /> },
+  ],
+  restaurants: [
+    { key: "name", label: "Restaurants" },
+    ...COUNTS,
+    { key: "favorites", label: "Favoris", icon: <FiHeart className={ICON} /> },
+  ],
+};
+const metricsOf = (kind: LeaderboardKind) =>
+  COLUMNS[kind].filter((c) => c.key !== "name") as {
+    key: Metric;
+    label: string;
+    icon: React.ReactNode;
+  }[];
+
+/** Ligne commune aux deux classements. */
+interface Row {
+  id: string;
+  name: string;
+  /** Libellé mobile : trigramme d'un collègue, nom d'un resto. */
+  short: string;
+  path: string;
+  me: boolean;
+  values: Partial<Record<Metric, number>>;
+  user?: LeaderboardRow;
+  restaurant?: RestaurantLeaderboardRow;
+}
 
 /** Recherche insensible à la casse et aux accents. */
 const fold = (s: string) =>
   s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
+const val = (r: Row, key: Metric) => r.values[key] ?? 0;
+
 /**
- * Classement des collègues, sur un mois (calendaire) ou depuis toujours.
- * Même table que l'admin (tri par colonne, chevrons) : par défaut les midis,
- * chaque colonne chiffrée se trie d'abord du plus grand au plus petit. La pp
- * porte l'effet de série de midis (flamme), comme sur le profil.
+ * Classement des collègues ou des restaurants, sur un mois (calendaire) ou
+ * depuis toujours. Même table que l'admin (tri par colonne, chevrons) : par
+ * défaut les midis, chaque colonne chiffrée se trie d'abord du plus grand au
+ * plus petit. La pp d'un collègue porte l'effet de série de midis (flamme),
+ * comme sur le profil.
  */
 interface Props {
+  kind: LeaderboardKind;
   period: LeaderboardPeriod;
   /** Recherche validée dans la barre d'outils (LeaderboardToolbar). */
   search: string;
@@ -63,20 +98,18 @@ const FADE_MS = 180;
 const STAGGER_MS = 30;
 const STAGGER_MAX = 15;
 
-
-
-const Leaderboard = ({ period, search }: Props) => {
+const Leaderboard = ({ kind, period, search }: Props) => {
   const { nameOf, trigramOf } = useUserNames();
   const navigate = useNavigate();
+  const { prefetchRestaurant } = usePrefetch();
   const { sessionData } = useSession();
   const myId = sessionData?.user?.id;
-  const {
-    data = [],
-    isPending,
-    isPlaceholderData,
-    error,
-  } = useLeaderboard(period);
-  const waiting = useScreenLoader(isPending);
+  // Les deux classements sont chargés : basculer de l'un à l'autre n'attend
+  // pas le réseau. Seul celui affiché se rafraîchit périodiquement.
+  const users = useLeaderboard(period, kind === "users");
+  const restaurants = useRestaurantLeaderboard(period, kind === "restaurants");
+  const active = kind === "users" ? users : restaurants;
+  const { isPlaceholderData, error } = active;
   // Temps réel : tout changement d'une table comptée relance le classement.
   // Les événements arrivent souvent en rafale (un midi déclaré débloque un
   // succès…) : un seul refetch par salve. Les succès des AUTRES ne sont pas
@@ -97,12 +130,53 @@ const Leaderboard = ({ period, search }: Props) => {
   useRealtimeTable("restaurant_photos", refresh);
   useRealtimeTable("user_achievements", refresh);
 
+  const METRICS = metricsOf(kind);
+
+  // Lignes des deux classements, ramenées à un même format.
+  const data = useMemo<Row[]>(() => {
+    if (kind === "restaurants")
+      return (restaurants.data ?? []).map((r) => ({
+        id: String(r.id),
+        name: r.name,
+        short: r.name,
+        path: restaurantPath(r.slug),
+        me: false,
+        values: {
+          lunches: r.lunches,
+          reviews: r.reviews,
+          photos: r.photos,
+          favorites: r.favorites,
+        },
+        restaurant: r,
+      }));
+    const toRow = (r: LeaderboardRow): Row => ({
+      id: r.user_id,
+      name: nameOf(r.email),
+      short: trigramOf(r.email),
+      path: profilePath(r.user_id, r.email),
+      me: r.user_id === myId,
+      values: {
+        lunches: r.lunches,
+        reviews: r.reviews,
+        photos: r.photos,
+        achievements: r.achievements,
+      },
+      user: r,
+    });
+    // Rick Astley, collègue fictif, ne se montre qu'à qui le cherche (succès
+    // secret).
+    return [
+      ...(users.data ?? []),
+      ...(isRickSearch(search) ? [RICK_ROW] : []),
+    ].map(toRow);
+  }, [kind, users.data, restaurants.data, search, nameOf, trigramOf, myId]);
+
   const {
     sort: chosen,
     toggle,
     firstDir,
   } = useTableSort<Metric>(
-    "leaderboard",
+    kind === "users" ? "leaderboard" : "leaderboard-restaurants",
     { key: "lunches", dir: "desc" },
     // Pas de tri par nom (un classement alphabétique n'a pas de sens) :
     // seules les colonnes chiffrées se trient, du plus grand au plus petit.
@@ -111,30 +185,35 @@ const Leaderboard = ({ period, search }: Props) => {
 
   // Colonne triée vide sur la période (que des 0, ex. aucun midi ce mois-là) :
   // on trie sur la suivante qui a du contenu (Midis → Avis → Photos →
-  // Succès, en boucle). Le tri choisi reste retenu et revient dès qu'il a de
-  // quoi trier ; le chevron, lui, montre le tri appliqué.
+  // Succès/Favoris, en boucle). Le tri choisi reste retenu et revient dès qu'il
+  // a de quoi trier ; le chevron, lui, montre le tri appliqué.
   const sort = useMemo(() => {
     if (data.length === 0) return chosen;
     const start = METRICS.findIndex((m) => m.key === chosen.key);
     for (let i = 0; i < METRICS.length; i++) {
       const key = METRICS[(start + i) % METRICS.length].key;
-      if (data.some((r) => r[key] > 0))
+      if (data.some((r) => val(r, key) > 0))
         return key === chosen.key ? chosen : { key, dir: firstDir(key) };
     }
     return chosen;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chosen.key, chosen.dir, data]);
 
-  // Changement de période OU de tri : seules les LIGNES s'effacent (vers le
-  // fond, blanc ou sombre selon le thème) — en-tête, cadre et barre de
-  // défilement restent en place —, puis la nouvelle vue apparaît en cascade
-  // dès que ses données sont là. Pendant l'effacement, on garde à l'écran
-  // les lignes quittées (instantané). Un refetch (temps réel) ne change pas
-  // de vue : pas de fondu.
-  const viewKey = `${period}|${sort.key}|${sort.dir}`;
+  // Changement de classement, de période OU de tri : seules les LIGNES
+  // s'effacent (vers le fond, blanc ou sombre selon le thème) — en-tête,
+  // cadre et barre de défilement restent en place —, puis la nouvelle vue
+  // apparaît en cascade dès que ses données sont là. Pendant l'effacement, on
+  // garde à l'écran les lignes quittées (instantané). Un refetch (temps réel)
+  // ne change pas de vue : pas de fondu.
+  const viewKey = `${kind}|${period}|${sort.key}|${sort.dir}`;
   const [shownView, setShownView] = useState(viewKey);
   const settled = shownView === viewKey;
   const [fadedOut, setFadedOut] = useState(false);
+  // Données de la vue demandée arrivées (pas celles d'une autre période).
+  const ready = active.data !== undefined && !isPlaceholderData;
+  // Monogramme de chargement au premier affichage seulement : ensuite, la
+  // table quittée reste affichée le temps du chargement.
+  const waiting = useScreenLoader(settled && active.data === undefined && !error);
   // Cascade d'apparition active seulement juste après un changement de vue
   // (et au premier affichage) : réordonner des lignes (temps réel)
   // relancerait sinon l'animation des lignes déplacées.
@@ -158,62 +237,54 @@ const Leaderboard = ({ period, search }: Props) => {
   }, [settled]);
   useEffect(() => {
     if (settled) setFadedOut(false);
-    else if (fadedOut && !isPlaceholderData) {
+    else if (fadedOut && ready) {
       setShownView(viewKey);
       setFadedOut(false);
     }
-  }, [settled, fadedOut, isPlaceholderData, viewKey]);
+  }, [settled, fadedOut, ready, viewKey]);
 
   // Colonnes vides sur la période (que des 0) : rien à y trier.
   const emptyCols = useMemo(
     () =>
       new Set<ColKey>(
         data.length
-          ? METRICS.filter((m) => data.every((r) => r[m.key] === 0)).map(
+          ? METRICS.filter((m) => data.every((r) => val(r, m.key) === 0)).map(
               (m) => m.key,
             )
           : [],
       ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [data],
   );
 
   // Ordre de base par nom : il départage les ex æquo (tri stable).
   const byName = useMemo(
-    () =>
-      [...data].sort((a, b) =>
-        nameOf(a.email).localeCompare(
-          nameOf(b.email),
-          "fr",
-        ),
-      ),
-    [data, nameOf],
+    () => [...data].sort((a, b) => a.name.localeCompare(b.name, "fr")),
+    [data],
   );
 
   const needle = fold(search.trim());
-  // Égalités sur la colonne triée : soi-même d'abord, puis le total des quatre
-  // colonnes, puis les autres colonnes chiffrées de gauche à droite, toujours
-  // dans le sens du tri ; enfin par nom (ordre de base, tri stable).
-  type TieKey = ColKey | "total" | "me";
+  // Égalités sur la colonne triée : soi-même d'abord, puis le total des
+  // compteurs, puis les autres colonnes chiffrées de gauche à
+  // droite, toujours dans le sens du tri ; enfin par nom (ordre de base).
+  type TieKey = Metric | "total" | "me";
   const tieKeys: TieKey[] = [
     "me",
     "total",
     ...METRICS.map((m) => m.key).filter((k) => k !== sort.key),
   ];
   // Tri sur la liste entière, recherche ensuite : le rang reste celui du
-  // classement complet. Rick Astley, collègue fictif, ne se montre qu'à qui le
-  // cherche (succès secret).
-  const sorted = sortRows<LeaderboardRow, TieKey>(
-    isRickSearch(search) ? [...byName, RICK_ROW] : byName,
+  // classement complet.
+  const sorted = sortRows<Row, TieKey>(
+    byName,
     sort,
     (r, key) =>
-      key === "user"
-        ? nameOf(r.email)
-        : key === "me"
-          ? // Signé selon le sens du tri : soi-même en tête dans les deux.
-            Number(r.user_id === myId) * (sort.dir === "asc" ? -1 : 1)
-          : key === "total"
-            ? METRICS.reduce((sum, m) => sum + r[m.key], 0)
-            : r[key],
+      key === "me"
+        ? // Signé selon le sens du tri : soi-même en tête dans les deux.
+          Number(r.me) * (sort.dir === "asc" ? -1 : 1)
+        : key === "total"
+          ? METRICS.reduce((sum, m) => sum + val(r, m.key), 0)
+          : val(r, key),
     tieKeys,
   );
   // Rang : seule la colonne triée compte, les ex æquo le partagent (1, 1, 3) ;
@@ -223,23 +294,28 @@ const Leaderboard = ({ period, search }: Props) => {
     .map((r, i) => {
       const prev = sorted[i - 1];
       ranks[i] =
-        prev && prev[sort.key] === r[sort.key]
-          ? ranks[i - 1]
-          : i + 1;
+        prev && val(prev, sort.key) === val(r, sort.key) ? ranks[i - 1] : i + 1;
       return { ...r, rank: ranks[i] };
     })
     .filter(
-      // Nom ou trigramme (celui qu'affiche le mobile).
+      // Nom ou libellé mobile (trigramme d'un collègue).
       (r) =>
         !needle ||
-        r.user_id === RICK_ROW.user_id ||
-        fold(nameOf(r.email)).includes(needle) ||
-        fold(trigramOf(r.email)).includes(needle),
+        r.id === RICK_ROW.user_id ||
+        fold(r.name).includes(needle) ||
+        fold(r.short).includes(needle),
     );
-  // Instantané de ce qui est affiché, rejoué pendant l'effacement.
-  const snapshot = useRef({ rows: liveRows, sortKey: sort.key as ColKey });
-  if (settled) snapshot.current = { rows: liveRows, sortKey: sort.key };
-  const { rows, sortKey } = snapshot.current;
+  // Instantané de ce qui est affiché, rejoué pendant l'effacement (avec ses
+  // colonnes : celles des collègues ou des restaurants).
+  const snapshot = useRef({
+    rows: liveRows,
+    sortKey: sort.key as ColKey,
+    kind,
+  });
+  if (settled) snapshot.current = { rows: liveRows, sortKey: sort.key, kind };
+  const { rows, sortKey, kind: shownKind } = snapshot.current;
+  const columns = COLUMNS[shownKind];
+  const shownMetrics = metricsOf(shownKind);
 
   return (
     <div className="tw-scope flex h-full w-full flex-col">
@@ -264,16 +340,16 @@ const Leaderboard = ({ period, search }: Props) => {
                   la largeur de son intitulé et les écarts varient. */}
               <colgroup>
                 <col />
-                {METRICS.map((m) => (
+                {shownMetrics.map((m) => (
                   <col
                     key={m.key}
-                    style={{ width: `${68 / METRICS.length}%` }}
+                    style={{ width: `${68 / shownMetrics.length}%` }}
                   />
                 ))}
               </colgroup>
               <thead>
                 <tr>
-                  {COLUMNS.map((c) => (
+                  {columns.map((c) => (
                     <th
                       key={c.key}
                       className={cn(
@@ -281,10 +357,10 @@ const Leaderboard = ({ period, search }: Props) => {
                         // Intitulé : au bord, sur les rangs, sur mobile ;
                         // aligné sur l'avatar, après la zone du rang, sur
                         // desktop (« ! » : prime sur la marge de `.admin-table`).
-                        c.key === "user" && "pl-2! text-left sm:pl-[var(--lb-rank-w)]!",
+                        c.key === "name" && "pl-2! text-left sm:pl-[var(--lb-rank-w)]!",
                       )}
                     >
-                      {c.key === "user" ? (
+                      {c.key === "name" ? (
                         // Pas triable : simple intitulé.
                         c.label
                       ) : (
@@ -320,20 +396,27 @@ const Leaderboard = ({ period, search }: Props) => {
                 {rows.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={COLUMNS.length}
+                      colSpan={columns.length}
                       className="px-4 py-6 text-foreground/50"
                     >
-                      <span className="lb-cell">Aucun collègue trouvé.</span>
+                      <span className="lb-cell">
+                        {shownKind === "users"
+                          ? "Aucun collègue trouvé."
+                          : "Aucun restaurant trouvé."}
+                      </span>
                     </td>
                   </tr>
                 ) : (
                   rows.map((r, i) => {
-                    const me = r.user_id === myId;
-                    // Rien sur la période : ligne légèrement grisée.
-                    const idle = METRICS.every((m) => r[m.key] === 0);
+                    // Rien sur la période (les favoris, pas datés, ne
+                    // comptent pas) : ligne légèrement grisée.
+                    const idle = shownMetrics.every(
+                      (m) => m.key === "favorites" || val(r, m.key) === 0,
+                    );
+                    const resto = r.restaurant;
                     return (
                       <tr
-                        key={r.user_id}
+                        key={r.id}
                         // Apparition en cascade, ligne après ligne (comme les
                         // tuiles des restos) ; l'effacement, lui, est d'un
                         // bloc. Plafonné : au-delà, les lignes sont hors écran.
@@ -342,15 +425,22 @@ const Leaderboard = ({ period, search }: Props) => {
                             "--lb-d": `${Math.min(i, STAGGER_MAX) * STAGGER_MS}ms`,
                           } as React.CSSProperties
                         }
-                        onClick={() =>
-                          navigate(profilePath(r.user_id, r.email))
+                        onClick={() => navigate(r.path)}
+                        // Fiche resto : avis, photos, menus chargés dès
+                        // l'intention de clic.
+                        onMouseEnter={
+                          resto ? () => prefetchRestaurant(resto.id) : undefined
                         }
-                        aria-label={`Voir le profil de ${nameOf(r.email)}`}
+                        aria-label={
+                          resto
+                            ? `Voir la fiche de ${r.name}`
+                            : `Voir le profil de ${r.name}`
+                        }
                         className={cn(
                           "cursor-pointer transition [&>td]:border-t [&>td]:border-border/60",
                           // Ma ligne : teinte portée par `.lb-me`, qui suit le
                           // fondu (sinon on la voyait sauter de place).
-                          me
+                          r.me
                             ? "lb-me"
                             : "[&>td]:bg-card hover:[&>td]:bg-[color-mix(in_srgb,var(--muted)_50%,var(--card))]",
                         )}
@@ -371,48 +461,80 @@ const Leaderboard = ({ period, search }: Props) => {
                             </span>
                             {/* Opacité sur un enfant : celle de `.lb-cell`
                                 porte le fondu, on ne la remplace pas. */}
-                            <span className={cn("block", idle && "opacity-50")}>
-                              <StreakAvatar
-                                email={r.email}
-                                avatarPath={r.avatar_path}
-                                streak={r.streak}
-                                size={28}
-                                compact
-                              />
+                            <span
+                              className={cn("block shrink-0", idle && "opacity-50")}
+                            >
+                              {resto ? (
+                                <img
+                                  loading="lazy"
+                                  data-fade
+                                  {...resizedImgProps(
+                                    resto.image || noImage,
+                                    IMG_THUMB,
+                                  )}
+                                  alt=""
+                                  className={cn(
+                                    "block h-7 w-7 rounded-md object-cover",
+                                    resto.closed && "grayscale",
+                                  )}
+                                />
+                              ) : (
+                                r.user && (
+                                  <StreakAvatar
+                                    email={r.user.email}
+                                    avatarPath={r.user.avatar_path}
+                                    streak={r.user.streak}
+                                    size={28}
+                                    compact
+                                  />
+                                )
+                              )}
                             </span>
                             <span
                               className={cn(
                                 "whitespace-nowrap",
-                                me
+                                // Nom d'un resto : coupé s'il est trop long.
+                                resto &&
+                                  "min-w-0 max-w-[7.5rem] truncate sm:max-w-[18rem]",
+                                r.me
                                   ? "font-semibold text-foreground"
                                   : idle
                                     ? "text-foreground/45"
                                     : "text-foreground/90",
                               )}
                             >
-                              {/* Mobile : le trigramme, plus court. */}
-                              <span className="sm:hidden">{trigramOf(r.email)}</span>
-                              <span className="hidden sm:inline">{nameOf(r.email)}</span>
+                              {resto ? (
+                                r.name
+                              ) : (
+                                <>
+                                  {/* Mobile : le trigramme, plus court. */}
+                                  <span className="sm:hidden">{r.short}</span>
+                                  <span className="hidden sm:inline">{r.name}</span>
+                                </>
+                              )}
                             </span>
                           </span>
                         </td>
-                        {METRICS.map((m) => (
-                          <td
-                            key={m.key}
-                            className={cn(
-                              "px-2 py-1.5 last:pr-4 tabular-nums",
-                              r[m.key] === 0
-                                ? "text-foreground/30"
-                                : m.key === sortKey
-                                  ? "font-semibold text-foreground"
-                                  : "text-foreground/80",
-                            )}
-                          >
-                            <span className="lb-cell">
-                              {r[m.key] === 0 ? "-" : r[m.key]}
-                            </span>
-                          </td>
-                        ))}
+                        {shownMetrics.map((m) => {
+                          const v = val(r, m.key);
+                          return (
+                            <td
+                              key={m.key}
+                              className={cn(
+                                "px-2 py-1.5 last:pr-4 tabular-nums",
+                                v === 0
+                                  ? "text-foreground/30"
+                                  : m.key === sortKey
+                                    ? "font-semibold text-foreground"
+                                    : "text-foreground/80",
+                              )}
+                            >
+                              <span className="lb-cell">
+                                {v === 0 ? "-" : v}
+                              </span>
+                            </td>
+                          );
+                        })}
                       </tr>
                     );
                   })

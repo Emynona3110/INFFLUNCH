@@ -1,12 +1,20 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { FiChevronDown, FiX, FiSearch } from "react-icons/fi";
+import { FiChevronDown, FiX, FiSearch, FiUsers } from "react-icons/fi";
+import { LuStore } from "react-icons/lu";
 import SearchInput from "./SearchInput";
 import RollingNumber from "./RollingNumber";
-import { addMonths, parisMonthKey } from "@/hooks/useLeaderboard";
+import {
+  addMonths,
+  LeaderboardKind,
+  parisMonthKey,
+} from "@/hooks/useLeaderboard";
 import { cn } from "@/lib/utils";
 
 interface Props {
+  /** Classement affiché : collègues ou restaurants. */
+  kind: LeaderboardKind;
+  onKindChange: (kind: LeaderboardKind) => void;
   /** Mois affiché « AAAA-MM » (retenu même quand « Depuis toujours » est actif). */
   month: string;
   onMonthChange: (month: string) => void;
@@ -54,7 +62,91 @@ const shortLabel = (key: string) =>
  * sur le mois ouvre la liste de tous les mois, du mois en cours au premier
  * ayant du contenu, au style de la liste de tri des restos.
  */
+const KINDS: { kind: LeaderboardKind; label: string; icon: React.ReactNode }[] = [
+  { kind: "users", label: "Utilisateurs", icon: <FiUsers className="h-4 w-4" /> },
+  { kind: "restaurants", label: "Restaurants", icon: <LuStore className="h-4 w-4" /> },
+];
+
+/**
+ * Choix du classement, collègues ou restaurants : même toggle à pastille
+ * glissante que la période. Libellés sur desktop, symboles sur mobile.
+ */
+const KindToggle = ({
+  kind,
+  onChange,
+  className,
+}: {
+  kind: LeaderboardKind;
+  onChange: (kind: LeaderboardKind) => void;
+  className?: string;
+}) => {
+  const refs = useRef<Partial<Record<LeaderboardKind, HTMLButtonElement | null>>>({});
+  const [pillBox, setPillBox] = useState<{ x: number; w: number } | null>(null);
+  const [pillReady, setPillReady] = useState(false);
+  useLayoutEffect(() => {
+    const place = () => {
+      const el = refs.current[kind];
+      if (el) setPillBox({ x: el.offsetLeft, w: el.offsetWidth });
+    };
+    place();
+    // Libellés (desktop) ou symboles (mobile) : on replace au resize.
+    const ro = new ResizeObserver(place);
+    Object.values(refs.current).forEach((el) => el && ro.observe(el));
+    return () => ro.disconnect();
+  }, [kind]);
+  useEffect(() => {
+    if (pillBox && !pillReady) {
+      const id = requestAnimationFrame(() => setPillReady(true));
+      return () => cancelAnimationFrame(id);
+    }
+  }, [pillBox, pillReady]);
+
+  return (
+    <div
+      className={cn(
+        "relative items-center gap-0.5 rounded-full bg-muted p-0.5",
+        className,
+      )}
+    >
+      {pillBox && (
+        <span
+          aria-hidden
+          className={cn(
+            "absolute bottom-0.5 left-0 top-0.5 rounded-full bg-card shadow-sm",
+            pillReady &&
+              "transition-[transform,width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+          )}
+          style={{ width: pillBox.w, transform: `translateX(${pillBox.x}px)` }}
+        />
+      )}
+      {KINDS.map((k) => (
+        <button
+          key={k.kind}
+          ref={(el) => {
+            refs.current[k.kind] = el;
+          }}
+          type="button"
+          aria-pressed={kind === k.kind}
+          aria-label={k.label}
+          onClick={() => onChange(k.kind)}
+          className={cn(
+            "relative flex h-8 cursor-pointer items-center whitespace-nowrap rounded-full px-2.5 text-sm font-medium transition-colors sm:px-3",
+            kind === k.kind
+              ? "text-primary"
+              : "text-foreground/55 hover:text-foreground",
+          )}
+        >
+          <span className="relative sm:hidden">{k.icon}</span>
+          <span className="relative hidden sm:inline">{k.label}</span>
+        </button>
+      ))}
+    </div>
+  );
+};
+
 const LeaderboardToolbar = ({
+  kind,
+  onKindChange,
   month,
   onMonthChange,
   all,
@@ -64,6 +156,8 @@ const LeaderboardToolbar = ({
   onSearch,
 }: Props) => {
   const [searchOpen, setSearchOpen] = useState(false);
+  const placeholder =
+    kind === "users" ? "Chercher un collègue..." : "Chercher un restaurant...";
   const [listOpen, setListOpen] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const popRef = useRef<HTMLDivElement>(null);
@@ -160,7 +254,7 @@ const LeaderboardToolbar = ({
             <SearchInput
               value={search}
               autoFocus
-              placeholder="Chercher un collègue..."
+              placeholder={placeholder}
               onSearch={(input) => {
                 onSearch(input);
                 setSearchOpen(false);
@@ -198,14 +292,20 @@ const LeaderboardToolbar = ({
         <SearchInput
           value={search}
           onSearch={onSearch}
-          placeholder="Chercher un collègue..."
+          placeholder={placeholder}
         />
       </div>
 
-      {/* Période. Cachée sur mobile pendant la saisie. */}
+      {/* Collègues / restaurants, puis période. Cachés sur mobile pendant
+          la saisie. */}
+      <KindToggle
+        kind={kind}
+        onChange={onKindChange}
+        className={cn("ml-auto", searchOpen ? "hidden sm:flex" : "flex")}
+      />
       <div
         className={cn(
-          "relative ml-auto items-center gap-0.5 rounded-full bg-muted p-0.5",
+          "relative items-center gap-0.5 rounded-full bg-muted p-0.5",
           searchOpen ? "hidden sm:flex" : "flex",
         )}
       >

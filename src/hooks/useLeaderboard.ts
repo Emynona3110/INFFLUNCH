@@ -63,13 +63,59 @@ export const leaderboardQueryOptions = (period: LeaderboardPeriod) =>
 
 // Changement de période (flèches, liste) : la table précédente reste affichée
 // le temps du chargement, plutôt qu'un spinner à chaque mois parcouru.
-const useLeaderboard = (period: LeaderboardPeriod) =>
+// `active` : classement affiché. L'autre (collègues / restaurants) est chargé
+// aussi, pour basculer sans attente, mais sans rafraîchissement périodique.
+const useLeaderboard = (period: LeaderboardPeriod, active = true) =>
   useQuery({
     ...leaderboardQueryOptions(period),
     placeholderData: (previous) => previous,
     // Filet pour ce que le temps réel ne voit pas : les succès des autres
     // (RLS de user_achievements). Seulement tant que la page est affichée.
-    refetchInterval: 60 * 1000,
+    refetchInterval: active ? 60 * 1000 : false,
+  });
+
+/** Ce que classe la page : les collègues ou les restaurants. */
+export type LeaderboardKind = "users" | "restaurants";
+
+export interface RestaurantLeaderboardRow {
+  id: number;
+  slug: string;
+  name: string;
+  image: string | null;
+  closed: boolean;
+  /** Collègues qui l'ont en favori aujourd'hui, quelle que soit la période
+   *  (les favoris ne sont pas datés). */
+  favorites: number;
+  reviews: number;
+  photos: number;
+  /** Midis déclarés chez lui (jours de semaine). */
+  lunches: number;
+}
+
+/** Classement des restaurants (sql/2026-10-15_classement_restos.sql). Clé
+ *  sous ["leaderboard"] : les invalidations du classement le couvrent. */
+export const restaurantLeaderboardQueryOptions = (period: LeaderboardPeriod) =>
+  queryOptions<RestaurantLeaderboardRow[], Error>({
+    queryKey: ["leaderboard", "restaurants", period],
+    staleTime: 60 * 1000,
+    queryFn: async () => {
+      const { data, error } = await supabaseClient.rpc(
+        "restaurant_leaderboard",
+        { period }
+      );
+      if (error) throw new Error(error.message);
+      return (data ?? []) as RestaurantLeaderboardRow[];
+    },
+  });
+
+export const useRestaurantLeaderboard = (
+  period: LeaderboardPeriod,
+  active = true
+) =>
+  useQuery({
+    ...restaurantLeaderboardQueryOptions(period),
+    placeholderData: (previous) => previous,
+    refetchInterval: active ? 60 * 1000 : false,
   });
 
 /** Premier mois « AAAA-MM » ayant du contenu (borne du sélecteur de mois),
