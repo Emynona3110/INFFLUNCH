@@ -64,7 +64,7 @@ import {
 import Beeeh from "@/sections/Beeeh";
 
 import { restaurantPath } from "@/utils/restaurantPath";
-import RestaurantPageSkeleton from "./RestaurantPageSkeleton";
+import { useScreenLoader } from "@/components/brand/ScreenLoader";
 /** Easter egg « Shooting Stars » : 5 clics (sans limite de temps) sur les
  *  étoiles de la note moyenne. Compteur au niveau module. */
 const SHOOTING_STARS_CLICKS = 5;
@@ -81,6 +81,7 @@ const RestaurantPage = () => {
     slug,
   });
   const restaurant = data[0];
+  const waiting = useScreenLoader(loading);
 
   const topRatedResult = useTopRated();
   const topRated = !topRatedResult.error
@@ -129,7 +130,7 @@ const RestaurantPage = () => {
 
   /* --------------------------- états de chargement --------------------------- */
 
-  if (loading) return <RestaurantPageSkeleton />;
+  if (waiting) return null;
 
   if (error || !restaurant) {
     // Slug inexistant (pas d'erreur, juste aucun résultat) : easter egg 🐑.

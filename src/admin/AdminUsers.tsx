@@ -17,7 +17,7 @@ import { profilePath } from "@/utils/profilePath";
 import { authorTrigram, formatAuthorName } from "@/utils/authorName";
 import { copyTempPassword } from "@/utils/tempPassword";
 import { fnError } from "@/utils/fnError";
-import AdminTableSkeleton from "@/admin/AdminTableSkeleton";
+import { useScreenLoader } from "@/components/brand/ScreenLoader";
 import StateChip from "./StateChip";
 
 /** Rôle : libellé à partir de sm, icône sur mobile (bouclier, comme l'entrée
@@ -42,6 +42,7 @@ const formatDate = (iso: string) =>
 const AdminUsers = () => {
   const queryClient = useQueryClient();
   const { data: users = [], isPending, error } = useUsers();
+  const waiting = useScreenLoader(isPending);
   const navigate = useNavigate();
   const { sessionData } = useSession();
   const myId = sessionData?.user?.id;
@@ -144,9 +145,7 @@ const AdminUsers = () => {
 
   return (
     <div className="tw-scope flex h-full w-full flex-col sm:px-4 sm:pb-4">
-      {isPending ? (
-        <AdminTableSkeleton />
-      ) : error ? (
+      {waiting ? null : error ? (
         <p className="text-destructive">Erreur : {error.message}</p>
       ) : users.length === 0 ? (
         <p className="text-foreground/60">Aucun utilisateur.</p>

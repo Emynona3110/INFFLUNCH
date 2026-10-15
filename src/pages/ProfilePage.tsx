@@ -14,8 +14,7 @@ import {
   RICK_PROFILE,
   RICK_VIDEO,
 } from "@/data/rickAstley";
-import UserProfileSkeleton from "@/components/UserProfileSkeleton";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useScreenLoader } from "@/components/brand/ScreenLoader";
 
 /**
  * Profil d'un collègue (/profil/:handle — le local-part de son email, ou son
@@ -48,19 +47,15 @@ const ProfilePage = () => {
       return data?.id ?? null;
     },
   });
+  const waiting = useScreenLoader(
+    !!handle && !isRick && !isUuid(handle) && resolved.isPending,
+  );
 
   if (!handle) return <Navigate to="/restaurants" replace />;
   const userId = isRick ? RICK_ID : isUuid(handle) ? handle : resolved.data;
 
-  if (!isRick && !isUuid(handle) && resolved.isPending) {
-    return (
-      <div className="tw-scope mx-auto w-full max-w-2xl">
-        <Skeleton className="mb-4 h-5 w-24" />
-        <div className="space-y-3 sm:space-y-6">
-          <UserProfileSkeleton />
-        </div>
-      </div>
-    );
+  if (waiting) {
+    return null;
   }
   if (!userId) return <PageNotFound />;
   const isMe = sessionData?.user?.id === userId;

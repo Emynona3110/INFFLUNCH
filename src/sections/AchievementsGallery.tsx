@@ -24,7 +24,7 @@ import {
   SECTION_TITLE,
   SECTION_BODY,
 } from "@/lib/sectionClasses";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useScreenLoader } from "@/components/brand/ScreenLoader";
 
 /** Mobile : date courte JJ/MM/AA. */
 const formatShortDate = (iso: string) =>
@@ -48,6 +48,7 @@ const formatDate = (iso: string) =>
  */
 const AchievementsGallery = () => {
   const { unlockedIds, unlockedAt, resetOne, loading } = useAchievements();
+  const waiting = useScreenLoader(loading);
   const { percentById, ready: statsReady } = useAchievementStats();
   // Conditions des secrets débloqués (en base, pas dans le bundle).
   const secretConditions = useSecretConditions();
@@ -129,28 +130,7 @@ const AchievementsGallery = () => {
         </div>
       </div>
       <div className={SECTION_BODY}>
-        {loading ? (
-          // Succès en chargement : mêmes lignes (vignette 40/56 px, titre,
-          // description) que les vraies.
-          <ul
-            className="m-0 list-none divide-y divide-border p-0 sm:divide-y-0 sm:space-y-2"
-            role="status"
-            aria-label="Chargement des succès"
-          >
-            {Array.from({ length: 5 }, (_, i) => (
-              <li
-                key={i}
-                className="flex min-h-[60px] items-center gap-3 px-3 py-2.5 sm:min-h-0 sm:rounded-xl sm:border sm:border-border sm:bg-background sm:p-3"
-              >
-                <Skeleton className="h-10 w-10 shrink-0 rounded-lg sm:h-14 sm:w-14" />
-                <div className="min-w-0 flex-1 space-y-2">
-                  <Skeleton className="h-4 w-32 sm:w-44" />
-                  <Skeleton className="h-3.5 w-3/4" />
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
+        {waiting ? null : (
           /* Mobile : lignes empilées séparées d'un filet, directement dans le cadre
              de la section ; desktop : tuiles arrondies espacées. */
           <ul className="m-0 list-none divide-y divide-border p-0 sm:divide-y-0 sm:space-y-2">

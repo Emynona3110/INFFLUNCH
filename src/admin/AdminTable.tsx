@@ -10,7 +10,7 @@ import RowActionsDialog from "./RowActionsDialog";
 import { sortRows, useTableSort } from "./tableSort";
 import { SortHeader } from "./SortHeader";
 import useRealtimeTable from "../hooks/useRealtimeTable";
-import AdminTableSkeleton from "@/admin/AdminTableSkeleton";
+import { useScreenLoader } from "@/components/brand/ScreenLoader";
 
 interface AdminTableProps {
   tableName: string;
@@ -81,6 +81,7 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
     dir: "asc",
   });
 
+  const waiting = useScreenLoader(loading);
   const error = queryError ? queryError.message : "";
   const columnNames = data.length > 0 ? columns ?? Object.keys(data[0]) : [];
   const visibleColumns = columnNames.filter((c) => c !== "id");
@@ -95,13 +96,7 @@ const AdminTable = ({ tableName, columns, onEdit, onDelete }: AdminTableProps) =
     return Array.isArray(value) ? value.join(", ") : value;
   });
 
-  if (loading) {
-    return (
-      <div className="tw-scope">
-        <AdminTableSkeleton cols={columns?.length ?? 4} />
-      </div>
-    );
-  }
+  if (waiting) return null;
 
   if (error) {
     return <p className="tw-scope p-4 text-center text-destructive">Erreur : {error}</p>;

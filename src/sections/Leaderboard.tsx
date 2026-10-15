@@ -17,7 +17,7 @@ import useUserNames from "@/hooks/useUserNames";
 import { profilePath } from "@/utils/profilePath";
 import { isRickSearch, RICK_ROW } from "@/data/rickAstley";
 import { cn } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useScreenLoader } from "@/components/brand/ScreenLoader";
 
 type Metric = Exclude<
   keyof LeaderboardRow,
@@ -64,41 +64,6 @@ const STAGGER_MS = 30;
 const STAGGER_MAX = 15;
 
 
-/** Classement en chargement : même cadre, même en-tête, lignes de même
- *  hauteur (avatar 28 px + py-1.5) que le tableau réel. */
-const LeaderboardSkeleton = () => (
-  <div
-    className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-card border border-border bg-card"
-    role="status"
-    aria-label="Chargement du classement"
-  >
-    <div className="flex h-10 shrink-0 items-center gap-2 bg-muted px-4 shadow-[inset_0_-1px_0_0_var(--border)]">
-      <Skeleton className="ml-8 h-3 w-20 sm:w-28" />
-      <div className="ml-auto flex w-[68%] justify-around">
-        {METRICS.map((m) => (
-          <Skeleton key={m.key} className="h-3 w-6 sm:w-12" />
-        ))}
-      </div>
-    </div>
-    {Array.from({ length: 8 }, (_, i) => (
-      <div
-        key={i}
-        className="flex h-[41px] shrink-0 items-center gap-2 border-t border-border/60 px-4 first:border-t-0"
-      >
-        <div className="-ml-4 -mr-2 flex w-12 shrink-0 justify-center">
-          <Skeleton className="h-3.5 w-3.5" />
-        </div>
-        <Skeleton className="h-7 w-7 shrink-0 rounded-full" />
-        <Skeleton className="h-3.5 w-10 sm:w-28" />
-        <div className="ml-auto flex w-[68%] justify-around">
-          {METRICS.map((m) => (
-            <Skeleton key={m.key} className="h-3.5 w-4 sm:w-6" />
-          ))}
-        </div>
-      </div>
-    ))}
-  </div>
-);
 
 const Leaderboard = ({ period, search }: Props) => {
   const { nameOf, trigramOf } = useUserNames();
@@ -111,6 +76,7 @@ const Leaderboard = ({ period, search }: Props) => {
     isPlaceholderData,
     error,
   } = useLeaderboard(period);
+  const waiting = useScreenLoader(isPending);
   // Temps réel : tout changement d'une table comptée relance le classement.
   // Les événements arrivent souvent en rafale (un midi déclaré débloque un
   // succès…) : un seul refetch par salve. Les succès des AUTRES ne sont pas
@@ -277,9 +243,7 @@ const Leaderboard = ({ period, search }: Props) => {
 
   return (
     <div className="tw-scope flex h-full w-full flex-col">
-      {isPending ? (
-        <LeaderboardSkeleton />
-      ) : error ? (
+      {waiting ? null : error ? (
         <p className="text-destructive">Erreur : {error.message}</p>
       ) : (
         // Cadre à pleine hauteur, quel que soit le nombre de lignes : il ne

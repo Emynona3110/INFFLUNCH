@@ -11,7 +11,7 @@ import {
 } from "@/lib/sectionClasses";
 
 import { restaurantPath } from "@/utils/restaurantPath";
-import TileListSkeleton from "@/components/TileListSkeleton";
+import { useScreenLoader } from "@/components/brand/ScreenLoader";
 /** Mobile : date courte JJ/MM/AA. */
 const formatShortDate = (iso: string) =>
   new Date(iso).toLocaleDateString("fr-FR", {
@@ -49,6 +49,7 @@ const Stars = ({ n }: { n: number }) => (
 const MyReviews = () => {
   const navigate = useNavigate();
   const { data: reviews = [], isPending: reviewsLoading } = useMyReviews();
+  const waiting = useScreenLoader(reviewsLoading);
   return (
     <section
       className={cn(
@@ -67,9 +68,7 @@ const MyReviews = () => {
         </div>
       </div>
       <div className={SECTION_BODY}>
-        {reviewsLoading ? (
-          <TileListSkeleton />
-        ) : reviews.length === 0 ? (
+        {waiting ? null : reviews.length === 0 ? (
           <p className="py-6 text-center text-sm text-foreground/55">
             Tu n'as encore laissé aucun avis.
           </p>

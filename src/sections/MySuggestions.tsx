@@ -16,7 +16,7 @@ import {
   SECTION_HEAD,
   SECTION_TITLE,
 } from "@/lib/sectionClasses";
-import TileListSkeleton from "@/components/TileListSkeleton";
+import { useScreenLoader } from "@/components/brand/ScreenLoader";
 
 /** Mobile : date courte JJ/MM/AA. */
 const formatShortDate = (iso: string) =>
@@ -44,6 +44,7 @@ const frozen = (s: RestaurantSuggestion) => s.status !== "nouveau";
  */
 const MySuggestions = () => {
   const { data: fetched = [], isPending, cancel } = useRestaurantSuggestions("mine");
+  const waiting = useScreenLoader(isPending);
   // En attente d'abord, puis les tranchées, chaque groupe du plus récent au
   // plus ancien.
   const items = [...fetched.filter((s) => !frozen(s)), ...fetched.filter(frozen)];
@@ -116,9 +117,7 @@ const MySuggestions = () => {
       </div>
 
       <div className={SECTION_BODY}>
-        {isPending ? (
-          <TileListSkeleton />
-        ) : items.length === 0 ? (
+        {waiting ? null : items.length === 0 ? (
           <p className="px-4 py-6 text-center text-sm text-foreground/55">
             Un resto manque à l'appel ? Propose-le en cliquant sur{" "}
             <ChefHatPlus className="inline h-4 w-4 align-text-bottom text-primary" />

@@ -42,7 +42,7 @@ import {
 } from "@/lib/sectionClasses";
 
 import { restaurantPath } from "@/utils/restaurantPath";
-import UserProfileSkeleton from "@/components/UserProfileSkeleton";
+import { useScreenLoader } from "@/components/brand/ScreenLoader";
 interface Props {
   userId: string;
   /** Profil de l'utilisateur connecté : tous ses succès lui sont révélés. */
@@ -99,6 +99,7 @@ const UserProfileView = ({ userId, isMe = false, fake }: Props) => {
   const secretConditions = useSecretConditions();
 
   const data = fake?.profile ?? profile.data;
+  const waiting = useScreenLoader(!fake && profile.isPending);
   const unlocked = (data?.achievements ?? [])
     .map((a) => ({ ...a, def: ACHIEVEMENTS_BY_ID[canonicalId(a.achievement_id)] }))
     // Un succès retiré du catalogue ne doit pas faire planter la page.
@@ -134,8 +135,8 @@ const UserProfileView = ({ userId, isMe = false, fake }: Props) => {
     }
   };
 
-  if (!fake && profile.isPending) {
-    return <UserProfileSkeleton />;
+  if (waiting) {
+    return null;
   }
 
   if ((!fake && profile.error) || !data) {

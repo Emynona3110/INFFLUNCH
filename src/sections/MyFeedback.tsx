@@ -19,7 +19,7 @@ import {
   SECTION_TITLE,
   SECTION_BODY,
 } from "@/lib/sectionClasses";
-import TileListSkeleton from "@/components/TileListSkeleton";
+import { useScreenLoader } from "@/components/brand/ScreenLoader";
 
 /** Demande classée sans retour possible, ou supprimée par l'admin : son
  *  auteur ne peut plus la corriger ni écrire dans son fil. */
@@ -55,6 +55,7 @@ const MyFeedback = () => {
     reply,
     editMessage,
   } = useFeedback("mine");
+  const waiting = useScreenLoader(isPending);
   // Ce qui attend encore quelque chose d'abord ; les demandes closes
   // (terminées, refusées) descendent en bas, chaque groupe gardant l'ordre
   // du plus récent au plus ancien.
@@ -147,9 +148,7 @@ const MyFeedback = () => {
       </div>
 
       <div className={SECTION_BODY}>
-        {isPending ? (
-          <TileListSkeleton />
-        ) : items.length === 0 ? (
+        {waiting ? null : items.length === 0 ? (
           <p className="px-4 py-6 text-center text-sm text-foreground/55">
             Un souci ? Une idée ? Exprime-toi en cliquant sur{" "}
             <FiHelpCircle className="inline h-4 w-4 align-text-bottom text-primary" />

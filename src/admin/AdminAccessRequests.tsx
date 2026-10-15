@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import AccessRequestDialog from "./AccessRequestDialog";
 import { sortRows, useTableSort } from "./tableSort";
 import { SortHeader } from "./SortHeader";
-import AdminTableSkeleton from "@/admin/AdminTableSkeleton";
+import { useScreenLoader } from "@/components/brand/ScreenLoader";
 import StateChip from "./StateChip";
 
 /** Nature d'une demande d'accès : une pastille, comme bug / idée côté Demandes. */
@@ -41,6 +41,7 @@ const formatDate = (iso: string) =>
 const AdminAccessRequests = () => {
   const { nameOf } = useUserNames();
   const { data: requests = [], isPending, error } = useAccessRequests();
+  const waiting = useScreenLoader(isPending);
   const [actionsFor, setActionsFor] = useState<AccessRequest | null>(null);
 
   // Tri par colonne ; par défaut, la plus récente d'abord.
@@ -61,9 +62,7 @@ const AdminAccessRequests = () => {
 
   return (
     <div className="tw-scope flex h-full w-full flex-col sm:px-4 sm:pb-4">
-      {isPending ? (
-        <AdminTableSkeleton />
-      ) : error ? (
+      {waiting ? null : error ? (
         <p className="text-destructive">Erreur : {error.message}</p>
       ) : rows.length === 0 ? (
         <p className="m-0 py-10 text-center text-foreground/60">Aucune demande d'accès.</p>

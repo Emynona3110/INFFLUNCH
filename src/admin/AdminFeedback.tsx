@@ -22,7 +22,7 @@ import useRestaurantSuggestions, {
   suggestionAwaitingAdmin,
 } from "@/hooks/useRestaurantSuggestions";
 import SuggestionAdminDialog from "./SuggestionAdminDialog";
-import AdminTableSkeleton from "@/admin/AdminTableSkeleton";
+import { useScreenLoader } from "@/components/brand/ScreenLoader";
 import StateChip from "./StateChip";
 
 /** Propositions de restos, rangées avec les demandes : leur propre nature
@@ -78,6 +78,7 @@ const AdminFeedback = () => {
     editMessage,
     remove,
   } = useFeedback("admin");
+  const waiting = useScreenLoader(isPending);
   const { sessionData } = useSession();
   const userId = sessionData?.user?.id;
   const {
@@ -233,9 +234,7 @@ const AdminFeedback = () => {
 
   return (
     <div className="tw-scope flex h-full w-full flex-col sm:px-4 sm:pb-4">
-      {isPending ? (
-        <AdminTableSkeleton />
-      ) : error ? (
+      {waiting ? null : error ? (
         <p className="text-destructive">Erreur : {error.message}</p>
       ) : allRows.length === 0 ? (
         <p className="text-foreground/60">Aucune demande pour le moment.</p>

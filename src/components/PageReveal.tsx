@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Query, useIsFetching, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import ScreenLoader from "@/components/brand/ScreenLoader";
+import { useScreenLoader } from "@/components/brand/ScreenLoader";
 import { markBootDone } from "@/components/brand/bootState";
 
 /** Au-delà, on montre la page quand même (réseau lent) : mieux vaut un
@@ -14,8 +14,10 @@ const SETTLE_MS = 60;
 
 /** Requête en premier chargement (pas encore de données en cache). Une requête
  *  qui échoue (ou a déjà échoué) ne bloque pas : ses tentatives successives
- *  tiendraient la page masquée jusqu'au plafond à chaque ouverture. */
+ *  tiendraient la page masquée jusqu'au plafond à chaque ouverture. Les
+ *  requêtes de fond (badges de la navbar…, `meta.background`) non plus. */
 const isFirstLoad = (q: Query) =>
+  !q.meta?.background &&
   q.state.data === undefined &&
   q.state.fetchFailureCount === 0 &&
   q.state.errorUpdateCount === 0;
@@ -73,20 +75,23 @@ const PageReveal = ({
     if (ready) markBootDone();
   }, [ready]);
 
+  const waiting = useScreenLoader(!ready, { yieldToOthers: true });
+
   // Tant que la page est masquée, le monogramme de chargement (unique, au
   // centre de l'écran, cf. screenLoaderControl.ts) reste affiché ; la page révélée
-  // (ses squelettes d'abord) le remplace pendant qu'il s'efface.
+  // apparaît une fois qu'il a fini son cycle et s'est effacé — sauf si ses
+  // sections encore en chargement le gardent affiché : elle apparaît alors
+  // tout de suite (cadre, outils), le monogramme au centre.
   return (
     <div className={className}>
       <motion.div
         initial={{ opacity: 0, y: 10 }}
-        animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+        animate={!waiting ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
         transition={{ duration: 0.35, ease: "easeOut" }}
         className={className}
       >
         {children}
       </motion.div>
-      {!ready && <ScreenLoader />}
     </div>
   );
 };

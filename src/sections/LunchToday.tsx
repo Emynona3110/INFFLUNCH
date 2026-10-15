@@ -32,7 +32,7 @@ import { SECTION_BODY } from "@/lib/sectionClasses";
 import { HOVER_ZOOM_IMG } from "@/lib/imageClasses";
 
 import { restaurantPath } from "@/utils/restaurantPath";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useScreenLoader } from "@/components/brand/ScreenLoader";
 /** "Jeudi 28 août" (première lettre en majuscule). */
 const todayLabel = () => {
   const s = new Date().toLocaleDateString("fr-FR", {
@@ -192,6 +192,7 @@ const LunchToday = () => {
     setLunchOff,
     clearLunch,
   } = useLunchToday();
+  const waiting = useScreenLoader(loading);
 
   const restById = useMemo(
     () => new Map(restaurants.map((r) => [r.id, r])),
@@ -592,29 +593,7 @@ const LunchToday = () => {
       </div>
 
       {/* Tablées du jour. */}
-      {loading ? (
-        // Tablées en chargement : mêmes lignes (vignette, nom, participants,
-        // bouton Rejoindre) que les vraies.
-        <div
-          className={cn(SECTION_BODY, "divide-y divide-border sm:flex sm:flex-col sm:gap-3 sm:divide-y-0")}
-          role="status"
-          aria-label="Chargement des tablées"
-        >
-          {[0, 1, 2].map((i) => (
-            <div
-              key={i}
-              className="flex items-center gap-3 p-2.5 sm:gap-4 sm:rounded-card sm:border sm:border-border sm:bg-card sm:p-3"
-            >
-              <Skeleton className="h-12 w-16 shrink-0 rounded-lg sm:h-16 sm:w-24" />
-              <div className="min-w-0 flex-1 space-y-2">
-                <Skeleton className="h-5 w-40 sm:h-6 sm:w-56" />
-                <Skeleton className="h-3.5 w-28 sm:h-6 sm:w-40" />
-              </div>
-              <Skeleton className="h-9 w-9 shrink-0 rounded-full sm:h-10 sm:w-28 sm:rounded-lg" />
-            </div>
-          ))}
-        </div>
-      ) : tables.length === 0 ? (
+      {waiting ? null : tables.length === 0 ? (
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}

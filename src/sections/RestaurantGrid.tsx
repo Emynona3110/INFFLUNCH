@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { SECTION_BODY } from "@/lib/sectionClasses";
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
 import { RestaurantFilters, ViewMode } from "../pages/UserPage";
@@ -15,7 +15,7 @@ import { lazyPage, useOpenedOnce } from "@/lib/lazyPage";
 import ChefHatPlus from "@/components/icons/ChefHatPlus";
 import { FiArrowUpRight, FiChevronDown } from "react-icons/fi";
 import PageLoader from "@/components/brand/PageLoader";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useScreenLoader } from "@/components/brand/ScreenLoader";
 
 // Attente des vues Carte et Roue (données ou code pas encore là).
 const mapLoader = (
@@ -60,44 +60,8 @@ let rememberedShown = { key: "", count: PAGE_SIZE };
 /** Mêmes dimensions que RestaurantCardTW, mobile (image 128 px, corps
  *  serré) comme desktop (image 192 px) : la grille ne saute pas à l'arrivée
  *  des données. */
-const CardSkeleton = () => (
-  <div className="flex h-full flex-col overflow-hidden rounded-card border border-border bg-card shadow-[0_10px_30px_-12px_rgba(2,8,40,0.22)]">
-    <Skeleton className="h-32 w-full rounded-none sm:h-48" />
-    <div className="flex grow flex-col gap-1 px-3 py-2 sm:gap-2 sm:px-5 sm:py-4">
-      <div className="flex h-7 items-center sm:h-[2.175rem]">
-        <Skeleton className="h-5 w-2/3 sm:h-6" />
-      </div>
-      <div className="flex h-[22px] items-center gap-2 sm:h-6">
-        <Skeleton className="h-3.5 w-28 sm:h-4" />
-        <Skeleton className="ml-auto h-5 w-14 rounded-full sm:h-6" />
-      </div>
-      <div className="flex h-7 items-center gap-1.5 sm:h-8">
-        <Skeleton className="h-5 w-16 rounded-full" />
-        <Skeleton className="h-5 w-14 rounded-full" />
-        <Skeleton className="ml-auto h-6 w-6 rounded-full sm:h-7 sm:w-7" />
-      </div>
-    </div>
-  </div>
-);
 
 /** Mêmes dimensions que RestaurantRow : sur mobile, ni vignette ni tags. */
-const RowSkeleton = () => (
-  <div className="flex items-stretch gap-2 p-2 sm:items-center sm:gap-4 sm:rounded-card sm:border sm:border-border sm:bg-card sm:p-3">
-    <Skeleton className="hidden h-20 w-28 shrink-0 rounded-lg sm:block" />
-    <div className="flex min-w-0 flex-1 flex-col justify-between">
-      <div className="flex h-6 items-center sm:h-7">
-        <Skeleton className="h-4 w-1/3 sm:h-5" />
-      </div>
-      <div className="mt-0.5 flex min-h-6 items-center">
-        <Skeleton className="h-3.5 w-1/4" />
-      </div>
-      <div className="mt-1.5 hidden gap-1.5 sm:flex">
-        <Skeleton className="h-5 w-14 rounded-full" />
-        <Skeleton className="h-5 w-12 rounded-full" />
-      </div>
-    </div>
-  </div>
-);
 
 const RestaurantGrid = ({
   restaurantFilters,
@@ -132,6 +96,10 @@ const RestaurantGrid = ({
     : data;
 
   const isLoading = loading || favoritesLoading;
+  // Carte et roue ont leur propre attente (dans leur cadre).
+  const waiting = useScreenLoader(
+    isLoading && viewMode !== "map" && viewMode !== "roulette",
+  );
 
   // Change quand un filtre change (favoris/tags/badges/note/tri) mais PAS à la
   // frappe de recherche → remonte la liste pour ré-animer tous les éléments.
@@ -144,31 +112,16 @@ const RestaurantGrid = ({
     viewMode,
   });
 
-  // Squelettes affichés pour cette liste : ils ont déjà joué l'arrivée (fondu
-  // en montant, avec la page). Les tuiles qui les remplacent prennent leur
-  // place telles quelles, sans fondu : un fondu depuis le vide faisait
-  // clignoter la grille (squelette → rien → tuile) ; seules les photos
-  // arrivent en fondu, sur le même gris que le squelette. Les tranches
-  // suivantes (« voir plus ») et les listes servies du cache gardent leur
-  // cascade.
-  const skeletonFor = useRef<string | null>(null);
-  // Oublié dès qu'on change de liste : revenir plus tard sur celle-ci (ex.
-  // décocher les favoris) doit rejouer la cascade, pas l'apparition sur place.
-  if (isLoading) skeletonFor.current = listKey;
-  else if (skeletonFor.current !== listKey) skeletonFor.current = null;
-  const replacesSkeleton = (i: number) =>
-    skeletonFor.current === listKey && i < PAGE_SIZE;
-  const enter = (i: number, y: number, step: number, max: number) =>
-    replacesSkeleton(i)
-      ? { initial: false as const, animate: { opacity: 1, y: 0 } }
-      : {
-          initial: { opacity: 0, y },
-          animate: { opacity: 1, y: 0 },
-          transition: {
-            duration: 0.35,
-            delay: Math.min((i % PAGE_SIZE) * step, max),
-          },
-        };
+  // Arrivée en cascade, comptée dans la tranche : la suivante (« voir plus »)
+  // démarre aussitôt.
+  const enter = (i: number, y: number, step: number, max: number) => ({
+    initial: { opacity: 0, y },
+    animate: { opacity: 1, y: 0 },
+    transition: {
+      duration: 0.35,
+      delay: Math.min((i % PAGE_SIZE) * step, max),
+    },
+  });
 
   // Nombre de résultats affichés : remis à une tranche dès que les filtres ou
   // la recherche changent.
@@ -290,10 +243,8 @@ const RestaurantGrid = ({
               "divide-y divide-border sm:flex sm:flex-col sm:gap-3 sm:divide-y-0",
             )}
           >
-            {isLoading
-              ? Array.from({ length: 6 }, (_, i) => (
-                  <RowSkeleton key={`s-${i}`} />
-                ))
+            {waiting
+              ? null
               : visibleData.map((restaurant, i) => (
                   <motion.div
                     key={restaurant.id}
@@ -319,12 +270,8 @@ const RestaurantGrid = ({
           key={listKey}
           className="grid grid-flow-dense grid-cols-1 gap-2.5 sm:gap-6 md:grid-cols-2 xl:grid-cols-3"
         >
-          {isLoading
-            ? Array.from({ length: 6 }, (_, i) => (
-                <div key={`s-${i}`}>
-                  <CardSkeleton />
-                </div>
-              ))
+          {waiting
+            ? null
             : visibleData.map((restaurant, i) => (
                 <motion.div
                   key={restaurant.id}
