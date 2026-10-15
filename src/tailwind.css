@@ -145,6 +145,47 @@ body {
   overscroll-behavior: none;
 }
 
+/* Barre de défilement de la page (Layout) :
+   - page en chargement (`os-page-busy`) : masquée, puis arrive en fondu avec
+     le contenu et le footer ;
+   - hauteur du contenu changée (`os-page-resizing`, posé par Layout le temps
+     du glissement) : taille et position glissent (variables @property
+     d'OverlayScrollbars, animables) — pas en défilement normal, où elle doit
+     suivre sans retard ;
+   - contenu qui devient (ou cesse d'être) assez long pour défiler : le curseur
+     apparaît (disparaît) en fondu, pas d'un coup. */
+.os-page > .os-scrollbar {
+  /* Même rendu que l'ancienne barre native de la page : couleur primaire,
+     8 px dont 2 px de marge de chaque côté. */
+  --os-size: 8px;
+  --os-padding-perpendicular: 2px;
+  --os-handle-bg: var(--primary);
+  --os-handle-bg-hover: var(--primary);
+  --os-handle-bg-active: var(--primary);
+  transition:
+    opacity 0.3s ease-out,
+    visibility 0.3s ease-out;
+}
+.os-page.os-page-busy > .os-scrollbar {
+  opacity: 0;
+  visibility: hidden;
+}
+.os-page.os-page-resizing > .os-scrollbar {
+  transition:
+    opacity 0.3s ease-out,
+    visibility 0.3s ease-out,
+    --os-viewport-percent 0.3s ease-out,
+    --os-scroll-percent 0.3s ease-out;
+}
+.os-page > .os-scrollbar .os-scrollbar-handle {
+  transition:
+    opacity 0.3s ease-out,
+    background-color 0.15s;
+}
+.os-page > .os-scrollbar-unusable .os-scrollbar-handle {
+  transition: opacity 0.3s ease-out !important;
+}
+
 /* Mode "grille figée" : la barre verticale démarre sous l'entête, l'horizontale
    s'arrête avant la colonne Actions figée (valeurs via --grid-top / --grid-right). */
 .os-grid .os-scrollbar-vertical {

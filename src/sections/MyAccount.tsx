@@ -21,6 +21,37 @@ import useFeedbackSeen from "@/hooks/useFeedbackSeen";
 import MySuggestions from "./MySuggestions";
 import useSuggestionsSeen from "@/hooks/useSuggestionsSeen";
 import { cn } from "@/lib/utils";
+import usePageScrollbar from "@/hooks/usePageScrollbar";
+
+/** Panneau du pager mobile : son propre défilement, avec la même barre
+ *  flottante que la page principale (pas de barre native qui rognerait la
+ *  marge de droite). */
+const ScrollPanel = ({ children }: { children: React.ReactNode }) => {
+  const { hostRef, viewportRef, className } = usePageScrollbar<HTMLDivElement>();
+  return (
+    <div
+      ref={hostRef}
+      data-overlayscrollbars-initialize=""
+      className={cn(className, "flex h-full w-full shrink-0 flex-col")}
+    >
+      <div
+        ref={viewportRef}
+        data-overlayscrollbars-initialize=""
+        // `overscroll-y-none`, pas `-contain` : `contain` arrête bien
+        // la propagation à la page, mais laisse le panneau faire SON
+        // propre rebond élastique — on tirait le contenu au-dessus du
+        // bandeau d'onglets ou sous le footer. `none` supprime les deux.
+        className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-none"
+      >
+        {/* Marges sur un bloc intérieur, comme dans Layout : OverlayScrollbars
+            remet à zéro le padding de l'élément qui défile. */}
+        <div className="flex flex-1 shrink-0 flex-col px-2.5 pt-3">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+};
 const subTabs = [
   // Ce que les autres voient de moi, en premier.
   { key: "profil", label: "Profil", adminOnly: false },
@@ -258,21 +289,14 @@ const MyAccount = () => {
             }}
           >
             {visibleTabs.map((t) => (
-              <div
-                key={t.key}
-                // `overscroll-y-none`, pas `-contain` : `contain` arrête bien
-                // la propagation à la page, mais laisse le panneau faire SON
-                // propre rebond élastique — on tirait le contenu au-dessus du
-                // bandeau d'onglets ou sous le footer. `none` supprime les deux.
-                className="flex h-full w-full shrink-0 flex-col overflow-y-auto overscroll-y-none px-2.5 pt-3"
-              >
+              <ScrollPanel key={t.key}>
                 {/* Contenu au moins plein écran : le footer se cale en bas
                     quand l'onglet est court, sous le contenu sinon. */}
                 <div className="flex-1 shrink-0 space-y-3">
                   {visited.has(t.key) && renderTab(t.key)}
                 </div>
                 <Footer />
-              </div>
+              </ScrollPanel>
             ))}
           </div>
         </div>

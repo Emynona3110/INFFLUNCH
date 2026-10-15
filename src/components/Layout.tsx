@@ -2,6 +2,7 @@ import Footer from "./Footer";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { useLocation, useNavigationType } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
+import usePageScrollbar from "@/hooks/usePageScrollbar";
 import PullToRefresh from "@/components/PullToRefresh";
 import { cn } from "@/lib/utils";
 
@@ -56,7 +57,12 @@ const Layout = ({
   toolbarPortal = false,
   footer = true,
 }: LayoutProps) => {
-  const mainRef = useRef<HTMLElement>(null);
+  // Barre de défilement flottante (cf. usePageScrollbar) : <main> défile.
+  const {
+    hostRef,
+    viewportRef: mainRef,
+    className: scrollbarCls,
+  } = usePageScrollbar<HTMLElement>(!fillContent);
   const location = useLocation();
   const navigationType = useNavigationType();
 
@@ -70,7 +76,7 @@ const Layout = ({
     const save = () => scrollPositions.set(keyRef.current, main.scrollTop);
     main.addEventListener("scroll", save, { passive: true });
     return () => main.removeEventListener("scroll", save);
-  }, [fillContent]);
+  }, [fillContent, mainRef]);
 
   // Nouvelle page (lien, replace) → en haut. Retour/avance (flèche « Retour »
   // = navigate(-1), ou bouton du navigateur : POP) → position mémorisée.
@@ -105,7 +111,7 @@ const Layout = ({
       stop();
       events.forEach((e) => main.removeEventListener(e, stop));
     };
-  }, [location.key, navigationType]);
+  }, [location.key, navigationType, mainRef]);
   const content = pullToRefresh ? (
     <PullToRefresh scrollRef={mainRef}>{children}</PullToRefresh>
   ) : (
@@ -172,31 +178,43 @@ const Layout = ({
               {children}
             </div>
           </main>
-          {footer && <Footer compact />}
+          {/* Footer en retrait des bords (filet inclus), comme dans les
+              panneaux de Mon compte mobile. */}
+          {footer && (
+            <div className="shrink-0 px-2.5 sm:px-4">
+              <Footer compact />
+            </div>
+          )}
         </>
       ) : (
         // Colonne flex scrollable : le contenu (`flex-1 shrink-0`) occupe au
         // moins toute la hauteur visible, ce qui cale le footer en bas de
         // l'écran quand la page est courte et sous le contenu quand elle est
         // longue — sans dépendre d'un `min-h-full` en pourcentage.
-        // `scrollbar-gutter: stable` : la place de la barre de défilement est
-        // toujours réservée, sinon passer d'un contenu long à un court (ex.
-        // sous-onglets de Mon compte) l'ôtait, élargissait la page et faisait
-        // sauter tout ce qui est centré.
-        <main
-          ref={mainRef}
-          className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain [scrollbar-gutter:stable]"
+        // Hôte de la barre flottante (cf. OverlayScrollbars plus haut).
+        <div
+          ref={hostRef}
+          data-overlayscrollbars-initialize=""
+          className={cn(scrollbarCls, "flex min-h-0 flex-1 flex-col")}
         >
-          <div
-            className={cn(
-              "mx-auto flex w-full max-w-[1200px] flex-1 shrink-0 flex-col px-2.5 py-3 sm:px-4 sm:py-6",
-              centerContent && "items-center justify-center",
-            )}
+          <main
+            ref={mainRef}
+            data-overlayscrollbars-initialize=""
+            className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-y-contain"
           >
-            {content}
-          </div>
-          <Footer />
-        </main>
+            <div
+              className={cn(
+                "mx-auto flex w-full max-w-[1200px] flex-1 shrink-0 flex-col px-2.5 py-3 sm:px-4 sm:py-6",
+                centerContent && "items-center justify-center",
+              )}
+            >
+              {content}
+            </div>
+            <div className="shrink-0 px-2.5 sm:px-4">
+              <Footer />
+            </div>
+          </main>
+        </div>
       )}
     </div>
   );
