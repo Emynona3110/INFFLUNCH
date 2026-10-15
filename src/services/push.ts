@@ -47,6 +47,28 @@ export const pushSupported = () =>
 /** iOS dans un onglet : rien ne marchera tant que l'app n'est pas installée. */
 export const pushBlockedOnIOS = () => isIOS() && !isStandalone();
 
+/**
+ * Marche à suivre pour débloquer des notifications refusées, selon
+ * l'environnement (le chemin des réglages diffère d'un navigateur à l'autre).
+ */
+const deniedHelp = () => {
+  const intro = "Notifications bloquées pour INFFLUNCH sur cet appareil.";
+  const ua = navigator.userAgent;
+  if (isIOS()) {
+    return `${intro} Réglages de l'iPhone → Notifications → INFFLUNCH → Autoriser les notifications.`;
+  }
+  if (isStandalone()) {
+    return `${intro} Menu ⋯ de l'app → Infos sur l'application (ou Paramètres du site) → Notifications → Autoriser, puis réessayez.`;
+  }
+  if (/Firefox\//.test(ua)) {
+    return `${intro} Cliquez sur le cadenas à gauche de l'adresse → retirez le blocage des notifications, puis réessayez.`;
+  }
+  if (/Safari\//.test(ua) && !/Chrome\/|Chromium\//.test(ua)) {
+    return `${intro} Safari → Réglages → Sites web → Notifications → INFFLUNCH → Autoriser, puis réessayez.`;
+  }
+  return `${intro} Cliquez sur le cadenas à gauche de l'adresse → Notifications → Autoriser, puis rechargez la page et réessayez.`;
+};
+
 /** Enregistre le service worker (appelé une fois au démarrage de l'app). */
 export const registerServiceWorker = () => {
   if (!("serviceWorker" in navigator)) return;
@@ -75,11 +97,17 @@ export const enablePush = async (): Promise<{ error?: string }> => {
     };
   }
 
+  // Une fois refusée, le navigateur ne réaffiche plus jamais la demande :
+  // inutile de la relancer, seul l'utilisateur peut débloquer dans ses réglages.
+  if (Notification.permission === "denied") return { error: deniedHelp() };
+
   const permission = await Notification.requestPermission();
+  if (permission === "denied") return { error: deniedHelp() };
   if (permission !== "granted") {
+    // Fenêtre fermée sans choisir : elle reviendra au prochain clic.
     return {
       error:
-        "Notifications refusées. Autorisez-les dans les réglages du navigateur pour ce site.",
+        "Autorisation non accordée. Cliquez à nouveau et choisissez « Autoriser ».",
     };
   }
 

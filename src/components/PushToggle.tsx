@@ -29,7 +29,8 @@ const PushToggle = () => {
         title: "Notifications",
         description: error,
         status: "error",
-        duration: 8000,
+        // Peut contenir une marche à suivre (déblocage) : le temps de la lire.
+        duration: 12000,
         isClosable: true,
       });
       return;
