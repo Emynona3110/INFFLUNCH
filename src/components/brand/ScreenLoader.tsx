@@ -57,3 +57,15 @@ export function useScreenLoader(
 
   return loading || (waited && leaving);
 }
+
+/**
+ * Vrai tant que le monogramme plein écran est affiché (ou en train de
+ * s'effacer) : pour un contenu qui n'attend pas de données mais ne doit pas
+ * apparaître sous lui (ex. l'intro du logo de la connexion, qui s'y jouait
+ * sans être vue).
+ */
+export function useScreenLoaderOnScreen() {
+  return (
+    useSyncExternalStore(subscribeScreenLoader, screenLoaderSnapshot) >= 0
+  );
+}

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { VscEye, VscEyeClosed } from "react-icons/vsc";
 import supabaseClient from "../services/supabaseClient";
@@ -12,12 +13,23 @@ import introWhiteRaw from "@/assets/brand/anim/infflunch-anim-intro-blanc.svg?ra
 import introLogotypeRaw from "@/assets/brand/anim/infflunch-logotype-anim.svg?raw";
 import introLogotypeWhiteRaw from "@/assets/brand/anim/infflunch-logotype-anim-blanc.svg?raw";
 import { svgDataUri } from "@/components/brand/inlineSvg";
+import { useScreenLoaderOnScreen } from "@/components/brand/ScreenLoader";
 
-// Intros embarquées (pas de requête) : elles démarrent avec la page.
-const intro = svgDataUri(introRaw);
-const introWhite = svgDataUri(introWhiteRaw);
-const introLogotype = svgDataUri(introLogotypeRaw);
-const introLogotypeWhite = svgDataUri(introLogotypeWhiteRaw);
+/**
+ * Intros embarquées (pas de requête). Une URL neuve à chaque affichage de la
+ * page (commentaire en fin de SVG) : le navigateur garde en mémoire l'image
+ * d'une URL déjà vue, animation comprise — revenue sur la connexion (après
+ * une déconnexion), l'intro était déjà finie.
+ */
+const freshIntros = () => {
+  const tag = `<!-- ${Date.now()} -->`;
+  return {
+    intro: svgDataUri(introRaw + tag),
+    introWhite: svgDataUri(introWhiteRaw + tag),
+    introLogotype: svgDataUri(introLogotypeRaw + tag),
+    introLogotypeWhite: svgDataUri(introLogotypeWhiteRaw + tag),
+  };
+};
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -26,6 +38,18 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const { intro, introWhite, introLogotype, introLogotypeWhite } = useMemo(
+    freshIntros,
+    [],
+  );
+  // Démarrage lent (> 1 s) : le monogramme de chargement est à l'écran, et
+  // l'intro se jouait dessous sans être vue. La carte attend qu'il soit
+  // effacé ; l'intro démarre avec elle.
+  const loaderOnScreen = useScreenLoaderOnScreen();
+  // Fondu d'arrivée seulement après le monogramme ; sinon la carte est là
+  // d'emblée, comme avant.
+  const waitedLoader = useRef(false);
+  if (loaderOnScreen) waitedLoader.current = true;
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -52,116 +76,142 @@ const LoginPage = () => {
 
   return (
     <Layout centerContent>
-      <div className="tw-scope w-full max-w-md">
-        <Card className="p-5 sm:p-8">
-          <div className="flex flex-col items-center text-center">
-            {/* Intro du logo, jouée seulement ici : monogramme sur mobile
+      {!loaderOnScreen && (
+        <motion.div
+          className="tw-scope w-full max-w-md"
+          initial={waitedLoader.current ? { opacity: 0 } : false}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.25 }}
+        >
+          <Card className="p-5 sm:p-8">
+            <div className="flex flex-col items-center text-center">
+              {/* Intro du logo, jouée seulement ici : monogramme sur mobile
                 (couverts qui sortent, point qui tombe), logotype dès sm
                 (lettres qui s'écrivent). */}
-            <span className="mb-3 sm:hidden">
-              <img src={intro} alt="" className="block h-18 w-auto dark:hidden" />
-              <img src={introWhite} alt="" className="hidden h-18 w-auto dark:block" />
-            </span>
-            <span className="mb-4 hidden sm:block">
-              <img src={introLogotype} alt="" className="block h-12 w-auto dark:hidden" />
-              <img src={introLogotypeWhite} alt="" className="hidden h-12 w-auto dark:block" />
-            </span>
-            <div
-              role="heading"
-              aria-level={1}
-              className="font-display text-xl font-bold text-card-foreground sm:text-2xl"
-            >
-              Connexion
-            </div>
-          </div>
-
-          {message && (
-            <div className="mt-4 rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive sm:mt-5">
-              {message}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3 sm:mt-6 sm:gap-4">
-            <label className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium text-foreground">
-                Adresse e-mail
+              <span className="mb-3 sm:hidden">
+                <img
+                  src={intro}
+                  alt=""
+                  className="block h-18 w-auto dark:hidden"
+                />
+                <img
+                  src={introWhite}
+                  alt=""
+                  className="hidden h-18 w-auto dark:block"
+                />
               </span>
-              <Input
-                type="email"
-                id="username"
-                name="username"
-                autoComplete="username"
-                inputMode="email"
-                autoCapitalize="none"
-                spellCheck={false}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </label>
-
-            <label className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium text-foreground">
-                Mot de passe
+              <span className="mb-4 hidden sm:block">
+                <img
+                  src={introLogotype}
+                  alt=""
+                  className="block h-12 w-auto dark:hidden"
+                />
+                <img
+                  src={introLogotypeWhite}
+                  alt=""
+                  className="hidden h-12 w-auto dark:block"
+                />
               </span>
               <div
-                className="relative"
-                onMouseLeave={() => setShowPassword(false)}
+                role="heading"
+                aria-level={1}
+                className="font-display text-xl font-bold text-card-foreground sm:text-2xl"
               >
-                <Input
-                  type={showPassword ? "text" : "password"}
-                  id="current-password"
-                  name="current-password"
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((p) => !p)}
-                  aria-label={
-                    showPassword
-                      ? "Masquer le mot de passe"
-                      : "Afficher le mot de passe"
-                  }
-                  className="absolute inset-y-0 right-0 flex w-10 cursor-pointer items-center justify-center text-foreground/50 transition hover:text-foreground"
-                >
-                  {showPassword ? <VscEye /> : <VscEyeClosed />}
-                </button>
+                Connexion
               </div>
-            </label>
-
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={() => navigate("/password-oublie")}
-                className="cursor-pointer text-sm text-primary hover:underline"
-              >
-                Mot de passe oublié ?
-              </button>
             </div>
 
-            <Button type="submit" loading={isLoading} className="w-full">
-              {isLoading ? "Connexion…" : "Se connecter"}
-            </Button>
-          </form>
+            {message && (
+              <div className="mt-4 rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive sm:mt-5">
+                {message}
+              </div>
+            )}
 
-          <div className="my-4 h-px bg-border sm:my-6" />
-
-          <p className="text-center text-sm text-foreground/60">
-            Nouveau sur Infflunch ?{" "}
-            <button
-              type="button"
-              onClick={() => navigate("/inscription")}
-              className="cursor-pointer text-primary hover:underline"
+            <form
+              onSubmit={handleSubmit}
+              className="mt-4 flex flex-col gap-3 sm:mt-6 sm:gap-4"
             >
-              Inscrivez-vous ici
-            </button>
-          </p>
-        </Card>
-      </div>
+              <label className="flex flex-col gap-1.5">
+                <span className="text-sm font-medium text-foreground">
+                  Adresse e-mail
+                </span>
+                <Input
+                  type="email"
+                  id="username"
+                  name="username"
+                  autoComplete="username"
+                  inputMode="email"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </label>
+
+              <label className="flex flex-col gap-1.5">
+                <span className="text-sm font-medium text-foreground">
+                  Mot de passe
+                </span>
+                <div
+                  className="relative"
+                  onMouseLeave={() => setShowPassword(false)}
+                >
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    id="current-password"
+                    name="current-password"
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((p) => !p)}
+                    aria-label={
+                      showPassword
+                        ? "Masquer le mot de passe"
+                        : "Afficher le mot de passe"
+                    }
+                    className="absolute inset-y-0 right-0 flex w-10 cursor-pointer items-center justify-center text-foreground/50 transition hover:text-foreground"
+                  >
+                    {showPassword ? <VscEye /> : <VscEyeClosed />}
+                  </button>
+                </div>
+              </label>
+
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => navigate("/password-oublie")}
+                  className="cursor-pointer text-sm text-primary hover:underline"
+                >
+                  Mot de passe oublié ?
+                </button>
+              </div>
+
+              <Button type="submit" loading={isLoading} className="w-full">
+                {isLoading ? "Connexion…" : "Se connecter"}
+              </Button>
+            </form>
+
+            <div className="my-4 h-px bg-border sm:my-6" />
+
+            <p className="text-center text-sm text-foreground/60">
+              Nouveau sur Infflunch ?{" "}
+              <button
+                type="button"
+                onClick={() => navigate("/inscription")}
+                className="cursor-pointer text-primary hover:underline"
+              >
+                Inscrivez-vous ici
+              </button>
+            </p>
+          </Card>
+        </motion.div>
+      )}
     </Layout>
   );
 };
