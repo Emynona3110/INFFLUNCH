@@ -184,7 +184,7 @@ const RestaurantGrid = ({
         <p className="py-10 text-center text-destructive">Erreur : {error}</p>
       );
     }
-    if (!isLoading && filteredData.length === 0) {
+    if (!isLoading && !waiting && filteredData.length === 0) {
       return (
         <div className="flex flex-col items-center gap-3 py-10 text-center">
           <p className="m-0 text-foreground/70">{emptyMessage}</p>
@@ -258,7 +258,7 @@ const RestaurantGrid = ({
                   </motion.div>
                 ))}
           </div>
-          {!isLoading && showMore}
+          {!waiting && showMore}
         </>
       );
     }
@@ -284,7 +284,7 @@ const RestaurantGrid = ({
                 </motion.div>
               ))}
         </div>
-        {!isLoading && showMore}
+        {!waiting && showMore}
       </>
     );
   };
