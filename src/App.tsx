@@ -2,6 +2,7 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useVersionCheck } from "./hooks/useVersionCheck";
+import { useEventCheck } from "./hooks/useEventCheck";
 import { lazy, Suspense, useEffect } from "react";
 import { releaseBoot } from "./components/brand/screenLoaderControl";
 import ScreenLoader from "./components/brand/ScreenLoader";
@@ -46,6 +47,7 @@ function App() {
   // monogramme d'index.html s'efface (page de connexion…).
   useEffect(releaseBoot, []);
   useVersionCheck();
+  useEventCheck();
   return (
     <Suspense fallback={<ChunkLoader />}>
       <Routes>
