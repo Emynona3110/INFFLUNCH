@@ -1,6 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import useSession from "@/hooks/useSession";
+import { useSyncExternalStore } from "react";
+import {
+  screenLoaderBusy,
+  subscribeScreenLoader,
+} from "@/components/brand/screenLoaderControl";
 
 // Soulignés en permanence : en gris clair, c'est ce qui les distingue de la
 // mention « Infflunch 2026 », qui n'est pas cliquable.
@@ -22,6 +27,10 @@ export const Footer = ({ compact = false }: { compact?: boolean }) => {
   // À propos et Nouveautés : pages du site, donc une fois connecté (le pied
   // de page s'affiche aussi sur l'écran de connexion).
   const loggedIn = !!useSession().sessionData?.user;
+  // Page en chargement (monogramme demandé ou encore à l'écran) : le pied de
+  // page attend et arrive en fondu avec le reste, pas seul avant lui. Sa place
+  // reste réservée : rien ne saute.
+  const busy = useSyncExternalStore(subscribeScreenLoader, screenLoaderBusy);
   // Séparateur « · » : sur une ligne (desktop) seulement. Sur mobile, les
   // liens passent à la ligne et un point en bout de ligne flotterait.
   const dot = (
@@ -38,6 +47,8 @@ export const Footer = ({ compact = false }: { compact?: boolean }) => {
         // Même filet et même hauteur partout ; `compact` retire seulement la
         // marge au-dessus (le footer est déjà calé en bas de l'écran).
         "border-t border-border pt-2.5 sm:pt-3",
+        "transition-opacity duration-300 ease-out",
+        busy && "pointer-events-none opacity-0",
         // iPhone (site installé, plein écran) : la barre d'accueil d'iOS est
         // dessinée par-dessus le bas de page. On ne réserve que ce qu'il faut
         // pour passer au-dessus d'elle, pas toute la zone (34 px), qui
