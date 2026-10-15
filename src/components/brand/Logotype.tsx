@@ -2,7 +2,7 @@ import { useEffect, useId, useState, type AnimationEvent, type CSSProperties } f
 import { shouldPlayIntro } from "./introOnce";
 import "./Logo.css";
 
-const INTRO_DURATION = 1700; // ms, durée totale de l'intro
+const INTRO_DURATION = 1400; // ms, durée totale de l'intro
 const LETTER_STEP = 0.08; // s, écart entre deux lettres à l'intro
 
 const P = {
@@ -104,7 +104,7 @@ export default function Logotype({ height = 40, color = "currentColor", accent =
     <svg
       className={classes}
       viewBox={admin ? "-6 14 578 72" : "-6 14 384 72"}
-      style={admin ? ({ "--il-dot-delay": `${0.2 + extra}s`, "--il-clink-delay": `${1.16 + extra}s` } as CSSProperties) : undefined}
+      style={admin ? ({ "--il-dot-delay": `${0.2 + extra}s`, "--il-clink-delay": `${0.83 + extra}s` } as CSSProperties) : undefined}
       height={height}
       role="img"
       aria-label={admin ? "adminfflunch" : "infflunch"}

@@ -2,7 +2,7 @@ import { useEffect, useState, type AnimationEvent } from "react";
 import { shouldPlayIntro } from "./introOnce";
 import "./Logo.css";
 
-const INTRO_DURATION = 1700; // ms
+const INTRO_DURATION = 1100; // ms
 
 const P = {
   fork: "M19.393 42.443 L22.533 41.187 V54 A1.6 1.6 0 0 0 25.733 54 V39.907 L30.267 38.093 V54 A1.6 1.6 0 0 0 33.467 54 V36.813 L36.607 35.557 Q38 35 38 36.5 V73 A7 7 0 0 1 31 80 H25 A7 7 0 0 1 18 73 V44.5 Q18 43 19.393 42.443 Z",

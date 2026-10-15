@@ -10,7 +10,7 @@
 }
 .infflunch-logo--mono {
   --il-dot-delay: 0.2s;
-  --il-clink-delay: 1.15s;
+  --il-clink-delay: 0.83s;
 }
 
 /* Le point est dans le groupe de la fourchette : il suit tous ses mouvements. */
@@ -41,13 +41,13 @@
   animation-name: infflunch-rise-fade; /* pas de masque à la ligne de base pour le monogramme */
 }
 .infflunch-logo--intro .il-dot {
-  animation: infflunch-pop 1s var(--il-dot-delay) both;
+  animation: infflunch-pop 0.583s var(--il-dot-delay) both;
 }
 .infflunch-logo--intro .il-fork {
-  animation: infflunch-clink-fork 0.5s var(--il-clink-delay) ease-in-out both;
+  animation: infflunch-clink-fork 0.187s var(--il-clink-delay) ease-in-out both;
 }
 .infflunch-logo--intro .il-knife {
-  animation: infflunch-clink-knife 0.5s var(--il-clink-delay) ease-in-out both;
+  animation: infflunch-clink-knife 0.187s var(--il-clink-delay) ease-in-out both;
 }
 
 /* ---------- Clic / toucher : les couverts s'écartent, lancent le point, puis trinquent ---------- */
@@ -71,23 +71,24 @@
   to { transform: translateY(0); opacity: 1; }
 }
 
+/* Même saut et même tchin que l'animation au clic */
 @keyframes infflunch-pop {
-  0% { transform: translateY(0) rotate(0); animation-timing-function: cubic-bezier(0.15, 0.6, 0.35, 1); }
-  40% { transform: translateY(-16px) rotate(180deg); animation-timing-function: cubic-bezier(0.6, 0, 0.8, 0.4); }
-  70% { transform: translateY(0) rotate(360deg); animation-timing-function: ease-out; }
-  79% { transform: translateY(-2.5px) rotate(360deg); animation-timing-function: ease-in; }
-  87% { transform: translateY(0) rotate(360deg); animation-timing-function: ease-out; }
-  93% { transform: translateY(-0.6px) rotate(360deg); animation-timing-function: ease-in; }
+  0% { transform: translateY(0) rotate(0); animation-timing-function: cubic-bezier(0.2, 0.7, 0.4, 1); }
+  39.6% { transform: translateY(-12px) rotate(180deg); animation-timing-function: cubic-bezier(0.6, 0, 0.8, 0.4); }
+  77.4% { transform: translateY(0) rotate(360deg); animation-timing-function: ease-out; }
+  88.7% { transform: translateY(-1.5px) rotate(360deg); animation-timing-function: ease-in; }
   100% { transform: translateY(0) rotate(360deg); }
 }
 
 @keyframes infflunch-clink-fork {
-  0%, 100% { transform: rotate(0); }
-  45% { transform: rotate(2.9deg); }
+  0% { transform: rotate(0); animation-timing-function: ease-out; }
+  41% { transform: rotate(2.9deg); animation-timing-function: ease-in-out; }
+  100% { transform: rotate(0); }
 }
 @keyframes infflunch-clink-knife {
-  0%, 100% { transform: rotate(0); }
-  45% { transform: rotate(-2.9deg); }
+  0% { transform: rotate(0); animation-timing-function: ease-out; }
+  41% { transform: rotate(-2.9deg); animation-timing-function: ease-in-out; }
+  100% { transform: rotate(0); }
 }
 
 /* Fourchette : s'écarte (élan), revient à 0 sans dépasser (lancer), attend, trinque juste au contact du couteau */
