@@ -24,6 +24,8 @@ const useProfile = () => {
 
   const query = useQuery<Profile | null, Error>({
     queryKey: key,
+    // Avatar de la navbar : les pages ne l'attendent pas (PageReveal).
+    meta: { background: true },
     enabled: !!userId,
     queryFn: async () => {
       const { data, error } = await supabaseClient

@@ -23,6 +23,8 @@ const useChangelogSeen = () => {
 
   const { data: seenAt, isPending } = useQuery<string>({
     queryKey,
+    // Badge de la navbar : les pages ne l'attendent pas (PageReveal).
+    meta: { background: true },
     enabled: !!userId,
     queryFn: async () => {
       const { data, error } = await supabaseClient

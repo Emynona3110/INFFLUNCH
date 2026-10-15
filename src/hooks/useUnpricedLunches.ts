@@ -54,6 +54,8 @@ const useUnpricedLunches = (enabled = true) => {
 
   const { data = [], isPending } = useQuery<Candidate[], Error>({
     queryKey,
+    // Badge de la navbar et invite de prix : les pages ne l'attendent pas (PageReveal).
+    meta: { background: true },
     enabled: !!userId && enabled,
     queryFn: async () => {
       const { data: plans, error } = await supabaseClient

@@ -1,42 +1,21 @@
-import { useEffect, useState, ReactNode } from "react";
-import { Navigate } from "react-router-dom";
-import supabaseClient from "../services/supabaseClient";
+import { ReactNode } from "react";
 import AchievementTriggers from "../components/AchievementTriggers";
 import RestaurantsPrefetch from "../components/RestaurantsPrefetch";
 import ShootingStarsTrail from "../components/ShootingStarsTrail";
-import ScreenLoader from "@/components/brand/ScreenLoader";
 
 interface WrapperProps {
   children: ReactNode;
 }
 
-const Wrapper = ({ children }: WrapperProps) => {
-  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    supabaseClient.auth.getSession().then(({ data: { session } }) => {
-      setAuthenticated(!!session);
-    });
-  }, []);
-
-  if (authenticated === null) {
-    return (
-      <div className="tw-scope flex h-screen items-center justify-center bg-background">
-        <ScreenLoader />
-      </div>
-    );
-  }
-
-  return authenticated ? (
-    <>
-      {children}
-      <AchievementTriggers />
-      <RestaurantsPrefetch />
-      <ShootingStarsTrail />
-    </>
-  ) : (
-    <Navigate to="/login" replace />
-  );
-};
+/** Compagnons globaux de l'appli connectée. La session est déjà vérifiée par
+ *  ProtectedRoute (une seconde vérification ici retardait l'ouverture). */
+const Wrapper = ({ children }: WrapperProps) => (
+  <>
+    {children}
+    <AchievementTriggers />
+    <RestaurantsPrefetch />
+    <ShootingStarsTrail />
+  </>
+);
 
 export default Wrapper;
