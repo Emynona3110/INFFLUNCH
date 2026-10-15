@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useRef, useState } from "react";
+import { startTransition, Suspense, useEffect, useRef, useState } from "react";
 import {
   FiMessageSquare,
   FiChevronDown,
@@ -19,6 +19,7 @@ import useProfile from "../hooks/useProfile";
 import { AnimatePresence, motion } from "framer-motion";
 import Monogramme from "./brand/Monogramme";
 import Logotype from "./brand/Logotype";
+import { eventTheme } from "@/events";
 import FeedbackDialog from "./FeedbackDialog";
 import { LazyProposeRestaurantDialog, LazyRestaurantDialog } from "./lazyDialogs";
 import { useOpenedOnce } from "@/lib/lazyPage";
@@ -64,6 +65,9 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
   const [addOpen, setAddOpen] = useState(false);
   const addOpened = useOpenedOnce(addOpen);
   const isAdmin = useIsAdmin();
+  // Évènement en cours (Halloween…) : logo de l'évènement à la place.
+  const EventMonogramme = eventTheme()?.Monogramme;
+  const EventLogotype = eventTheme()?.Logotype;
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const sections = buildUserSections(isAdmin);
@@ -159,8 +163,12 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
         <div
           className="flex cursor-pointer items-center"
           onClick={() => {
-            onFilterChange(defaultRestaurantFilters);
-            setPage("restaurants");
+            // Rendu interruptible : le retour aux restaurants (toute la
+            // grille) ne fige pas l'animation du logo lancée par ce clic.
+            startTransition(() => {
+              onFilterChange(defaultRestaurantFilters);
+              setPage("restaurants");
+            });
           }}
         >
           {/* Monogramme sur mobile, logotype complet au-delà (ADMINFFLUNCH pour
@@ -170,10 +178,18 @@ const Navbar = ({ page, setPage, onFilterChange }: NavbarProps) => {
               <span> : Logo.css (hors couche Tailwind) impose display:block
               au <svg>. */}
           <span className="text-[#113894] sm:hidden dark:text-white">
-            <Monogramme playIntro={false} className="h-7" />
+            {EventMonogramme ? (
+              <EventMonogramme className="h-7" />
+            ) : (
+              <Monogramme playIntro={false} className="h-7" />
+            )}
           </span>
           <span className="mr-2 hidden text-[#113894] sm:block dark:text-white">
-            <Logotype admin={isAdmin} playIntro={false} className="h-7" />
+            {EventLogotype ? (
+              <EventLogotype admin={isAdmin} className="h-7" />
+            ) : (
+              <Logotype admin={isAdmin} playIntro={false} className="h-7" />
+            )}
           </span>
         </div>
 

@@ -53,6 +53,40 @@
     <div id="boot-loader" class="booting" role="status" aria-label="Chargement">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="6 0 70 90" aria-hidden="true"><style>.bl-fork,.bl-knife,.bl-dot{transform-box:fill-box}.bl-fork,.bl-knife{transform-origin:50% 100%}.bl-dot{transform-origin:50% 50%}.bl-fork{animation:bl-loop-fork 1.1s infinite}.bl-knife{animation:bl-loop-knife 1.1s infinite}.bl-dot{animation:bl-loop-dot 1.1s infinite}@keyframes bl-loop-fork{0%{transform:translateY(0) rotate(0);animation-timing-function:cubic-bezier(.2,.8,.4,1)}10%{transform:translateY(-5px) rotate(0);animation-timing-function:cubic-bezier(.6,0,.9,.5)}22.7%{transform:translateY(0) rotate(0)}62.1%{transform:translateY(0) rotate(0);animation-timing-function:ease-out}69.1%{transform:translateY(0) rotate(2.9deg);animation-timing-function:ease-in-out}79.1%,100%{transform:translateY(0) rotate(0)}}@keyframes bl-loop-knife{0%,62.1%{transform:rotate(0);animation-timing-function:ease-out}69.1%{transform:rotate(-2.9deg);animation-timing-function:ease-in-out}79.1%,100%{transform:rotate(0)}}@keyframes bl-loop-dot{0%,7.3%{transform:translateY(0) rotate(0);animation-timing-function:cubic-bezier(.2,.7,.4,1)}28.3%{transform:translateY(-12px) rotate(180deg);animation-timing-function:cubic-bezier(.6,0,.8,.4)}48.3%{transform:translateY(0) rotate(360deg);animation-timing-function:ease-out}54.3%{transform:translateY(-1.5px) rotate(360deg);animation-timing-function:ease-in}60.3%,100%{transform:translateY(0) rotate(360deg)}}@media (prefers-reduced-motion:reduce){.bl-l,.bl-fork,.bl-knife,.bl-dot{animation:none!important}}</style><g class="bl-fork"><path fill="currentColor" d="M19.393 42.443 L22.533 41.187 V54 A1.6 1.6 0 0 0 25.733 54 V39.907 L30.267 38.093 V54 A1.6 1.6 0 0 0 33.467 54 V36.813 L36.607 35.557 Q38 35 38 36.5 V73 A7 7 0 0 1 31 80 H25 A7 7 0 0 1 18 73 V44.5 Q18 43 19.393 42.443 Z"></path><path class="bl-dot" fill="#EA580C" d="M19.393 27.443 L36.607 20.557 Q38 20 38 21.5 V28.5 Q38 30 36.607 30.557 L19.393 37.443 Q18 38 18 36.5 V29.5 Q18 28 19.393 27.443 Z"></path></g><g class="bl-knife"><path fill="currentColor" d="M51 80 A7 7 0 0 1 44 73 V21.5 Q44 20.1 45.4 20.4 C55 22.5 64 31 64 43 V73 A7 7 0 0 1 57 80 Z"></path></g></svg>
     </div>
+    <!-- Évènement en cours (Halloween…) : calendrier de src/events/calendar.ts,
+         injecté au build. Marque <html data-event> (lu par l'app) et remplace
+         le monogramme de chargement par celui de l'évènement, téléchargé
+         seulement pendant sa période. -->
+    <script>
+      (function () {
+        var events = __INFFLUNCH_EVENTS__, id = null, forced = null;
+        // Aperçu choisi par un admin (onglet Admin › Évènements), sur son
+        // navigateur seulement : un évènement, ou « aucun ».
+        try { forced = localStorage.getItem("evenement-apercu"); } catch (e) {}
+        if (forced !== null) {
+          events.forEach(function (e) { if (e.id === forced) id = e.id; });
+        } else {
+          var d = new Date();
+          var md = ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+          events.forEach(function (e) {
+            if (e.from <= e.to ? md >= e.from && md <= e.to : md >= e.from || md <= e.to) id = e.id;
+          });
+        }
+        if (!id) return;
+        document.documentElement.setAttribute("data-event", id);
+        var loader = document.getElementById("boot-loader");
+        var fallback = loader.innerHTML;
+        loader.innerHTML = "";
+        fetch("/events/" + id + "/chargement.svg")
+          .then(function (r) {
+            // Fichier absent : le serveur renvoie la page du site, pas un SVG.
+            if (!r.ok || (r.headers.get("content-type") || "").indexOf("svg") < 0) throw 0;
+            return r.text();
+          })
+          .then(function (svg) { loader.innerHTML = svg; })
+          .catch(function () { loader.innerHTML = fallback; });
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

@@ -1,0 +1,156 @@
+/* Halloween : chauve-souris du logo et bougies du pied de page.
+   Préfixe hl- ; chargé seulement pendant l'évènement (src/events). */
+
+/* ---------- Chauve-souris du logo : battement d'ailes et bond au clic ---------- */
+.hl-bat-logo .hl-hopb {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  will-change: transform; /* cf. Logo.css : pas de saut d'un pixel du reste de la page */
+}
+.hl-bat-logo .hl-wing {
+  transform-box: fill-box;
+  transform-origin: 0% 74%;
+  will-change: transform;
+}
+.hl-flap .hl-wing { animation: hl-flap 0.9s ease-in-out both; }
+/* Fin du bond = fin de l'animation (cf. BatLogo.tsx, onAnimationEnd). */
+.hl-flap .hl-hopb { animation: hl-hopb 0.9s ease-in-out both; }
+
+@keyframes hl-flap {
+  0% { transform: rotate(0deg); }
+  12% { transform: rotate(-30deg); }
+  24% { transform: rotate(22deg); }
+  36% { transform: rotate(-30deg); }
+  48% { transform: rotate(22deg); }
+  60% { transform: rotate(-30deg); }
+  72% { transform: rotate(18deg); }
+  86% { transform: rotate(-4deg); }
+  100% { transform: rotate(0deg); }
+}
+@keyframes hl-hopb {
+  0% { transform: translateY(0); }
+  15% { transform: translateY(-10px); }
+  50% { transform: translateY(-16px); }
+  80% { transform: translateY(-4px); }
+  100% { transform: translateY(0); }
+}
+
+/* ---------- Bougies du pied de page ---------- */
+/* Dessinées à leur taille d'origine (filet à y = 500), réduites d'un facteur
+   --hl-s. Chaque ancre est un point du filet : le pied de la bougie. */
+.hl-candles {
+  --hl-s: 0.1;
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 0;
+}
+@media (min-width: 768px) {
+  .hl-candles { --hl-s: 0.12; }
+}
+.hl-anchor { position: absolute; top: 0; }
+/* Bougies non cliquables. La citrouille hérite du pied de page : pas
+   cliquable non plus tant qu'il est masqué (chargement en cours). */
+.hl-anchor-left, .hl-anchor-right { pointer-events: none; }
+.hl-anchor-left { left: 1.5rem; }
+.hl-anchor-right { right: 2.5rem; }
+.hl-canvas {
+  position: absolute;
+  top: calc(-500px * var(--hl-s));
+  transform: scale(var(--hl-s));
+  transform-origin: 0 0;
+}
+/* Centre de la bougie (seule) / des deux bougies (duo), en x d'origine. */
+.hl-candle { left: calc(-241px * var(--hl-s)); }
+.hl-duo { left: calc(-276px * var(--hl-s)); }
+
+/* Citrouille (05) : à droite de la bougie seule, posée sur le filet (bas de
+   la citrouille à y = 485 dans son repère, cadré 60 110 360 390). Seul
+   élément cliquable du décor. */
+.hl-anchor-pumpkin { left: calc(1.5rem + 360px * var(--hl-s)); }
+.hl-pumpkin {
+  left: calc(-180px * var(--hl-s));
+  top: calc(-375px * var(--hl-s));
+  width: 360px;
+  height: 390px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.hl-pumpkin svg { display: block; overflow: visible; }
+.hl-pumpkin:focus-visible { outline: 24px solid #ea580c; outline-offset: 16px; border-radius: 48px; }
+.hlp-hop { transform-box: fill-box; transform-origin: 50% 100%; }
+.hlp-c { transform-box: fill-box; transform-origin: center; }
+.hl-pumpkin-jump .hlp-hop { animation: hlp-hop 0.78s linear both; }
+.hl-pumpkin-jump .hlp-c { animation: hlp-cand 0.78s ease-in-out var(--d) both; }
+.hlp-handle { stroke: #113894; }
+.hlp-stick { stroke: #5478d4; }
+html.dark .hlp-handle { stroke: #5478d4; }
+html.dark .hlp-stick { stroke: #ffffff; }
+@keyframes hlp-hop {
+  0% { transform: translateY(0) scale(1, 1); animation-timing-function: ease-out; }
+  15% { transform: translateY(0) scale(1.08, 0.9); animation-timing-function: ease-out; }
+  31% { transform: translateY(-52px) scale(0.95, 1.07); animation-timing-function: ease-out; }
+  50% { transform: translateY(-70px) scale(1, 1); animation-timing-function: ease-in; }
+  69% { transform: translateY(0) scale(1, 1); animation-timing-function: ease-out; }
+  77% { transform: translateY(0) scale(1.1, 0.88); animation-timing-function: ease-in-out; }
+  88% { transform: translateY(0) scale(0.97, 1.03); animation-timing-function: ease-in-out; }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+@keyframes hlp-cand {
+  0%, 31% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(calc(var(--a) * -10px)) rotate(calc(var(--rr) * 0.5)); }
+  65% { transform: translateY(calc(var(--a) * -22px)) rotate(var(--rr)); }
+  81% { transform: translateY(calc(var(--a) * -6px)) rotate(calc(var(--rr) * 0.3)); }
+  88% { transform: translateY(0) rotate(0deg); }
+  95% { transform: translateY(calc(var(--a) * -4px)) rotate(0deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+
+.hl-body { fill: #113894; }
+.hl-wick { stroke: #113894; }
+html.dark .hl-body { fill: #ffffff; }
+html.dark .hl-wick { stroke: #5478d4; }
+.hl-only-dark { display: none; }
+html.dark .hl-only-dark { display: block; }
+html.dark .hl-only-light { display: none; }
+
+.hl-flame {
+  animation: hl-flicker ease-in-out infinite;
+  transform-origin: 50% 90%;
+}
+.hl-halo { animation: hl-halo ease-in-out infinite; }
+.hl-core {
+  animation: hl-core ease-in-out infinite;
+  transform-origin: 50% 100%;
+}
+@keyframes hl-flicker {
+  0% { transform: scale(1, 1) skewX(0deg); }
+  20% { transform: scale(0.94, 1.08) skewX(3deg); }
+  40% { transform: scale(1.04, 0.95) skewX(-2deg); }
+  60% { transform: scale(0.96, 1.06) skewX(-3.5deg); }
+  80% { transform: scale(1.02, 0.98) skewX(2deg); }
+  100% { transform: scale(1, 1) skewX(0deg); }
+}
+@keyframes hl-halo {
+  0%, 100% { transform: scale(0.94); opacity: 0.8; }
+  45% { transform: scale(1.05); opacity: 1; }
+  70% { transform: scale(0.98); opacity: 0.85; }
+}
+@keyframes hl-core {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-3px) scale(0.9, 1.1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hl-bat-logo .hl-wing,
+  .hl-bat-logo .hl-hopb,
+  .hl-pumpkin-jump .hlp-hop,
+  .hl-pumpkin-jump .hlp-c,
+  .hl-flame,
+  .hl-halo,
+  .hl-core {
+    animation: none !important;
+  }
+}

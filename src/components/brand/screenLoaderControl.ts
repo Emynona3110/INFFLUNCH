@@ -19,7 +19,9 @@ const DELAY_MS = 1000;
 // (même rendu React) : on attend un instant avant de masquer.
 const HANDOFF_MS = 60;
 // Boucle de infflunch-anim-chargement.svg : 1,1 s, couverts au repos à
-// partir de 79,1 % — le fondu de sortie (0,25 s) tient dans ce repos.
+// partir de 79,1 % — le fondu de sortie (0,25 s) tient dans ce repos. Une
+// animation d'évènement (citrouille d'Halloween…) donne les siennes sur son
+// <svg> (data-cycle, data-rest).
 const CYCLE_MS = 1100;
 const REST_MS = 870;
 const FADE_MS = 250;
@@ -42,15 +44,32 @@ const setOnScreen = (value: boolean) => {
   onScreen = value;
   emit();
 };
-// Démarrage : index.html le fait apparaître à 1 s (animation CSS).
+// Démarrage : index.html le fait apparaître à 1 s (animation CSS). Plus
+// rien n'attend à ce moment-là (app affichée juste avant) : il n'apparaît
+// pas — sinon la page à peine affichée (connexion…) se masquait le temps
+// d'un cycle et revenait.
 const bootTimer = setTimeout(
   () => {
-    if (!detached) setOnScreen(true);
+    if (detached) return;
+    if (count > 0) setOnScreen(true);
+    else cancelBootAppearance();
   },
   Math.max(0, DELAY_MS - performance.now()),
 );
 
 const el = () => document.getElementById("boot-loader");
+
+/** Démarrage fini avant son apparition : l'animation CSS d'apparition est
+ *  retirée, il reste invisible (une attente suivante passera par
+ *  `scheduleShow`, délai compris). */
+const cancelBootAppearance = () => {
+  const node = el();
+  if (!node || detached || isShown(node)) return;
+  clearTimeout(bootTimer);
+  detach(node);
+  node.style.opacity = "0";
+  node.toggleAttribute("aria-hidden", true);
+};
 
 /** Animations de la boucle (pas le fondu de l'élément lui-même). Vide si
  *  « Réduire les animations » est actif. */
@@ -59,6 +78,15 @@ const loopAnimations = (node: HTMLElement) =>
 
 const loopDelay = (a: Animation) => Number(a.effect?.getTiming().delay ?? 0);
 
+/** Durée de la boucle et début de son repos (ms). */
+const loopTiming = (node: HTMLElement) => {
+  const data = node.querySelector("svg")?.dataset;
+  return {
+    cycle: Number(data?.cycle) || CYCLE_MS,
+    rest: Number(data?.rest) || REST_MS,
+  };
+};
+
 /** Temps restant avant le prochain repos de la boucle (0 si elle n'a pas
  *  encore démarré : rien de visible n'est interrompu). */
 const untilRest = (node: HTMLElement) => {
@@ -66,8 +94,9 @@ const untilRest = (node: HTMLElement) => {
   if (!a || a.currentTime == null) return 0;
   const t = Number(a.currentTime) - loopDelay(a);
   if (t < 0) return 0;
-  const phase = t % CYCLE_MS;
-  return phase <= REST_MS ? REST_MS - phase : CYCLE_MS - phase + REST_MS;
+  const { cycle, rest } = loopTiming(node);
+  const phase = t % cycle;
+  return phase <= rest ? rest - phase : cycle - phase + rest;
 };
 
 /** Sort l'élément de son animation CSS de démarrage, à l'opacité où il en
@@ -95,9 +124,12 @@ const setVisible = (visible: boolean) => {
   clearTimeout(pauseTimer);
   if (visible) {
     setOnScreen(true);
-    // Chaque apparition part du début de la boucle.
-    for (const a of loopAnimations(node)) {
-      a.currentTime = loopDelay(a);
+    // Chaque apparition part du début de la boucle. Même instant pour
+    // toutes : les décalages entre elles (bonbons de la citrouille) restent.
+    const anims = loopAnimations(node);
+    const start = Math.min(...anims.map(loopDelay));
+    for (const a of anims) {
+      a.currentTime = start;
       a.play();
     }
   } else {
@@ -154,6 +186,7 @@ export const acquireScreenLoader = () => {
 
 export const releaseScreenLoader = () => {
   count = Math.max(0, count - 1);
+  if (count === 0) cancelBootAppearance();
   emit();
   if (count === 0) scheduleHide();
 };

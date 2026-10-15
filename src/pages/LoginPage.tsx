@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { memo, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { VscEye, VscEyeClosed } from "react-icons/vsc";
@@ -14,6 +14,7 @@ import introLogotypeRaw from "@/assets/brand/anim/infflunch-logotype-anim.svg?ra
 import introLogotypeWhiteRaw from "@/assets/brand/anim/infflunch-logotype-anim-blanc.svg?raw";
 import { svgDataUri } from "@/components/brand/inlineSvg";
 import { useScreenLoaderOnScreen } from "@/components/brand/ScreenLoader";
+import { eventTheme } from "@/events";
 
 /**
  * Intros embarquées (pas de requête). Une URL neuve à chaque affichage de la
@@ -31,6 +32,31 @@ const freshIntros = () => {
   };
 };
 
+/**
+ * Intro d'un évènement (Halloween…) : SVG intégré à la page et non <img>, pour
+ * que l'animation puisse sortir de son cadre (une image la tronque : la
+ * chauve-souris, immense au départ, était coupée). Même taille de cadre que
+ * l'intro habituelle ; l'animation repart à chaque affichage (nouvel élément).
+ * Contenu figé (memo + objet stable) : React 19 réécrit le HTML dès que
+ * l'objet `dangerouslySetInnerHTML` change, ce qui rejouait l'intro à chaque
+ * rendu de la page (clic, saisie…).
+ */
+const EventIntro = memo(function EventIntro({
+  svg,
+  className,
+}: {
+  svg: string;
+  className: string;
+}) {
+  const html = useMemo(() => ({ __html: svg }), [svg]);
+  return (
+    <span
+      className={`relative z-10 [&>svg]:block [&>svg]:w-auto [&>svg]:overflow-visible ${className}`}
+      dangerouslySetInnerHTML={html}
+    />
+  );
+});
+
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -42,6 +68,7 @@ const LoginPage = () => {
     freshIntros,
     [],
   );
+  const eventIntro = eventTheme()?.loginIntro;
   // Démarrage lent (> 1 s) : le monogramme de chargement est à l'écran, et
   // l'intro se jouait dessous sans être vue. La carte attend qu'il soit
   // effacé ; l'intro démarre avec elle.
@@ -88,30 +115,57 @@ const LoginPage = () => {
               {/* Intro du logo, jouée seulement ici : monogramme sur mobile
                 (couverts qui sortent, point qui tombe), logotype dès sm
                 (lettres qui s'écrivent). */}
-              <span className="mb-3 sm:hidden">
-                <img
-                  src={intro}
-                  alt=""
-                  className="block h-18 w-auto dark:hidden"
-                />
-                <img
-                  src={introWhite}
-                  alt=""
-                  className="hidden h-18 w-auto dark:block"
-                />
-              </span>
-              <span className="mb-4 hidden sm:block">
-                <img
-                  src={introLogotype}
-                  alt=""
-                  className="block h-12 w-auto dark:hidden"
-                />
-                <img
-                  src={introLogotypeWhite}
-                  alt=""
-                  className="hidden h-12 w-auto dark:block"
-                />
-              </span>
+              {eventIntro ? (
+                <>
+                  <span className="mb-3 sm:hidden">
+                    <EventIntro
+                      svg={eventIntro.mono}
+                      className="block [&>svg]:h-18 dark:hidden"
+                    />
+                    <EventIntro
+                      svg={eventIntro.monoWhite}
+                      className="hidden [&>svg]:h-18 dark:block"
+                    />
+                  </span>
+                  <span className="mb-4 hidden sm:block">
+                    <EventIntro
+                      svg={eventIntro.logotype}
+                      className="block [&>svg]:h-12 dark:hidden"
+                    />
+                    <EventIntro
+                      svg={eventIntro.logotypeWhite}
+                      className="hidden [&>svg]:h-12 dark:block"
+                    />
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="mb-3 sm:hidden">
+                    <img
+                      src={intro}
+                      alt=""
+                      className="block h-18 w-auto dark:hidden"
+                    />
+                    <img
+                      src={introWhite}
+                      alt=""
+                      className="hidden h-18 w-auto dark:block"
+                    />
+                  </span>
+                  <span className="mb-4 hidden sm:block">
+                    <img
+                      src={introLogotype}
+                      alt=""
+                      className="block h-12 w-auto dark:hidden"
+                    />
+                    <img
+                      src={introLogotypeWhite}
+                      alt=""
+                      className="hidden h-12 w-auto dark:block"
+                    />
+                  </span>
+                </>
+              )}
               <div
                 role="heading"
                 aria-level={1}

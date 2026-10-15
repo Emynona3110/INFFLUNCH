@@ -6,6 +6,7 @@ import {
   screenLoaderBusy,
   subscribeScreenLoader,
 } from "@/components/brand/screenLoaderControl";
+import { eventTheme } from "@/events";
 
 // Soulignés en permanence : en gris clair, c'est ce qui les distingue de la
 // mention « Infflunch 2026 », qui n'est pas cliquable.
@@ -31,6 +32,10 @@ export const Footer = ({ compact = false }: { compact?: boolean }) => {
   // page attend et arrive en fondu avec le reste, pas seul avant lui. Sa place
   // reste réservée : rien ne saute.
   const busy = useSyncExternalStore(subscribeScreenLoader, screenLoaderBusy);
+  // Décor d'évènement (bougies d'Halloween…) posé sur le filet, plus de place
+  // au-dessus pour lui. Pas sur les écrans pleine hauteur (`compact`) : il
+  // mordrait sur la carte, la roue…
+  const Decor = compact ? undefined : eventTheme()?.FooterDecor;
   // Séparateur « · » : sur une ligne (desktop) seulement. Sur mobile, les
   // liens passent à la ligne et un point en bout de ligne flotterait.
   const dot = (
@@ -43,7 +48,7 @@ export const Footer = ({ compact = false }: { compact?: boolean }) => {
       className={cn(
         // Mobile : les liens en haut, sur une ou deux lignes aérées, la
         // mention « Infflunch 2026 » dessous. Desktop : tout sur une ligne.
-        "flex shrink-0 flex-col items-center gap-1.5 text-center text-xs text-foreground/45 sm:flex-row sm:justify-center sm:gap-2 sm:text-[11px]",
+        "relative flex shrink-0 flex-col items-center gap-1.5 text-center text-xs text-foreground/45 sm:flex-row sm:justify-center sm:gap-2 sm:text-[11px]",
         // Même filet et même hauteur partout ; `compact` retire seulement la
         // marge au-dessus (le footer est déjà calé en bas de l'écran).
         "border-t border-border pt-2.5 sm:pt-3",
@@ -54,9 +59,10 @@ export const Footer = ({ compact = false }: { compact?: boolean }) => {
         // pour passer au-dessus d'elle, pas toute la zone (34 px), qui
         // laissait trop de vide. Nécessite `viewport-fit=cover` (index.html).
         "pb-[max(0.625rem,calc(env(safe-area-inset-bottom)-0.75rem))] sm:pb-[max(0.75rem,calc(env(safe-area-inset-bottom)-0.75rem))]",
-        !compact && "mt-4 sm:mt-8",
+        !compact && (Decor ? "mt-10 sm:mt-12" : "mt-4 sm:mt-8"),
       )}
     >
+      {Decor && <Decor />}
       <span className="order-last sm:order-none">Infflunch 2026</span>
       {dot}
       <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 sm:gap-x-2">

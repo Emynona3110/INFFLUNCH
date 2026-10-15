@@ -6,6 +6,7 @@ import { Toaster } from "sonner";
 import App from "./App";
 import { ThemeProvider, useTheme } from "./lib/theme";
 import { registerServiceWorker } from "./services/push";
+import { loadEventTheme } from "./events";
 import "overlayscrollbars/overlayscrollbars.css";
 import "./tailwind.css";
 
@@ -71,15 +72,18 @@ new MutationObserver((mutations) => {
 // Un chunk de l'ancien build a disparu après un déploiement : on recharge.
 window.addEventListener("vite:preloadError", () => location.reload());
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-        <ThemedToaster />
-      </ThemeProvider>
-    </QueryClientProvider>
-  </React.StrictMode>
+// Évènement en cours (Halloween…) : son thème arrive avant le premier rendu.
+loadEventTheme().then(() =>
+  ReactDOM.createRoot(document.getElementById("root")!).render(
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+          <ThemedToaster />
+        </ThemeProvider>
+      </QueryClientProvider>
+    </React.StrictMode>
+  ),
 );

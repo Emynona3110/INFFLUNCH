@@ -4,6 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import { fileURLToPath, URL } from "node:url";
 import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { EVENTS } from "./src/events/calendar";
 
 /** Identifiant unique du build, injecté dans le bundle ET écrit dans dist/version.json. */
 const BUILD_ID = Date.now().toString(36);
@@ -55,9 +56,19 @@ function stylesAfterBootLoader(): Plugin {
   };
 }
 
+/** Calendrier des évènements (src/events/calendar.ts) injecté dans index.html. */
+function eventCalendar(): Plugin {
+  return {
+    name: "infflunch-event-calendar",
+    transformIndexHtml(html) {
+      return html.replace("__INFFLUNCH_EVENTS__", JSON.stringify(EVENTS));
+    },
+  };
+}
+
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss(), versionFile(), stylesAfterBootLoader()],
+  plugins: [react(), tailwindcss(), versionFile(), stylesAfterBootLoader(), eventCalendar()],
   base: "/",
   define: {
     __BUILD_ID__: JSON.stringify(BUILD_ID),

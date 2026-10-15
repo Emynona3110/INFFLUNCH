@@ -1,14 +1,9 @@
 import { useEffect, useState, type AnimationEvent } from "react";
 import { shouldPlayIntro } from "./introOnce";
+import { MONO as P } from "./logoPaths";
 import "./Logo.css";
 
 const INTRO_DURATION = 1100; // ms
-
-const P = {
-  fork: "M19.393 42.443 L22.533 41.187 V54 A1.6 1.6 0 0 0 25.733 54 V39.907 L30.267 38.093 V54 A1.6 1.6 0 0 0 33.467 54 V36.813 L36.607 35.557 Q38 35 38 36.5 V73 A7 7 0 0 1 31 80 H25 A7 7 0 0 1 18 73 V44.5 Q18 43 19.393 42.443 Z",
-  dot: "M19.393 27.443 L36.607 20.557 Q38 20 38 21.5 V28.5 Q38 30 36.607 30.557 L19.393 37.443 Q18 38 18 36.5 V29.5 Q18 28 19.393 27.443 Z",
-  knife: "M51 80 A7 7 0 0 1 44 73 V21.5 Q44 20.1 45.4 20.4 C55 22.5 64 31 64 43 V73 A7 7 0 0 1 57 80 Z",
-};
 
 type Props = {
   /** Hauteur en px. */
