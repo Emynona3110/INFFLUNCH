@@ -20,7 +20,8 @@ const RESIZE_MS = 300;
  * du viewport est remis à zéro par OverlayScrollbars : marges sur un bloc
  * intérieur.
  * - flottante : aucune gouttière, la largeur ne change jamais ;
- * - masquée pendant un chargement, puis arrivée en fondu avec le contenu ;
+ * - visible pendant le défilement seulement, effacée en fondu 1,2 s après ;
+ * - jamais pendant un chargement ;
  * - taille et position glissent quand la hauteur du contenu change.
  * Initialisée en layout effect : la barre native n'apparaît jamais.
  */
@@ -39,10 +40,10 @@ export default function usePageScrollbar<T extends HTMLElement>(enabled = true) 
       {
         overflow: { x: "hidden" },
         scrollbars: {
-          // Souris : toujours visible, comme la barre native. Doigt : seulement
-          // pendant le défilement.
-          autoHide: matchMedia("(hover: none)").matches ? "scroll" : "never",
-          autoHideDelay: 400,
+          // Visible pendant le défilement (molette, doigt, glisser), puis
+          // s'efface en fondu 1,2 s après — souris comme doigt.
+          autoHide: "scroll",
+          autoHideDelay: 1200,
           theme: "os-infflunch",
         },
       },
