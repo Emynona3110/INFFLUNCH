@@ -74,7 +74,7 @@ export const Footer = ({ compact = false }: { compact?: boolean }) => {
         // pour passer au-dessus d'elle, pas toute la zone (34 px), qui
         // laissait trop de vide. Nécessite `viewport-fit=cover` (index.html).
         "pb-[max(0.625rem,calc(env(safe-area-inset-bottom)-0.75rem))] sm:pb-[max(0.75rem,calc(env(safe-area-inset-bottom)-0.75rem))]",
-        !compact && (Decor ? "mt-10 sm:mt-12" : "mt-4 sm:mt-8"),
+        !compact && (Decor ? "mt-14 sm:mt-16" : "mt-4 sm:mt-8"),
       )}
     >
       {Decor && decorShown && <Decor />}

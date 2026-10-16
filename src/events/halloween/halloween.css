@@ -60,20 +60,25 @@
 .hl-anchor-left, .hl-anchor-right { pointer-events: none; }
 .hl-anchor-left { left: 1.5rem; }
 .hl-anchor-right { right: 2.5rem; }
+/* --hl-k : réduction propre à chaque élément ; les bougies sont 1,5 fois
+   plus grandes que la citrouille. */
 .hl-canvas {
+  --hl-k: var(--hl-s);
   position: absolute;
-  top: calc(-500px * var(--hl-s));
-  transform: scale(var(--hl-s));
+  top: calc(-500px * var(--hl-k));
+  transform: scale(var(--hl-k));
   transform-origin: 0 0;
 }
+.hl-candle, .hl-duo { --hl-k: calc(var(--hl-s) * 1.5); }
 /* Centre de la bougie (seule) / des deux bougies (duo), en x d'origine. */
-.hl-candle { left: calc(-241px * var(--hl-s)); }
-.hl-duo { left: calc(-276px * var(--hl-s)); }
+.hl-candle { left: calc(-241px * var(--hl-k)); }
+.hl-duo { left: calc(-276px * var(--hl-k)); }
 
-/* Citrouille (05) : à droite de la bougie seule, posée sur le filet (bas de
-   la citrouille à y = 485 dans son repère, cadré 60 110 360 390). Seul
-   élément cliquable du décor. */
-.hl-anchor-pumpkin { left: calc(1.5rem + 360px * var(--hl-s)); }
+/* Citrouille (05) : à droite de la bougie seule (au-delà de sa cire, qui
+   s'étend à 155 px de son centre), posée sur le filet (bas de la citrouille
+   à y = 485 dans son repère, cadré 60 110 360 390). Seul élément cliquable
+   du décor. */
+.hl-anchor-pumpkin { left: calc(1.5rem + 155px * 1.5 * var(--hl-s) + 205px * var(--hl-s)); }
 .hl-pumpkin {
   left: calc(-180px * var(--hl-s));
   top: calc(-375px * var(--hl-s));

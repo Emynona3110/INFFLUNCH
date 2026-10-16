@@ -8,15 +8,17 @@ import "./halloween.css";
  * à y = 500) puis réduites en CSS (--hl-s, cf. halloween.css).
  */
 
-const glow = (dark: boolean) =>
-  dark
-    ? "radial-gradient(circle, rgba(234,88,12,0.55) 0%, rgba(234,88,12,0.22) 35%, rgba(234,88,12,0) 68%)"
-    : "radial-gradient(circle, rgba(234,88,12,0.34) 0%, rgba(234,88,12,0.13) 40%, rgba(234,88,12,0) 70%)";
+/** Dégradé du halo (`small` : petite flamme du duo, un peu moins vif). */
+const glow = (dark: boolean, small: boolean) => {
+  const [a, b] = dark ? (small ? [0.48, 0.18] : [0.55, 0.22]) : small ? [0.46, 0.19] : [0.52, 0.22];
+  const [mid, end] = dark ? [35, 68] : [42, 70];
+  return `radial-gradient(circle, rgba(234,88,12,${a}) 0%, rgba(234,88,12,${b}) ${mid}%, rgba(234,88,12,0) ${end}%)`;
+};
 
-type HaloProps = { x: number; y: number; size: number; dark?: boolean; anim: CSSProperties };
+type HaloProps = { x: number; y: number; size: number; dark?: boolean; small?: boolean; anim: CSSProperties };
 
 /** Aura qui pulse autour d'une flamme (plus large et plus vive en thème sombre). */
-const Halo = ({ x, y, size, dark = false, anim }: HaloProps) => (
+const Halo = ({ x, y, size, dark = false, small = false, anim }: HaloProps) => (
   <div
     className={`hl-halo ${dark ? "hl-only-dark" : "hl-only-light"}`}
     style={{
@@ -26,7 +28,7 @@ const Halo = ({ x, y, size, dark = false, anim }: HaloProps) => (
       width: size,
       height: size,
       borderRadius: "50%",
-      background: glow(dark),
+      background: glow(dark, small),
       ...anim,
     }}
   />
@@ -34,7 +36,7 @@ const Halo = ({ x, y, size, dark = false, anim }: HaloProps) => (
 
 type FlameProps = { x: number; y: number; transform: string; flame: CSSProperties; core: CSSProperties };
 
-/** Flamme orange à cœur blanc qui vacille. */
+/** Flamme orange à cœur blanc qui vacille (agrandie par `transform`, depuis sa base). */
 const Flame = ({ x, y, transform, flame, core }: FlameProps) => (
   <div
     style={{ position: "absolute", left: x, top: y, width: 48, height: 80, transform, transformOrigin: "50% 90%" }}
@@ -75,8 +77,8 @@ const WAX = "#5478D4";
 /** Bougie seule (01). */
 const Candle = () => (
   <div className="hl-canvas hl-candle" style={{ width: 480, height: 600 }}>
-    <Halo x={87} y={45} size={320} anim={{ animationDuration: "3.2s" }} />
-    <Halo x={27} y={-15} size={440} dark anim={{ animationDuration: "3.2s" }} />
+    <Halo x={87} y={27} size={320} anim={{ animationDuration: "3.2s" }} />
+    <Halo x={27} y={-33} size={440} dark anim={{ animationDuration: "3.2s" }} />
     <svg width="480" height="600" viewBox="0 0 480 600" style={{ position: "absolute", left: 0, top: 0, overflow: "visible" }}>
       <path className="hl-body" d="M184 266 C190 252 214 250 230 254 C240 257 250 250 262 249 C280 248 296 252 298 262 C296 300 302 340 300 380 C301 430 303 470 306 500 L176 500 C179 470 182 430 182 380 C181 330 186 300 184 266 Z" />
       <path fill={WAX} d="M182 268 C186 250 214 246 232 252 C244 256 252 246 266 246 C284 246 300 252 300 264 C302 290 304 330 303 380 C302 430 308 470 310 494 C311 500 300 502 298 496 C296 470 292 440 291 400 C290 380 286 372 282 380 C279 400 282 420 276 428 C270 436 262 430 263 420 C264 380 262 320 256 300 C252 292 248 294 247 304 C246 316 249 326 242 330 C236 333 232 326 234 316 C236 300 232 292 226 296 C220 300 222 330 222 350 C222 372 226 386 216 390 C206 393 204 382 207 370 C210 340 206 300 198 296 C192 293 192 310 190 322 C188 336 184 344 178 338 C172 332 176 316 177 300 C178 288 179 276 182 268 Z" />
@@ -87,7 +89,7 @@ const Candle = () => (
     <Flame
       x={223}
       y={160}
-      transform="rotate(4deg)"
+      transform="rotate(4deg) scale(1.5)"
       flame={{ animationDuration: "1.6s" }}
       core={{ animationDuration: "1.6s" }}
     />
@@ -97,10 +99,10 @@ const Candle = () => (
 /** Duo de bougies (02) : rythmes désynchronisés, cires réunies sur le filet. */
 const CandleDuo = () => (
   <div className="hl-canvas hl-duo" style={{ width: 560, height: 600 }}>
-    <Halo x={57} y={45} size={320} anim={{ animationDuration: "3.7s", animationDelay: "-0.5s" }} />
-    <Halo x={-3} y={-15} size={440} dark anim={{ animationDuration: "3.7s", animationDelay: "-0.5s" }} />
-    <Halo x={247} y={210} size={220} anim={{ animationDuration: "2.9s", animationDelay: "-1.7s" }} />
-    <Halo x={207} y={170} size={300} dark anim={{ animationDuration: "2.9s", animationDelay: "-1.7s" }} />
+    <Halo x={57} y={27} size={320} anim={{ animationDuration: "3.7s", animationDelay: "-0.5s" }} />
+    <Halo x={-3} y={-33} size={440} dark anim={{ animationDuration: "3.7s", animationDelay: "-0.5s" }} />
+    <Halo x={247} y={196} size={220} small anim={{ animationDuration: "2.9s", animationDelay: "-1.7s" }} />
+    <Halo x={207} y={156} size={300} dark small anim={{ animationDuration: "2.9s", animationDelay: "-1.7s" }} />
     <svg width="560" height="600" viewBox="0 0 560 600" style={{ position: "absolute", left: 0, top: 0, overflow: "visible" }}>
       <g transform="translate(-30 0)">
         <path className="hl-body" d="M184 266 C190 252 214 250 230 254 C240 257 250 250 262 249 C280 248 296 252 298 262 C296 300 302 340 300 380 C301 430 303 470 306 500 L176 500 C179 470 182 430 182 380 C181 330 186 300 184 266 Z" />
@@ -118,14 +120,14 @@ const CandleDuo = () => (
     <Flame
       x={193}
       y={160}
-      transform="rotate(4deg)"
+      transform="rotate(4deg) scale(1.5)"
       flame={{ animationDuration: "1.83s", animationDelay: "-0.4s" }}
       core={{ animationDuration: "1.57s", animationDelay: "-1.1s" }}
     />
     <Flame
       x={333}
       y={277}
-      transform="rotate(-4deg) scale(0.78)"
+      transform="rotate(-4deg) scale(1.17)"
       flame={{ animationDuration: "1.37s", animationDelay: "-0.9s" }}
       core={{ animationDuration: "1.21s", animationDelay: "-0.3s" }}
     />
