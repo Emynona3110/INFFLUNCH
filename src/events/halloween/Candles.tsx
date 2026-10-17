@@ -1,5 +1,4 @@
-import { useState, type AnimationEvent, type CSSProperties } from "react";
-import pumpkinSvg from "./anim/citrouille-saut.svg?raw";
+import type { CSSProperties } from "react";
 import "./halloween.css";
 
 /*
@@ -134,46 +133,14 @@ const CandleDuo = () => (
   </div>
 );
 
-// Objet stable : React 19 réécrit le HTML dès que l'objet change, ce qui
-// couperait le saut en cours.
-const pumpkinHtml = { __html: pumpkinSvg };
-
-/**
- * Citrouille-panier (05) : un saut au clic (ou Entrée/Espace). Comme le logo,
- * un appui pendant le saut est ignoré : il va jusqu'au bout avant de pouvoir
- * être rejoué (fin = toutes les animations finies, bonbons compris).
- */
-const Pumpkin = () => {
-  const [jumping, setJumping] = useState(false);
-  const onAnimationEnd = (e: AnimationEvent<HTMLButtonElement>) => {
-    const done = e.currentTarget
-      .getAnimations({ subtree: true })
-      .every((a) => a.playState === "finished");
-    if (done) setJumping(false);
-  };
-  return (
-    <button
-      type="button"
-      aria-label="Faire sauter la citrouille"
-      className={`hl-canvas hl-pumpkin ${jumping ? "hl-pumpkin-jump" : ""}`}
-      onClick={() => {
-        if (!jumping) setJumping(true);
-      }}
-      onAnimationEnd={onAnimationEnd}
-      dangerouslySetInnerHTML={pumpkinHtml}
-    />
-  );
-};
-
-/** Décor du pied de page : bougie seule et citrouille à gauche, duo à droite. */
+/** Décor du pied de page : bougie seule à gauche, duo à droite. (Plus de
+ *  citrouille : la citrouille-panier pleine est le trophée de la chasse aux
+ *  bonbons.) */
 export default function Candles() {
   return (
     <div className="hl-candles">
       <div aria-hidden="true" className="hl-anchor hl-anchor-left">
         <Candle />
-      </div>
-      <div className="hl-anchor hl-anchor-pumpkin">
-        <Pumpkin />
       </div>
       <div aria-hidden="true" className="hl-anchor hl-anchor-right">
         <CandleDuo />

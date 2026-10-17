@@ -1,8 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Query, useIsFetching, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { useScreenLoader } from "@/components/brand/ScreenLoader";
+import {
+  useScreenLoader,
+  useScreenLoaderBusy,
+} from "@/components/brand/ScreenLoader";
 import { markBootDone } from "@/components/brand/bootState";
+import { PageRevealedContext } from "@/components/pageRevealContext";
 
 /** Au-delà, on montre la page quand même (réseau lent) : mieux vaut un
  *  chargement visible qu'un écran vide. */
@@ -75,13 +79,20 @@ const PageReveal = ({
     if (ready) markBootDone();
   }, [ready]);
 
-  const waiting = useScreenLoader(!ready, { yieldToOthers: true });
+  useScreenLoader(!ready);
+  // La page n'apparaît que COMPLÈTE : plus aucune attente en cours (ses
+  // sections comprises, même pas encore affichée) et le monogramme effacé
+  // après son cycle. Jamais par-dessus un monogramme encore visible. Une
+  // fois révélée, elle le reste (une attente plus tardive, changement de
+  // vue…, ne la masque plus).
+  const busy = useScreenLoaderBusy();
+  const [revealed, setRevealed] = useState(false);
+  if (!revealed && ready && !busy) setRevealed(true);
+  const waiting = !revealed;
 
   // Tant que la page est masquée, le monogramme de chargement (unique, au
-  // centre de l'écran, cf. screenLoaderControl.ts) reste affiché ; la page révélée
-  // apparaît une fois qu'il a fini son cycle et s'est effacé — sauf si ses
-  // sections encore en chargement le gardent affiché : elle apparaît alors
-  // tout de suite (cadre, outils), le monogramme au centre.
+  // centre de l'écran, cf. screenLoaderControl.ts) reste affiché ; la page
+  // apparaît d'un bloc une fois qu'il a fini son cycle et s'est effacé.
   return (
     <div className={className}>
       <motion.div
@@ -90,7 +101,9 @@ const PageReveal = ({
         transition={{ duration: 0.35, ease: "easeOut" }}
         className={className}
       >
-        {children}
+        <PageRevealedContext.Provider value={!waiting}>
+          {children}
+        </PageRevealedContext.Provider>
       </motion.div>
     </div>
   );

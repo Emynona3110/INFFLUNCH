@@ -14,20 +14,32 @@ import { LazyRestaurantDialog } from "@/components/lazyDialogs";
 import { lazyPage, useOpenedOnce } from "@/lib/lazyPage";
 import ChefHatPlus from "@/components/icons/ChefHatPlus";
 import { FiArrowUpRight, FiChevronDown } from "react-icons/fi";
-import PageLoader from "@/components/brand/PageLoader";
-import { useScreenLoader } from "@/components/brand/ScreenLoader";
+import ScreenLoader, {
+  useScreenLoader,
+  useScreenLoaderOnScreen,
+} from "@/components/brand/ScreenLoader";
 
-// Attente des vues Carte et Roue (données ou code pas encore là).
-const mapLoader = (
-  <div className="flex h-full items-center justify-center rounded-card border border-border bg-muted/40">
-    <PageLoader />
-  </div>
-);
-const rouletteLoader = (
-  <div className="flex h-full items-center justify-center">
-    <PageLoader />
-  </div>
-);
+/** Carte et roue : n'apparaissent qu'une fois le monogramme de chargement
+ *  effacé — il finit son cycle avant de partir (leur code est téléchargé
+ *  pendant ce temps), comme pour les autres pages. */
+const ViewReveal = ({ children }: { children: React.ReactNode }) => {
+  const onScreen = useScreenLoaderOnScreen();
+  // Une fois affichée, elle reste : un monogramme plus tard (autre attente)
+  // ne doit pas la démonter en plein tirage.
+  const [shown, setShown] = useState(!onScreen);
+  if (!onScreen && !shown) setShown(true);
+  if (!shown) return null;
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.25 }}
+      className="h-full"
+    >
+      {children}
+    </motion.div>
+  );
+};
 
 // Carte (Leaflet) et roue : chargées à part, préchargées en tâche de fond.
 const RestaurantsMap = lazyPage(() => import("@/components/RestaurantsMap"));
@@ -96,10 +108,7 @@ const RestaurantGrid = ({
     : data;
 
   const isLoading = loading || favoritesLoading;
-  // Carte et roue ont leur propre attente (dans leur cadre).
-  const waiting = useScreenLoader(
-    isLoading && viewMode !== "map" && viewMode !== "roulette",
-  );
+  const waiting = useScreenLoader(isLoading);
 
   // Change quand un filtre change (favoris/tags/badges/note/tri) mais PAS à la
   // frappe de recherche → remonte la liste pour ré-animer tous les éléments.
@@ -204,28 +213,32 @@ const RestaurantGrid = ({
 
     // --- Carte globale ---
     if (viewMode === "map") {
-      if (isLoading) return mapLoader;
+      if (isLoading || waiting) return null;
       // Les restaurants fermés ne sont pas placés sur la carte.
       return (
-        <Suspense fallback={mapLoader}>
-          <RestaurantsMap restaurants={filteredData.filter((r) => !r.closed)} />
+        <Suspense fallback={<ScreenLoader />}>
+          <ViewReveal>
+            <RestaurantsMap restaurants={filteredData.filter((r) => !r.closed)} />
+          </ViewReveal>
         </Suspense>
       );
     }
 
     // --- Roue (Surprise du midi) ---
     if (viewMode === "roulette") {
-      if (isLoading) return rouletteLoader;
+      if (isLoading || waiting) return null;
       return (
-        <Suspense fallback={rouletteLoader}>
-          <RestaurantRoulette
-            pool={filteredData.filter((r) => !r.closed)}
-            excludedIds={rouletteExcluded}
-            onExcludedChange={onRouletteExcludedChange}
-            winnerId={rouletteWinnerId}
-            onWinnerChange={onRouletteWinnerChange}
-            cardProps={itemProps}
-          />
+        <Suspense fallback={<ScreenLoader />}>
+          <ViewReveal>
+            <RestaurantRoulette
+              pool={filteredData.filter((r) => !r.closed)}
+              excludedIds={rouletteExcluded}
+              onExcludedChange={onRouletteExcludedChange}
+              winnerId={rouletteWinnerId}
+              onWinnerChange={onRouletteWinnerChange}
+              cardProps={itemProps}
+            />
+          </ViewReveal>
         </Suspense>
       );
     }

@@ -27,6 +27,7 @@ import PageReveal from "../components/PageReveal";
 import ScreenLoader from "@/components/brand/ScreenLoader";
 import useIsAdmin from "../hooks/useIsAdmin";
 import { cn } from "@/lib/utils";
+import { eventTheme } from "@/events";
 import { lazyPage, preloadLazyPages } from "@/lib/lazyPage";
 
 // Seule la liste des restaurants (écran principal) est dans ce chunk ; les
@@ -182,6 +183,8 @@ const UserPage = () => {
   // en haut, carte centrée) ; demandes / tables = pleine hauteur avec scroll
   // interne (pas de scroll de page) ; restaurants/fiche = scroll de page.
   const centerContent = currentPage === "a-propos";
+  const hasLunchDecor = !!eventTheme()?.lunchDecor;
+  const EventOverlay = eventTheme()?.Overlay;
   // La carte globale et la roue occupent toute la hauteur (pas de scroll de page).
   const isDesktop = useIsDesktop();
   const fillContent =
@@ -250,6 +253,14 @@ const UserPage = () => {
     >
       {/* Page pas encore téléchargée (ouverte avant le préchargement) : le
           monogramme de chargement, puis PageReveal comme d'habitude. */}
+      {/* Emplacement du décor d'évènement de Déjeuner (toile d'Halloween…),
+          rempli par LunchToday via un portail : hors de PageReveal, il
+          apparaît en fondu avec la page sans glisser. Ligne de hauteur
+          nulle, le décor se cale sur le coin haut droit. */}
+      {EventOverlay && <EventOverlay />}
+      {currentPage === "dejeuner" && hasLunchDecor && (
+        <div id="lunch-decor" className="relative h-0 w-full shrink-0" />
+      )}
       <Suspense fallback={<ScreenLoader />}>
         {/* Chaque page n'apparaît qu'une fois ses données chargées (fondu en
             montant) : remontée à chaque changement d'adresse. */}

@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useLayoutEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { LuClock, LuMapPinOff, LuSandwich, LuUtensils, LuUtensilsCrossed } from "react-icons/lu";
@@ -33,6 +34,8 @@ import { HOVER_ZOOM_IMG } from "@/lib/imageClasses";
 
 import { restaurantPath } from "@/utils/restaurantPath";
 import { useScreenLoader } from "@/components/brand/ScreenLoader";
+import { eventTheme } from "@/events";
+import { usePageRevealed } from "@/components/pageRevealContext";
 /** "Jeudi 28 août" (première lettre en majuscule). */
 const todayLabel = () => {
   const s = new Date().toLocaleDateString("fr-FR", {
@@ -192,7 +195,17 @@ const LunchToday = () => {
     setLunchOff,
     clearLunch,
   } = useLunchToday();
-  const waiting = useScreenLoader(loading);
+  // Décor d'évènement (toile d'Halloween…), absent hors période. Le thème
+  // ne change pas pendant la session : appel de hook conditionnel stable.
+  const lunchDecor = eventTheme()?.lunchDecor;
+  const decorLoading = lunchDecor?.useLoading() ?? false;
+  // Le monogramme de chargement reste jusqu'à ce que TOUT soit prêt (midis
+  // du jour et décor) ; tout apparaît ensuite d'un bloc.
+  const waiting = useScreenLoader(loading || decorLoading);
+  const revealed = usePageRevealed();
+  // Emplacement du décor posé par UserPage hors du fondu-montée de la page.
+  const [decorSlot, setDecorSlot] = useState<HTMLElement | null>(null);
+  useLayoutEffect(() => setDecorSlot(document.getElementById("lunch-decor")), []);
 
   const restById = useMemo(
     () => new Map(restaurants.map((r) => [r.id, r])),
@@ -323,16 +336,25 @@ const LunchToday = () => {
   const leave = () => confirmLateChange("clear", hasPlan, () => guard(() => clearLunch()));
 
   return (
+    // Toute la page attend la fin du monogramme de chargement : entête,
+    // encart et tablées apparaissent ensemble (avec le décor d'évènement,
+    // qui attend le même signal).
     <motion.div
       initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
+      animate={waiting ? { opacity: 0, y: 10 } : { opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
       className="tw-scope mx-auto w-full max-w-2xl"
     >
       {/* Entête : le jour + le compteur, qui « pope » à chaque arrivée. */}
       {/* `items-baseline-last` : le compteur s'aligne sur la DERNIÈRE ligne de
           gauche (la date), pas sur le titre. */}
-      <div className="mb-2.5 flex items-baseline-last justify-between gap-4 sm:mb-5">
+      <div
+        className={cn(
+          "mb-2.5 flex items-baseline-last justify-between gap-4 sm:mb-5",
+          // Le compteur s'écarte de la toile tant qu'elle déborde sur la colonne.
+          lunchDecor && "pr-16 sm:pr-24 lg:pr-0",
+        )}
+      >
         <div>
           <div
             role="heading"
@@ -799,6 +821,12 @@ const LunchToday = () => {
       />
 
       {lateLunchDialog}
+
+      {lunchDecor &&
+        decorSlot &&
+        revealed &&
+        !waiting &&
+        createPortal(<lunchDecor.Decor />, decorSlot)}
     </motion.div>
   );
 };

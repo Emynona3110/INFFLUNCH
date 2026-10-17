@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useState } from "react";
 import { FiX, FiSearch } from "react-icons/fi";
 
 interface SearchInputProps {
@@ -10,6 +10,8 @@ interface SearchInputProps {
   /** Focus immédiat à l'affichage (barre dépliée sur mobile). */
   autoFocus?: boolean;
   placeholder?: string;
+  /** Remplaçant de la loupe (bonbon d'un évènement…). */
+  icon?: ReactNode;
 }
 
 /**
@@ -23,6 +25,7 @@ const SearchInput = ({
   onSearch,
   autoFocus,
   placeholder = "Chercher un restaurant...",
+  icon,
 }: SearchInputProps) => {
   // État local libre pendant la frappe, resynchronisé dès que la valeur change
   // à l'extérieur (retour sur l'onglet, réinitialisation via le logo…).
@@ -50,7 +53,7 @@ const SearchInput = ({
         aria-label="Rechercher"
         className="absolute left-2 top-1/2 flex h-6 w-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full text-foreground transition hover:bg-foreground/10 [&>svg]:opacity-50 hover:[&>svg]:opacity-100"
       >
-        <FiSearch className="h-4 w-4" />
+        {icon ?? <FiSearch className="h-4 w-4" />}
       </button>
       <input
         type="search"

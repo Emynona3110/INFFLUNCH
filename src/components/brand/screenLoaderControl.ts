@@ -64,7 +64,15 @@ const el = () => document.getElementById("boot-loader");
  *  `scheduleShow`, délai compris). */
 const cancelBootAppearance = () => {
   const node = el();
-  if (!node || detached || isShown(node)) return;
+  if (!node || detached) return;
+  // Déjà en train d'apparaître (l'animation CSS part à 1 s sans attendre le
+  // code : sur un téléphone, le code peut prendre du retard sur elle). Il
+  // est À L'ÉCRAN : le contenu attend, et il s'efface après son cycle.
+  if (isShown(node)) {
+    setOnScreen(true);
+    scheduleHide();
+    return;
+  }
   clearTimeout(bootTimer);
   detach(node);
   node.style.opacity = "0";

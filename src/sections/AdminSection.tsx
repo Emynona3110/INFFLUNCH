@@ -8,6 +8,7 @@ import AdminUsers from "../admin/AdminUsers";
 import AdminFeedback, { useNewFeedbackCount } from "../admin/AdminFeedback";
 import AdminIllustrations from "../admin/AdminIllustrations";
 import AdminEvents from "../admin/AdminEvents";
+import AdminDecors from "../admin/AdminDecors";
 import AdminAccessRequests from "../admin/AdminAccessRequests";
 import useAccessRequests from "../hooks/useAccessRequests";
 import { adminSections } from "../services/adminSections";
@@ -24,8 +25,11 @@ import { cn } from "@/lib/utils";
 //  - Tags : CRUD générique (DataManager).
 //  - Illustrations : toutes les images de succès en grand (AdminIllustrations),
 //    pour contrôler style, cadrage et détourage.
-//  - Évènements : aperçu d'un évènement (Halloween…) avant sa période, sur
-//    le navigateur de l'admin seulement (AdminEvents).
+//  - Évènements : les popups de l'évènement affiché à rejouer, remise à
+//    zéro de sa chasse aux bonbons (AdminEvents).
+//  - Décors : quels décors d'évènement afficher (calendrier, aperçu d'un
+//    évènement avant sa période, aucun), sur le navigateur de l'admin
+//    seulement (AdminDecors).
 //
 // Navigation entre sous-onglets : pills sur desktop, roue « ‹ Onglet › » dans
 // le bandeau sur mobile (comme Mon compte). Pas de balayage ici, contrairement
@@ -39,6 +43,7 @@ const tabs = [
   { key: "tags", label: "Tags" },
   { key: "illustrations", label: "Illustrations" },
   { key: "events", label: "Évènements" },
+  { key: "decors", label: "Décors" },
 ] as const;
 
 type TabKey = (typeof tabs)[number]["key"];
@@ -102,6 +107,8 @@ const AdminSection = () => {
       <AdminIllustrations />
     ) : tab === "events" ? (
       <AdminEvents />
+    ) : tab === "decors" ? (
+      <AdminDecors />
     ) : tab === "users" ? (
       <AdminUsers />
     ) : tab === "feedback" ? (

@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="60 30 360 470">
+<defs>
+<clipPath id="ifl-sin-s"><path d="M0 0 L480 0 L480 190 L352 190 A112 24 0 0 1 128 190 L0 190 Z"></path></clipPath>
+</defs>
+<g transform="translate(0 50)">
+<g class="ifl-hop" style="animation-duration: 1.50s">
+<path fill="none" stroke="#5478D4" stroke-width="10" stroke-linecap="round" d="M128 190 C120 40 360 40 352 190"></path>
+<ellipse cx="165" cy="310" rx="95" ry="125" fill="#EA580C"></ellipse>
+<ellipse cx="315" cy="310" rx="95" ry="125" fill="#EA580C"></ellipse>
+<ellipse cx="240" cy="305" rx="105" ry="135" fill="#EA580C"></ellipse>
+<ellipse cx="240" cy="190" rx="124" ry="30" fill="#EA580C"></ellipse>
+<path fill="#113894" d="M150 348 C190 378 290 378 330 348 C320 398 280 418 240 418 C200 418 160 398 150 348 Z"></path>
+<path fill="#113894" transform="translate(180 333) scale(1.75) translate(-28 -80)" d="M19.393 27.443 L36.607 20.557 Q38 20 38 21.5 V28.5 Q38 30 36.607 30.557 L19.393 37.443 Q18 38 18 36.5 V29.5 Q18 28 19.393 27.443 Z M19.393 42.443 L22.533 41.187 V54 A1.6 1.6 0 0 0 25.733 54 V39.907 L30.267 38.093 V54 A1.6 1.6 0 0 0 33.467 54 V36.813 L36.607 35.557 Q38 35 38 36.5 V73 A7 7 0 0 1 31 80 H25 A7 7 0 0 1 18 73 V44.5 Q18 43 19.393 42.443 Z"></path>
+<path fill="#113894" transform="translate(300 333) scale(1.75) translate(-54 -80)" d="M51 80 A7 7 0 0 1 44 73 V21.5 Q44 20.1 45.4 20.4 C55 22.5 64 31 64 43 V73 A7 7 0 0 1 57 80 Z"></path>
+<path fill="#EA580C" d="M204 360 L222 364 L220 380 L206 377 Z M258 364 L276 360 L274 377 L260 380 Z M230 418 L230 402 L250 402 L250 418 Z"></path>
+<ellipse cx="240" cy="190" rx="112" ry="24" fill="#113894"></ellipse>
+<g clip-path="url(#ifl-sin-s)">
+
+<g transform="translate(172 212)"><g class="ifl-c" style="animation-duration: 1.50s; animation-delay: 0s; --a: 0.6; --rr: 6deg"><g transform="rotate(10) scale(0.85)">
+<path fill="#EA580C" d="M0 0 L22 0 A22 22 0 0 1 19.05 11 Z M0 0 L11 19.05 A22 22 0 0 1 0 22 Z M0 0 L-11 19.05 A22 22 0 0 1 -19.05 11 Z M0 0 L-22 0 A22 22 0 0 1 -19.05 -11 Z M0 0 L-11 -19.05 A22 22 0 0 1 0 -22 Z M0 0 L11 -19.05 A22 22 0 0 1 19.05 -11 Z"></path>
+<path fill="#FFFFFF" d="M0 0 L19.05 11 A22 22 0 0 1 11 19.05 Z M0 0 L0 22 A22 22 0 0 1 -11 19.05 Z M0 0 L-19.05 11 A22 22 0 0 1 -22 0 Z M0 0 L-19.05 -11 A22 22 0 0 1 -11 -19.05 Z M0 0 L0 -22 A22 22 0 0 1 11 -19.05 Z M0 0 L19.05 -11 A22 22 0 0 1 22 0 Z"></path>
+<circle r="22" fill="none" stroke="#5478D4" stroke-width="3"></circle>
+<circle r="4" fill="#FFFFFF"></circle>
+</g></g></g>
+
+<g transform="translate(300 214)"><g class="ifl-c" style="animation-duration: 1.50s; animation-delay: 0.02s; --a: 0.7; --rr: -8deg"><g transform="rotate(-12) scale(0.85)">
+<clipPath id="ss-p1"><ellipse rx="24" ry="17"></ellipse></clipPath>
+<path fill="#5478D4" d="M-16 0 C-24 -5 -32 -14 -40 -16 C-45 -6 -45 6 -40 16 C-32 14 -24 5 -16 0 Z M16 0 C24 -5 32 -14 40 -16 C45 -6 45 6 40 16 C32 14 24 5 16 0 Z"></path>
+<ellipse rx="24" ry="17" fill="#5478D4"></ellipse>
+<g clip-path="url(#ss-p1)"><path fill="none" stroke="#FFFFFF" stroke-width="5" d="M-12 -20 L-2 20 M4 -20 L14 20"></path></g>
+</g></g></g>
+
+<g transform="translate(232 214)"><g class="ifl-c" style="animation-duration: 1.50s; animation-delay: 0.01s; --a: 0.6; --rr: 5deg"><g transform="rotate(0) scale(0.85)">
+<clipPath id="ss-c1"><path d="M0 -34 C6 -34 28 12 28 18 C28 25 18 26 0 26 C-18 26 -28 25 -28 18 C-28 12 -6 -34 0 -34 Z"></path></clipPath>
+<g clip-path="url(#ss-c1)"><rect x="-30" y="-36" width="60" height="22" fill="#FFFFFF"></rect><rect x="-30" y="-14" width="60" height="20" fill="#EA580C"></rect><rect x="-30" y="6" width="60" height="22" fill="#5478D4"></rect></g>
+<path fill="none" stroke="#5478D4" stroke-width="2.5" stroke-linejoin="round" d="M0 -34 C6 -34 28 12 28 18 C28 25 18 26 0 26 C-18 26 -28 25 -28 18 C-28 12 -6 -34 0 -34 Z"></path>
+</g></g></g>
+
+<g transform="translate(196 204)"><g class="ifl-c" style="animation-duration: 1.50s; animation-delay: 0.03s; --a: 0.8; --rr: -10deg"><g transform="rotate(20) scale(0.85)">
+<clipPath id="ss-p2"><ellipse rx="24" ry="17"></ellipse></clipPath>
+<path fill="#5478D4" d="M-16 0 C-24 -5 -32 -14 -40 -16 C-45 -6 -45 6 -40 16 C-32 14 -24 5 -16 0 Z M16 0 C24 -5 32 -14 40 -16 C45 -6 45 6 40 16 C32 14 24 5 16 0 Z"></path>
+<ellipse rx="24" ry="17" fill="#5478D4"></ellipse>
+<g clip-path="url(#ss-p2)"><path fill="none" stroke="#FFFFFF" stroke-width="5" d="M-12 -20 L-2 20 M4 -20 L14 20"></path></g>
+</g></g></g>
+
+<g transform="translate(276 206)"><g class="ifl-c" style="animation-duration: 1.50s; animation-delay: 0.02s; --a: 0.8; --rr: 8deg"><g transform="rotate(-10) scale(0.85)">
+<path fill="#EA580C" d="M0 0 L22 0 A22 22 0 0 1 19.05 11 Z M0 0 L11 19.05 A22 22 0 0 1 0 22 Z M0 0 L-11 19.05 A22 22 0 0 1 -19.05 11 Z M0 0 L-22 0 A22 22 0 0 1 -19.05 -11 Z M0 0 L-11 -19.05 A22 22 0 0 1 0 -22 Z M0 0 L11 -19.05 A22 22 0 0 1 19.05 -11 Z"></path>
+<path fill="#FFFFFF" d="M0 0 L19.05 11 A22 22 0 0 1 11 19.05 Z M0 0 L0 22 A22 22 0 0 1 -11 19.05 Z M0 0 L-19.05 11 A22 22 0 0 1 -22 0 Z M0 0 L-19.05 -11 A22 22 0 0 1 -11 -19.05 Z M0 0 L0 -22 A22 22 0 0 1 11 -19.05 Z M0 0 L19.05 -11 A22 22 0 0 1 22 0 Z"></path>
+<circle r="22" fill="none" stroke="#5478D4" stroke-width="3"></circle>
+<circle r="4" fill="#FFFFFF"></circle>
+</g></g></g>
+
+<g transform="translate(318 196)"><g class="ifl-c" style="animation-duration: 1.50s; animation-delay: 0.04s; --a: 0.9; --rr: -12deg"><g transform="rotate(-18) scale(0.85)">
+<clipPath id="ss-c2"><path d="M0 -34 C6 -34 28 12 28 18 C28 25 18 26 0 26 C-18 26 -28 25 -28 18 C-28 12 -6 -34 0 -34 Z"></path></clipPath>
+<g clip-path="url(#ss-c2)"><rect x="-30" y="-36" width="60" height="22" fill="#FFFFFF"></rect><rect x="-30" y="-14" width="60" height="20" fill="#EA580C"></rect><rect x="-30" y="6" width="60" height="22" fill="#5478D4"></rect></g>
+<path fill="none" stroke="#5478D4" stroke-width="2.5" stroke-linejoin="round" d="M0 -34 C6 -34 28 12 28 18 C28 25 18 26 0 26 C-18 26 -28 25 -28 18 C-28 12 -6 -34 0 -34 Z"></path>
+</g></g></g>
+
+<g transform="translate(214 168)"><g class="ifl-c" style="animation-duration: 1.50s; animation-delay: 0.05s; --a: 1.2; --rr: 10deg"><g transform="rotate(-12) scale(0.85)">
+<path fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" d="M0 10 L0 64"></path>
+<circle r="24" fill="#EA580C"></circle>
+<path fill="none" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" d="M-3 0 a3 3 0 1 1 6 0 a6.5 6.5 0 1 1 -13 0 a10 10 0 1 1 20 0 a13.5 13.5 0 1 1 -27 0 a17 17 0 1 1 34 0"></path>
+</g></g></g>
+
+<g transform="translate(168 192)"><g class="ifl-c" style="animation-duration: 1.50s; animation-delay: 0.03s; --a: 1; --rr: -6deg"><g transform="rotate(25) scale(0.85)">
+<path fill="#EA580C" d="M0 0 L22 0 A22 22 0 0 1 19.05 11 Z M0 0 L11 19.05 A22 22 0 0 1 0 22 Z M0 0 L-11 19.05 A22 22 0 0 1 -19.05 11 Z M0 0 L-22 0 A22 22 0 0 1 -19.05 -11 Z M0 0 L-11 -19.05 A22 22 0 0 1 0 -22 Z M0 0 L11 -19.05 A22 22 0 0 1 19.05 -11 Z"></path>
+<path fill="#FFFFFF" d="M0 0 L19.05 11 A22 22 0 0 1 11 19.05 Z M0 0 L0 22 A22 22 0 0 1 -11 19.05 Z M0 0 L-19.05 11 A22 22 0 0 1 -22 0 Z M0 0 L-19.05 -11 A22 22 0 0 1 -11 -19.05 Z M0 0 L0 -22 A22 22 0 0 1 11 -19.05 Z M0 0 L19.05 -11 A22 22 0 0 1 22 0 Z"></path>
+<circle r="22" fill="none" stroke="#5478D4" stroke-width="3"></circle>
+<circle r="4" fill="#FFFFFF"></circle>
+</g></g></g>
+
+<g transform="translate(262 188)"><g class="ifl-c" style="animation-duration: 1.50s; animation-delay: 0.04s; --a: 1.1; --rr: 9deg"><g transform="rotate(8) scale(0.85)">
+<clipPath id="ss-p3"><ellipse rx="24" ry="17"></ellipse></clipPath>
+<path fill="#5478D4" d="M-16 0 C-24 -5 -32 -14 -40 -16 C-45 -6 -45 6 -40 16 C-32 14 -24 5 -16 0 Z M16 0 C24 -5 32 -14 40 -16 C45 -6 45 6 40 16 C32 14 24 5 16 0 Z"></path>
+<ellipse rx="24" ry="17" fill="#5478D4"></ellipse>
+<g clip-path="url(#ss-p3)"><path fill="none" stroke="#FFFFFF" stroke-width="5" d="M-12 -20 L-2 20 M4 -20 L14 20"></path></g>
+</g></g></g>
+
+<g transform="translate(200 188)"><g class="ifl-c" style="animation-duration: 1.50s; animation-delay: 0.02s; --a: 1; --rr: -7deg"><g transform="rotate(24) scale(0.85)">
+<clipPath id="ss-c3"><path d="M0 -34 C6 -34 28 12 28 18 C28 25 18 26 0 26 C-18 26 -28 25 -28 18 C-28 12 -6 -34 0 -34 Z"></path></clipPath>
+<g clip-path="url(#ss-c3)"><rect x="-30" y="-36" width="60" height="22" fill="#FFFFFF"></rect><rect x="-30" y="-14" width="60" height="20" fill="#EA580C"></rect><rect x="-30" y="6" width="60" height="22" fill="#5478D4"></rect></g>
+<path fill="none" stroke="#5478D4" stroke-width="2.5" stroke-linejoin="round" d="M0 -34 C6 -34 28 12 28 18 C28 25 18 26 0 26 C-18 26 -28 25 -28 18 C-28 12 -6 -34 0 -34 Z"></path>
+</g></g></g>
+
+<g transform="translate(296 158)"><g class="ifl-c" style="animation-duration: 1.50s; animation-delay: 0.06s; --a: 1.4; --rr: 12deg"><g transform="rotate(14) scale(0.85)">
+<path fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" d="M0 10 L0 64"></path>
+<circle r="24" fill="#EA580C"></circle>
+<path fill="none" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" d="M-3 0 a3 3 0 1 1 6 0 a6.5 6.5 0 1 1 -13 0 a10 10 0 1 1 20 0 a13.5 13.5 0 1 1 -27 0 a17 17 0 1 1 34 0"></path>
+</g></g></g>
+
+<g transform="translate(244 152)"><g class="ifl-c" style="animation-duration: 1.50s; animation-delay: 0.05s; --a: 1.3; --rr: -9deg"><g transform="rotate(-6) scale(0.85)">
+<path fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" d="M0 10 L0 64"></path>
+<circle r="24" fill="#EA580C"></circle>
+<path fill="none" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" d="M-3 0 a3 3 0 1 1 6 0 a6.5 6.5 0 1 1 -13 0 a10 10 0 1 1 20 0 a13.5 13.5 0 1 1 -27 0 a17 17 0 1 1 34 0"></path>
+</g></g></g>
+
+</g>
+</g>
+</g>
+</svg>

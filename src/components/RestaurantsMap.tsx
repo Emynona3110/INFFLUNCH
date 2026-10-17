@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   MapContainer,
   TileLayer,
@@ -14,6 +15,7 @@ import { FaStar } from "react-icons/fa";
 import MapZoomControl from "@/components/MapZoomControl";
 import OsmAttribution from "@/components/OsmAttribution";
 import { INFFLUX_COORDS } from "@/services/geocode";
+import { eventTheme } from "@/events";
 import { useTheme } from "@/lib/theme";
 import { Restaurant } from "@/hooks/useRestaurants";
 import { clusterize } from "@/services/mapClusters";
@@ -38,6 +40,30 @@ const pinIcon = (color: string) =>
 // Couleurs de l'app : restos en bleu, INFFLUX en orange (même goutte).
 const RESTO_PIN = "#113894";
 const inffluxIcon = pinIcon("#EA580C");
+
+/** Repère d'INFFLUX vide, rempli par un portail pendant un évènement (bonbon
+ *  à la place de la goutte, cf. EventTheme.MapHomePin). Même boîte et même
+ *  ancre que la goutte. */
+const inffluxSlotIcon = L.divIcon({
+  className: "",
+  html: "",
+  iconSize: [20, 20],
+  iconAnchor: [10, 20],
+});
+/** La goutte d'INFFLUX en React, pour le repère d'évènement. */
+const InffluxDrop = () => (
+  <div
+    style={{
+      width: 20,
+      height: 20,
+      borderRadius: "50% 50% 50% 0",
+      transform: "rotate(-45deg)",
+      background: "#EA580C",
+      boxShadow: "0 3px 6px rgba(2,8,40,.45)",
+      border: "2px solid #fff",
+    }}
+  />
+);
 
 /** Groupe de restaurants trop proches pour être distingués : une pastille
  *  ronde portant leur nombre, dans le bleu des pins qu'elle remplace. Elle
@@ -117,6 +143,10 @@ const RestaurantsMap = ({ restaurants }: Props) => {
   // restaurants à la même adresse ne se séparent à aucun zoom, leurs fiches
   // devenaient inaccessibles. La liste y mène toujours.
   const [openCluster, setOpenCluster] = useState<string | null>(null);
+  // Évènement : un bonbon à la place de la goutte d'INFFLUX, rendu dans
+  // l'élément du repère une fois posé sur la carte.
+  const EventHomePin = eventTheme()?.MapHomePin;
+  const [homePinEl, setHomePinEl] = useState<HTMLElement | null>(null);
 
   const located = useMemo(
     () => restaurants.filter((r) => r.lat != null && r.lng != null),
@@ -229,8 +259,16 @@ const RestaurantsMap = ({ restaurants }: Props) => {
 
         <Marker
           position={[INFFLUX_COORDS.lat, INFFLUX_COORDS.lng]}
-          icon={inffluxIcon}
+          icon={EventHomePin ? inffluxSlotIcon : inffluxIcon}
+          eventHandlers={
+            EventHomePin
+              ? { add: (e) => setHomePinEl((e.target as L.Marker).getElement() ?? null) }
+              : undefined
+          }
         />
+        {EventHomePin &&
+          homePinEl &&
+          createPortal(<EventHomePin fallback={<InffluxDrop />} />, homePinEl)}
 
         {clusters.map((cluster) => {
           if (cluster.items.length > 1) {

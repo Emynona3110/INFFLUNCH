@@ -1,108 +1,96 @@
 import { useState } from "react";
-import {
-  EVENTS,
-  PREVIEW_KEY,
-  PREVIEW_NONE,
-  scheduledEvent,
-} from "@/events/calendar";
-import { cn } from "@/lib/utils";
+import { useQueryClient } from "@tanstack/react-query";
+import supabaseClient from "@/services/supabaseClient";
+import useSession from "@/hooks/useSession";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/lib/toast";
+import { CANDIES_DB } from "@/events/candiesDb";
+import { currentEvent, eventTheme } from "@/events";
+import { EVENTS } from "@/events/calendar";
 
-const MONTHS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
-
-/** « 10-24 » → « 24 oct. » */
-const day = (md: string) => {
-  const [m, d] = md.split("-").map(Number);
-  return `${d} ${MONTHS[m - 1]}`;
-};
-
-const readPreview = () => {
-  try {
-    return localStorage.getItem(PREVIEW_KEY);
-  } catch {
-    return null;
-  }
-};
+/** Une ligne d'action : titre, détail, bouton. */
+const Row = ({
+  title,
+  detail,
+  action,
+  onClick,
+  disabled,
+}: {
+  title: string;
+  detail: string;
+  action: string;
+  onClick: () => void;
+  disabled?: boolean;
+}) => (
+  <div className="flex items-center justify-between gap-3 rounded-card border border-border bg-card p-3">
+    <span className="min-w-0">
+      <span className="block text-sm font-semibold text-card-foreground">{title}</span>
+      <span className="block text-xs text-foreground/60">{detail}</span>
+    </span>
+    <Button variant="outline" disabled={disabled} onClick={onClick}>
+      {action}
+    </Button>
+  </div>
+);
 
 /**
- * Onglet admin « Évènements » : choisir ce que CE navigateur affiche —
- * le calendrier (comme tout le monde), un évènement en avance pour le
- * vérifier, ou aucun. L'évènement est choisi au chargement de la page
- * (index.html) : la page se recharge pour l'appliquer.
+ * Onglet admin « Évènements » : les fenêtres de l'évènement affiché, à
+ * rejouer pour les régler (annonce, trophée…), et la remise à zéro de sa
+ * chasse aux bonbons. L'évènement affiché se choisit dans l'onglet Décors.
  */
 const AdminEvents = () => {
-  const [preview] = useState(readPreview);
-  const scheduled = scheduledEvent();
-  const scheduledLabel =
-    EVENTS.find((e) => e.id === scheduled)?.label ?? "aucun évènement";
+  const { sessionData } = useSession();
+  const userId = sessionData?.user?.id;
+  const queryClient = useQueryClient();
+  const [resetting, setResetting] = useState(false);
+  const replays = eventTheme()?.replays ?? [];
+  const label = EVENTS.find((e) => e.id === currentEvent)?.label;
 
-  const choose = (value: string | null) => {
-    if (value === preview) return;
-    try {
-      if (value === null) localStorage.removeItem(PREVIEW_KEY);
-      else localStorage.setItem(PREVIEW_KEY, value);
-    } catch {
+  /** Rend SES bonbons (chasse d'Halloween 2026) et retire son trophée,
+   *  pour rejouer la chasse en test. Les autres joueurs ne sont pas touchés. */
+  const resetCandies = async () => {
+    if (!userId) return;
+    setResetting(true);
+    const candies = await supabaseClient.from("event_candies").delete().eq("user_id", userId);
+    const trophies = await supabaseClient.from("user_trophies").delete().eq("user_id", userId);
+    const error = candies.error ?? trophies.error;
+    setResetting(false);
+    if (error) {
+      toast({ title: "Remise à zéro impossible.", status: "error" });
       return;
     }
-    location.reload();
+    queryClient.invalidateQueries({ queryKey: ["event-candies"] });
+    queryClient.invalidateQueries({ queryKey: ["trophies"] });
+    toast({ title: "Tes bonbons sont remis en place.", status: "success" });
   };
-
-  const options: { value: string | null; title: string; detail: string }[] = [
-    {
-      value: null,
-      title: "Selon le calendrier",
-      detail: `Aujourd'hui : ${scheduledLabel}.`,
-    },
-    ...EVENTS.map((e) => ({
-      value: e.id as string,
-      title: `Aperçu : ${e.label}`,
-      detail: `Période : du ${day(e.from)} au ${day(e.to)}${scheduled === e.id ? " (en cours)" : ""}.`,
-    })),
-    {
-      value: PREVIEW_NONE,
-      title: "Aucun évènement",
-      detail: "Affichage par défaut.",
-    },
-  ];
 
   return (
     <div className="tw-scope flex h-full w-full flex-col overflow-y-auto sm:px-4 sm:pb-4">
-      <div className="w-full max-w-xl">
-        <div role="radiogroup" aria-label="Évènement affiché" className="flex flex-col gap-2">
-          {options.map((o) => {
-            const selected = o.value === preview;
-            return (
-              <button
-                key={o.value ?? "calendrier"}
-                type="button"
-                role="radio"
-                aria-checked={selected}
-                onClick={() => choose(o.value)}
-                className={cn(
-                  "flex w-full cursor-pointer items-start gap-3 rounded-card border bg-card p-3 text-left transition",
-                  selected
-                    ? "border-primary"
-                    : "border-border hover:bg-muted/40",
-                )}
-              >
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2",
-                    selected ? "border-primary" : "border-foreground/30",
-                  )}
-                >
-                  {selected && <span className="h-2 w-2 rounded-full bg-primary" />}
-                </span>
-                <span className="min-w-0">
-                  <span className="block text-sm font-semibold text-card-foreground">
-                    {o.title}
-                  </span>
-                  <span className="block text-xs text-foreground/60">{o.detail}</span>
-                </span>
-              </button>
-            );
-          })}
-        </div>
+      <div className="flex w-full max-w-xl flex-col gap-2">
+        {!label ? (
+          <p className="m-0 rounded-card border border-dashed border-border bg-card p-4 text-sm text-foreground/60">
+            Aucun évènement affiché. Choisis-en un dans l'onglet Décors pour
+            rejouer ses fenêtres.
+          </p>
+        ) : (
+          <>
+            <p className="m-0 mb-1 text-sm text-foreground/60">
+              Évènement affiché : <span className="font-semibold text-foreground">{label}</span>
+            </p>
+            {replays.map((r) => (
+              <Row key={r.label} title={r.label} detail={r.detail} action="Revoir" onClick={r.run} />
+            ))}
+            {CANDIES_DB && currentEvent === "halloween" && (
+              <Row
+                title="Chasse aux bonbons"
+                detail="Remet en place les bonbons que tu as trouvés et retire ton trophée."
+                action="Remettre à zéro"
+                disabled={resetting}
+                onClick={resetCandies}
+              />
+            )}
+          </>
+        )}
       </div>
     </div>
   );

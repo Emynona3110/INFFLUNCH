@@ -74,52 +74,6 @@
 .hl-candle { left: calc(-241px * var(--hl-k)); }
 .hl-duo { left: calc(-276px * var(--hl-k)); }
 
-/* Citrouille (05) : à droite de la bougie seule (au-delà de sa cire, qui
-   s'étend à 155 px de son centre), posée sur le filet (bas de la citrouille
-   à y = 485 dans son repère, cadré 60 110 360 390). Seul élément cliquable
-   du décor. */
-.hl-anchor-pumpkin { left: calc(1.5rem + 155px * 1.5 * var(--hl-s) + 205px * var(--hl-s)); }
-.hl-pumpkin {
-  left: calc(-180px * var(--hl-s));
-  top: calc(-375px * var(--hl-s));
-  width: 360px;
-  height: 390px;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-.hl-pumpkin svg { display: block; overflow: visible; }
-.hl-pumpkin:focus-visible { outline: 24px solid #ea580c; outline-offset: 16px; border-radius: 48px; }
-.hlp-hop { transform-box: fill-box; transform-origin: 50% 100%; }
-.hlp-c { transform-box: fill-box; transform-origin: center; }
-.hl-pumpkin-jump .hlp-hop { animation: hlp-hop 0.78s linear both; }
-.hl-pumpkin-jump .hlp-c { animation: hlp-cand 0.78s ease-in-out var(--d) both; }
-.hlp-handle { stroke: #113894; }
-.hlp-stick { stroke: #5478d4; }
-html.dark .hlp-handle { stroke: #5478d4; }
-html.dark .hlp-stick { stroke: #ffffff; }
-@keyframes hlp-hop {
-  0% { transform: translateY(0) scale(1, 1); animation-timing-function: ease-out; }
-  15% { transform: translateY(0) scale(1.08, 0.9); animation-timing-function: ease-out; }
-  31% { transform: translateY(-52px) scale(0.95, 1.07); animation-timing-function: ease-out; }
-  50% { transform: translateY(-70px) scale(1, 1); animation-timing-function: ease-in; }
-  69% { transform: translateY(0) scale(1, 1); animation-timing-function: ease-out; }
-  77% { transform: translateY(0) scale(1.1, 0.88); animation-timing-function: ease-in-out; }
-  88% { transform: translateY(0) scale(0.97, 1.03); animation-timing-function: ease-in-out; }
-  100% { transform: translateY(0) scale(1, 1); }
-}
-@keyframes hlp-cand {
-  0%, 31% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(calc(var(--a) * -10px)) rotate(calc(var(--rr) * 0.5)); }
-  65% { transform: translateY(calc(var(--a) * -22px)) rotate(var(--rr)); }
-  81% { transform: translateY(calc(var(--a) * -6px)) rotate(calc(var(--rr) * 0.3)); }
-  88% { transform: translateY(0) rotate(0deg); }
-  95% { transform: translateY(calc(var(--a) * -4px)) rotate(0deg); }
-  100% { transform: translateY(0) rotate(0deg); }
-}
-
 .hl-body { fill: #113894; }
 .hl-wick { stroke: #113894; }
 html.dark .hl-body { fill: #ffffff; }
@@ -158,11 +112,228 @@ html.dark .hl-only-light { display: none; }
 @media (prefers-reduced-motion: reduce) {
   .hl-bat-logo .hl-wing,
   .hl-bat-logo .hl-hopb,
-  .hl-pumpkin-jump .hlp-hop,
-  .hl-pumpkin-jump .hlp-c,
   .hl-flame,
   .hl-halo,
   .hl-core {
     animation: none !important;
   }
+}
+
+/* Toile et araignée de la page Déjeuner (SpiderWeb.tsx, animations 05 et
+   06). Repère d'origine 480 × 600 réduit par --hl-sc ; --hl-l = longueur du
+   fil au repos. Collée au coin haut droit de la fenêtre (100vw), quelle que
+   soit la largeur du contenu. */
+.hl-spider {
+  --hl-sc: 0.34;
+  --hl-l: 80;
+  position: absolute;
+  top: -0.75rem;
+  right: calc((100% - 100vw) / 2);
+  z-index: 10;
+  width: calc(480px * var(--hl-sc));
+  height: calc(600px * var(--hl-sc));
+  color: #113894;
+  pointer-events: none;
+  animation: hl-decor-in 0.3s ease-out both;
+}
+@media (min-width: 768px) {
+  .hl-spider { --hl-sc: 0.5; --hl-l: 300; top: -1.5rem; }
+}
+html.dark .hl-spider { color: #ffffff; }
+.hl-spider svg { display: block; width: 100%; height: 100%; }
+
+.hl-sp-pivot,
+.hl-sp-sway,
+.hl-sp-thread,
+.hl-sp-leg-hold,
+.hl-sp-leg-free {
+  transform-box: view-box;
+  transform-origin: 0 0; /* pattes : point d'attache posé en ligne */
+}
+.hl-sp-thread { transform: scaleY(var(--hl-l)); }
+.hl-sp-drop { transform: translateY(calc(var(--hl-l) * 1px)); }
+
+/* Avec le bonbon : balancier (06). */
+.hl-sp-sway { animation: hl-sp-sway 3.6s ease-in-out infinite; }
+.hl-sp-leg-hold { animation: hl-sp-leg-hold 3.6s ease-in-out infinite; }
+.hl-sp-candy {
+  transform-box: fill-box;
+  transform-origin: 50% 0%;
+  animation: hl-sp-candy 3.6s ease-in-out 0.2s infinite;
+}
+@keyframes hl-sp-sway { 0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(7deg); } }
+@keyframes hl-sp-leg-hold { 0%, 100% { transform: rotate(4deg); } 50% { transform: rotate(-4deg); } }
+@keyframes hl-sp-candy { 0%, 100% { transform: rotate(5deg); } 50% { transform: rotate(-5deg); } }
+
+/* Zone de clic, plus large que le bonbon (minuscule sur mobile). */
+.hl-sp-hit {
+  fill: transparent;
+  pointer-events: all;
+  cursor: pointer;
+  outline: none;
+}
+.hl-sp-hit:focus-visible { stroke: #EA580C; stroke-width: 4; stroke-dasharray: 8 8; }
+
+.hl-sp-gone { opacity: 0; }
+
+/* Bonbon pris (CandyGrab.tsx) : l'original disparaît, sa copie (posée sur
+   document.body, au-dessus de la navbar) joue la prise en 1,1 s.
+   --hl-m : orientation et échelle d'origine ; --hl-unrot : angle qui la
+   redresse ; --hl-k : grossissement au plus fort (≈ 120 px à l'écran).
+   Chaque étape garde la même liste de fonctions (matrix, rotate, scale)
+   pour que le navigateur interpole terme à terme. */
+.hl-grab-at {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 2000;
+  pointer-events: none;
+}
+.hl-grab {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  animation: hl-grab 1.1s both;
+}
+.hl-grab-art {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.3));
+}
+.hl-grab-art svg { overflow: visible; }
+@keyframes hl-grab {
+  /* Élan : il se tasse. */
+  0% { transform: var(--hl-m) rotate(0deg) scale(1); animation-timing-function: ease-out; }
+  12% { transform: var(--hl-m) rotate(0deg) scale(0.75); animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1.25); }
+  /* Éclat : il jaillit en se redressant, dépasse un peu… */
+  38% { transform: var(--hl-m) rotate(calc(var(--hl-unrot) - 10deg)) scale(calc(var(--hl-k) * 1.12)); animation-timing-function: ease-in-out; }
+  /* …tenue : il oscille et se pose. */
+  50% { transform: var(--hl-m) rotate(calc(var(--hl-unrot) + 6deg)) scale(calc(var(--hl-k) * 0.97)); animation-timing-function: ease-in-out; }
+  60% { transform: var(--hl-m) rotate(calc(var(--hl-unrot) - 3deg)) scale(var(--hl-k)); animation-timing-function: ease-in-out; }
+  76% { transform: var(--hl-m) rotate(var(--hl-unrot)) scale(var(--hl-k)); opacity: 1; animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.5); }
+  /* Poche : il se rétracte en tournant. */
+  100% { transform: var(--hl-m) rotate(calc(var(--hl-unrot) + 200deg)) scale(0); opacity: 0.6; }
+}
+
+/* Onde de choc au moment de l'éclat. */
+.hl-grab-ring {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 150px;
+  height: 150px;
+  margin: -75px 0 0 -75px;
+  border-radius: 50%;
+  border: 4px solid #EA580C;
+  opacity: 0;
+  animation: hl-grab-ring 0.6s cubic-bezier(0.2, 0.8, 0.3, 1) 0.12s both;
+}
+@keyframes hl-grab-ring {
+  0% { transform: scale(0.1); opacity: 0.9; border-width: 10px; }
+  100% { transform: scale(1.15); opacity: 0; border-width: 1px; }
+}
+
+/* Confettis : partent du centre dans leur direction (--hl-a) sur --hl-d. */
+.hl-grab-bit {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  animation: hl-grab-bit 0.7s cubic-bezier(0.15, 0.8, 0.3, 1) 0.12s both;
+}
+@keyframes hl-grab-bit {
+  0% { transform: translate(-50%, -50%) rotate(var(--hl-a)) translateX(0) scale(1.2); opacity: 1; }
+  70% { opacity: 1; }
+  100% { transform: translate(-50%, -50%) rotate(var(--hl-a)) translateX(var(--hl-d)) scale(0.3); opacity: 0; }
+}
+
+/* Sans bonbon : remontée, pause, chute et rebonds (05). Part de l'état de
+   repos (en bas, droite) : le recentrage y mène sans à-coup. */
+.hl-sp-thread-free { animation: hl-sp-thread 5s infinite; }
+.hl-sp-drop-free { animation: hl-sp-drop 5s infinite; }
+.hl-sp-leg-free { animation: hl-sp-leg-free 5s ease-in-out infinite; }
+@keyframes hl-sp-drop {
+  0%, 18% { transform: translateY(calc(var(--hl-l) * 1px)); animation-timing-function: ease-in-out; }
+  34%, 48% { transform: translateY(0); animation-timing-function: cubic-bezier(.45, 0, .9, .6); }
+  70% { transform: translateY(calc(var(--hl-l) * 1px)); animation-timing-function: ease-out; }
+  76% { transform: translateY(calc((var(--hl-l) - 32) * 1px)); animation-timing-function: ease-in-out; }
+  82% { transform: translateY(calc((var(--hl-l) + 6) * 1px)); animation-timing-function: ease-in-out; }
+  88% { transform: translateY(calc((var(--hl-l) - 8) * 1px)); animation-timing-function: ease-in-out; }
+  94%, 100% { transform: translateY(calc(var(--hl-l) * 1px)); }
+}
+@keyframes hl-sp-thread {
+  0%, 18% { transform: scaleY(var(--hl-l)); animation-timing-function: ease-in-out; }
+  34%, 48% { transform: scaleY(0); animation-timing-function: cubic-bezier(.45, 0, .9, .6); }
+  70% { transform: scaleY(var(--hl-l)); animation-timing-function: ease-out; }
+  76% { transform: scaleY(calc(var(--hl-l) - 32)); animation-timing-function: ease-in-out; }
+  82% { transform: scaleY(calc(var(--hl-l) + 6)); animation-timing-function: ease-in-out; }
+  88% { transform: scaleY(calc(var(--hl-l) - 8)); animation-timing-function: ease-in-out; }
+  94%, 100% { transform: scaleY(var(--hl-l)); }
+}
+@keyframes hl-sp-leg-free {
+  0%, 18% { transform: rotate(0deg); }
+  24% { transform: rotate(-6deg); }
+  30% { transform: rotate(4deg); }
+  36%, 48% { transform: rotate(0deg); }
+  62% { transform: rotate(-14deg); }
+  70% { transform: rotate(-16deg); }
+  73% { transform: rotate(18deg); }
+  78% { transform: rotate(-12deg); }
+  83% { transform: rotate(10deg); }
+  89% { transform: rotate(-6deg); }
+  95% { transform: rotate(3deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hl-sp-sway,
+  .hl-sp-leg-hold,
+  .hl-sp-leg-free,
+  .hl-sp-candy,
+  .hl-sp-thread-free,
+  .hl-sp-drop-free {
+    animation: none !important;
+  }
+}
+
+/* Sucette de la recherche du classement (SearchLollipop.tsx) : bâton bleu
+   clair, blanc en thème sombre (comme les modèles). */
+.hl-lolli-stick { stroke: #5478D4; }
+html.dark .hl-lolli-stick { stroke: #ffffff; }
+
+/* Bonbon maïs à la place du repère d'INFFLUX (MapCandyCorn.tsx) : posé sur
+   le point (bas centré dans la boîte 20 × 20 du repère), un peu plus grand
+   que la goutte. */
+.hl-corn {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 24px;
+  height: 26px;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 3px 4px rgba(2, 8, 40, 0.45));
+}
+
+/* Menthe de la roulette (RouletteMint.tsx) : tourne lentement, comme une
+   petite roue (figée si l'appareil demande moins d'animations). */
+.hl-mint { animation: hl-mint-spin 9s linear infinite; }
+@keyframes hl-mint-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .hl-mint { animation: none; }
+}
+
+/* Chasse aux bonbons : bonbons de l'annonce qui flottent (QuestAnnounce),
+   bonbon pas encore trouvé de l'encart du profil (QuestProgress : couleur
+   pleine éteinte + opacité sur l'icône entière). */
+.hl-quest-bob { animation: hl-quest-bob 1.8s ease-in-out infinite both; }
+@keyframes hl-quest-bob {
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50% { transform: translateY(-6px) rotate(4deg); }
+}
+.hl-candy-missing { filter: grayscale(1); opacity: 0.35; }
+@media (prefers-reduced-motion: reduce) {
+  .hl-quest-bob { animation: none; }
 }

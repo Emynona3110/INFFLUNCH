@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import {
   acquireScreenLoader,
   releaseScreenLoader,
+  screenLoaderBusy,
   screenLoaderSnapshot,
   subscribeScreenLoader,
 } from "./screenLoaderControl";
@@ -22,32 +23,18 @@ export default function ScreenLoader() {
  * Attente d'une page ou d'une section : le monogramme tant que `loading`, puis
  * le contenu une fois le monogramme effacé — il finit son cycle avant de
  * partir, le contenu n'apparaît pas par-dessus, même si d'autres attentes le
- * prolongent. `yieldToOthers` (cadre de page) : si d'autres attentes le
- * gardent affiché, apparaître sans attendre, le monogramme au centre.
- * Renvoie true tant que le contenu doit rester masqué.
+ * prolongent. Renvoie true tant que le contenu doit rester masqué.
  */
-export function useScreenLoader(
-  loading: boolean,
-  { yieldToOthers = false }: { yieldToOthers?: boolean } = {},
-) {
-  const acquired = useRef(false);
+export function useScreenLoader(loading: boolean) {
   useEffect(() => {
     if (!loading) return;
-    acquired.current = true;
     acquireScreenLoader();
-    return () => {
-      acquired.current = false;
-      releaseScreenLoader();
-    };
+    return releaseScreenLoader;
   }, [loading]);
 
-  const snapshot = useSyncExternalStore(subscribeScreenLoader, screenLoaderSnapshot);
-  // À l'écran (snapshot = demandes en cours, -1 sinon). Avec `yieldToOthers` :
-  // seulement s'il s'efface pour de bon, plus aucune autre demande que la
-  // nôtre (encore comptée au rendu qui suit la fin du chargement).
-  const leaving = yieldToOthers
-    ? snapshot >= 0 && snapshot - (acquired.current ? 1 : 0) === 0
-    : snapshot >= 0;
+  // À l'écran (snapshot = demandes en cours, -1 sinon).
+  const leaving =
+    useSyncExternalStore(subscribeScreenLoader, screenLoaderSnapshot) >= 0;
 
   // Seul un contenu qui a attendu patiente : une section déjà prête (cache)
   // ne se masque pas parce qu'une autre fait disparaître le monogramme.
@@ -64,6 +51,14 @@ export function useScreenLoader(
  * apparaître sous lui (ex. l'intro du logo de la connexion, qui s'y jouait
  * sans être vue).
  */
+/**
+ * Une attente est en cours quelque part (demandée, même pas encore affichée,
+ * ou monogramme encore à l'écran) : la page n'est pas complète.
+ */
+export function useScreenLoaderBusy() {
+  return useSyncExternalStore(subscribeScreenLoader, screenLoaderBusy);
+}
+
 export function useScreenLoaderOnScreen() {
   return (
     useSyncExternalStore(subscribeScreenLoader, screenLoaderSnapshot) >= 0

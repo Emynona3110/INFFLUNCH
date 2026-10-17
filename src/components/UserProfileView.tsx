@@ -43,6 +43,9 @@ import {
 
 import { restaurantPath } from "@/utils/restaurantPath";
 import { useScreenLoader } from "@/components/brand/ScreenLoader";
+import useTrophies from "@/hooks/useTrophies";
+import TrophyBadges from "@/components/TrophyBadges";
+import { eventTheme } from "@/events";
 interface Props {
   userId: string;
   /** Profil de l'utilisateur connecté : tous ses succès lui sont révélés. */
@@ -99,7 +102,10 @@ const UserProfileView = ({ userId, isMe = false, fake }: Props) => {
   const secretConditions = useSecretConditions();
 
   const data = fake?.profile ?? profile.data;
-  const waiting = useScreenLoader(!fake && profile.isPending);
+  const trophies = useTrophies(fake ? null : userId);
+  const EventProfileQuest = eventTheme()?.ProfileQuest;
+  // Le profil n'apparaît qu'avec ses trophées (pas de section qui surgit).
+  const waiting = useScreenLoader(!fake && (profile.isPending || trophies.isPending));
   const unlocked = (data?.achievements ?? [])
     .map((a) => ({ ...a, def: ACHIEVEMENTS_BY_ID[canonicalId(a.achievement_id)] }))
     // Un succès retiré du catalogue ne doit pas faire planter la page.
@@ -156,12 +162,16 @@ const UserProfileView = ({ userId, isMe = false, fake }: Props) => {
           <StreakAvatar email={data.email} avatarPath={data.avatar_path} streak={data.lunch_streak ?? 0} size={64} className="sm:hidden" />
           <StreakAvatar email={data.email} avatarPath={data.avatar_path} streak={data.lunch_streak ?? 0} size={96} className="hidden sm:block" />
           <div className="min-w-0 flex-1">
-            <div
-              role="heading"
-              aria-level={2}
-              className="truncate font-display text-xl sm:text-2xl font-bold text-card-foreground"
-            >
-              {nameOf(data.email)}
+            {/* Nom, puis les trophées d'évènements en petits badges. */}
+            <div className="flex min-w-0 items-center gap-2">
+              <div
+                role="heading"
+                aria-level={2}
+                className="truncate font-display text-xl sm:text-2xl font-bold text-card-foreground"
+              >
+                {nameOf(data.email)}
+              </div>
+              {!fake && <TrophyBadges trophies={trophies.data ?? []} />}
             </div>
             <p className="mb-0 mt-0.5 text-[13px] text-foreground/55 sm:text-sm">
               Membre depuis {formatMonth(data.member_since)}
@@ -195,6 +205,9 @@ const UserProfileView = ({ userId, isMe = false, fake }: Props) => {
           </div>
         </div>
       </Card>
+
+      {/* Évènement : avancement de sa quête (son profil seulement). */}
+      {isMe && !fake && EventProfileQuest && <EventProfileQuest />}
 
       {/* Succès obtenus par la personne. Ce qu'on en voit dépend du visiteur :
           le contenu d'un succès ne se dévoile qu'à qui l'a lui-même décroché. */}

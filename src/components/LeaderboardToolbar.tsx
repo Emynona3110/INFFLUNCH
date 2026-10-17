@@ -10,6 +10,7 @@ import {
   parisMonthKey,
 } from "@/hooks/useLeaderboard";
 import { cn } from "@/lib/utils";
+import { eventTheme } from "@/events";
 
 interface Props {
   /** Classement affiché : collègues ou restaurants. */
@@ -176,6 +177,16 @@ const LeaderboardToolbar = ({
   onSearch,
 }: Props) => {
   const [searchOpen, setSearchOpen] = useState(false);
+  // Loupe remplacée pendant un évènement (sucette d'Halloween…).
+  const EventSearchIcon = eventTheme()?.SearchIcon;
+  const loupe = (className: string) => {
+    const icon = <FiSearch className={className} />;
+    return EventSearchIcon ? (
+      <EventSearchIcon className={className} fallback={icon} />
+    ) : (
+      icon
+    );
+  };
   const placeholder =
     kind === "users" ? "Chercher un collègue..." : "Chercher un restaurant...";
   const [listOpen, setListOpen] = useState(false);
@@ -275,6 +286,7 @@ const LeaderboardToolbar = ({
               value={search}
               autoFocus
               placeholder={placeholder}
+              icon={loupe("h-4 w-4")}
               onSearch={(input) => {
                 onSearch(input);
                 setSearchOpen(false);
@@ -300,7 +312,7 @@ const LeaderboardToolbar = ({
           onClick={() => setSearchOpen(true)}
           className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-foreground sm:hidden [&>svg]:opacity-60"
         >
-          <FiSearch className="h-[18px] w-[18px]" />
+          {loupe("h-[18px] w-[18px]")}
           {search && (
             <span className="absolute right-1.5 top-1.5 h-2.5 w-2.5 rounded-full bg-[#ea580c] ring-2 ring-card" />
           )}
@@ -313,6 +325,7 @@ const LeaderboardToolbar = ({
           value={search}
           onSearch={onSearch}
           placeholder={placeholder}
+          icon={loupe("h-4 w-4")}
         />
       </div>
 

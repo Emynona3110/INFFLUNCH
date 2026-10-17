@@ -9,6 +9,7 @@ import { Restaurant } from "@/hooks/useRestaurants";
 import useAchievements from "@/hooks/useAchievements";
 import noImage from "@/assets/no-image-thumb.webp";
 import { resizedImgProps, IMG_THUMB } from "@/lib/imageUrl";
+import { eventTheme } from "@/events";
 
 const ITEM_H = 88; // hauteur d'une ligne de la roulette (px)
 const SLOT_H = 360; // hauteur réservée = taille d'une tuile (boutons stables)
@@ -144,6 +145,8 @@ const RestaurantRoulette = ({
   // Un seul resto possible (filtres) : pas de roue, on l'affiche directement.
   const single = pool.length === 1 ? pool[0] : null;
 
+  const EventRouletteIcon = eventTheme()?.RouletteIcon;
+
   const launch = () => {
     // Succès « Dé pipé » : lancer avec un seul resto, réduit volontairement
     // (d'autres restos existent mais ont été décochés).
@@ -232,7 +235,15 @@ const RestaurantRoulette = ({
         ) : (
           // ---- En attente : invite à lancer la roue (taille d'une tuile) ----
           <div className="flex h-full w-full flex-col items-center justify-center gap-3 rounded-card border border-dashed border-border bg-card px-6 text-center">
-            <LuDices className="h-10 w-10 text-primary" />
+            {EventRouletteIcon ? (
+              // Évènement : un bonbon à la place des dés.
+              <EventRouletteIcon
+                className="h-10 w-10"
+                fallback={<LuDices className="h-10 w-10 text-primary" />}
+              />
+            ) : (
+              <LuDices className="h-10 w-10 text-primary" />
+            )}
             <p className="text-sm text-foreground/60">
               Clique sur{" "}
               <span className="font-medium text-foreground">Lancer</span> pour
