@@ -6,7 +6,10 @@ import {
   useScreenLoaderBusy,
 } from "@/components/brand/ScreenLoader";
 import { markBootDone } from "@/components/brand/bootState";
-import { PageRevealedContext } from "@/components/pageRevealContext";
+import {
+  PageRevealedContext,
+  usePageRevealed,
+} from "@/components/pageRevealContext";
 
 /** Au-delà, on montre la page quand même (réseau lent) : mieux vaut un
  *  chargement visible qu'un écran vide. */
@@ -15,6 +18,8 @@ const MAX_WAIT_MS = 300;
  *  autre) démarre un rendu plus tard — sans ce sas, on révélerait entre les
  *  deux et la page sauterait quand même. */
 const SETTLE_MS = 60;
+/** Calme requis avant de révéler : aucune attente pendant ce délai. */
+const IDLE_MS = 120;
 
 /** Requête en premier chargement (pas encore de données en cache). Une requête
  *  qui échoue (ou a déjà échoué) ne bloque pas : ses tentatives successives
@@ -37,9 +42,13 @@ const isFirstLoad = (q: Query) =>
 const PageReveal = ({
   children,
   className,
+  slide = true,
 }: {
   children: React.ReactNode;
   className?: string;
+  /** `false` : fondu seul, sans monter (panneaux mobiles de Mon compte, que
+   *  la piste fait déjà glisser). */
+  slide?: boolean;
 }) => {
   const queryClient = useQueryClient();
   const loading = useIsFetching({ predicate: isFirstLoad });
@@ -79,15 +88,27 @@ const PageReveal = ({
     if (ready) markBootDone();
   }, [ready]);
 
+  // Dans une page déjà affichée (sous-onglet…) : pas de monogramme, le
+  // contenu attend ses données (cf. pageRevealContext).
+  const parentShown = usePageRevealed();
   useScreenLoader(!ready);
   // La page n'apparaît que COMPLÈTE : plus aucune attente en cours (ses
   // sections comprises, même pas encore affichée) et le monogramme effacé
   // après son cycle. Jamais par-dessus un monogramme encore visible. Une
   // fois révélée, elle le reste (une attente plus tardive, changement de
   // vue…, ne la masque plus).
+  //
+  // « Plus aucune attente » doit TENIR un instant (IDLE_MS) : une section
+  // qui charge en plusieurs temps (requête lancée à la réponse d'une autre)
+  // laisse un creux de quelques millisecondes entre deux attentes ; révélée
+  // dans ce creux, la page voyait le monogramme revenir par-dessus.
   const busy = useScreenLoaderBusy();
   const [revealed, setRevealed] = useState(false);
-  if (!revealed && ready && !busy) setRevealed(true);
+  useEffect(() => {
+    if (revealed || !ready || busy) return;
+    const t = setTimeout(() => setRevealed(true), IDLE_MS);
+    return () => clearTimeout(t);
+  }, [revealed, ready, busy]);
   const waiting = !revealed;
 
   // Tant que la page est masquée, le monogramme de chargement (unique, au
@@ -96,12 +117,12 @@ const PageReveal = ({
   return (
     <div className={className}>
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={!waiting ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: slide ? 10 : 0 }}
+        animate={!waiting ? { opacity: 1, y: 0 } : { opacity: 0, y: slide ? 10 : 0 }}
         transition={{ duration: 0.35, ease: "easeOut" }}
         className={className}
       >
-        <PageRevealedContext.Provider value={!waiting}>
+        <PageRevealedContext.Provider value={parentShown || !waiting}>
           {children}
         </PageRevealedContext.Provider>
       </motion.div>

@@ -6,16 +6,20 @@ import {
   screenLoaderSnapshot,
   subscribeScreenLoader,
 } from "./screenLoaderControl";
+import { usePageRevealed } from "@/components/pageRevealContext";
 
 /**
  * Attente plein écran : affiche le monogramme unique de la page (cf.
- * screenLoaderControl.ts) tant que ce composant est monté. Ne rend rien lui-même.
+ * screenLoaderControl.ts) tant que ce composant est monté — sauf dans une
+ * page déjà affichée (cf. pageRevealContext). Ne rend rien lui-même.
  */
 export default function ScreenLoader() {
+  const pageShown = usePageRevealed();
   useEffect(() => {
+    if (pageShown) return;
     acquireScreenLoader();
     return releaseScreenLoader;
-  }, []);
+  }, [pageShown]);
   return null;
 }
 
@@ -24,13 +28,18 @@ export default function ScreenLoader() {
  * le contenu une fois le monogramme effacé — il finit son cycle avant de
  * partir, le contenu n'apparaît pas par-dessus, même si d'autres attentes le
  * prolongent. Renvoie true tant que le contenu doit rester masqué.
+ *
+ * Dans une page déjà affichée (cf. pageRevealContext) : pas de monogramme,
+ * le contenu attend simplement ses données.
  */
 export function useScreenLoader(loading: boolean) {
+  const pageShown = usePageRevealed();
+  const show = loading && !pageShown;
   useEffect(() => {
-    if (!loading) return;
+    if (!show) return;
     acquireScreenLoader();
     return releaseScreenLoader;
-  }, [loading]);
+  }, [show]);
 
   // À l'écran (snapshot = demandes en cours, -1 sinon).
   const leaving =
@@ -42,15 +51,9 @@ export function useScreenLoader(loading: boolean) {
   if (loading && !waited) setWaited(true);
   if (!loading && waited && !leaving) setWaited(false);
 
-  return loading || (waited && leaving);
+  return loading || (!pageShown && waited && leaving);
 }
 
-/**
- * Vrai tant que le monogramme plein écran est affiché (ou en train de
- * s'effacer) : pour un contenu qui n'attend pas de données mais ne doit pas
- * apparaître sous lui (ex. l'intro du logo de la connexion, qui s'y jouait
- * sans être vue).
- */
 /**
  * Une attente est en cours quelque part (demandée, même pas encore affichée,
  * ou monogramme encore à l'écran) : la page n'est pas complète.
@@ -59,6 +62,12 @@ export function useScreenLoaderBusy() {
   return useSyncExternalStore(subscribeScreenLoader, screenLoaderBusy);
 }
 
+/**
+ * Vrai tant que le monogramme plein écran est affiché (ou en train de
+ * s'effacer) : pour un contenu qui n'attend pas de données mais ne doit pas
+ * apparaître sous lui (ex. l'intro du logo de la connexion, qui s'y jouait
+ * sans être vue).
+ */
 export function useScreenLoaderOnScreen() {
   return (
     useSyncExternalStore(subscribeScreenLoader, screenLoaderSnapshot) >= 0

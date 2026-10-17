@@ -292,8 +292,15 @@ const MyAccount = () => {
               <ScrollPanel key={t.key}>
                 {/* Contenu au moins plein écran : le footer se cale en bas
                     quand l'onglet est court, sous le contenu sinon. */}
-                <div className="flex-1 shrink-0 space-y-3">
-                  {visited.has(t.key) && renderTab(t.key)}
+                {/* Comme sur desktop, la première ouverture attend ses
+                    données et la fin du monogramme (fondu seul : la piste
+                    glisse déjà). */}
+                <div className="flex-1 shrink-0">
+                  {visited.has(t.key) && (
+                    <PageReveal slide={false} className="space-y-3">
+                      {renderTab(t.key)}
+                    </PageReveal>
+                  )}
                 </div>
                 <Footer />
               </ScrollPanel>
